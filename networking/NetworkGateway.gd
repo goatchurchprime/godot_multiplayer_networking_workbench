@@ -27,17 +27,19 @@ onready var serverbroadcastsudp = not OS.has_feature("Server")
 
 var deferred_playerconnections = [ ]
 var remote_players_idstonodenames = { }
+var possibleusernames = ["Alice", "Beth", "Cath", "Dan", "Earl", "Fred", "George", "Harry", "Ivan", "John"]
 
 func _ready():
 	assert (PlayersNode.get_child_count() == 1)  # Must have a 
 	LocalPlayer = PlayersNode.get_child(0)
-	if not LocalPlayer.has_node("LocalPlayerFrame"):
-		var localplayerframe = Node.new()
-		localplayerframe.name = "LocalPlayerFrame"
-		localplayerframe.set_script(load("res://networking/LocalPlayerFrame.gd"))
-		LocalPlayer.add_child(localplayerframe)
+	if not LocalPlayer.has_node("PlayerFrame"):
+		var playerframe = Node.new()
+		playerframe.name = "PlayerFrame"
+		playerframe.set_script(load("res://networking/LocalPlayerFrame.gd"))
+		LocalPlayer.add_child(playerframe)
 
 	randomize()
+	var randomusername = LocalPlayer.initavatar({"labeltext":possibleusernames[randi()%len(possibleusernames)]})
 	for rs in remoteservers:
 		$NetworkOptionButton.add_item(rs)
 
@@ -124,7 +126,7 @@ func _player_connected(id):
 	remote_players_idstonodenames[id] = null
 	print("players_connected_list: ", remote_players_idstonodenames)
 	var avatardata = LocalPlayer.avatarinitdata()
-	avatardata["framedata0"] = LocalPlayer.get_node("LocalPlayerFrame").framedata0
+	avatardata["framedata0"] = LocalPlayer.get_node("PlayerFrame").framedata0
 	rpc_id(id, "spawnintoremoteplayer", avatardata)
 	updatestatusrec("")
 	updateplayerlist()
@@ -144,7 +146,7 @@ remote func spawnintoremoteplayer(avatardata):
 	var senderid = get_tree().get_rpc_sender_id()
 	var remoteplayer = newremoteplayer(avatardata)
 	assert (senderid == avatardata["networkid"])
-	remoteplayer.set_network_master(senderid)
+	remoteplayer.get_node("PlayerFrame").set_network_master(senderid)
 	assert (remote_players_idstonodenames[senderid] == null)
 	remote_players_idstonodenames[senderid] = remoteplayer.get_name()
 
@@ -231,11 +233,13 @@ func _on_Doppelganger_toggled(button_pressed):
 		$DoppelgangerPanel.visible = true
 		var avatardata = LocalPlayer.avatarinitdata()
 		avatardata["playernodename"] = "Doppelganger"
-		avatardata["framedata0"] = LocalPlayer.get_node("LocalPlayerFrame").framedata0
-		LocalPlayer.get_node("LocalPlayerFrame").doppelgangernode = newremoteplayer(avatardata)
+		var fd = LocalPlayer.get_node("PlayerFrame").framedata0.duplicate()
+		LocalPlayer.changethinnedframedatafordoppelganger(fd)
+		avatardata["framedata0"] = fd
+		LocalPlayer.get_node("PlayerFrame").doppelgangernode = newremoteplayer(avatardata)
 	else:
 		$DoppelgangerPanel.visible = false
-		LocalPlayer.get_node("LocalPlayerFrame").doppelgangernode = null
+		LocalPlayer.get_node("PlayerFrame").doppelgangernode = null
 		removeremoteplayer("Doppelganger")
 	updateplayerlist()
 
@@ -243,17 +247,16 @@ func newremoteplayer(avatardata):
 	var remoteplayer = PlayersNode.get_node_or_null(avatardata["playernodename"])
 	if remoteplayer == null:
 		remoteplayer = load(avatardata["avatarsceneresource"]).instance()
-		if not remoteplayer.has_node("RemotePlayerFrame"):
-			var remoteplayerframe = Node.new()
-			remoteplayerframe.name = "RemotePlayerFrame"
-			remoteplayerframe.set_script(load("res://networking/RemotePlayerFrame.gd"))
-			remoteplayer.add_child(remoteplayerframe)
-		assert (not remoteplayer.islocalplayer)
+		if not remoteplayer.has_node("PlayerFrame"):
+			var playerframe = Node.new()
+			playerframe.name = "PlayerFrame"
+			playerframe.set_script(load("res://networking/RemotePlayerFrame.gd"))
+			remoteplayer.add_child(playerframe)
 		remoteplayer.initavatar(avatardata)
 		PlayersNode.add_child(remoteplayer)
 		if "framedata0" in avatardata:
-			remoteplayer.get_node("RemotePlayerFrame").networkedavatarthinnedframedata(avatardata["framedata0"])
-		print("Adding remoteplayer: ", avatardata["playernodename"], "  ", remoteplayer.islocalplayer)
+			remoteplayer.get_node("PlayerFrame").networkedavatarthinnedframedata(avatardata["framedata0"])
+		print("Adding remoteplayer: ", avatardata["playernodename"])
 	else:
 		print("** remoteplayer already exists: ", avatardata["playernodename"])
 	return remoteplayer

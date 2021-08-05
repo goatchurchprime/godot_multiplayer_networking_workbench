@@ -1,6 +1,5 @@
 extends Label
 
-onready var islocalplayer = (get_name() == "LocalPlayer")
 var networkID = 0   # 0:unconnected, 1:server, -1:connecting, >1:connected to client
 
 var localavatardisplacement = Vector3(0,0,-0.1)*0
@@ -18,9 +17,12 @@ func framedatatoavatar(fd):
 	rect_position = fd["rect_position"]
 
 func initavatar(avatardata):
-	set_name(avatardata["playernodename"])
-	networkID = avatardata["networkid"]
+	if avatardata.has("playernodename"):
+		set_name(avatardata["playernodename"])
+	if avatardata.has("networkid"):
+		networkID = avatardata["networkid"]
 	text = avatardata["labeltext"]
+
 
 func avatarinitdata():
 	var avatardata = { "playernodename":get_name(),

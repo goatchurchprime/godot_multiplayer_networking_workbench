@@ -68,7 +68,7 @@ func _process(delta):
 	if doppelgangernode != null:
 		vd[CFI_TIMESTAMP] = tstamp + 100
 		get_parent().changethinnedframedatafordoppelganger(vd)
-		doppelgangernode.get_node("RemotePlayerFrame").call_deferred("networkedavatarthinnedframedata", vd)
+		doppelgangernode.get_node("PlayerFrame").call_deferred("networkedavatarthinnedframedata", vd)
 
 
 
