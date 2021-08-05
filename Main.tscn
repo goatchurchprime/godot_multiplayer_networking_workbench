@@ -22,4 +22,10 @@ __meta__ = {
 }
 
 [node name="LocalPlayer" parent="Players" instance=ExtResource( 2 )]
+anchor_top = 0.291
+anchor_bottom = 1.229
+margin_left = 10.1021
+margin_top = 0.0847054
+margin_right = -499.898
+margin_bottom = -155.693
 text = "MePlayer"

@@ -2,10 +2,20 @@ extends Panel
 
 export var hostportnumber : int = 4547
 export var udpdiscoveryport = 4546
-
-var remoteservers = [ "tunnelvr.goatchurch.org.uk", 
+export var remoteservers = [ "tunnelvr.goatchurch.org.uk", 
 					  "192.168.43.1" ]
-var broadcastudpipnum = "255.255.255.255"
+
+var websocketobjecttopoll = null
+#	websocketserver.close()
+	# Note: To achieve a clean close, you will need to keep polling until either WebSocketClient.connection_closed or WebSocketServer.client_disconnected is received.
+	# Note: The HTML5 export might not support all status codes. Please refer to browser-specific documentation for more details.
+#	websocketserver = null
+#if websocketclient != null:
+#	websocketclient.disconnect_from_host()
+	#websocketclient = null
+
+
+const broadcastudpipnum = "255.255.255.255"
 const udpdiscoverybroadcasterperiod = 2.0
 const broadcastservermsg = "GodotServer_here!"
 
@@ -14,6 +24,10 @@ enum NETWORK_OPTIONS { NETWORK_OFF = 0
 					   LOCAL_NETWORK = 2,
 					   FIXED_URL = 3,
 					 }
+enum NETWORK_PROTOCOL { ENET = 0, 
+						WEBSOCKET = 1,
+						WEBRTC = 2
+					  }
 
 # command for running locally on the unix partition
 # /mnt/c/Users/henry/godot/Godot_v3.2.3-stable_linux_server.64 --main-pack /mnt/c/Users/henry/godot/games/OQ_Networking_Demo/releases/OQ_Networking_Demo.pck
@@ -41,7 +55,7 @@ func _ready():
 	randomize()
 	var randomusername = LocalPlayer.initavatar({"labeltext":possibleusernames[randi()%len(possibleusernames)]})
 	for rs in remoteservers:
-		$NetworkOptionButton.add_item(rs)
+		$NetworkOptions.add_item(rs)
 
 	get_tree().connect("network_peer_connected", 	self, "_player_connected")
 	get_tree().connect("network_peer_disconnected", self, "_player_disconnected")
@@ -52,8 +66,8 @@ func _ready():
 
 	yield(get_tree().create_timer(1.5), "timeout")
 	if OS.has_feature("Server"):
-		$NetworkOptionButton.select(NETWORK_OPTIONS.AS_SERVER)
-	_on_OptionButton_item_selected($NetworkOptionButton.selected)
+		$NetworkOptions.select(NETWORK_OPTIONS.AS_SERVER)
+	_on_OptionButton_item_selected($NetworkOptions.selected)
 
 func _input(event):
 	if event is InputEventKey and event.pressed:
@@ -64,8 +78,8 @@ func _input(event):
 		elif (event.scancode == KEY_3):	bsel = 3
 		elif (event.scancode == KEY_4):	bsel = 4
 
-		if bsel != -1 and $NetworkOptionButton.selected != bsel:
-			$NetworkOptionButton.select(bsel)
+		if bsel != -1 and $NetworkOptions.selected != bsel:
+			$NetworkOptions.select(bsel)
 			_on_OptionButton_item_selected(bsel)
 		elif (event.scancode == KEY_G):
 			$Doppelganger.pressed = not $Doppelganger.pressed
@@ -74,7 +88,7 @@ func updatestatusrec(ptxt):
 	$ColorRect/StatusRec.text = "%sNetworkID: %d\nRemotes: %s" % [ptxt, LocalPlayer.networkID, PoolStringArray(remote_players_idstonodenames.values()).join(", ")]
 
 func _server_disconnected():
-	var ns = $NetworkOptionButton.selected
+	var ns = $NetworkOptions.selected
 	get_tree().set_network_peer(null)
 	LocalPlayer.networkID = 0
 	LocalPlayer.set_name("R%d" % LocalPlayer.networkID) 
@@ -84,6 +98,9 @@ func _server_disconnected():
 	print("*** _server_disconnected ", LocalPlayer.networkID)
 	$ColorRect.color = Color.red if (ns >= NETWORK_OPTIONS.LOCAL_NETWORK) else Color.black
 	updatestatusrec("")
+	if websocketobjecttopoll != null:
+		websocketobjecttopoll.close()
+		websocketobjecttopoll = null
 
 func _connected_to_server():
 	LocalPlayer.networkID = get_tree().get_network_unique_id()
@@ -104,6 +121,7 @@ func _connection_failed():
 	deferred_playerconnections.clear()
 	$ColorRect.color = Color.red
 	updatestatusrec("Connection failed\n")
+	websocketobjecttopoll = null
 
 func updateplayerlist():
 	var plp = $PlayerList.get_item_text($PlayerList.selected) 
@@ -153,7 +171,10 @@ remote func spawnintoremoteplayer(avatardata):
 var Dudpcount = 0
 #set_process(false)
 func _process(delta):
-	var ns = $NetworkOptionButton.selected
+	if websocketobjecttopoll != null:
+		websocketobjecttopoll.poll()
+
+	var ns = $NetworkOptions.selected
 	if ns == NETWORK_OPTIONS.AS_SERVER and serverbroadcastsudp:
 		udpdiscoverybroadcasterperiodtimer -= delta
 		if udpdiscoverybroadcasterperiodtimer < 0:
@@ -176,14 +197,14 @@ func _process(delta):
 			print("Received: ", spkt, " from ", peer.get_packet_ip())
 			if spkt[0] == broadcastservermsg:
 				var receivedIPnumber = peer.get_packet_ip()
-				for nsi in range(NETWORK_OPTIONS.FIXED_URL, $NetworkOptionButton.get_item_count()):
-					if receivedIPnumber == $NetworkOptionButton.get_item_text(nsi):
+				for nsi in range(NETWORK_OPTIONS.FIXED_URL, $NetworkOptions.get_item_count()):
+					if receivedIPnumber == $NetworkOptions.get_item_text(nsi):
 						ns = nsi
 						break
 				if ns == NETWORK_OPTIONS.LOCAL_NETWORK:
-					$NetworkOptionButton.add_item(receivedIPnumber)
-					ns = $NetworkOptionButton.get_item_count() - 1
-				$NetworkOptionButton.select(ns)
+					$NetworkOptions.add_item(receivedIPnumber)
+					ns = $NetworkOptions.get_item_count() - 1
+				$NetworkOptions.select(ns)
 				_on_OptionButton_item_selected(ns)
 				
 
@@ -200,35 +221,56 @@ func _on_OptionButton_item_selected(ns):
 		if get_tree().get_network_peer() != null:
 			print("closing connection ", LocalPlayer.networkID, get_tree().get_network_peer())
 		_server_disconnected()
+
 	assert (LocalPlayer.networkID == 0)
 
 	if ns == NETWORK_OPTIONS.AS_SERVER:
-		print("creating server on port: ", hostportnumber)
-		var networkedmultiplayerenetserver = NetworkedMultiplayerENet.new()
-		var e = networkedmultiplayerenetserver.create_server(hostportnumber)
-
-		if e == 0:
-			get_tree().set_network_peer(networkedmultiplayerenetserver)
+		var networkedmultiplayerserver = null
+		var servererror = 0
+		if $ProtocolOptions.selected == NETWORK_PROTOCOL.WEBSOCKET:
+			print("creating Websocket server on port: ", hostportnumber)
+			networkedmultiplayerserver = WebSocketServer.new()
+			servererror = networkedmultiplayerserver.listen(hostportnumber, PoolStringArray(), true)
+			if servererror == 0:
+				websocketobjecttopoll = networkedmultiplayerserver
+		elif $ProtocolOptions.selected == NETWORK_PROTOCOL.ENET:
+			print("creating ENet server on port: ", hostportnumber)
+			networkedmultiplayerserver = NetworkedMultiplayerENet.new()
+			servererror = networkedmultiplayerserver.create_server(hostportnumber)
+		if servererror == 0:
+			get_tree().set_network_peer(networkedmultiplayerserver)
 			_connected_to_server()
 		else:
-			print("networkedmultiplayerenet createserver Error: ", { ERR_CANT_CREATE:"ERR_CANT_CREATE" }.get(e, e))
+			print("networkedmultiplayer createserver Error: ", { ERR_CANT_CREATE:"ERR_CANT_CREATE" }.get(servererror, servererror))
 			print("*** is there a server running on this port already? ", hostportnumber)
 			$ColorRect.color = Color.red
-			$NetworkOptionButton.select(NETWORK_OPTIONS.NETWORK_OFF)
+			$NetworkOptions.select(NETWORK_OPTIONS.NETWORK_OFF)
 
 	if ns >= NETWORK_OPTIONS.FIXED_URL and LocalPlayer.networkID == 0:
-		var serverIPnumber = $NetworkOptionButton.get_item_text(ns).split(" ", 1)[0]
-		var networkedmultiplayerenet = NetworkedMultiplayerENet.new()
-		var e = networkedmultiplayerenet.create_client(serverIPnumber, hostportnumber, 0, 0)
-		print("networkedmultiplayerenet createclient ", ("" if e else str(e)), " to: ", serverIPnumber)
-		if e == 0:
-			get_tree().set_network_peer(networkedmultiplayerenet)
+		var serverIPnumber = $NetworkOptions.get_item_text(ns).split(" ", 1)[0]
+		var networkedmultiplayerclient = null
+		var clienterror = 0
+		if $ProtocolOptions.selected == NETWORK_PROTOCOL.WEBSOCKET:
+			var url = "ws://%s:%d" % [serverIPnumber, hostportnumber]
+			print("Websocketclient connect to: ", url)
+			networkedmultiplayerclient = WebSocketClient.new();
+			clienterror = networkedmultiplayerclient.connect_to_url(url, PoolStringArray(), true)
+		elif $ProtocolOptions.selected == NETWORK_PROTOCOL.ENET:
+			print("networkedmultiplayerenet createclient ", serverIPnumber, ":", hostportnumber)
+			networkedmultiplayerclient = NetworkedMultiplayerENet.new()
+			clienterror = networkedmultiplayerclient.create_client(serverIPnumber, hostportnumber, 0, 0)
+		if clienterror == 0:
+			get_tree().set_network_peer(networkedmultiplayerclient)
 			$ColorRect.color = Color.yellow
 			LocalPlayer.networkID = -1
 		else:
-			$NetworkOptionButton.select(NETWORK_OPTIONS.NETWORK_OFF)
+			print("networkedmultiplayer createclient Error: ", { ERR_CANT_CREATE:"ERR_CANT_CREATE" }.get(clienterror, clienterror))
+			print("*** is there a server running on this port already? ", hostportnumber)
+			$ColorRect.color = Color.red
+			$NetworkOptions.select(NETWORK_OPTIONS.NETWORK_OFF)
 		
-
+	$ProtocolOptions.disabled = ($NetworkOptions.selected != NETWORK_OPTIONS.NETWORK_OFF)
+	
 func _on_Doppelganger_toggled(button_pressed):
 	if button_pressed:
 		$DoppelgangerPanel.visible = true
