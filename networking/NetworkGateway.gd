@@ -7,7 +7,7 @@ var remoteservers = [ "tunnelvr.goatchurch.org.uk",
 					  "192.168.43.1" ]
 var broadcastudpipnum = "255.255.255.255"
 const udpdiscoverybroadcasterperiod = 2.0
-const broadcastservermsg = "OQServer_here!"
+const broadcastservermsg = "GodotServer_here!"
 
 enum NETWORK_OPTIONS { NETWORK_OFF = 0
 					   AS_SERVER = 1,
@@ -71,7 +71,7 @@ func _input(event):
 			$Doppelganger.pressed = not $Doppelganger.pressed
 
 func updatestatusrec(ptxt):
-	$StatusRec.text = "%sNetworkID: %d\nRemotes: %s" % [ptxt, LocalPlayer.networkID, PoolStringArray(remote_players_idstonodenames.values()).join(", ")]
+	$ColorRect/StatusRec.text = "%sNetworkID: %d\nRemotes: %s" % [ptxt, LocalPlayer.networkID, PoolStringArray(remote_players_idstonodenames.values()).join(", ")]
 
 func _server_disconnected():
 	var ns = $NetworkOptionButton.selected
@@ -206,6 +206,7 @@ func _on_OptionButton_item_selected(ns):
 		print("creating server on port: ", hostportnumber)
 		var networkedmultiplayerenetserver = NetworkedMultiplayerENet.new()
 		var e = networkedmultiplayerenetserver.create_server(hostportnumber)
+
 		if e == 0:
 			get_tree().set_network_peer(networkedmultiplayerenetserver)
 			_connected_to_server()
