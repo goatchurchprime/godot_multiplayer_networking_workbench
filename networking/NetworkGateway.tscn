@@ -13,12 +13,12 @@ __meta__ = {
 }
 
 [node name="ProtocolOptions" type="OptionButton" parent="."]
-margin_left = 343.245
-margin_top = 33.592
-margin_right = 470.245
-margin_bottom = 53.592
+margin_left = 264.756
+margin_top = 32.1778
+margin_right = 391.756
+margin_bottom = 52.1778
 text = "WebSocket"
-items = [ "ENet", null, false, 0, null, "WebSocket", null, false, 1, null, "WebRTC", null, false, 2, null ]
+items = [ "ENet", null, false, 0, null, "WebSocket", null, false, 1, null, "WebRTC (websocket signal)", null, false, 2, null, "WebRTC (mqtt signal)", null, false, 3, null ]
 selected = 1
 __meta__ = {
 "_edit_use_anchors_": false
@@ -61,10 +61,10 @@ __meta__ = {
 }
 
 [node name="NetworkOptions" type="OptionButton" parent="."]
-margin_left = 168.0
-margin_top = 71.0
-margin_right = 543.0
-margin_bottom = 91.0
+margin_left = 167.0
+margin_top = 69.0
+margin_right = 345.0
+margin_bottom = 89.0
 text = "Network off"
 items = [ "Network off", null, false, 0, null, "As server", null, false, 1, null, "Local network", null, false, 3, null ]
 selected = 0
@@ -82,6 +82,23 @@ text = "Connection:"
 __meta__ = {
 "_edit_use_anchors_": false
 }
+
+[node name="portnumber" type="LineEdit" parent="NetworkOptions"]
+margin_left = 262.932
+margin_top = -2.29289
+margin_right = 320.932
+margin_bottom = 21.7071
+text = "4547"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Label" type="Label" parent="NetworkOptions/portnumber"]
+margin_left = -60.8112
+margin_top = 2.82843
+margin_right = -20.8112
+margin_bottom = 16.8284
+text = "port:"
 
 [node name="Doppelganger" type="CheckBox" parent="."]
 margin_left = 14.0
