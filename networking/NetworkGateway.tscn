@@ -1,6 +1,7 @@
-[gd_scene load_steps=2 format=2]
+[gd_scene load_steps=3 format=2]
 
 [ext_resource path="res://networking/NetworkGateway.gd" type="Script" id=1]
+[ext_resource path="res://networking/SignallingWebsocket.gd" type="Script" id=2]
 
 [node name="NetworkGateway" type="Panel"]
 self_modulate = Color( 0.32549, 0.317647, 0.317647, 1 )
@@ -17,9 +18,9 @@ margin_left = 264.756
 margin_top = 32.1778
 margin_right = 391.756
 margin_bottom = 52.1778
-text = "WebSocket"
+text = "WebRTC (websocket signal)"
 items = [ "ENet", null, false, 0, null, "WebSocket", null, false, 1, null, "WebRTC (websocket signal)", null, false, 2, null, "WebRTC (mqtt signal)", null, false, 3, null ]
-selected = 1
+selected = 2
 __meta__ = {
 "_edit_use_anchors_": false
 }
@@ -32,10 +33,10 @@ margin_bottom = 16.3163
 text = "Protocol:"
 
 [node name="ColorRect" type="ColorRect" parent="."]
-margin_left = 253.0
-margin_top = 167.0
-margin_right = 489.0
-margin_bottom = 196.0
+margin_left = 250.879
+margin_top = 171.243
+margin_right = 486.879
+margin_bottom = 200.243
 color = Color( 0.215686, 0.137255, 0.917647, 1 )
 __meta__ = {
 "_edit_use_anchors_": false
@@ -130,10 +131,10 @@ margin_bottom = 24.0
 text = "Player list"
 
 [node name="Interpdelay" type="HSlider" parent="."]
-margin_left = 226.149
-margin_top = 149.4
-margin_right = 538.149
-margin_bottom = 167.4
+margin_left = 224.028
+margin_top = 148.693
+margin_right = 536.028
+margin_bottom = 166.693
 max_value = 1000.0
 value = 300.0
 __meta__ = {
@@ -202,6 +203,9 @@ text = "Netdropsimulation:"
 __meta__ = {
 "_edit_use_anchors_": false
 }
+
+[node name="SignallingWebsocket" type="Node" parent="."]
+script = ExtResource( 2 )
 
 [connection signal="item_selected" from="NetworkOptions" to="." method="_on_OptionButton_item_selected"]
 [connection signal="toggled" from="Doppelganger" to="." method="_on_Doppelganger_toggled"]

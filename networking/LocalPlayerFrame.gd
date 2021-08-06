@@ -42,6 +42,7 @@ var framedividerVal = 5
 var framedividerCount = framedividerVal
 var DframereportCount = 0
 var Dcumulativebytes = 0
+var Dframebytesprev = 0
 func _process(delta):
 	get_parent().processlocalavatarposition(delta)
 
@@ -57,7 +58,9 @@ func _process(delta):
 	Dcumulativebytes += len(var2bytes(vd))
 	DframereportCount += 1
 	if DframereportCount == 10:
-		print("Frame bytes: ", Dcumulativebytes)
+		if Dcumulativebytes != Dframebytesprev:
+			print("Frame bytes: ", Dcumulativebytes)
+			Dframebytesprev = Dcumulativebytes
 		Dcumulativebytes= 0
 		DframereportCount = 0
 	

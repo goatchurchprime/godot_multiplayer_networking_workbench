@@ -31,6 +31,8 @@ enum NETWORK_PROTOCOL { ENET = 0,
 						WEBRTC_MQTTSIGNAL = 3
 					  }
 
+
+
 const errordecodes = { ERR_ALREADY_IN_USE:"ERR_ALREADY_IN_USE", 
 					   ERR_CANT_CREATE:"ERR_CANT_CREATE"
 					 }
@@ -98,11 +100,17 @@ func updatestatusrec(ptxt):
 
 func _server_disconnected():
 	if websocketobjecttopoll != null:
-		if websocketobjecttopoll.is_class("WebSocketServer"):
+		if LocalPlayer.networkID == 1:
 			websocketobjecttopoll.stop()
-		elif websocketobjecttopoll.is_class("WebSocketClient"):
+		else:
 			websocketobjecttopoll.close()
 		websocketobjecttopoll = null
+	if $ProtocolOptions.selected == NETWORK_PROTOCOL.WEBRTC_WEBSOCKETSIGNAL:
+		if LocalPlayer.networkID == 1:
+			$SignallingWebsocket.stopwebsocketserver()
+		else:
+			$SignallingWebsocket.closeconnection()
+	
 	var ns = $NetworkOptions.selected
 	get_tree().set_network_peer(null)
 	LocalPlayer.networkID = 0
@@ -125,6 +133,9 @@ func _connected_to_server():
 	$ColorRect.color = Color.green
 	updatestatusrec("")
 
+func setnetworkoff():
+	$NetworkOptions.select(NETWORK_OPTIONS.NETWORK_OFF)
+	
 func _connection_failed():
 	$NetworkOptions.select(NETWORK_OPTIONS.NETWORK_OFF)
 	updatestatusrec("Connection failed\n")
@@ -159,6 +170,8 @@ func _player_connected(id):
 	print("players_connected_list: ", remote_players_idstonodenames)
 	var avatardata = LocalPlayer.avatarinitdata()
 	avatardata["framedata0"] = LocalPlayer.get_node("PlayerFrame").framedata0
+	print("Dpeer.get_connection_state ", $SignallingWebsocket.Dpeer.get_connection_state(), " tree: ", get_tree().network_peer.get_connection_status())
+	print("calling spawnintoremoteplayer at ", id)
 	rpc_id(id, "spawnintoremoteplayer", avatardata)
 	updatestatusrec("")
 
@@ -176,6 +189,10 @@ func _player_disconnected(id):
 
 remote func spawnintoremoteplayer(avatardata):
 	var senderid = get_tree().get_rpc_sender_id()
+	print("rec spawnintoremoteplayer from ", senderid)
+	if not remote_players_idstonodenames.has(senderid):
+		print("forcing _player_connected from spawnintoremoteplayer")
+		_player_connected(senderid)
 	var remoteplayer = newremoteplayer(avatardata)
 	assert (senderid == avatardata["networkid"])
 	remoteplayer.get_node("PlayerFrame").set_network_master(senderid)
@@ -184,7 +201,6 @@ remote func spawnintoremoteplayer(avatardata):
 	updateplayerlist()
 	
 var Dudpcount = 0
-#set_process(false)
 func _process(delta):
 	if websocketobjecttopoll != null:
 		websocketobjecttopoll.poll()
@@ -198,7 +214,7 @@ func _process(delta):
 			var err0 = udpdiscoverybroadcaster.set_dest_address(broadcastudpipnum, udpdiscoveryport)
 			var err1 = udpdiscoverybroadcaster.put_packet((broadcastservermsg+" "+str(Dudpcount)).to_utf8())
 			Dudpcount += 1
-			print("put UDP onto ", broadcastudpipnum, ":", broadcastudpipnum, " errs:", err0, " ", err1)
+			#print("put UDP onto ", broadcastudpipnum, ":", broadcastudpipnum, " errs:", err0, " ", err1)
 			if err0 != 0 or err1 != 0:
 				print("udpdiscoverybroadcaster error ", err0, " ", err1)
 			udpdiscoverybroadcasterperiodtimer = udpdiscoverybroadcasterperiod
@@ -222,7 +238,9 @@ func _process(delta):
 				$NetworkOptions.select(ns)
 				_on_OptionButton_item_selected(ns)
 				
-
+func _data_channel_received(channel: Object):
+	print("_data_channel_received ", channel)
+	
 func _on_OptionButton_item_selected(ns):
 	print(" _on_OptionButton_item_selected ", ns)
 	if ns == NETWORK_OPTIONS.LOCAL_NETWORK:
@@ -252,9 +270,16 @@ func _on_OptionButton_item_selected(ns):
 			print("creating ENet server on port: ", int($NetworkOptions/portnumber.text))
 			networkedmultiplayerserver = NetworkedMultiplayerENet.new()
 			servererror = networkedmultiplayerserver.create_server(int($NetworkOptions/portnumber.text))
-		if servererror == 0:
+
+		elif $ProtocolOptions.selected == NETWORK_PROTOCOL.WEBRTC_WEBSOCKETSIGNAL:
+			networkedmultiplayerserver = WebRTCMultiplayer.new()
+			servererror = networkedmultiplayerserver.initialize(1, true)
+			$SignallingWebsocket.startwebsocketserver()
+
+		if servererror == OK:
 			get_tree().set_network_peer(networkedmultiplayerserver)
 			_connected_to_server()
+			print("networkedmultiplayerserver.is_network_server ", get_tree().is_network_server(), " tree: ", get_tree().network_peer.get_connection_status())
 		else:
 			print("networkedmultiplayer createserver Error: ", errordecodes.get(servererror, servererror))
 			print("*** is there a server running on this port already? ", int($NetworkOptions/portnumber.text))
@@ -274,8 +299,13 @@ func _on_OptionButton_item_selected(ns):
 			print("networkedmultiplayerenet createclient ", serverIPnumber, ":", int($NetworkOptions/portnumber.text))
 			networkedmultiplayerclient = NetworkedMultiplayerENet.new()
 			clienterror = networkedmultiplayerclient.create_client(serverIPnumber, int($NetworkOptions/portnumber.text), 0, 0)
+		elif $ProtocolOptions.selected == NETWORK_PROTOCOL.WEBRTC_WEBSOCKETSIGNAL:
+			print("networkedmultiplayerwebrtc createwebsocket signal ", serverIPnumber, ":", int($NetworkOptions/portnumber.text))
+			$SignallingWebsocket.connectwebsocket(serverIPnumber)
+
 		if clienterror == 0:
 			get_tree().set_network_peer(networkedmultiplayerclient)
+			print("networkedmultiplayerclient.is_network_server ", get_tree().is_network_server())
 			$ColorRect.color = Color.yellow
 			LocalPlayer.networkID = -1
 		else:
