@@ -23,7 +23,6 @@ func initavatar(avatardata):
 		networkID = avatardata["networkid"]
 	text = avatardata["labeltext"]
 
-
 func avatarinitdata():
 	var avatardata = { "playernodename":get_name(),
 					   "avatarsceneresource":filename, 

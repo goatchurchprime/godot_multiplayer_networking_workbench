@@ -2,23 +2,11 @@ extends Panel
 
 
 
-export var udpdiscoveryport = 4546
-export var remoteservers = [ "tunnelvr.goatchurch.org.uk", 
-					  "192.168.43.1", "192.168.8.111" ]
+
+export var remoteservers = [ "192.168.43.1", "192.168.8.111" ]
 
 var websocketobjecttopoll = null
-#	websocketserver.close()
-	# Note: To achieve a clean close, you will need to keep polling until either WebSocketClient.connection_closed or WebSocketServer.client_disconnected is received.
-	# Note: The HTML5 export might not support all status codes. Please refer to browser-specific documentation for more details.
-#	websocketserver = null
-#if websocketclient != null:
-#	websocketclient.disconnect_from_host()
-	#websocketclient = null
 
-
-const broadcastudpipnum = "255.255.255.255"
-const udpdiscoverybroadcasterperiod = 2.0
-const broadcastservermsg = "GodotServer_here!"
 
 enum NETWORK_OPTIONS { NETWORK_OFF = 0
 					   AS_SERVER = 1,
@@ -42,10 +30,6 @@ const errordecodes = { ERR_ALREADY_IN_USE:"ERR_ALREADY_IN_USE",
 export var playernodepath = "/root/Main/Players"
 onready var PlayersNode = get_node(playernodepath)
 var LocalPlayer = null
-
-var udpdiscoverybroadcasterperiodtimer = udpdiscoverybroadcasterperiod
-var udpdiscoveryreceivingserver = null
-onready var serverbroadcastsudp = not OS.has_feature("Server")
 
 var deferred_playerconnections = [ ]
 var remote_players_idstonodenames = { }
@@ -78,6 +62,7 @@ func _ready():
 	if OS.has_feature("HTML5"):
 		$NetworkOptions.get_item(NETWORK_OPTIONS.LOCAL_NETWORK).disabled = true
 		
+	_server_disconnected()
 	_on_OptionButton_item_selected($NetworkOptions.selected)
 
 func _input(event):
@@ -121,6 +106,7 @@ func _server_disconnected():
 	print("*** _server_disconnected ", LocalPlayer.networkID)
 	$ColorRect.color = Color.red if (ns >= NETWORK_OPTIONS.LOCAL_NETWORK) else Color.black
 	updatestatusrec("")
+	updateplayerlist()
 
 func _connected_to_server():
 	LocalPlayer.networkID = get_tree().get_network_unique_id()
@@ -132,6 +118,7 @@ func _connected_to_server():
 	deferred_playerconnections.clear()
 	$ColorRect.color = Color.green
 	updatestatusrec("")
+	updateplayerlist()
 
 func setnetworkoff():
 	$NetworkOptions.select(NETWORK_OPTIONS.NETWORK_OFF)
@@ -150,11 +137,11 @@ func _connection_failed():
 	websocketobjecttopoll = null
 
 func updateplayerlist():
-	var plp = $PlayerList.get_item_text($PlayerList.selected) 
+	var plp = $PlayerList.get_item_text($PlayerList.selected).split(" ")[0].replace("*", "")
 	$PlayerList.clear()
 	$PlayerList.selected = 0
 	for player in PlayersNode.get_children():
-		$PlayerList.add_item(("*" if player == LocalPlayer else "") + player.get_name())
+		$PlayerList.add_item(("*" if player == LocalPlayer else "") + player.get_name() + " " + player.text)
 		if plp == player.get_name():
 			$PlayerList.selected = $PlayerList.get_item_count() - 1
 
@@ -190,9 +177,6 @@ func _player_disconnected(id):
 remote func spawnintoremoteplayer(avatardata):
 	var senderid = get_tree().get_rpc_sender_id()
 	print("rec spawnintoremoteplayer from ", senderid)
-	if not remote_players_idstonodenames.has(senderid):
-		print("forcing _player_connected from spawnintoremoteplayer")
-		_player_connected(senderid)
 	var remoteplayer = newremoteplayer(avatardata)
 	assert (senderid == avatardata["networkid"])
 	remoteplayer.get_node("PlayerFrame").set_network_master(senderid)
@@ -205,50 +189,31 @@ func _process(delta):
 	if websocketobjecttopoll != null:
 		websocketobjecttopoll.poll()
 
-	var ns = $NetworkOptions.selected
-	if ns == NETWORK_OPTIONS.AS_SERVER and serverbroadcastsudp and not OS.has_feature("HTML5"):
-		udpdiscoverybroadcasterperiodtimer -= delta
-		if udpdiscoverybroadcasterperiodtimer < 0:
-			var udpdiscoverybroadcaster = PacketPeerUDP.new()
-			udpdiscoverybroadcaster.set_broadcast_enabled(true)
-			var err0 = udpdiscoverybroadcaster.set_dest_address(broadcastudpipnum, udpdiscoveryport)
-			var err1 = udpdiscoverybroadcaster.put_packet((broadcastservermsg+" "+str(Dudpcount)).to_utf8())
-			Dudpcount += 1
-			#print("put UDP onto ", broadcastudpipnum, ":", broadcastudpipnum, " errs:", err0, " ", err1)
-			if err0 != 0 or err1 != 0:
-				print("udpdiscoverybroadcaster error ", err0, " ", err1)
-			udpdiscoverybroadcasterperiodtimer = udpdiscoverybroadcasterperiod
 
-	if ns == NETWORK_OPTIONS.LOCAL_NETWORK and LocalPlayer.networkID == 0:
-		udpdiscoveryreceivingserver.poll()
-		if udpdiscoveryreceivingserver.is_connection_available():
-			var peer = udpdiscoveryreceivingserver.take_connection()
-			var pkt = peer.get_packet()
-			var spkt = pkt.get_string_from_utf8().split(" ")
-			print("Received: ", spkt, " from ", peer.get_packet_ip())
-			if spkt[0] == broadcastservermsg:
-				var receivedIPnumber = peer.get_packet_ip()
-				for nsi in range(NETWORK_OPTIONS.FIXED_URL, $NetworkOptions.get_item_count()):
-					if receivedIPnumber == $NetworkOptions.get_item_text(nsi):
-						ns = nsi
-						break
-				if ns == NETWORK_OPTIONS.LOCAL_NETWORK:
-					$NetworkOptions.add_item(receivedIPnumber)
-					ns = $NetworkOptions.get_item_count() - 1
-				$NetworkOptions.select(ns)
-				_on_OptionButton_item_selected(ns)
 				
 func _data_channel_received(channel: Object):
 	print("_data_channel_received ", channel)
+
+func udpreceivedipnumber(receivedIPnumber):
+
+	var ns = $NetworkOptions.selected
+	for nsi in range(NETWORK_OPTIONS.FIXED_URL, $NetworkOptions.get_item_count()):
+		if receivedIPnumber == $NetworkOptions.get_item_text(nsi):
+			ns = nsi
+			break
+	if ns == NETWORK_OPTIONS.LOCAL_NETWORK:
+		$NetworkOptions.add_item(receivedIPnumber)
+		ns = $NetworkOptions.get_item_count() - 1
+	$NetworkOptions.select(ns)
+	_on_OptionButton_item_selected(ns)
+
 	
 func _on_OptionButton_item_selected(ns):
 	print(" _on_OptionButton_item_selected ", ns)
 	if ns == NETWORK_OPTIONS.LOCAL_NETWORK:
-		udpdiscoveryreceivingserver = UDPServer.new()
-		udpdiscoveryreceivingserver.listen(udpdiscoveryport)
-	elif udpdiscoveryreceivingserver != null:
-		udpdiscoveryreceivingserver.stop()
-		udpdiscoveryreceivingserver = null
+		$SignallingUDP.start_udp_localIP_discovery_signals(false)
+	else:
+		$SignallingUDP.stop_udp_localIP_discovery_signals()
 
 	if LocalPlayer.networkID != 0:
 		if get_tree().get_network_peer() != null:
@@ -276,10 +241,16 @@ func _on_OptionButton_item_selected(ns):
 			servererror = networkedmultiplayerserver.initialize(1, true)
 			$SignallingWebsocket.startwebsocketserver()
 
+		if (not OS.has_feature("Server")) and (not OS.has_feature("HTML5")) and $ProtocolOptions.selected != NETWORK_PROTOCOL.WEBRTC_MQTTSIGNAL:
+			$SignallingUDP.start_udp_localIP_discovery_signals(true)
+
 		if servererror == OK:
 			get_tree().set_network_peer(networkedmultiplayerserver)
 			_connected_to_server()
 			print("networkedmultiplayerserver.is_network_server ", get_tree().is_network_server(), " tree: ", get_tree().network_peer.get_connection_status())
+			if (not OS.has_feature("Server")) and (not OS.has_feature("HTML5")) and $ProtocolOptions.selected != NETWORK_PROTOCOL.WEBRTC_MQTTSIGNAL:
+				$SignallingUDP.start_udp_localIP_discovery_signals(true)
+
 		else:
 			print("networkedmultiplayer createserver Error: ", errordecodes.get(servererror, servererror))
 			print("*** is there a server running on this port already? ", int($NetworkOptions/portnumber.text))
