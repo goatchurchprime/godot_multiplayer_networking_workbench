@@ -9,9 +9,11 @@ func _ready():
 	websocketserver.connect("client_connected", self, "wss_client_connected")
 	websocketserver.connect("client_disconnected", self, "wss_client_disconnected")
 	websocketserver.connect("data_received", self, "wss_data_received")
+	
 	websocketclient.connect("connection_closed", self, "wsc_connection_closed")
 	websocketclient.connect("connection_error", self, "wsc_connection_error")
 	websocketclient.connect("connection_established", self, "wsc_connection_established")
+
 	websocketclient.connect("server_close_request", self, "wsc_server_close_request")
 	websocketclient.connect("data_received", self, "wsc_data_received")
 	set_process(false)
@@ -123,8 +125,8 @@ func _process(delta):
 	websocketserver.poll()
 	websocketclient.poll()
 		
-func startwebsocketserver():
-	var servererror = websocketserver.listen(4549, PoolStringArray([websocketprotocol]), false)
+func startwebsocketserver(port):
+	var servererror = websocketserver.listen(port, PoolStringArray([websocketprotocol]), false)
 	if servererror == 0:
 		set_process(true)
 	else:
@@ -135,11 +137,8 @@ func stopwebsocketserver():
 	websocketserver = null
 	set_process(false)
 		
-func connectwebsocket(ipnumber):
-	#websocketexperiment()
-	var port = 4549
-	var url = "ws://%s:%d" % [ipnumber, port]
-	var clienterror = websocketclient.connect_to_url(url, PoolStringArray([websocketprotocol]), false)
+func connectwebsocket(wsurl):
+	var clienterror = websocketclient.connect_to_url(wsurl, PoolStringArray([websocketprotocol]), false)
 	if clienterror == 0:
 		set_process(true)
 	else:

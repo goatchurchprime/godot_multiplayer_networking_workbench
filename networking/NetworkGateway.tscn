@@ -1,24 +1,29 @@
-[gd_scene load_steps=4 format=2]
+[gd_scene load_steps=9 format=2]
 
 [ext_resource path="res://networking/NetworkGateway.gd" type="Script" id=1]
 [ext_resource path="res://networking/SignallingWebsocket.gd" type="Script" id=2]
 [ext_resource path="res://networking/SignallingUDP.gd" type="Script" id=3]
+[ext_resource path="res://networking/MQTT.gd" type="Script" id=4]
+[ext_resource path="res://networking/SignallingMQTT.gd" type="Script" id=5]
+[ext_resource path="res://networking/NetworkRole.gd" type="Script" id=6]
+[ext_resource path="res://networking/ServermodeMQTTsignal.gd" type="Script" id=7]
+[ext_resource path="res://networking/ClientmodeMQTTsignal.gd" type="Script" id=8]
 
 [node name="NetworkGateway" type="Panel"]
 self_modulate = Color( 0.32549, 0.317647, 0.317647, 1 )
 margin_left = 1.0
 margin_right = 560.0
-margin_bottom = 288.0
+margin_bottom = 379.0
 script = ExtResource( 1 )
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
 [node name="ProtocolOptions" type="OptionButton" parent="."]
-margin_left = 264.756
-margin_top = 32.1778
-margin_right = 391.756
-margin_bottom = 52.1778
+margin_left = 278.772
+margin_top = 11.087
+margin_right = 480.772
+margin_bottom = 31.087
 text = "WebRTC (websocket signal)"
 items = [ "ENet", null, false, 0, null, "WebSocket", null, false, 1, null, "WebRTC (websocket signal)", null, false, 2, null, "WebRTC (mqtt signal)", null, false, 3, null ]
 selected = 2
@@ -34,10 +39,10 @@ margin_bottom = 16.3163
 text = "Protocol:"
 
 [node name="ColorRect" type="ColorRect" parent="."]
-margin_left = 250.879
-margin_top = 171.243
-margin_right = 486.879
-margin_bottom = 200.243
+margin_left = 290.879
+margin_top = 260.243
+margin_right = 526.879
+margin_bottom = 289.243
 color = Color( 0.215686, 0.137255, 0.917647, 1 )
 __meta__ = {
 "_edit_use_anchors_": false
@@ -63,10 +68,10 @@ __meta__ = {
 }
 
 [node name="NetworkOptions" type="OptionButton" parent="."]
-margin_left = 167.0
-margin_top = 69.0
-margin_right = 345.0
-margin_bottom = 89.0
+margin_left = 137.455
+margin_top = 37.5457
+margin_right = 315.455
+margin_bottom = 57.5457
 text = "Network off"
 items = [ "Network off", null, false, 0, null, "As server", null, false, 1, null, "Local network", null, false, 3, null ]
 selected = 0
@@ -86,37 +91,55 @@ __meta__ = {
 }
 
 [node name="portnumber" type="LineEdit" parent="NetworkOptions"]
-margin_left = 262.932
-margin_top = -2.29289
-margin_right = 320.932
-margin_bottom = 21.7071
+margin_left = 265.313
+margin_top = 0.881915
+margin_right = 323.313
+margin_bottom = 24.8819
 text = "4547"
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
 [node name="Label" type="Label" parent="NetworkOptions/portnumber"]
-margin_left = -60.8112
-margin_top = 2.82843
-margin_right = -20.8112
-margin_bottom = 16.8284
+margin_left = -60.0175
+margin_top = 4.41583
+margin_right = -20.0175
+margin_bottom = 18.4158
 text = "port:"
 
+[node name="roomname" type="LineEdit" parent="NetworkOptions"]
+visible = false
+margin_left = 265.313
+margin_top = 0.881915
+margin_right = 323.313
+margin_bottom = 24.8819
+text = "carrot"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Label" type="Label" parent="NetworkOptions/roomname"]
+margin_left = -59.2238
+margin_top = 4.41583
+margin_right = -19.2238
+margin_bottom = 18.4158
+text = "room:"
+
 [node name="Doppelganger" type="CheckBox" parent="."]
-margin_left = 14.0
-margin_top = 182.0
-margin_right = 217.0
-margin_bottom = 206.0
+margin_left = 9.0
+margin_top = 262.0
+margin_right = 212.0
+margin_bottom = 286.0
 text = "doppelganger"
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
 [node name="PlayerList" type="OptionButton" parent="."]
-margin_left = 226.0
-margin_top = 101.0
-margin_right = 538.0
-margin_bottom = 129.0
+margin_left = 219.0
+margin_top = 227.0
+margin_right = 531.0
+margin_bottom = 255.0
 text = "me"
 items = [ "me", null, false, 0, null ]
 selected = 0
@@ -132,10 +155,10 @@ margin_bottom = 24.0
 text = "Player list"
 
 [node name="Interpdelay" type="HSlider" parent="."]
-margin_left = 224.028
-margin_top = 148.693
-margin_right = 536.028
-margin_bottom = 166.693
+margin_left = 223.028
+margin_top = 206.693
+margin_right = 535.028
+margin_bottom = 224.693
 max_value = 1000.0
 value = 300.0
 __meta__ = {
@@ -154,10 +177,10 @@ __meta__ = {
 }
 
 [node name="DoppelgangerPanel" type="Panel" parent="."]
-margin_left = 9.0
-margin_top = 211.0
-margin_right = 557.0
-margin_bottom = 276.0
+margin_left = 3.0
+margin_top = 305.0
+margin_right = 551.0
+margin_bottom = 370.0
 __meta__ = {
 "_edit_use_anchors_": false
 }
@@ -205,11 +228,197 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="SignallingWebsocket" type="Node" parent="."]
-script = ExtResource( 2 )
-
 [node name="SignallingUDP" type="Node" parent="."]
 script = ExtResource( 3 )
 
+[node name="SignallingWebsocket" type="Node" parent="."]
+script = ExtResource( 2 )
+
+[node name="SignallingMQTT" type="Node" parent="."]
+script = ExtResource( 5 )
+
+[node name="MQTT" type="Node" parent="SignallingMQTT"]
+script = ExtResource( 4 )
+
+[node name="NetworkRole" type="TabContainer" parent="."]
+margin_left = 5.84091
+margin_top = 70.0
+margin_right = 558.841
+margin_bottom = 182.0
+script = ExtResource( 6 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="SetupMQTTsignal" type="Control" parent="NetworkRole"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_left = 4.0
+margin_top = 32.0
+margin_right = -4.0
+margin_bottom = -4.0
+
+[node name="brokeraddress" type="LineEdit" parent="NetworkRole/SetupMQTTsignal"]
+margin_left = 115.0
+margin_top = 7.0
+margin_right = 310.0
+margin_bottom = 31.0
+text = "mosquitto.doesliverpool.xyz"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Label" type="Label" parent="NetworkRole/SetupMQTTsignal/brokeraddress"]
+margin_left = -95.0213
+margin_top = 4.36359
+margin_right = -13.0213
+margin_bottom = 18.3636
+text = "MQTT broker"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="usewebsocket" type="CheckBox" parent="NetworkRole/SetupMQTTsignal/brokeraddress"]
+margin_left = 222.838
+margin_top = -5.88626
+margin_right = 321.838
+margin_bottom = 18.1137
+text = "Websocket"
+
+[node name="roomname" type="LineEdit" parent="NetworkRole/SetupMQTTsignal"]
+margin_left = 120.0
+margin_top = 40.0
+margin_right = 200.0
+margin_bottom = 64.0
+text = "rhubarb"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Label" type="Label" parent="NetworkRole/SetupMQTTsignal/roomname"]
+margin_left = -98.3849
+margin_top = 5.88629
+margin_right = -21.3849
+margin_bottom = 19.8863
+text = "Roomname:"
+
+[node name="monitorhelp" type="Label" parent="NetworkRole/SetupMQTTsignal/roomname"]
+margin_left = 181.271
+margin_top = -9.29523
+margin_right = 357.271
+margin_bottom = 41.7048
+text = "mosquitto_sub -h 
+test.mosquitto.org -v -t 
+\"carrot/#\""
+
+[node name="MQTT" type="Node" parent="NetworkRole/SetupMQTTsignal"]
+script = ExtResource( 4 )
+
+[node name="ServermodeMQTTsignal" type="Control" parent="NetworkRole"]
+visible = false
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_left = 4.0
+margin_top = 32.0
+margin_right = -4.0
+margin_bottom = -4.0
+script = ExtResource( 7 )
+
+[node name="StartServer" type="Button" parent="NetworkRole/ServermodeMQTTsignal"]
+margin_left = 27.0
+margin_right = 90.0
+margin_bottom = 20.0
+toggle_mode = true
+text = "Start"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="statuslabel" type="Label" parent="NetworkRole/ServermodeMQTTsignal/StartServer"]
+margin_left = 71.0
+margin_top = 2.0
+margin_right = 122.0
+margin_bottom = 21.0
+text = "Off"
+
+[node name="ClientsList" type="OptionButton" parent="NetworkRole/ServermodeMQTTsignal"]
+margin_left = 183.773
+margin_top = -2.1591
+margin_right = 321.773
+margin_bottom = 17.8409
+text = "Item 0"
+selected = 0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="ClientmodeMQTTsignal" type="Control" parent="NetworkRole"]
+visible = false
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_left = 4.0
+margin_top = 32.0
+margin_right = -4.0
+margin_bottom = -4.0
+script = ExtResource( 8 )
+
+[node name="StartClient" type="Button" parent="NetworkRole/ClientmodeMQTTsignal"]
+margin_left = 17.4095
+margin_top = -1.52269
+margin_right = 78.4095
+margin_bottom = 18.4773
+toggle_mode = true
+text = "Start"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="statuslabel" type="Label" parent="NetworkRole/ClientmodeMQTTsignal/StartClient"]
+margin_left = 81.567
+margin_top = 1.68179
+margin_right = 121.567
+margin_bottom = 15.6818
+text = "Off"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="clientid" type="LineEdit" parent="NetworkRole/ClientmodeMQTTsignal"]
+margin_left = 219.615
+margin_top = -3.68182
+margin_right = 289.615
+margin_bottom = 20.3182
+text = "0"
+
+[node name="Label" type="Label" parent="NetworkRole/ClientmodeMQTTsignal/clientid"]
+margin_left = -62.2263
+margin_top = 4.20445
+margin_right = -10.2263
+margin_bottom = 18.2045
+text = "ClientID"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="tempclientid" type="LineEdit" parent="NetworkRole/ClientmodeMQTTsignal"]
+margin_left = 421.43
+margin_top = -1.99998
+margin_right = 491.43
+margin_bottom = 22.0
+text = "0"
+
+[node name="Label" type="Label" parent="NetworkRole/ClientmodeMQTTsignal/tempclientid"]
+margin_left = -99.2258
+margin_top = 5.04536
+margin_right = -7.22575
+margin_bottom = 19.0454
+text = "Temp ClientID"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[connection signal="item_selected" from="ProtocolOptions" to="." method="_on_ProtocolOptions_item_selected"]
 [connection signal="item_selected" from="NetworkOptions" to="." method="_on_OptionButton_item_selected"]
 [connection signal="toggled" from="Doppelganger" to="." method="_on_Doppelganger_toggled"]
+[connection signal="toggled" from="NetworkRole/ServermodeMQTTsignal/StartServer" to="NetworkRole/ServermodeMQTTsignal" method="_on_StartServer_toggled"]
+[connection signal="toggled" from="NetworkRole/ClientmodeMQTTsignal/StartClient" to="NetworkRole/ClientmodeMQTTsignal" method="_on_StartClient_toggled"]

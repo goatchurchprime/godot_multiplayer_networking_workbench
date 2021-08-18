@@ -157,7 +157,8 @@ func _player_connected(id):
 	print("players_connected_list: ", remote_players_idstonodenames)
 	var avatardata = LocalPlayer.avatarinitdata()
 	avatardata["framedata0"] = LocalPlayer.get_node("PlayerFrame").framedata0
-	print("Dpeer.get_connection_state ", $SignallingWebsocket.Dpeer.get_connection_state(), " tree: ", get_tree().network_peer.get_connection_status())
+	if $SignallingWebsocket.Dpeer != null:
+		print("Dpeer.get_connection_state ", $SignallingWebsocket.Dpeer.get_connection_state(), " tree: ", get_tree().network_peer.get_connection_status())
 	print("calling spawnintoremoteplayer at ", id)
 	rpc_id(id, "spawnintoremoteplayer", avatardata)
 	updatestatusrec("")
@@ -210,10 +211,11 @@ func udpreceivedipnumber(receivedIPnumber):
 	
 func _on_OptionButton_item_selected(ns):
 	print(" _on_OptionButton_item_selected ", ns)
-	if ns == NETWORK_OPTIONS.LOCAL_NETWORK:
-		$SignallingUDP.start_udp_localIP_discovery_signals(false)
-	else:
-		$SignallingUDP.stop_udp_localIP_discovery_signals()
+	if $ProtocolOptions.selected != NETWORK_PROTOCOL.WEBRTC_MQTTSIGNAL:
+		if ns == NETWORK_OPTIONS.LOCAL_NETWORK:
+			$SignallingUDP.start_udp_localIP_discovery_signals(false)
+		else:
+			$SignallingUDP.stop_udp_localIP_discovery_signals()
 
 	if LocalPlayer.networkID != 0:
 		if get_tree().get_network_peer() != null:
@@ -239,9 +241,15 @@ func _on_OptionButton_item_selected(ns):
 		elif $ProtocolOptions.selected == NETWORK_PROTOCOL.WEBRTC_WEBSOCKETSIGNAL:
 			networkedmultiplayerserver = WebRTCMultiplayer.new()
 			servererror = networkedmultiplayerserver.initialize(1, true)
-			$SignallingWebsocket.startwebsocketserver()
+			$SignallingWebsocket.startwebsocketserver(int($NetworkOptions/portnumber.text))
 
-		if (not OS.has_feature("Server")) and (not OS.has_feature("HTML5")) and $ProtocolOptions.selected != NETWORK_PROTOCOL.WEBRTC_MQTTSIGNAL:
+		elif $ProtocolOptions.selected == NETWORK_PROTOCOL.WEBRTC_MQTTSIGNAL:
+			networkedmultiplayerserver = WebRTCMultiplayer.new()
+			servererror = networkedmultiplayerserver.initialize(1, true)
+			$SignallingMQTT.serverstate_startmqttsignalling($NetworkOptions/roomname.text)
+
+		if (not OS.has_feature("Server")) and (not OS.has_feature("HTML5")) \
+				and $ProtocolOptions.selected != NETWORK_PROTOCOL.WEBRTC_MQTTSIGNAL:
 			$SignallingUDP.start_udp_localIP_discovery_signals(true)
 
 		if servererror == OK:
@@ -257,7 +265,12 @@ func _on_OptionButton_item_selected(ns):
 			$ColorRect.color = Color.red
 			$NetworkOptions.select(NETWORK_OPTIONS.NETWORK_OFF)
 
-	if ns >= NETWORK_OPTIONS.FIXED_URL and LocalPlayer.networkID == 0:
+	if $ProtocolOptions.selected == NETWORK_PROTOCOL.WEBRTC_MQTTSIGNAL and ns > NETWORK_OPTIONS.AS_SERVER:
+		$SignallingMQTT.clientstate_connecttomqttsignal($NetworkOptions/roomname.text)
+		$ColorRect.color = Color.yellow
+		LocalPlayer.networkID = -1
+		
+	elif ns >= NETWORK_OPTIONS.FIXED_URL and LocalPlayer.networkID == 0:
 		var serverIPnumber = $NetworkOptions.get_item_text(ns).split(" ", 1)[0]
 		var networkedmultiplayerclient = null
 		var clienterror = 0
@@ -271,8 +284,9 @@ func _on_OptionButton_item_selected(ns):
 			networkedmultiplayerclient = NetworkedMultiplayerENet.new()
 			clienterror = networkedmultiplayerclient.create_client(serverIPnumber, int($NetworkOptions/portnumber.text), 0, 0)
 		elif $ProtocolOptions.selected == NETWORK_PROTOCOL.WEBRTC_WEBSOCKETSIGNAL:
-			print("networkedmultiplayerwebrtc createwebsocket signal ", serverIPnumber, ":", int($NetworkOptions/portnumber.text))
-			$SignallingWebsocket.connectwebsocket(serverIPnumber)
+			var wsurl = "ws://%s:%d" % [serverIPnumber, int($NetworkOptions/portnumber.text)]
+			print("networkedmultiplayerwebrtc createwebsocket signal ", wsurl)
+			$SignallingWebsocket.connectwebsocket(wsurl)
 
 		if clienterror == 0:
 			get_tree().set_network_peer(networkedmultiplayerclient)
@@ -329,4 +343,10 @@ func removeremoteplayer(playernodename):
 	else:
 		print("** remoteplayer already removed: ", playernodename)
 	
+
+
+func _on_ProtocolOptions_item_selected(np):
+	$NetworkOptions/portnumber.visible = (np != NETWORK_PROTOCOL.WEBRTC_MQTTSIGNAL)
+	$NetworkOptions/roomname.visible = (np == NETWORK_PROTOCOL.WEBRTC_MQTTSIGNAL)
+
 
