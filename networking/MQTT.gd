@@ -41,7 +41,9 @@ func receivedbufferlength():
 	return receivedbuffer.size()
 	
 func YreceivedbuffernextNbytes(n):
-	yield(get_tree(), "idle_frame") 
+	yield(get_tree(), "idle_frame")
+	if n == 0:
+		return PoolByteArray()
 	while receivedbufferlength() < n:
 		yield(get_tree().create_timer(0.1), "timeout")
 	#var sv = socket.get_data(n)
@@ -463,7 +465,7 @@ func wait_msg():
 	var msg = data if binarymessages else data.get_string_from_ascii()
 	
 	emit_signal("received_message", topic, msg)
-	print("Received message", [topic, len(msg)])
+	print("Received message", [topic, msg.substr(0, 30)])
 	
 #	self.cb(topic, msg)
 	if op & 6 == 2:

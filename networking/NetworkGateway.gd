@@ -208,8 +208,24 @@ func udpreceivedipnumber(receivedIPnumber):
 	$NetworkOptions.select(ns)
 	_on_OptionButton_item_selected(ns)
 
-	
+
 func _on_OptionButton_item_selected(ns):
+	var selectasoff = (ns == NETWORK_OPTIONS.NETWORK_OFF)
+	var selectasserver = (ns == NETWORK_OPTIONS.AS_SERVER)
+	var selectasclient = (ns >= NETWORK_OPTIONS.LOCAL_NETWORK)
+	$NetworkRole/ServermodeMQTTsignal.visible = ($ProtocolOptions.selected == NETWORK_PROTOCOL.WEBRTC_MQTTSIGNAL)
+	if $ProtocolOptions.selected == NETWORK_PROTOCOL.WEBRTC_MQTTSIGNAL:
+		$NetworkRole/ServermodeMQTTsignal.visible = selectasserver
+		$NetworkRole/ClientmodeMQTTsignal.visible = selectasclient
+		if $NetworkRole/SetupMQTTsignal/autoconnect.pressed or $NetworkRole/ServermodeMQTTsignal/StartServer.pressed:
+			$NetworkRole/ServermodeMQTTsignal/StartServer.pressed = selectasserver
+		if $NetworkRole/SetupMQTTsignal/autoconnect.pressed or $NetworkRole/ClientmodeMQTTsignal/StartClient.pressed:
+			$NetworkRole/ClientmodeMQTTsignal/StartClient.pressed = selectasclient
+	$ProtocolOptions.disabled = not selectasoff
+
+
+
+func D_on_OptionButton_item_selected(ns):
 	print(" _on_OptionButton_item_selected ", ns)
 	if $ProtocolOptions.selected != NETWORK_PROTOCOL.WEBRTC_MQTTSIGNAL:
 		if ns == NETWORK_OPTIONS.LOCAL_NETWORK:
