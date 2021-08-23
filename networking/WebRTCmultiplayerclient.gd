@@ -1,7 +1,7 @@
 extends Control
 
 
-onready var clientsignalling = get_node("../NetworkRole/ClientmodeMQTTsignal")
+onready var clientsignalling = get_parent()
 
 
 func client_ice_candidate_created(mid_name, index_name, sdp_name):
@@ -44,7 +44,7 @@ func client_packet_received(v):
 		get_tree().set_network_peer(networkedmultiplayerclient)
 		assert (get_tree().get_network_unique_id() == clientsignalling.wclientid)
 		$statuslabel.text = "recieve offer"
-		get_parent().LocalPlayer.networkID = -1
+		get_node("../../../..").LocalPlayer.networkID = -1
 			
 	elif v["subject"] == "ice_candidate":
 		assert (get_tree().network_peer.is_class("WebRTCMultiplayer"))

@@ -216,14 +216,11 @@ func _on_OptionButton_item_selected(ns):
 	$NetworkRole/SetupMQTTsignal/Servermode.visible = ($ProtocolOptions.selected == NETWORK_PROTOCOL.WEBRTC_MQTTSIGNAL)
 	if $ProtocolOptions.selected == NETWORK_PROTOCOL.WEBRTC_MQTTSIGNAL:
 		$NetworkRole/SetupMQTTsignal/Servermode.visible = selectasserver
-		$NetworkRole/ClientmodeMQTTsignal.visible = selectasclient
-		$WebRTCmultiplayerclient.visible = selectasclient
+		$NetworkRole/SetupMQTTsignal/Clientmode.visible = selectasclient
 		if $NetworkRole/SetupMQTTsignal/autoconnect.pressed or $NetworkRole/SetupMQTTsignal/Servermode/StartServer.pressed:
 			$NetworkRole/SetupMQTTsignal/Servermode/StartServer.pressed = selectasserver
-		if $NetworkRole/SetupMQTTsignal/autoconnect.pressed or $NetworkRole/ClientmodeMQTTsignal/StartClient.pressed:
-			$NetworkRole/ClientmodeMQTTsignal/StartClient.pressed = selectasclient
-	else:
-		$WebRTCmultiplayerclient.visible = false
+		if $NetworkRole/SetupMQTTsignal/autoconnect.pressed or $NetworkRole/SetupMQTTsignal/Clientmode/StartClient.pressed:
+			$NetworkRole/SetupMQTTsignal/Clientmode/StartClient.pressed = selectasclient
 	$ProtocolOptions.disabled = not selectasoff
 
 
