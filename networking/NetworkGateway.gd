@@ -213,18 +213,16 @@ func _on_OptionButton_item_selected(ns):
 	var selectasoff = (ns == NETWORK_OPTIONS.NETWORK_OFF)
 	var selectasserver = (ns == NETWORK_OPTIONS.AS_SERVER)
 	var selectasclient = (ns >= NETWORK_OPTIONS.LOCAL_NETWORK)
-	$NetworkRole/ServermodeMQTTsignal.visible = ($ProtocolOptions.selected == NETWORK_PROTOCOL.WEBRTC_MQTTSIGNAL)
+	$NetworkRole/SetupMQTTsignal/Servermode.visible = ($ProtocolOptions.selected == NETWORK_PROTOCOL.WEBRTC_MQTTSIGNAL)
 	if $ProtocolOptions.selected == NETWORK_PROTOCOL.WEBRTC_MQTTSIGNAL:
-		$NetworkRole/ServermodeMQTTsignal.visible = selectasserver
+		$NetworkRole/SetupMQTTsignal/Servermode.visible = selectasserver
 		$NetworkRole/ClientmodeMQTTsignal.visible = selectasclient
-		$WebRTCmultiplayerserver.visible = selectasserver
 		$WebRTCmultiplayerclient.visible = selectasclient
-		if $NetworkRole/SetupMQTTsignal/autoconnect.pressed or $NetworkRole/ServermodeMQTTsignal/StartServer.pressed:
-			$NetworkRole/ServermodeMQTTsignal/StartServer.pressed = selectasserver
+		if $NetworkRole/SetupMQTTsignal/autoconnect.pressed or $NetworkRole/SetupMQTTsignal/Servermode/StartServer.pressed:
+			$NetworkRole/SetupMQTTsignal/Servermode/StartServer.pressed = selectasserver
 		if $NetworkRole/SetupMQTTsignal/autoconnect.pressed or $NetworkRole/ClientmodeMQTTsignal/StartClient.pressed:
 			$NetworkRole/ClientmodeMQTTsignal/StartClient.pressed = selectasclient
 	else:
-		$WebRTCmultiplayerserver.visible = false
 		$WebRTCmultiplayerclient.visible = false
 	$ProtocolOptions.disabled = not selectasoff
 

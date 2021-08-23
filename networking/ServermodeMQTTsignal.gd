@@ -1,7 +1,7 @@
 extends Control
 
 
-onready var SetupMQTTsignal = get_node("../SetupMQTTsignal")
+onready var SetupMQTTsignal = get_parent()
 onready var MQTT = SetupMQTTsignal.get_node("MQTT")
 var roomname = ""
 
