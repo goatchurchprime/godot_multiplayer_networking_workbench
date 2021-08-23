@@ -4,20 +4,10 @@ extends Control
 onready var SetupMQTTsignal = get_node("../SetupMQTTsignal")
 onready var MQTT = SetupMQTTsignal.get_node("MQTT")
 var roomname = ""
+var wclientid = 0
 
-func _ready():
-	connect("connection_established", self, "_connection_established") 
-	connect("connection_closed", self, "_connection_closed") 
-	connect("packet_received", self, "_packet_received") 
 
-func _connection_established():
-	print("connection_established")
-func _connection_closed():
-	print("connection_closed ")
-func _packet_received(v):
-	print("packet_received ", v)
-
-signal connection_established()
+signal connection_established(wclientid)
 signal connection_closed()
 signal packet_received(v)
 
@@ -28,6 +18,10 @@ var statustopic = ""
 
 # Messages: topic: room/clientid/[packet|server|client]/[clientid-to|]
 # 			payload: {"subject":type, ...}
+
+func sendpacket_toserver(v):
+	var t = "%s/%s/packet/%s" % [roomname, MQTT.client_id, selectedserver]
+	MQTT.publish(t, to_json(v))
 	
 func received_mqtt(topic, msg):
 	if msg == "":  return
@@ -52,6 +46,7 @@ func received_mqtt(topic, msg):
 						if serverconnected:
 							emit_signal("connection_closed")
 							$StartClient/statuslabel.text = "stopped"
+							wclientid = 0
 							serverconnected = false
 						#MQTT.unsubscribe("%s/%s/server" % [roomname, selectedserver])
 						selectedserver = ""
@@ -61,7 +56,8 @@ func received_mqtt(topic, msg):
 				if not serverconnected:
 					if v["subject"] == "connection_established":
 						serverconnected = true
-						emit_signal("connection_established")
+						wclientid = int(v["wclientid"])
+						emit_signal("connection_established", int(v["wclientid"]))
 						$StartClient/statuslabel.text = "connected"
 						MQTT.publish(statustopic, to_json({"subject":"connected"}))
 				else:
@@ -75,7 +71,7 @@ func _on_StartClient_toggled(button_pressed):
 		MQTT.connect("received_message", self, "received_mqtt")
 		roomname = SetupMQTTsignal.get_node("roomname").text
 		randomize()
-		MQTT.client_id = "t%d" % randi()
+		MQTT.client_id = "c%d" % randi()
 		SetupMQTTsignal.get_node("client_id").text = MQTT.client_id
 		MQTT.server = SetupMQTTsignal.get_node("brokeraddress").text
 		MQTT.websocketurl = "ws://%s:8080/mqtt" % MQTT.server
@@ -102,4 +98,5 @@ func _on_StartClient_toggled(button_pressed):
 		$StartClient/statuslabel.text = "off"
 		SetupMQTTsignal.get_node("client_id").text = ""
 		emit_signal("connection_closed")
+		wclientid = 0
 
