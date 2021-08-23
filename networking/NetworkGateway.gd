@@ -35,6 +35,14 @@ var deferred_playerconnections = [ ]
 var remote_players_idstonodenames = { }
 var possibleusernames = ["Alice", "Beth", "Cath", "Dan", "Earl", "Fred", "George", "Harry", "Ivan", "John"]
 
+
+func _on_ProtocolOptions_item_selected(np):
+	var selectasmqttwebrtc = (np == NETWORK_PROTOCOL.WEBRTC_MQTTSIGNAL)
+	var selectuseportnumber = not (selectasmqttwebrtc)
+	$MQTTsignalling.visible = selectasmqttwebrtc
+	$NetworkOptions/portnumber.visible = selectuseportnumber
+
+
 func _ready():
 	assert (PlayersNode.get_child_count() == 1)  # Must have a 
 	LocalPlayer = PlayersNode.get_child(0)
@@ -213,16 +221,15 @@ func _on_OptionButton_item_selected(ns):
 	var selectasoff = (ns == NETWORK_OPTIONS.NETWORK_OFF)
 	var selectasserver = (ns == NETWORK_OPTIONS.AS_SERVER)
 	var selectasclient = (ns >= NETWORK_OPTIONS.LOCAL_NETWORK)
-	$NetworkRole/SetupMQTTsignal/Servermode.visible = ($ProtocolOptions.selected == NETWORK_PROTOCOL.WEBRTC_MQTTSIGNAL)
+	$MQTTsignalling/Servermode.visible = ($ProtocolOptions.selected == NETWORK_PROTOCOL.WEBRTC_MQTTSIGNAL)
 	if $ProtocolOptions.selected == NETWORK_PROTOCOL.WEBRTC_MQTTSIGNAL:
-		$NetworkRole/SetupMQTTsignal/Servermode.visible = selectasserver
-		$NetworkRole/SetupMQTTsignal/Clientmode.visible = selectasclient
-		if $NetworkRole/SetupMQTTsignal/autoconnect.pressed or $NetworkRole/SetupMQTTsignal/Servermode/StartServer.pressed:
-			$NetworkRole/SetupMQTTsignal/Servermode/StartServer.pressed = selectasserver
-		if $NetworkRole/SetupMQTTsignal/autoconnect.pressed or $NetworkRole/SetupMQTTsignal/Clientmode/StartClient.pressed:
-			$NetworkRole/SetupMQTTsignal/Clientmode/StartClient.pressed = selectasclient
+		$MQTTsignalling/Servermode.visible = selectasserver
+		$MQTTsignalling/Clientmode.visible = selectasclient
+		if $MQTTsignalling/autoconnect.pressed or $MQTTsignalling/Servermode/StartServer.pressed:
+			$MQTTsignalling/Servermode/StartServer.pressed = selectasserver
+		if $MQTTsignalling/autoconnect.pressed or $MQTTsignalling/Clientmode/StartClient.pressed:
+			$MQTTsignalling/Clientmode/StartClient.pressed = selectasclient
 	$ProtocolOptions.disabled = not selectasoff
-
 
 
 func D_on_OptionButton_item_selected(ns):
@@ -262,7 +269,7 @@ func D_on_OptionButton_item_selected(ns):
 		elif $ProtocolOptions.selected == NETWORK_PROTOCOL.WEBRTC_MQTTSIGNAL:
 			networkedmultiplayerserver = WebRTCMultiplayer.new()
 			servererror = networkedmultiplayerserver.initialize(1, true)
-			$SignallingMQTT.serverstate_startmqttsignalling($NetworkOptions/roomname.text)
+			#$SignallingMQTT.serverstate_startmqttsignalling($NetworkOptions/roomname.text)
 
 		if (not OS.has_feature("Server")) and (not OS.has_feature("HTML5")) \
 				and $ProtocolOptions.selected != NETWORK_PROTOCOL.WEBRTC_MQTTSIGNAL:
@@ -282,7 +289,7 @@ func D_on_OptionButton_item_selected(ns):
 			$NetworkOptions.select(NETWORK_OPTIONS.NETWORK_OFF)
 
 	if $ProtocolOptions.selected == NETWORK_PROTOCOL.WEBRTC_MQTTSIGNAL and ns > NETWORK_OPTIONS.AS_SERVER:
-		$SignallingMQTT.clientstate_connecttomqttsignal($NetworkOptions/roomname.text)
+		#$SignallingMQTT.clientstate_connecttomqttsignal($NetworkOptions/roomname.text)
 		$ColorRect.color = Color.yellow
 		LocalPlayer.networkID = -1
 		
@@ -359,10 +366,4 @@ func removeremoteplayer(playernodename):
 	else:
 		print("** remoteplayer already removed: ", playernodename)
 	
-
-
-func _on_ProtocolOptions_item_selected(np):
-	$NetworkOptions/portnumber.visible = (np != NETWORK_PROTOCOL.WEBRTC_MQTTSIGNAL)
-	$NetworkOptions/roomname.visible = (np == NETWORK_PROTOCOL.WEBRTC_MQTTSIGNAL)
-
 

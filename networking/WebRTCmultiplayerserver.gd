@@ -50,11 +50,11 @@ func _on_StartWebRTCmultiplayer_toggled(button_pressed):
 		serversignalling.connect("client_connected", self, "server_client_connected") 
 		serversignalling.connect("client_disconnected", self, "server_client_disconnected") 
 		serversignalling.connect("packet_received", self, "server_packet_received") 
-		get_node("../../../..")._connected_to_server()
+		get_node("../../..")._connected_to_server()
 			
 	else:
 		get_tree().set_network_peer(null)
 		serversignalling.disconnect("client_connected", self, "server_client_connected") 
 		serversignalling.disconnect("client_disconnected", self, "server_client_disconnected") 
 		serversignalling.disconnect("packet_received", self, "server_packet_received") 
-		get_node("../../../..")._server_disconnected()
+		get_node("../../..")._server_disconnected()

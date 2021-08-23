@@ -21,7 +21,7 @@ func client_connection_established(lwclientid):
 		$statuslabel.text = "request_offer"
 
 func client_connection_closed():
-	if get_tree().get_network_peer() == null:
+	if get_tree().get_network_peer() != null:
 		var peer = get_tree().get_network_peer().get_peer(1)
 		peer.close()
 	print("server client_disconnected ")
@@ -44,7 +44,7 @@ func client_packet_received(v):
 		get_tree().set_network_peer(networkedmultiplayerclient)
 		assert (get_tree().get_network_unique_id() == clientsignalling.wclientid)
 		$statuslabel.text = "recieve offer"
-		get_node("../../../..").LocalPlayer.networkID = -1
+		get_node("../../..").LocalPlayer.networkID = -1
 			
 	elif v["subject"] == "ice_candidate":
 		assert (get_tree().network_peer.is_class("WebRTCMultiplayer"))
