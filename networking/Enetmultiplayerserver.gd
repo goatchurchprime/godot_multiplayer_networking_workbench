@@ -14,7 +14,6 @@ func _on_StartENetmultiplayer_toggled(button_pressed):
 			PlayerConnections.connectionlog("Server error: %d\n" % servererror)
 			print("networkedmultiplayer createserver Error: ", servererror)
 			print("*** is there a server running on this port already? ", portnumber)
-			#$ColorRect.color = Color.red
 			NetworkGateway.get_node("NetworkOptions").select(NetworkGateway.NETWORK_OPTIONS.NETWORK_OFF)
 
 	else:

@@ -43,8 +43,8 @@ func client_packet_received(v):
 		if E != 0:	print("Errrr3 ", E)
 		get_tree().set_network_peer(networkedmultiplayerclient)
 		assert (get_tree().get_network_unique_id() == clientsignalling.wclientid)
-		$statuslabel.text = "recieve offer"
-		get_node("../../..").LocalPlayer.networkID = -1
+		$statuslabel.text = "receive offer"
+		get_node("../../../PlayerConnections").LocalPlayer.networkID = -1
 			
 	elif v["subject"] == "ice_candidate":
 		assert (get_tree().network_peer.is_class("WebRTCMultiplayer"))

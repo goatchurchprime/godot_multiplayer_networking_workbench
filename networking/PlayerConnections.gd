@@ -36,9 +36,6 @@ func _ready():
 	LocalPlayer.set_name("R%d" % LocalPlayer.networkID) 
 
 
-func updatestatusrec(ptxt):
-	$ColorRect/StatusRec.text = "%sNetworkID: %d\nRemotes: %s" % [ptxt, LocalPlayer.networkID, PoolStringArray(remote_players_idstonodenames.values()).join(", ")]
-
 func connectionlog(txt):
 	$ConnectionLog.text += txt
 	var cl = $ConnectionLog.get_line_count()
@@ -71,8 +68,6 @@ func networkplayer_server_disconnected(serverisself):
 		network_player_disconnected(id)
 	print("*** _server_disconnected ", LocalPlayer.networkID)
 	var selectasclient = (ns >= NetworkGateway.NETWORK_OPTIONS.LOCAL_NETWORK)	
-	$ColorRect.color = Color.red if selectasclient else Color.black
-	updatestatusrec("")
 	updateplayerlist()
 
 func clientplayer_connected_to_server():
@@ -93,15 +88,12 @@ func networkplayer_connected_to_server(serverisself):
 	for id in deferred_playerconnections:
 		network_player_added(id, true)
 	deferred_playerconnections.clear()
-	$ColorRect.color = Color.green
-	updatestatusrec("")
 	updateplayerlist()
 
 
 func clientplayer_connection_failed():
 	connectionlog("_connection failed\n")
 	NetworkGateway.get_node("NetworkOptions").select(NetworkGateway.NETWORK_OPTIONS.NETWORK_OFF)
-	updatestatusrec("Connection failed\n")
 
 func updateplayerlist():
 	var plp = $PlayerList.get_item_text($PlayerList.selected).split(" ")[0].replace("*", "")
@@ -129,7 +121,6 @@ func network_player_added(id, wasdeferred):
 	avatardata["framedata0"] = LocalPlayer.get_node("PlayerFrame").framedata0
 	print("calling spawnintoremoteplayer at ", id)
 	rpc_id(id, "spawnintoremoteplayer", avatardata)
-	updatestatusrec("")
 
 	
 func network_player_disconnected(id):
@@ -140,8 +131,30 @@ func network_player_disconnected(id):
 	if remoteplayernodename != null:
 		removeremoteplayer(remoteplayernodename)
 	print("players_connected_list: ", remote_players_idstonodenames)
-	updatestatusrec("")
 	updateplayerlist()
+
+func _on_Doppelganger_toggled(button_pressed):
+	var DoppelgangerPanel = get_node("../DoppelgangerPanel")
+	if button_pressed:
+		DoppelgangerPanel.visible = true
+		var avatardata = LocalPlayer.avatarinitdata()
+		avatardata["playernodename"] = "Doppelganger"
+		var fd = LocalPlayer.get_node("PlayerFrame").framedata0.duplicate()
+		LocalPlayer.changethinnedframedatafordoppelganger(fd)
+		avatardata["framedata0"] = fd
+		LocalPlayer.get_node("PlayerFrame").doppelgangernode = newremoteplayer(avatardata)
+	else:
+		DoppelgangerPanel.visible = false
+		LocalPlayer.get_node("PlayerFrame").doppelgangernode = null
+		removeremoteplayer("Doppelganger")
+	updateplayerlist()
+
+
+
+
+
+
+
 
 remote func spawnintoremoteplayer(avatardata):
 	var senderid = get_tree().get_rpc_sender_id()

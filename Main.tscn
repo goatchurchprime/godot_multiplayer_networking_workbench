@@ -13,10 +13,10 @@ __meta__ = {
 [node name="NetworkGateway" parent="." instance=ExtResource( 1 )]
 
 [node name="Players" type="Control" parent="."]
-margin_left = 2.0
-margin_top = 242.0
-margin_right = 571.0
-margin_bottom = 423.0
+margin_left = 8.29956
+margin_top = 380.591
+margin_right = 577.3
+margin_bottom = 561.591
 __meta__ = {
 "_edit_use_anchors_": false
 }

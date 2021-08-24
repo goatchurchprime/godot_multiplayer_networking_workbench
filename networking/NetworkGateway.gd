@@ -127,7 +127,7 @@ func _input(event):
 			$NetworkOptions.select(bsel)
 			_on_OptionButton_item_selected(bsel)
 		elif (event.scancode == KEY_G):
-			$Doppelganger.pressed = not $Doppelganger.pressed
+			$PlayerConnections/Doppelganger.pressed = not $PlayerConnections/Doppelganger.pressed
 
 
 func setnetworkoff():
@@ -146,22 +146,6 @@ func _data_channel_received(channel: Object):
 	print("_data_channel_received ", channel)
 
 
-
-	
-func _on_Doppelganger_toggled(button_pressed):
-	if button_pressed:
-		$DoppelgangerPanel.visible = true
-		var avatardata = $PlayerConnections.LocalPlayer.avatarinitdata()
-		avatardata["playernodename"] = "Doppelganger"
-		var fd = $PlayerConnections.LocalPlayer.get_node("PlayerFrame").framedata0.duplicate()
-		$PlayerConnections.LocalPlayer.changethinnedframedatafordoppelganger(fd)
-		avatardata["framedata0"] = fd
-		$PlayerConnections.LocalPlayer.get_node("PlayerFrame").doppelgangernode = $PlayerConnections.newremoteplayer(avatardata)
-	else:
-		$DoppelgangerPanel.visible = false
-		$PlayerConnections.LocalPlayer.get_node("PlayerFrame").doppelgangernode = null
-		$PlayerConnections.removeremoteplayer("Doppelganger")
-	$PlayerConnections.updateplayerlist()
 
 
 

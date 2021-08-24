@@ -178,10 +178,10 @@ text = "enable"
 visible = false
 anchor_right = 1.0
 anchor_bottom = 1.0
-margin_left = 10.0
-margin_top = 70.0
-margin_right = -22.9999
-margin_bottom = -219.0
+margin_left = 18.742
+margin_top = 33.0
+margin_right = -14.2579
+margin_bottom = -256.0
 color = Color( 0.215686, 0.145098, 0.294118, 1 )
 
 [node name="Servermode" type="Control" parent="MQTTsignalling"]
@@ -377,10 +377,10 @@ margin_bottom = 20.4773
 text = "mqtt clientid:"
 
 [node name="ENetMultiplayer" type="ColorRect" parent="."]
-margin_left = 10.0
-margin_top = 77.0
-margin_right = 364.0
-margin_bottom = 135.0
+margin_left = 9.72998
+margin_top = 74.5704
+margin_right = 363.73
+margin_bottom = 132.57
 color = Color( 0.0980392, 0.305882, 0.160784, 1 )
 __meta__ = {
 "_edit_use_anchors_": false
@@ -440,10 +440,10 @@ pressed = true
 text = "autoconnect"
 
 [node name="PlayerConnections" type="ColorRect" parent="."]
-margin_left = 12.0
-margin_top = 138.0
-margin_right = 559.0
-margin_bottom = 225.0
+margin_left = 9.0
+margin_top = 135.0
+margin_right = 556.0
+margin_bottom = 222.0
 color = Color( 0.0156863, 0.0313726, 0.392157, 1 )
 script = ExtResource( 12 )
 __meta__ = {
@@ -457,9 +457,9 @@ text = "Player connections"
 
 [node name="PlayerList" type="OptionButton" parent="PlayerConnections"]
 margin_left = 6.74203
-margin_top = 16.0
+margin_top = 18.0
 margin_right = 286.742
-margin_bottom = 44.0
+margin_bottom = 46.0
 text = "me"
 items = [ "me", null, false, 0, null ]
 selected = 0
@@ -474,31 +474,12 @@ margin_right = -108.0
 margin_bottom = 24.0
 text = "Player list"
 
-[node name="ColorRect" type="ColorRect" parent="PlayerConnections"]
-margin_left = 19.0
+[node name="Doppelganger" type="CheckBox" parent="PlayerConnections"]
+margin_left = 6.74203
 margin_top = 50.0
-margin_right = 256.0
-margin_bottom = 79.0
-color = Color( 0.215686, 0.137255, 0.917647, 1 )
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="ColorRect" type="ColorRect" parent="PlayerConnections/ColorRect"]
-margin_left = 7.0
-margin_top = 5.0
-margin_right = 227.0
-margin_bottom = 24.0
-color = Color( 0.00784314, 0.00784314, 0.00784314, 1 )
-
-[node name="StatusRec" type="RichTextLabel" parent="PlayerConnections/ColorRect"]
-margin_left = 16.0
-margin_top = 8.0
-margin_right = 220.0
-margin_bottom = 23.0
-rect_pivot_offset = Vector2( 103.791, -1.38985 )
-text = "nothing"
-scroll_active = false
+margin_right = 132.742
+margin_bottom = 74.0
+text = "doppelganger"
 __meta__ = {
 "_edit_use_anchors_": false
 }
@@ -508,16 +489,6 @@ margin_left = 305.0
 margin_top = 5.0
 margin_right = 539.0
 margin_bottom = 79.0
-
-[node name="Doppelganger" type="CheckBox" parent="."]
-margin_left = 9.0
-margin_top = 262.0
-margin_right = 212.0
-margin_bottom = 286.0
-text = "doppelganger"
-__meta__ = {
-"_edit_use_anchors_": false
-}
 
 [node name="Interpdelay" type="HSlider" parent="."]
 margin_left = 217.879
@@ -606,4 +577,4 @@ script = ExtResource( 2 )
 [connection signal="toggled" from="MQTTsignalling/Clientmode/StartClient" to="MQTTsignalling/Clientmode" method="_on_StartClient_toggled"]
 [connection signal="toggled" from="ENetMultiplayer/Servermode/StartENetmultiplayer" to="ENetMultiplayer/Servermode" method="_on_StartENetmultiplayer_toggled"]
 [connection signal="toggled" from="ENetMultiplayer/Clientmode/StartENetmultiplayer" to="ENetMultiplayer/Clientmode" method="_on_StartENetmultiplayer_toggled"]
-[connection signal="toggled" from="Doppelganger" to="." method="_on_Doppelganger_toggled"]
+[connection signal="toggled" from="PlayerConnections/Doppelganger" to="PlayerConnections" method="_on_Doppelganger_toggled"]
