@@ -39,10 +39,14 @@ func _on_ProtocolOptions_item_selected(np):
 	$ENetMultiplayer/Clientmode.visible = false
 	
 func _on_OptionButton_item_selected(ns):
+	var selectasoff = (ns == NETWORK_OPTIONS.NETWORK_OFF)
+	if not selectasoff:
+		$PlayerConnections/ConnectionLog.text = ""
+
 	if $PlayerConnections.LocalPlayer.networkID != 0:
 		if get_tree().get_network_peer() != null:
 			print("closing connection ", $PlayerConnections.LocalPlayer.networkID, get_tree().get_network_peer())
-		$PlayerConnections._server_disconnected()
+		$PlayerConnections.force_server_disconnect()
 	assert ($PlayerConnections.LocalPlayer.networkID == 0)
 	if $UDPipdiscovery/Servermode.is_processing():
 		$UDPipdiscovery/Servermode.stopUDPbroadcasting()
@@ -53,7 +57,6 @@ func _on_OptionButton_item_selected(ns):
 	var np = $ProtocolOptions.selected 
 	assert (np != NETWORK_PROTOCOL.WEBRTC_MQTTSIGNAL)
 
-	var selectasoff = (ns == NETWORK_OPTIONS.NETWORK_OFF)
 	var selectasserver = (ns == NETWORK_OPTIONS.AS_SERVER)
 	var selectasclient = (ns > NETWORK_OPTIONS.LOCAL_NETWORK)
 	var selectassearchingclient = (ns == NETWORK_OPTIONS.LOCAL_NETWORK)
@@ -80,6 +83,7 @@ func _on_OptionButton_item_selected(ns):
 				$ENetMultiplayer/Servermode/StartENetmultiplayer.pressed = true
 			if selectasclient:
 				$ENetMultiplayer/Clientmode/StartENetmultiplayer.pressed = true
+
 
 func _on_udpenabled_toggled(button_pressed):
 	$NetworkOptions.set_item_disabled(NETWORK_OPTIONS.LOCAL_NETWORK, not button_pressed)

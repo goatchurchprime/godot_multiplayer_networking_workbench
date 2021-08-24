@@ -443,7 +443,7 @@ text = "autoconnect"
 margin_left = 12.0
 margin_top = 138.0
 margin_right = 559.0
-margin_bottom = 189.0
+margin_bottom = 225.0
 color = Color( 0.0156863, 0.0313726, 0.392157, 1 )
 script = ExtResource( 12 )
 __meta__ = {
@@ -475,10 +475,10 @@ margin_bottom = 24.0
 text = "Player list"
 
 [node name="ColorRect" type="ColorRect" parent="PlayerConnections"]
-margin_left = 355.0
-margin_top = 9.5686
-margin_right = 522.0
-margin_bottom = 38.5686
+margin_left = 19.0
+margin_top = 50.0
+margin_right = 256.0
+margin_bottom = 79.0
 color = Color( 0.215686, 0.137255, 0.917647, 1 )
 __meta__ = {
 "_edit_use_anchors_": false
@@ -502,6 +502,12 @@ scroll_active = false
 __meta__ = {
 "_edit_use_anchors_": false
 }
+
+[node name="ConnectionLog" type="TextEdit" parent="PlayerConnections"]
+margin_left = 305.0
+margin_top = 5.0
+margin_right = 539.0
+margin_bottom = 79.0
 
 [node name="Doppelganger" type="CheckBox" parent="."]
 margin_left = 9.0

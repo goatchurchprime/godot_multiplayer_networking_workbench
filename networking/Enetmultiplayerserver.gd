@@ -11,6 +11,7 @@ func _on_StartENetmultiplayer_toggled(button_pressed):
 		if servererror == 0:
 			PlayerConnections.SetNetworkedMultiplayerPeer(networkedmultiplayerserver)
 		else:
+			PlayerConnections.connectionlog("Server error: %d\n" % servererror)
 			print("networkedmultiplayer createserver Error: ", servererror)
 			print("*** is there a server running on this port already? ", portnumber)
 			#$ColorRect.color = Color.red
@@ -18,5 +19,5 @@ func _on_StartENetmultiplayer_toggled(button_pressed):
 
 	else:
 		if get_tree().get_network_peer() != null:
-			PlayerConnections._server_disconnected()
+			PlayerConnections.force_server_disconnect()
 		

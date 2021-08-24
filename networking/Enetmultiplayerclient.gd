@@ -15,5 +15,5 @@ func _on_StartENetmultiplayer_toggled(button_pressed):
 
 	else:
 		if get_tree().get_network_peer() != null:
-			PlayerConnections._server_disconnected()
+			PlayerConnections.force_server_disconnect()
 		

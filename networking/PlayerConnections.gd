@@ -22,59 +22,84 @@ func _ready():
 		LocalPlayer.add_child(playerframe)
 
 	randomize()
-	var randomusername = LocalPlayer.initavatar({"labeltext":possibleusernames[randi()%len(possibleusernames)]})
+	var playername = possibleusernames[randi()%len(possibleusernames)]
+	var randomusername = LocalPlayer.initavatar({"labeltext":playername})
 
-	get_tree().connect("network_peer_connected", 	self, "_player_connected")
-	get_tree().connect("network_peer_disconnected", self, "_player_disconnected")
+	get_tree().connect("network_peer_connected", self, "network_player_connected")
+	get_tree().connect("network_peer_disconnected", self, "network_player_disconnected")
 
-	get_tree().connect("connected_to_server", 		self, "_connected_to_server")
-	get_tree().connect("connection_failed", 		self, "_connection_failed")
-	get_tree().connect("server_disconnected", 		self, "_server_disconnected")
+	get_tree().connect("connected_to_server", self, "clientplayer_connected_to_server")
+	get_tree().connect("connection_failed", self, "clientplayer_connection_failed")
+	get_tree().connect("server_disconnected", self, "clientplayer_server_disconnected")
 
-	_server_disconnected()
+	LocalPlayer.networkID = 0
+	LocalPlayer.set_name("R%d" % LocalPlayer.networkID) 
+
 
 func updatestatusrec(ptxt):
 	$ColorRect/StatusRec.text = "%sNetworkID: %d\nRemotes: %s" % [ptxt, LocalPlayer.networkID, PoolStringArray(remote_players_idstonodenames.values()).join(", ")]
+
+func connectionlog(txt):
+	$ConnectionLog.text += txt
+	var cl = $ConnectionLog.get_line_count()
+	$ConnectionLog.cursor_set_line(cl)
 
 func SetNetworkedMultiplayerPeer(peer):
 	if peer != null:
 		get_tree().set_network_peer(peer)
 		if get_tree().is_network_server():
-			_connected_to_server()
+			networkplayer_connected_to_server(true)
 		else:
 			$ColorRect.color = Color.yellow
 			LocalPlayer.networkID = -1
 	else:
 		get_tree().set_network_peer(null)
 
-func _server_disconnected():	
+func clientplayer_server_disconnected():
+	networkplayer_server_disconnected(false)
+	
+	
+	
+func networkplayer_server_disconnected(serverisself):
+	connectionlog("_server(self) disconnect\n" if serverisself else "_server disconnect\n")
 	var ns = NetworkGateway.get_node("NetworkOptions").selected
 	get_tree().set_network_peer(null)
 	LocalPlayer.networkID = 0
 	LocalPlayer.set_name("R%d" % LocalPlayer.networkID) 
 	deferred_playerconnections.clear()
 	for id in remote_players_idstonodenames.duplicate():
-		_player_disconnected(id)
+		network_player_disconnected(id)
 	print("*** _server_disconnected ", LocalPlayer.networkID)
 	var selectasclient = (ns >= NetworkGateway.NETWORK_OPTIONS.LOCAL_NETWORK)	
 	$ColorRect.color = Color.red if selectasclient else Color.black
 	updatestatusrec("")
 	updateplayerlist()
 
-func _connected_to_server():
+func clientplayer_connected_to_server():
+	networkplayer_connected_to_server(false)
+	
+func force_server_disconnect():
+	if get_tree().get_network_peer() != null:
+		var serverisself = get_tree().is_network_server()
+		networkplayer_server_disconnected(serverisself)
+
+func networkplayer_connected_to_server(serverisself):
+	connectionlog("_server(self) connect\n" if serverisself else "_server connect\n")
 	LocalPlayer.networkID = get_tree().get_network_unique_id()
 	assert (LocalPlayer.networkID >= 1)
 	LocalPlayer.set_name("R%d" % LocalPlayer.networkID)
-	print("_connected_to_server myid=", LocalPlayer.networkID)
+	connectionlog("_my networkid=%d\n" % LocalPlayer.networkID)
+	print("my playerid=", LocalPlayer.networkID)
 	for id in deferred_playerconnections:
-		_player_connected(id)
+		network_player_added(id, true)
 	deferred_playerconnections.clear()
 	$ColorRect.color = Color.green
 	updatestatusrec("")
 	updateplayerlist()
 
 
-func _connection_failed():
+func clientplayer_connection_failed():
+	connectionlog("_connection failed\n")
 	NetworkGateway.get_node("NetworkOptions").select(NetworkGateway.NETWORK_OPTIONS.NETWORK_OFF)
 	updatestatusrec("Connection failed\n")
 
@@ -87,12 +112,15 @@ func updateplayerlist():
 		if plp == player.get_name():
 			$PlayerList.selected = $PlayerList.get_item_count() - 1
 
-func _player_connected(id):
+func network_player_connected(id):
 	if LocalPlayer.networkID == -1:
 		deferred_playerconnections.push_back(id)
-		print("_player_connected remote=", id, "  **deferred")
-		return
-	print("_player_connected remote=", id)
+		connectionlog("_add playerid %d (defer)\n" % id)
+	else:
+		network_player_added(id, false)
+
+func network_player_added(id, wasdeferred):
+	connectionlog("_add playerid %d\n" % id)
 	assert (LocalPlayer.networkID >= 1)
 	assert (not remote_players_idstonodenames.has(id))
 	remote_players_idstonodenames[id] = null
@@ -104,8 +132,8 @@ func _player_connected(id):
 	updatestatusrec("")
 
 	
-func _player_disconnected(id):
-	print("_player_disconnected remote=", id)
+func network_player_disconnected(id):
+	connectionlog("_remove playerid %d\n" % id)
 	assert (remote_players_idstonodenames.has(id))
 	var remoteplayernodename = remote_players_idstonodenames[id]
 	remote_players_idstonodenames.erase(id)
@@ -118,6 +146,7 @@ func _player_disconnected(id):
 remote func spawnintoremoteplayer(avatardata):
 	var senderid = get_tree().get_rpc_sender_id()
 	print("rec spawnintoremoteplayer from ", senderid)
+	connectionlog("spawn playerid %d\n" % senderid)
 	var remoteplayer = newremoteplayer(avatardata)
 	assert (senderid == avatardata["networkid"])
 	remoteplayer.get_node("PlayerFrame").set_network_master(senderid)
