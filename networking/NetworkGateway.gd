@@ -19,8 +19,6 @@ enum NETWORK_PROTOCOL { ENET = 0,
 						WEBRTC_MQTTSIGNAL = 3
 					  }
 
-
-
 const errordecodes = { ERR_ALREADY_IN_USE:"ERR_ALREADY_IN_USE", 
 					   ERR_CANT_CREATE:"ERR_CANT_CREATE"
 					 }
@@ -35,16 +33,81 @@ var deferred_playerconnections = [ ]
 var remote_players_idstonodenames = { }
 var possibleusernames = ["Alice", "Beth", "Cath", "Dan", "Earl", "Fred", "George", "Harry", "Ivan", "John"]
 
-
 func _on_ProtocolOptions_item_selected(np):
+	assert ($NetworkOptions.selected == 0 and $NetworkOptionsMQTTWebRTC.selected == 0)
 	var selectasmqttwebrtc = (np == NETWORK_PROTOCOL.WEBRTC_MQTTSIGNAL)
-	var selectuseportnumber = not (selectasmqttwebrtc)
+	var selectasenet = (np == NETWORK_PROTOCOL.ENET)
+	$NetworkOptions.visible = not selectasmqttwebrtc
+	$NetworkOptionsMQTTWebRTC.visible = selectasmqttwebrtc
 	$MQTTsignalling.visible = selectasmqttwebrtc
-	$NetworkOptions/portnumber.visible = selectuseportnumber
+	$MQTTsignalling/Servermode.visible = false
+	$MQTTsignalling/Clientmode.visible = false
+	$UDPipdiscovery.visible = $NetworkOptions.visible and (not OS.has_feature("Server")) and (not OS.has_feature("HTML5"))
+	$ENetMultiplayer.visible = selectasenet
+	$ENetMultiplayer/Servermode.visible = false
+	$ENetMultiplayer/Clientmode.visible = false
+	
+func _on_OptionButton_item_selected(ns):
+	if LocalPlayer.networkID != 0:
+		if get_tree().get_network_peer() != null:
+			print("closing connection ", LocalPlayer.networkID, get_tree().get_network_peer())
+		_server_disconnected()
+	assert (LocalPlayer.networkID == 0)
+	if $UDPipdiscovery/Servermode.is_processing():
+		$UDPipdiscovery/Servermode.stopUDPbroadcasting()
+	if $UDPipdiscovery/Clientmode.is_processing():
+		$UDPipdiscovery/Clientmode.stopUDPreceiving()
+	$ENetMultiplayer/Servermode/StartENetmultiplayer.pressed = false
 
+	var np = $ProtocolOptions.selected 
+	assert (np != NETWORK_PROTOCOL.WEBRTC_MQTTSIGNAL)
+
+	var selectasoff = (ns == NETWORK_OPTIONS.NETWORK_OFF)
+	var selectasserver = (ns == NETWORK_OPTIONS.AS_SERVER)
+	var selectasclient = (ns > NETWORK_OPTIONS.LOCAL_NETWORK)
+	var selectassearchingclient = (ns == NETWORK_OPTIONS.LOCAL_NETWORK)
+	var selectUDPipdiscoveryserver = selectasserver and (not OS.has_feature("Server")) and (not OS.has_feature("HTML5"))
+
+	if selectasoff:
+		$UDPipdiscovery.visible = (not OS.has_feature("Server")) and (not OS.has_feature("HTML5"))
+	else:
+		$UDPipdiscovery.visible = selectUDPipdiscoveryserver or selectassearchingclient
+	assert (not $MQTTsignalling.visible)
+	$ProtocolOptions.disabled = not selectasoff
+	$UDPipdiscovery/Servermode.visible = selectasserver
+	if selectUDPipdiscoveryserver and $UDPipdiscovery/udpenabled.pressed:
+		$UDPipdiscovery/Servermode.startUDPbroadcasting()
+	if selectassearchingclient:
+		$UDPipdiscovery/Clientmode.startUDPreceiving()
+	
+	var selectasenet = (np == NETWORK_PROTOCOL.ENET)
+	if selectasenet:
+		$ENetMultiplayer/Servermode.visible = selectasserver
+		$ENetMultiplayer/Clientmode.visible = selectasclient
+		if $ENetMultiplayer/autoconnect.pressed:
+			if selectasserver:
+				$ENetMultiplayer/Servermode/StartENetmultiplayer.pressed = true
+			if selectasclient:
+				$ENetMultiplayer/Clientmode/StartENetmultiplayer.pressed = true
+
+func _on_udpenabled_toggled(button_pressed):
+	$NetworkOptions.set_item_disabled(NETWORK_OPTIONS.LOCAL_NETWORK, not button_pressed)
+
+func _on_NetworkOptionsMQTTWebRTC_item_selected(ns):
+	assert ($ProtocolOptions.selected == NETWORK_PROTOCOL.WEBRTC_MQTTSIGNAL)
+	var selectasoff = (ns == NETWORK_OPTIONS.NETWORK_OFF)
+	var selectasserver = (ns == NETWORK_OPTIONS.AS_SERVER)
+	var selectasclient = (ns >= NETWORK_OPTIONS.LOCAL_NETWORK)
+	$MQTTsignalling/Servermode.visible = selectasserver
+	$MQTTsignalling/Clientmode.visible = selectasclient
+	$ProtocolOptions.disabled = not selectasoff
+	if $MQTTsignalling/autoconnect.pressed or $MQTTsignalling/Servermode/StartServer.pressed:
+		$MQTTsignalling/Servermode/StartServer.pressed = selectasserver
+	if $MQTTsignalling/autoconnect.pressed or $MQTTsignalling/Clientmode/StartClient.pressed:
+		$MQTTsignalling/Clientmode/StartClient.pressed = selectasclient
 
 func _ready():
-	assert (PlayersNode.get_child_count() == 1)  # Must have a 
+	assert (PlayersNode.get_child_count() == 1) 
 	LocalPlayer = PlayersNode.get_child(0)
 	if not LocalPlayer.has_node("PlayerFrame"):
 		var playerframe = Node.new()
@@ -64,14 +127,27 @@ func _ready():
 	get_tree().connect("connection_failed", 		self, "_connection_failed")
 	get_tree().connect("server_disconnected", 		self, "_server_disconnected")
 
-	yield(get_tree().create_timer(1.5), "timeout")
+	_server_disconnected()
+	_on_ProtocolOptions_item_selected($ProtocolOptions.selected)
+	_on_udpenabled_toggled($UDPipdiscovery/udpenabled.pressed)
+
 	if OS.has_feature("Server"):
+		yield(get_tree().create_timer(1.5), "timeout")
 		$NetworkOptions.select(NETWORK_OPTIONS.AS_SERVER)
 	if OS.has_feature("HTML5"):
 		$NetworkOptions.get_item(NETWORK_OPTIONS.LOCAL_NETWORK).disabled = true
-		
-	_server_disconnected()
-	_on_OptionButton_item_selected($NetworkOptions.selected)
+
+
+func SetNetworkedMultiplayerPeer(peer):
+	if peer != null:
+		get_tree().set_network_peer(peer)
+		if get_tree().is_network_server():
+			_connected_to_server()
+		else:
+			$ColorRect.color = Color.yellow
+			LocalPlayer.networkID = -1
+	else:
+		get_tree().set_network_peer(null)
 
 func _input(event):
 	if event is InputEventKey and event.pressed:
@@ -131,6 +207,7 @@ func _connected_to_server():
 func setnetworkoff():
 	$NetworkOptions.select(NETWORK_OPTIONS.NETWORK_OFF)
 	
+
 func _connection_failed():
 	$NetworkOptions.select(NETWORK_OPTIONS.NETWORK_OFF)
 	updatestatusrec("Connection failed\n")
@@ -204,7 +281,6 @@ func _data_channel_received(channel: Object):
 	print("_data_channel_received ", channel)
 
 func udpreceivedipnumber(receivedIPnumber):
-
 	var ns = $NetworkOptions.selected
 	for nsi in range(NETWORK_OPTIONS.FIXED_URL, $NetworkOptions.get_item_count()):
 		if receivedIPnumber == $NetworkOptions.get_item_text(nsi):
@@ -216,113 +292,6 @@ func udpreceivedipnumber(receivedIPnumber):
 	$NetworkOptions.select(ns)
 	_on_OptionButton_item_selected(ns)
 
-
-func _on_OptionButton_item_selected(ns):
-	var selectasoff = (ns == NETWORK_OPTIONS.NETWORK_OFF)
-	var selectasserver = (ns == NETWORK_OPTIONS.AS_SERVER)
-	var selectasclient = (ns >= NETWORK_OPTIONS.LOCAL_NETWORK)
-	$MQTTsignalling/Servermode.visible = ($ProtocolOptions.selected == NETWORK_PROTOCOL.WEBRTC_MQTTSIGNAL)
-	if $ProtocolOptions.selected == NETWORK_PROTOCOL.WEBRTC_MQTTSIGNAL:
-		$MQTTsignalling/Servermode.visible = selectasserver
-		$MQTTsignalling/Clientmode.visible = selectasclient
-		if $MQTTsignalling/autoconnect.pressed or $MQTTsignalling/Servermode/StartServer.pressed:
-			$MQTTsignalling/Servermode/StartServer.pressed = selectasserver
-		if $MQTTsignalling/autoconnect.pressed or $MQTTsignalling/Clientmode/StartClient.pressed:
-			$MQTTsignalling/Clientmode/StartClient.pressed = selectasclient
-	$ProtocolOptions.disabled = not selectasoff
-
-
-func D_on_OptionButton_item_selected(ns):
-	print(" _on_OptionButton_item_selected ", ns)
-	if $ProtocolOptions.selected != NETWORK_PROTOCOL.WEBRTC_MQTTSIGNAL:
-		if ns == NETWORK_OPTIONS.LOCAL_NETWORK:
-			$SignallingUDP.start_udp_localIP_discovery_signals(false)
-		else:
-			$SignallingUDP.stop_udp_localIP_discovery_signals()
-
-	if LocalPlayer.networkID != 0:
-		if get_tree().get_network_peer() != null:
-			print("closing connection ", LocalPlayer.networkID, get_tree().get_network_peer())
-		_server_disconnected()
-
-	assert (LocalPlayer.networkID == 0)
-
-	if ns == NETWORK_OPTIONS.AS_SERVER:
-		var networkedmultiplayerserver = null
-		var servererror = 0
-		if $ProtocolOptions.selected == NETWORK_PROTOCOL.WEBSOCKET:
-			print("creating Websocket server on port: ", int($NetworkOptions/portnumber.text))
-			networkedmultiplayerserver = WebSocketServer.new()
-			servererror = networkedmultiplayerserver.listen(int($NetworkOptions/portnumber.text), PoolStringArray(), true)
-			if servererror == 0:
-				websocketobjecttopoll = networkedmultiplayerserver
-		elif $ProtocolOptions.selected == NETWORK_PROTOCOL.ENET:
-			print("creating ENet server on port: ", int($NetworkOptions/portnumber.text))
-			networkedmultiplayerserver = NetworkedMultiplayerENet.new()
-			servererror = networkedmultiplayerserver.create_server(int($NetworkOptions/portnumber.text))
-
-		elif $ProtocolOptions.selected == NETWORK_PROTOCOL.WEBRTC_WEBSOCKETSIGNAL:
-			networkedmultiplayerserver = WebRTCMultiplayer.new()
-			servererror = networkedmultiplayerserver.initialize(1, true)
-			$SignallingWebsocket.startwebsocketserver(int($NetworkOptions/portnumber.text))
-
-		elif $ProtocolOptions.selected == NETWORK_PROTOCOL.WEBRTC_MQTTSIGNAL:
-			networkedmultiplayerserver = WebRTCMultiplayer.new()
-			servererror = networkedmultiplayerserver.initialize(1, true)
-			#$SignallingMQTT.serverstate_startmqttsignalling($NetworkOptions/roomname.text)
-
-		if (not OS.has_feature("Server")) and (not OS.has_feature("HTML5")) \
-				and $ProtocolOptions.selected != NETWORK_PROTOCOL.WEBRTC_MQTTSIGNAL:
-			$SignallingUDP.start_udp_localIP_discovery_signals(true)
-
-		if servererror == OK:
-			get_tree().set_network_peer(networkedmultiplayerserver)
-			_connected_to_server()
-			print("networkedmultiplayerserver.is_network_server ", get_tree().is_network_server(), " tree: ", get_tree().network_peer.get_connection_status())
-			if (not OS.has_feature("Server")) and (not OS.has_feature("HTML5")) and $ProtocolOptions.selected != NETWORK_PROTOCOL.WEBRTC_MQTTSIGNAL:
-				$SignallingUDP.start_udp_localIP_discovery_signals(true)
-
-		else:
-			print("networkedmultiplayer createserver Error: ", errordecodes.get(servererror, servererror))
-			print("*** is there a server running on this port already? ", int($NetworkOptions/portnumber.text))
-			$ColorRect.color = Color.red
-			$NetworkOptions.select(NETWORK_OPTIONS.NETWORK_OFF)
-
-	if $ProtocolOptions.selected == NETWORK_PROTOCOL.WEBRTC_MQTTSIGNAL and ns > NETWORK_OPTIONS.AS_SERVER:
-		#$SignallingMQTT.clientstate_connecttomqttsignal($NetworkOptions/roomname.text)
-		$ColorRect.color = Color.yellow
-		LocalPlayer.networkID = -1
-		
-	elif ns >= NETWORK_OPTIONS.FIXED_URL and LocalPlayer.networkID == 0:
-		var serverIPnumber = $NetworkOptions.get_item_text(ns).split(" ", 1)[0]
-		var networkedmultiplayerclient = null
-		var clienterror = 0
-		if $ProtocolOptions.selected == NETWORK_PROTOCOL.WEBSOCKET:
-			var url = "ws://%s:%d" % [serverIPnumber, int($NetworkOptions/portnumber.text)]
-			print("Websocketclient connect to: ", url)
-			networkedmultiplayerclient = WebSocketClient.new();
-			clienterror = networkedmultiplayerclient.connect_to_url(url, PoolStringArray(), true)
-		elif $ProtocolOptions.selected == NETWORK_PROTOCOL.ENET:
-			print("networkedmultiplayerenet createclient ", serverIPnumber, ":", int($NetworkOptions/portnumber.text))
-			networkedmultiplayerclient = NetworkedMultiplayerENet.new()
-			clienterror = networkedmultiplayerclient.create_client(serverIPnumber, int($NetworkOptions/portnumber.text), 0, 0)
-		elif $ProtocolOptions.selected == NETWORK_PROTOCOL.WEBRTC_WEBSOCKETSIGNAL:
-			var wsurl = "ws://%s:%d" % [serverIPnumber, int($NetworkOptions/portnumber.text)]
-			print("networkedmultiplayerwebrtc createwebsocket signal ", wsurl)
-			$SignallingWebsocket.connectwebsocket(wsurl)
-
-		if clienterror == 0:
-			get_tree().set_network_peer(networkedmultiplayerclient)
-			print("networkedmultiplayerclient.is_network_server ", get_tree().is_network_server())
-			$ColorRect.color = Color.yellow
-			LocalPlayer.networkID = -1
-		else:
-			print("networkedmultiplayer createclient Error: ", errordecodes.get(clienterror, clienterror))
-			print("*** is there a server running on this port already? ", int($NetworkOptions/portnumber.text))
-			$ColorRect.color = Color.red
-			$NetworkOptions.select(NETWORK_OPTIONS.NETWORK_OFF)
-		
-	$ProtocolOptions.disabled = ($NetworkOptions.selected != NETWORK_OPTIONS.NETWORK_OFF)
 	
 func _on_Doppelganger_toggled(button_pressed):
 	if button_pressed:
@@ -366,4 +335,8 @@ func removeremoteplayer(playernodename):
 	else:
 		print("** remoteplayer already removed: ", playernodename)
 	
+
+
+
+
 
