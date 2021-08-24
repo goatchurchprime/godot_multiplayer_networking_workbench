@@ -1,4 +1,4 @@
-[gd_scene load_steps=12 format=2]
+[gd_scene load_steps=13 format=2]
 
 [ext_resource path="res://networking/NetworkGateway.gd" type="Script" id=1]
 [ext_resource path="res://networking/SignallingWebsocket.gd" type="Script" id=2]
@@ -11,6 +11,7 @@
 [ext_resource path="res://networking/WebRTCmultiplayerclient.gd" type="Script" id=9]
 [ext_resource path="res://networking/UDPdiscoveryclient.gd" type="Script" id=10]
 [ext_resource path="res://networking/Enetmultiplayerserver.gd" type="Script" id=11]
+[ext_resource path="res://networking/PlayerConnections.gd" type="Script" id=12]
 
 [node name="NetworkGateway" type="Panel"]
 self_modulate = Color( 0.32549, 0.317647, 0.317647, 1 )
@@ -438,24 +439,59 @@ margin_bottom = 40.056
 pressed = true
 text = "autoconnect"
 
-[node name="ColorRect" type="ColorRect" parent="."]
-margin_left = 290.879
-margin_top = 260.243
-margin_right = 526.879
-margin_bottom = 289.243
+[node name="PlayerConnections" type="ColorRect" parent="."]
+margin_left = 12.0
+margin_top = 138.0
+margin_right = 559.0
+margin_bottom = 189.0
+color = Color( 0.0156863, 0.0313726, 0.392157, 1 )
+script = ExtResource( 12 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Label" type="Label" parent="PlayerConnections"]
+margin_right = 40.0
+margin_bottom = 14.0
+text = "Player connections"
+
+[node name="PlayerList" type="OptionButton" parent="PlayerConnections"]
+margin_left = 6.74203
+margin_top = 16.0
+margin_right = 286.742
+margin_bottom = 44.0
+text = "me"
+items = [ "me", null, false, 0, null ]
+selected = 0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Label" type="Label" parent="PlayerConnections/PlayerList"]
+margin_left = -207.0
+margin_top = 6.0
+margin_right = -108.0
+margin_bottom = 24.0
+text = "Player list"
+
+[node name="ColorRect" type="ColorRect" parent="PlayerConnections"]
+margin_left = 355.0
+margin_top = 9.5686
+margin_right = 522.0
+margin_bottom = 38.5686
 color = Color( 0.215686, 0.137255, 0.917647, 1 )
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="ColorRect" type="ColorRect" parent="ColorRect"]
+[node name="ColorRect" type="ColorRect" parent="PlayerConnections/ColorRect"]
 margin_left = 7.0
 margin_top = 5.0
 margin_right = 227.0
 margin_bottom = 24.0
 color = Color( 0.00784314, 0.00784314, 0.00784314, 1 )
 
-[node name="StatusRec" type="RichTextLabel" parent="ColorRect"]
+[node name="StatusRec" type="RichTextLabel" parent="PlayerConnections/ColorRect"]
 margin_left = 16.0
 margin_top = 8.0
 margin_right = 220.0
@@ -477,30 +513,11 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="PlayerList" type="OptionButton" parent="."]
-margin_left = 225.742
-margin_top = 292.177
-margin_right = 537.742
-margin_bottom = 320.177
-text = "me"
-items = [ "me", null, false, 0, null ]
-selected = 0
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="Label" type="Label" parent="PlayerList"]
-margin_left = -207.0
-margin_top = 6.0
-margin_right = -108.0
-margin_bottom = 24.0
-text = "Player list"
-
 [node name="Interpdelay" type="HSlider" parent="."]
-margin_left = 223.028
-margin_top = 289.1
-margin_right = 535.028
-margin_bottom = 307.1
+margin_left = 217.879
+margin_top = 326.177
+margin_right = 529.879
+margin_bottom = 344.177
 max_value = 1000.0
 value = 300.0
 __meta__ = {

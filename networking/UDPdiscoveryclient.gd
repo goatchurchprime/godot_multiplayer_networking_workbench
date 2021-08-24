@@ -31,4 +31,16 @@ func _process(delta):
 		var spkt = pkt.get_string_from_utf8().split(" ")
 		print("Received: ", spkt, " from ", peer.get_packet_ip())
 		if spkt[0] == broadcastservermsg:
-			get_node("../..").udpreceivedipnumber(peer.get_packet_ip())
+			var NetworkGateway = get_node("../..")
+			var NetworkOptions = NetworkGateway.get_node("NetworkOptions")
+			var receivedIPnumber = peer.get_packet_ip()
+			var ns = NetworkOptions.selected
+			for nsi in range(NetworkGateway.NETWORK_OPTIONS.FIXED_URL, NetworkOptions.get_item_count()):
+				if receivedIPnumber == NetworkOptions.get_item_text(nsi):
+					ns = nsi
+					break
+			if ns == NetworkGateway.NETWORK_OPTIONS.LOCAL_NETWORK:
+				NetworkOptions.add_item(receivedIPnumber)
+				ns = NetworkOptions.get_item_count() - 1
+			NetworkOptions.select(ns)
+			NetworkGateway._on_OptionButton_item_selected(ns)

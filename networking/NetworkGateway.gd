@@ -23,15 +23,6 @@ const errordecodes = { ERR_ALREADY_IN_USE:"ERR_ALREADY_IN_USE",
 					   ERR_CANT_CREATE:"ERR_CANT_CREATE"
 					 }
 
-# command for running locally on the unix partition
-# /mnt/c/Users/henry/godot/Godot_v3.2.3-stable_linux_server.64 --main-pack /mnt/c/Users/henry/godot/games/OQ_Networking_Demo/releases/OQ_Networking_Demo.pck
-export var playernodepath = "/root/Main/Players"
-onready var PlayersNode = get_node(playernodepath)
-var LocalPlayer = null
-
-var deferred_playerconnections = [ ]
-var remote_players_idstonodenames = { }
-var possibleusernames = ["Alice", "Beth", "Cath", "Dan", "Earl", "Fred", "George", "Harry", "Ivan", "John"]
 
 func _on_ProtocolOptions_item_selected(np):
 	assert ($NetworkOptions.selected == 0 and $NetworkOptionsMQTTWebRTC.selected == 0)
@@ -48,11 +39,11 @@ func _on_ProtocolOptions_item_selected(np):
 	$ENetMultiplayer/Clientmode.visible = false
 	
 func _on_OptionButton_item_selected(ns):
-	if LocalPlayer.networkID != 0:
+	if $PlayerConnections.LocalPlayer.networkID != 0:
 		if get_tree().get_network_peer() != null:
-			print("closing connection ", LocalPlayer.networkID, get_tree().get_network_peer())
-		_server_disconnected()
-	assert (LocalPlayer.networkID == 0)
+			print("closing connection ", $PlayerConnections.LocalPlayer.networkID, get_tree().get_network_peer())
+		$PlayerConnections._server_disconnected()
+	assert ($PlayerConnections.LocalPlayer.networkID == 0)
 	if $UDPipdiscovery/Servermode.is_processing():
 		$UDPipdiscovery/Servermode.stopUDPbroadcasting()
 	if $UDPipdiscovery/Clientmode.is_processing():
@@ -107,30 +98,10 @@ func _on_NetworkOptionsMQTTWebRTC_item_selected(ns):
 		$MQTTsignalling/Clientmode/StartClient.pressed = selectasclient
 
 func _ready():
-	assert (PlayersNode.get_child_count() == 1) 
-	LocalPlayer = PlayersNode.get_child(0)
-	if not LocalPlayer.has_node("PlayerFrame"):
-		var playerframe = Node.new()
-		playerframe.name = "PlayerFrame"
-		playerframe.set_script(load("res://networking/LocalPlayerFrame.gd"))
-		LocalPlayer.add_child(playerframe)
-
-	randomize()
-	var randomusername = LocalPlayer.initavatar({"labeltext":possibleusernames[randi()%len(possibleusernames)]})
 	for rs in remoteservers:
 		$NetworkOptions.add_item(rs)
-
-	get_tree().connect("network_peer_connected", 	self, "_player_connected")
-	get_tree().connect("network_peer_disconnected", self, "_player_disconnected")
-
-	get_tree().connect("connected_to_server", 		self, "_connected_to_server")
-	get_tree().connect("connection_failed", 		self, "_connection_failed")
-	get_tree().connect("server_disconnected", 		self, "_server_disconnected")
-
-	_server_disconnected()
 	_on_ProtocolOptions_item_selected($ProtocolOptions.selected)
 	_on_udpenabled_toggled($UDPipdiscovery/udpenabled.pressed)
-
 	if OS.has_feature("Server"):
 		yield(get_tree().create_timer(1.5), "timeout")
 		$NetworkOptions.select(NETWORK_OPTIONS.AS_SERVER)
@@ -138,16 +109,6 @@ func _ready():
 		$NetworkOptions.get_item(NETWORK_OPTIONS.LOCAL_NETWORK).disabled = true
 
 
-func SetNetworkedMultiplayerPeer(peer):
-	if peer != null:
-		get_tree().set_network_peer(peer)
-		if get_tree().is_network_server():
-			_connected_to_server()
-		else:
-			$ColorRect.color = Color.yellow
-			LocalPlayer.networkID = -1
-	else:
-		get_tree().set_network_peer(null)
 
 func _input(event):
 	if event is InputEventKey and event.pressed:
@@ -164,111 +125,11 @@ func _input(event):
 		elif (event.scancode == KEY_G):
 			$Doppelganger.pressed = not $Doppelganger.pressed
 
-func updatestatusrec(ptxt):
-	$ColorRect/StatusRec.text = "%sNetworkID: %d\nRemotes: %s" % [ptxt, LocalPlayer.networkID, PoolStringArray(remote_players_idstonodenames.values()).join(", ")]
-
-func _server_disconnected():
-	if websocketobjecttopoll != null:
-		if LocalPlayer.networkID == 1:
-			websocketobjecttopoll.stop()
-		else:
-			websocketobjecttopoll.close()
-		websocketobjecttopoll = null
-	if $ProtocolOptions.selected == NETWORK_PROTOCOL.WEBRTC_WEBSOCKETSIGNAL:
-		if LocalPlayer.networkID == 1:
-			$SignallingWebsocket.stopwebsocketserver()
-		else:
-			$SignallingWebsocket.closeconnection()
-	
-	var ns = $NetworkOptions.selected
-	get_tree().set_network_peer(null)
-	LocalPlayer.networkID = 0
-	LocalPlayer.set_name("R%d" % LocalPlayer.networkID) 
-	deferred_playerconnections.clear()
-	for id in remote_players_idstonodenames.duplicate():
-		_player_disconnected(id)
-	print("*** _server_disconnected ", LocalPlayer.networkID)
-	$ColorRect.color = Color.red if (ns >= NETWORK_OPTIONS.LOCAL_NETWORK) else Color.black
-	updatestatusrec("")
-	updateplayerlist()
-
-func _connected_to_server():
-	LocalPlayer.networkID = get_tree().get_network_unique_id()
-	assert (LocalPlayer.networkID >= 1)
-	LocalPlayer.set_name("R%d" % LocalPlayer.networkID)
-	print("_connected_to_server myid=", LocalPlayer.networkID)
-	for id in deferred_playerconnections:
-		_player_connected(id)
-	deferred_playerconnections.clear()
-	$ColorRect.color = Color.green
-	updatestatusrec("")
-	updateplayerlist()
 
 func setnetworkoff():
 	$NetworkOptions.select(NETWORK_OPTIONS.NETWORK_OFF)
 	
 
-func _connection_failed():
-	$NetworkOptions.select(NETWORK_OPTIONS.NETWORK_OFF)
-	updatestatusrec("Connection failed\n")
-	return
-	
-	print("_connection_failed ", LocalPlayer.networkID)
-	assert (LocalPlayer.networkID == -1)
-	get_tree().set_network_peer(null)	
-	LocalPlayer.networkID = 0
-	deferred_playerconnections.clear()
-	$ColorRect.color = Color.red
-	websocketobjecttopoll = null
-
-func updateplayerlist():
-	var plp = $PlayerList.get_item_text($PlayerList.selected).split(" ")[0].replace("*", "")
-	$PlayerList.clear()
-	$PlayerList.selected = 0
-	for player in PlayersNode.get_children():
-		$PlayerList.add_item(("*" if player == LocalPlayer else "") + player.get_name() + " " + player.text)
-		if plp == player.get_name():
-			$PlayerList.selected = $PlayerList.get_item_count() - 1
-
-func _player_connected(id):
-	if LocalPlayer.networkID == -1:
-		deferred_playerconnections.push_back(id)
-		print("_player_connected remote=", id, "  **deferred")
-		return
-	print("_player_connected remote=", id)
-	assert (LocalPlayer.networkID >= 1)
-	assert (not remote_players_idstonodenames.has(id))
-	remote_players_idstonodenames[id] = null
-	print("players_connected_list: ", remote_players_idstonodenames)
-	var avatardata = LocalPlayer.avatarinitdata()
-	avatardata["framedata0"] = LocalPlayer.get_node("PlayerFrame").framedata0
-	if $SignallingWebsocket.Dpeer != null:
-		print("Dpeer.get_connection_state ", $SignallingWebsocket.Dpeer.get_connection_state(), " tree: ", get_tree().network_peer.get_connection_status())
-	print("calling spawnintoremoteplayer at ", id)
-	rpc_id(id, "spawnintoremoteplayer", avatardata)
-	updatestatusrec("")
-
-	
-func _player_disconnected(id):
-	print("_player_disconnected remote=", id)
-	assert (remote_players_idstonodenames.has(id))
-	var remoteplayernodename = remote_players_idstonodenames[id]
-	remote_players_idstonodenames.erase(id)
-	if remoteplayernodename != null:
-		removeremoteplayer(remoteplayernodename)
-	print("players_connected_list: ", remote_players_idstonodenames)
-	updatestatusrec("")
-	updateplayerlist()
-
-remote func spawnintoremoteplayer(avatardata):
-	var senderid = get_tree().get_rpc_sender_id()
-	print("rec spawnintoremoteplayer from ", senderid)
-	var remoteplayer = newremoteplayer(avatardata)
-	assert (senderid == avatardata["networkid"])
-	remoteplayer.get_node("PlayerFrame").set_network_master(senderid)
-	assert (remote_players_idstonodenames[senderid] == null)
-	remote_players_idstonodenames[senderid] = remoteplayer.get_name()
-	updateplayerlist()
 	
 var Dudpcount = 0
 func _process(delta):
@@ -280,61 +141,24 @@ func _process(delta):
 func _data_channel_received(channel: Object):
 	print("_data_channel_received ", channel)
 
-func udpreceivedipnumber(receivedIPnumber):
-	var ns = $NetworkOptions.selected
-	for nsi in range(NETWORK_OPTIONS.FIXED_URL, $NetworkOptions.get_item_count()):
-		if receivedIPnumber == $NetworkOptions.get_item_text(nsi):
-			ns = nsi
-			break
-	if ns == NETWORK_OPTIONS.LOCAL_NETWORK:
-		$NetworkOptions.add_item(receivedIPnumber)
-		ns = $NetworkOptions.get_item_count() - 1
-	$NetworkOptions.select(ns)
-	_on_OptionButton_item_selected(ns)
+
 
 	
 func _on_Doppelganger_toggled(button_pressed):
 	if button_pressed:
 		$DoppelgangerPanel.visible = true
-		var avatardata = LocalPlayer.avatarinitdata()
+		var avatardata = $PlayerConnections.LocalPlayer.avatarinitdata()
 		avatardata["playernodename"] = "Doppelganger"
-		var fd = LocalPlayer.get_node("PlayerFrame").framedata0.duplicate()
-		LocalPlayer.changethinnedframedatafordoppelganger(fd)
+		var fd = $PlayerConnections.LocalPlayer.get_node("PlayerFrame").framedata0.duplicate()
+		$PlayerConnections.LocalPlayer.changethinnedframedatafordoppelganger(fd)
 		avatardata["framedata0"] = fd
-		LocalPlayer.get_node("PlayerFrame").doppelgangernode = newremoteplayer(avatardata)
+		$PlayerConnections.LocalPlayer.get_node("PlayerFrame").doppelgangernode = $PlayerConnections.newremoteplayer(avatardata)
 	else:
 		$DoppelgangerPanel.visible = false
-		LocalPlayer.get_node("PlayerFrame").doppelgangernode = null
-		removeremoteplayer("Doppelganger")
-	updateplayerlist()
+		$PlayerConnections.LocalPlayer.get_node("PlayerFrame").doppelgangernode = null
+		$PlayerConnections.removeremoteplayer("Doppelganger")
+	$PlayerConnections.updateplayerlist()
 
-func newremoteplayer(avatardata):
-	var remoteplayer = PlayersNode.get_node_or_null(avatardata["playernodename"])
-	if remoteplayer == null:
-		remoteplayer = load(avatardata["avatarsceneresource"]).instance()
-		if not remoteplayer.has_node("PlayerFrame"):
-			var playerframe = Node.new()
-			playerframe.name = "PlayerFrame"
-			playerframe.set_script(load("res://networking/RemotePlayerFrame.gd"))
-			remoteplayer.add_child(playerframe)
-		remoteplayer.initavatar(avatardata)
-		PlayersNode.add_child(remoteplayer)
-		if "framedata0" in avatardata:
-			remoteplayer.get_node("PlayerFrame").networkedavatarthinnedframedata(avatardata["framedata0"])
-		print("Adding remoteplayer: ", avatardata["playernodename"])
-	else:
-		print("** remoteplayer already exists: ", avatardata["playernodename"])
-	return remoteplayer
-	
-func removeremoteplayer(playernodename):
-	var remoteplayer = PlayersNode.get_node_or_null(playernodename)
-	if remoteplayer != null:
-		PlayersNode.remove_child(remoteplayer)
-		remoteplayer.queue_free()
-		print("Removing remoteplayer: ", playernodename)
-	else:
-		print("** remoteplayer already removed: ", playernodename)
-	
 
 
 
