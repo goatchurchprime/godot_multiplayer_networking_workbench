@@ -32,7 +32,9 @@ func _on_ProtocolOptions_item_selected(np):
 	$NetworkOptionsMQTTWebRTC.visible = selectasmqttwebrtc
 	$MQTTsignalling.visible = selectasmqttwebrtc
 	$MQTTsignalling/Servermode.visible = false
+	$MQTTsignalling/Servermode/WebRTCmultiplayerserver/StartWebRTCmultiplayer.disabled = true
 	$MQTTsignalling/Clientmode.visible = false
+	$MQTTsignalling/Clientmode/WebRTCmultiplayerclient/StartWebRTCmultiplayer.disabled = true
 	$UDPipdiscovery.visible = $NetworkOptions.visible and (not OS.has_feature("Server")) and (not OS.has_feature("HTML5"))
 	$ENetMultiplayer.visible = selectasenet
 	$ENetMultiplayer/Servermode.visible = false
@@ -42,6 +44,14 @@ func _on_OptionButton_item_selected(ns):
 	var selectasoff = (ns == NETWORK_OPTIONS.NETWORK_OFF)
 	if not selectasoff:
 		$PlayerConnections/ConnectionLog.text = ""
+	if $MQTTsignalling.visible:
+		$MQTTsignalling/Servermode/WebRTCmultiplayerserver.pressed = false
+		$MQTTsignalling/Servermode/WebRTCmultiplayerserver/StartWebRTCmultiplayer.disabled = true
+		$MQTTsignalling/Servermode.visible = false
+		$MQTTsignalling/Clientmode/WebRTCmultiplayerclient.pressed = false
+		$MQTTsignalling/Clientmode/WebRTCmultiplayerclient/StartWebRTCmultiplayer.disabled = true		
+		$MQTTsignalling/Clientmode.visible = false
+
 
 	if $PlayerConnections.LocalPlayer.networkID != 0:
 		if get_tree().get_network_peer() != null:
@@ -53,7 +63,8 @@ func _on_OptionButton_item_selected(ns):
 	if $UDPipdiscovery/Clientmode.is_processing():
 		$UDPipdiscovery/Clientmode.stopUDPreceiving()
 	$ENetMultiplayer/Servermode/StartENetmultiplayer.pressed = false
-
+	$ENetMultiplayer/Clientmode/StartENetmultiplayer.pressed = false
+	
 	var np = $ProtocolOptions.selected 
 	assert (np != NETWORK_PROTOCOL.WEBRTC_MQTTSIGNAL)
 
@@ -96,9 +107,9 @@ func _on_NetworkOptionsMQTTWebRTC_item_selected(ns):
 	$MQTTsignalling/Servermode.visible = selectasserver
 	$MQTTsignalling/Clientmode.visible = selectasclient
 	$ProtocolOptions.disabled = not selectasoff
-	if $MQTTsignalling/autoconnect.pressed or $MQTTsignalling/Servermode/StartServer.pressed:
+	if $MQTTsignalling/mqttautoconnect.pressed or $MQTTsignalling/Servermode/StartServer.pressed:
 		$MQTTsignalling/Servermode/StartServer.pressed = selectasserver
-	if $MQTTsignalling/autoconnect.pressed or $MQTTsignalling/Clientmode/StartClient.pressed:
+	if $MQTTsignalling/mqttautoconnect.pressed or $MQTTsignalling/Clientmode/StartClient.pressed:
 		$MQTTsignalling/Clientmode/StartClient.pressed = selectasclient
 
 func _ready():

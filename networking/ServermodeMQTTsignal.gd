@@ -10,17 +10,9 @@ var nextclientnumber = 2
 var clientidtowclientid = { }
 var wclientidtoclientid = { }
 
-func _client_connected(id):
-	print("client connected ", id)
-func _client_disconnected(id):
-	print("client_disconnected ", id)
-func _packet_received(id, v):
-	print("packet_received ", id, v)
-
-signal client_connected(id)
-signal client_disconnected(id)
-signal packet_received(id, v)
-signal hithere
+signal mqttsig_client_connected(id)
+signal mqttsig_client_disconnected(id)
+signal mqttsig_packet_received(id, v)
 
 
 # Messages: topic: room/clientid/[packet|server|client]/[clientid-to|]
@@ -40,7 +32,7 @@ func received_mqtt(topic, msg):
 			
 			if len(stopic) == 4  and stopic[2] == "packet" and stopic[3] == MQTT.client_id:
 				if clientidtowclientid.has(sendingclientid):
-					emit_signal("packet_received", clientidtowclientid[sendingclientid], v)
+					emit_signal("mqttsig_packet_received", clientidtowclientid[sendingclientid], v)
 				elif v["subject"] == "request_connection":
 					var wclientid = nextclientnumber
 					nextclientnumber += 1
@@ -49,7 +41,7 @@ func received_mqtt(topic, msg):
 					MQTT.subscribe("%s/%s/client" % [roomname, sendingclientid])
 					var t = "%s/%s/packet/%s" % [roomname, MQTT.client_id, sendingclientid]
 					MQTT.publish(t, to_json({"subject":"connection_established", "wclientid":wclientid}))
-					emit_signal("client_connected", wclientid)
+					emit_signal("mqttsig_client_connected", wclientid)
 					$ClientsList.add_item(sendingclientid, int(sendingclientid))
 					$ClientsList.selected = $ClientsList.get_item_count()-1
 				
@@ -57,7 +49,7 @@ func received_mqtt(topic, msg):
 				if clientidtowclientid.has(sendingclientid) and v["subject"] == "dead":
 					#MQTT.unsubscribe("%s/%s/client" % [roomname, sendingclientid])
 					var wclientid = clientidtowclientid[sendingclientid]
-					emit_signal("client_disconnected", wclientid)
+					emit_signal("mqttsig_client_disconnected", wclientid)
 					clientidtowclientid.erase(sendingclientid)
 					wclientidtoclientid.erase(wclientid)
 					MQTT.publish(topic, "", true)
@@ -94,6 +86,9 @@ func _on_StartServer_toggled(button_pressed):
 		MQTT.publish(statustopic, to_json({"subject":"open"}), true)
 		$StartServer/statuslabel.text = "connected"
 		$ClientsList.set_item_text(0, MQTT.client_id)
+		$WebRTCmultiplayerserver/StartWebRTCmultiplayer.disabled = false
+		if SetupMQTTsignal.get_node("autoconnect").pressed:
+			$WebRTCmultiplayerserver/StartWebRTCmultiplayer.pressed = true
 
 	else:
 		print("Disconnecting MQTT")
@@ -102,11 +97,12 @@ func _on_StartServer_toggled(button_pressed):
 		$StartServer/statuslabel.text = "off"
 		SetupMQTTsignal.get_node("client_id").text = ""
 		for s in clientidtowclientid:
-			emit_signal("client_disconnected", clientidtowclientid[s])		
+			emit_signal("mqttsig_client_disconnected", clientidtowclientid[s])		
 		$ClientsList.clear()
 		$ClientsList.add_item("none", 0)
 		clientidtowclientid.clear()
 		wclientidtoclientid.clear()
-		
+		emit_signal("mqttsig_server_stopped")
+		$WebRTCmultiplayerserver/StartWebRTCmultiplayer.disabled = true
 		
 		

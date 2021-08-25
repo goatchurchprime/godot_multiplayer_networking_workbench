@@ -5,14 +5,15 @@ onready var websocketclient = WebSocketClient.new()
 const websocketprotocol = "webrtc-signalling"
 
 func _ready():
+	return 
 	websocketserver.connect("client_close_request", self, "wss_client_close_request")
 	websocketserver.connect("client_connected", self, "wss_client_connected")
 	websocketserver.connect("client_disconnected", self, "wss_client_disconnected")
 	websocketserver.connect("data_received", self, "wss_data_received")
 	
-	websocketclient.connect("connection_closed", self, "wsc_connection_closed")
+	websocketclient.connect("mqttsig_connection_closed", self, "wsc_connection_closed")
 	websocketclient.connect("connection_error", self, "wsc_connection_error")
-	websocketclient.connect("connection_established", self, "wsc_connection_established")
+	websocketclient.connect("mqttsig_connection_established", self, "wsc_connection_established")
 
 	websocketclient.connect("server_close_request", self, "wsc_server_close_request")
 	websocketclient.connect("data_received", self, "wsc_data_received")

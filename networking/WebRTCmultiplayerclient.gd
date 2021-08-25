@@ -2,7 +2,7 @@ extends Control
 
 
 onready var clientsignalling = get_parent()
-
+onready var PlayerConnections = get_node("../../../PlayerConnections")
 
 func client_ice_candidate_created(mid_name, index_name, sdp_name):
 	clientsignalling.sendpacket_toserver({"subject":"ice_candidate", "mid_name":mid_name, "index_name":index_name, "sdp_name":sdp_name})
@@ -23,7 +23,7 @@ func client_connection_established(lwclientid):
 func client_connection_closed():
 	if get_tree().get_network_peer() != null:
 		var peer = get_tree().get_network_peer().get_peer(1)
-		peer.close()
+		peer["connection"].close()
 	print("server client_disconnected ")
 
 func client_packet_received(v):
@@ -54,14 +54,16 @@ func client_packet_received(v):
 
 func _on_StartWebRTCmultiplayer_toggled(button_pressed):
 	if button_pressed:
-		clientsignalling.connect("connection_established", self, "client_connection_established") 
-		clientsignalling.connect("connection_closed", self, "client_connection_closed") 
-		clientsignalling.connect("packet_received", self, "client_packet_received") 
-		if $StartWebRTCmultiplayer.pressed:
-			clientsignalling.sendpacket_toserver({"subject":"request_offer"})
-			$statuslabel.text = "request_offer"
+		assert (clientsignalling.wclientid != 0)
+		clientsignalling.connect("mqttsig_connection_established", self, "client_connection_established") 
+		clientsignalling.connect("mqttsig_connection_closed", self, "client_connection_closed") 
+		clientsignalling.connect("mqttsig_packet_received", self, "client_packet_received") 
+		clientsignalling.sendpacket_toserver({"subject":"request_offer"})
+		$statuslabel.text = "request_offer"
+		
 	else:
-		get_tree().set_network_peer(null)
-		clientsignalling.disconnect("connection_established", self, "client_connection_established") 
-		clientsignalling.disconnect("connection_closed", self, "client_connection_closed") 
-		clientsignalling.disconnect("packet_received", self, "client_packet_received") 
+		clientsignalling.disconnect("mqttsig_connection_established", self, "client_connection_established") 
+		clientsignalling.disconnect("mqttsig_connection_closed", self, "client_connection_closed") 
+		clientsignalling.disconnect("mqttsig_packet_received", self, "client_packet_received") 
+		if get_tree().get_network_peer() != null:
+			PlayerConnections.force_server_disconnect()

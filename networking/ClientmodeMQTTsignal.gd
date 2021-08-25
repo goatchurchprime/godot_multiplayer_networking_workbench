@@ -6,10 +6,9 @@ onready var MQTT = SetupMQTTsignal.get_node("MQTT")
 var roomname = ""
 var wclientid = 0
 
-
-signal connection_established(wclientid)
-signal connection_closed()
-signal packet_received(v)
+signal mqttsig_connection_established(wclientid)
+signal mqttsig_connection_closed()
+signal mqttsig_packet_received(v)
 
 var openserverslist = [ ]
 var selectedserver = ""
@@ -44,10 +43,11 @@ func received_mqtt(topic, msg):
 					openserverslist.remove(si)
 					if selectedserver == sendingserverid:
 						if serverconnected:
-							emit_signal("connection_closed")
+							emit_signal("mqttsig_connection_closed")
 							$StartClient/statuslabel.text = "stopped"
 							wclientid = 0
 							serverconnected = false
+							$WebRTCmultiplayerclient/StartWebRTCmultiplayer.disabled = true
 						#MQTT.unsubscribe("%s/%s/server" % [roomname, selectedserver])
 						selectedserver = ""
 						MQTT.publish(statustopic, to_json({"subject":"unconnected"}))
@@ -57,11 +57,15 @@ func received_mqtt(topic, msg):
 					if v["subject"] == "connection_established":
 						serverconnected = true
 						wclientid = int(v["wclientid"])
-						emit_signal("connection_established", int(v["wclientid"]))
+						emit_signal("mqttsig_connection_established", int(v["wclientid"]))
 						$StartClient/statuslabel.text = "connected"
 						MQTT.publish(statustopic, to_json({"subject":"connected"}))
+						$WebRTCmultiplayerclient/StartWebRTCmultiplayer.disabled = false
+						if SetupMQTTsignal.get_node("autoconnect").pressed:
+							$WebRTCmultiplayerclient/StartWebRTCmultiplayer.pressed = true
+							
 				else:
-					emit_signal("packet_received", v)
+					emit_signal("mqttsig_packet_received", v)
 					
 			else:
 				print("Unrecognized topic ", topic)
@@ -97,6 +101,6 @@ func _on_StartClient_toggled(button_pressed):
 		openserverslist.clear()
 		$StartClient/statuslabel.text = "off"
 		SetupMQTTsignal.get_node("client_id").text = ""
-		emit_signal("connection_closed")
+		emit_signal("mqttsig_connection_closed")
 		wclientid = 0
-
+		$WebRTCmultiplayerclient/StartWebRTCmultiplayer.disabled = true

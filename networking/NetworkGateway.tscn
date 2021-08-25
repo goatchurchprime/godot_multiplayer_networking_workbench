@@ -107,6 +107,7 @@ __meta__ = {
 }
 
 [node name="UDPipdiscovery" type="ColorRect" parent="."]
+visible = false
 margin_left = 12.0
 margin_top = 33.0
 margin_right = 364.0
@@ -175,16 +176,16 @@ pressed = true
 text = "enable"
 
 [node name="MQTTsignalling" type="ColorRect" parent="."]
-visible = false
 anchor_right = 1.0
 anchor_bottom = 1.0
-margin_left = 18.742
+margin_left = 12.0
 margin_top = 33.0
-margin_right = -14.2579
+margin_right = -13.9999
 margin_bottom = -256.0
 color = Color( 0.215686, 0.145098, 0.294118, 1 )
 
 [node name="Servermode" type="Control" parent="MQTTsignalling"]
+visible = false
 anchor_right = 1.0
 anchor_bottom = 1.0
 margin_left = 322.0
@@ -248,13 +249,12 @@ __meta__ = {
 }
 
 [node name="Clientmode" type="Control" parent="MQTTsignalling"]
-visible = false
 anchor_right = 1.0
 anchor_bottom = 1.0
-margin_left = 324.856
-margin_top = 22.0769
-margin_right = 45.8562
-margin_bottom = -13.923
+margin_left = 325.0
+margin_top = 22.0
+margin_right = -32.0
+margin_bottom = -14.0
 script = ExtResource( 8 )
 __meta__ = {
 "_edit_use_anchors_": false
@@ -279,9 +279,10 @@ toggle_mode = true
 text = "StartWebrtc client"
 
 [node name="statuslabel" type="Label" parent="MQTTsignalling/Clientmode/WebRTCmultiplayerclient"]
-margin_left = 142.116
-margin_right = 184.116
-margin_bottom = 21.0
+margin_left = 8.4729
+margin_top = 23.5227
+margin_right = 50.4729
+margin_bottom = 44.5227
 text = "null"
 
 [node name="StartClient" type="Button" parent="MQTTsignalling/Clientmode"]
@@ -351,19 +352,19 @@ margin_top = 22.0769
 margin_right = 322.0
 margin_bottom = 62.0769
 
-[node name="autoconnect" type="CheckBox" parent="MQTTsignalling"]
-margin_left = 182.0
-margin_top = 34.5227
-margin_right = 289.0
-margin_bottom = 58.5227
+[node name="mqttautoconnect" type="CheckBox" parent="MQTTsignalling"]
+margin_left = 168.0
+margin_top = 35.0
+margin_right = 307.0
+margin_bottom = 59.0
 pressed = true
-text = "autoconnect"
+text = "mqtt autoconnect"
 
 [node name="client_id" type="LineEdit" parent="MQTTsignalling"]
-margin_left = 107.742
-margin_top = 62.0
-margin_right = 214.742
-margin_bottom = 86.0
+margin_left = 96.4283
+margin_top = 61.5704
+margin_right = 203.428
+margin_bottom = 85.5704
 editable = false
 __meta__ = {
 "_edit_use_anchors_": false
@@ -376,7 +377,16 @@ margin_right = -0.681274
 margin_bottom = 20.4773
 text = "mqtt clientid:"
 
+[node name="autoconnect" type="CheckBox" parent="MQTTsignalling"]
+margin_left = 205.879
+margin_top = 61.5704
+margin_right = 312.879
+margin_bottom = 85.5704
+pressed = true
+text = "autoconnect"
+
 [node name="ENetMultiplayer" type="ColorRect" parent="."]
+visible = false
 margin_left = 9.72998
 margin_top = 74.5704
 margin_right = 363.73

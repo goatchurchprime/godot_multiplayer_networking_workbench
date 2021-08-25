@@ -32,6 +32,8 @@ var lw_qos = 0
 var lw_retain = false
 
 signal received_message(topic, message)
+signal broker_connected()
+signal broker_disconnected()
 
 
 var receivedbuffer : PoolByteArray = PoolByteArray()
@@ -235,7 +237,8 @@ func connect_to_server(usessl=false):
 		print("EE3 ", E3)
 		
 	print("Connected to mqtt broker ", self.server)
-
+	emit_signal("broker_connected")
+	
 	var msg = firstmessagetoserver()
 	senddata(msg)
 	
@@ -283,7 +286,7 @@ func websocket_connect_to_server():
 
 	yield(get_tree().create_timer(0.5), "timeout")
 	print("Connected to mqtt broker ", self.server)
-
+	emit_signal("broker_connected")
 	
 	#print(Array(msg))
 	#msg = PoolByteArray([16,46,0,4,77,81,84,84,4,38,0,0,0,10,49,54,49,57,53,53,53,52,53,49,0,13,109,101,116,101,115,116,47,115,116,97,116,117,115,0,7,115,116,111,112,112,101,100])
@@ -333,11 +336,12 @@ func disconnect_from_server():
 	if socket != null:
 		socket.disconnect_from_host()
 		socket = null
+		emit_signal("broker_disconnected")
 	if websocketclient != null:
 		websocketclient.disconnect_from_host()
 		websocketclient = null
 		websocket = null
-
+		emit_signal("broker_disconnected")
 	
 func ping():
 	senddata(PoolByteArray([0xC0, 0x00]))

@@ -1,7 +1,8 @@
 extends Control
 
 onready var serversignalling = get_parent()
-	
+onready var PlayerConnections = get_node("../../../PlayerConnections")
+
 func server_ice_candidate_created(mid_name, index_name, sdp_name, id):
 	serversignalling.sendpacket_toclient(id, {"subject":"ice_candidate", "mid_name":mid_name, "index_name":index_name, "sdp_name":sdp_name})
 
@@ -45,16 +46,19 @@ func _on_StartWebRTCmultiplayer_toggled(button_pressed):
 	if button_pressed:
 		var networkedmultiplayerserver = WebRTCMultiplayer.new()
 		var servererror = networkedmultiplayerserver.initialize(1, true)
-		get_tree().set_network_peer(networkedmultiplayerserver)
+		assert (servererror == 0)
+		PlayerConnections.SetNetworkedMultiplayerPeer(networkedmultiplayerserver)
+			
 		assert (get_tree().get_network_unique_id() == 1)
-		serversignalling.connect("client_connected", self, "server_client_connected") 
-		serversignalling.connect("client_disconnected", self, "server_client_disconnected") 
-		serversignalling.connect("packet_received", self, "server_packet_received") 
-		get_node("../../..")._connected_to_server()
+		serversignalling.connect("mqttsig_client_connected", self, "server_client_connected") 
+		serversignalling.connect("mqttsig_client_disconnected", self, "server_client_disconnected") 
+		serversignalling.connect("mqttsig_packet_received", self, "server_packet_received") 
 			
 	else:
-		get_tree().set_network_peer(null)
-		serversignalling.disconnect("client_connected", self, "server_client_connected") 
-		serversignalling.disconnect("client_disconnected", self, "server_client_disconnected") 
-		serversignalling.disconnect("packet_received", self, "server_packet_received") 
-		get_node("../../..")._server_disconnected()
+		serversignalling.disconnect("mqttsig_client_connected", self, "server_client_connected") 
+		serversignalling.disconnect("mqttsig_client_disconnected", self, "server_client_disconnected") 
+		serversignalling.disconnect("mqttsig_packet_received", self, "server_packet_received") 
+		if get_tree().get_network_peer() != null:
+			PlayerConnections.force_server_disconnect()
+
+

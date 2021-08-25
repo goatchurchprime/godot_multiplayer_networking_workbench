@@ -42,19 +42,16 @@ func connectionlog(txt):
 	$ConnectionLog.cursor_set_line(cl)
 
 func SetNetworkedMultiplayerPeer(peer):
-	if peer != null:
-		get_tree().set_network_peer(peer)
-		if get_tree().is_network_server():
-			networkplayer_connected_to_server(true)
-		else:
-			$ColorRect.color = Color.yellow
-			LocalPlayer.networkID = -1
+	assert (peer != null)
+	get_tree().set_network_peer(peer)
+	if get_tree().is_network_server():
+		networkplayer_connected_to_server(true)
 	else:
-		get_tree().set_network_peer(null)
+		$ColorRect.color = Color.yellow
+		LocalPlayer.networkID = -1
 
 func clientplayer_server_disconnected():
 	networkplayer_server_disconnected(false)
-	
 	
 	
 func networkplayer_server_disconnected(serverisself):
