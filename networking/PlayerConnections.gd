@@ -23,6 +23,9 @@ func _ready():
 
 	randomize()
 	var playername = possibleusernames[randi()%len(possibleusernames)]
+	LocalPlayer.rect_position.y += randi()%300
+	print(LocalPlayer.modulate)
+	LocalPlayer.modulate = Color.yellow
 	var randomusername = LocalPlayer.initavatar({"labeltext":playername})
 
 	get_tree().connect("network_peer_connected", self, "network_player_connected")
@@ -47,7 +50,6 @@ func SetNetworkedMultiplayerPeer(peer):
 	if get_tree().is_network_server():
 		networkplayer_connected_to_server(true)
 	else:
-		$ColorRect.color = Color.yellow
 		LocalPlayer.networkID = -1
 
 func clientplayer_server_disconnected():
@@ -57,7 +59,9 @@ func clientplayer_server_disconnected():
 func networkplayer_server_disconnected(serverisself):
 	connectionlog("_server(self) disconnect\n" if serverisself else "_server disconnect\n")
 	var ns = NetworkGateway.get_node("NetworkOptions").selected
+	print("(networkplayer_server_disconnected ", serverisself)
 	get_tree().set_network_peer(null)
+	print("setnetworkpeer null")
 	LocalPlayer.networkID = 0
 	LocalPlayer.set_name("R%d" % LocalPlayer.networkID) 
 	deferred_playerconnections.clear()
@@ -66,6 +70,13 @@ func networkplayer_server_disconnected(serverisself):
 	print("*** _server_disconnected ", LocalPlayer.networkID)
 	var selectasclient = (ns >= NetworkGateway.NETWORK_OPTIONS.LOCAL_NETWORK)	
 	updateplayerlist()
+	if NetworkGateway.get_node("ProtocolOptions").selected == NetworkGateway.NETWORK_PROTOCOL.ENET:
+		NetworkGateway.get_node("ENetMultiplayer/Servermode/StartENetmultiplayer").pressed = false
+		NetworkGateway.get_node("ENetMultiplayer/Clientmode/StartENetmultiplayer").pressed = false
+	if NetworkGateway.get_node("ProtocolOptions").selected == NetworkGateway.NETWORK_PROTOCOL.WEBRTC_MQTTSIGNAL:
+		NetworkGateway.get_node("MQTTsignalling/Servermode/WebRTCmultiplayerserver/StartWebRTCmultiplayer").pressed = false
+		NetworkGateway.get_node("MQTTsignalling/Clientmode/WebRTCmultiplayerclient/StartWebRTCmultiplayer").pressed = false
+
 
 func clientplayer_connected_to_server():
 	networkplayer_connected_to_server(false)
@@ -86,6 +97,7 @@ func networkplayer_connected_to_server(serverisself):
 		network_player_added(id, true)
 	deferred_playerconnections.clear()
 	updateplayerlist()
+		
 
 
 func clientplayer_connection_failed():

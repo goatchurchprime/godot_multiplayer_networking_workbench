@@ -30,7 +30,7 @@ margin_top = 11.087
 margin_right = 271.039
 margin_bottom = 31.087
 text = "ENet"
-items = [ "ENet", null, false, 0, null, "WebSocket", null, false, 1, null, "WebRTC (websocket signal)", null, false, 2, null, "WebRTC (mqtt signal)", null, false, 3, null ]
+items = [ "ENet", null, false, 0, null, "WebSocket", null, false, 1, null, "WebRTC (websocket signal)", null, true, 2, null, "WebRTC (mqtt signal)", null, false, 3, null ]
 selected = 0
 __meta__ = {
 "_edit_use_anchors_": false
@@ -107,7 +107,6 @@ __meta__ = {
 }
 
 [node name="UDPipdiscovery" type="ColorRect" parent="."]
-visible = false
 margin_left = 12.0
 margin_top = 33.0
 margin_right = 364.0
@@ -386,7 +385,6 @@ pressed = true
 text = "autoconnect"
 
 [node name="ENetMultiplayer" type="ColorRect" parent="."]
-visible = false
 margin_left = 9.72998
 margin_top = 74.5704
 margin_right = 363.73
@@ -476,13 +474,6 @@ selected = 0
 __meta__ = {
 "_edit_use_anchors_": false
 }
-
-[node name="Label" type="Label" parent="PlayerConnections/PlayerList"]
-margin_left = -207.0
-margin_top = 6.0
-margin_right = -108.0
-margin_bottom = 24.0
-text = "Player list"
 
 [node name="Doppelganger" type="CheckBox" parent="PlayerConnections"]
 margin_left = 6.74203

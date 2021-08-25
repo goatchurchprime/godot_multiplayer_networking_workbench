@@ -88,7 +88,8 @@ func _on_OptionButton_item_selected(ns):
 	var selectasenet = (np == NETWORK_PROTOCOL.ENET)
 	if selectasenet:
 		$ENetMultiplayer/Servermode.visible = selectasserver
-		$ENetMultiplayer/Clientmode.visible = selectasclient
+		$ENetMultiplayer/Clientmode.visible = selectasclient or selectassearchingclient
+		$ENetMultiplayer/Clientmode/StartENetmultiplayer.disabled = selectassearchingclient
 		if $ENetMultiplayer/autoconnect.pressed:
 			if selectasserver:
 				$ENetMultiplayer/Servermode/StartENetmultiplayer.pressed = true
@@ -122,8 +123,8 @@ func _ready():
 		$NetworkOptions.select(NETWORK_OPTIONS.AS_SERVER)
 	if OS.has_feature("HTML5"):
 		$NetworkOptions.get_item(NETWORK_OPTIONS.LOCAL_NETWORK).disabled = true
-
-
+		$MQTTsignalling/brokeraddress/usewebsocket.pressed = false
+		$MQTTsignalling/brokeraddress/usewebsocket.disabled = true
 
 func _input(event):
 	if event is InputEventKey and event.pressed:
