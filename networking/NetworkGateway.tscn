@@ -29,9 +29,9 @@ margin_left = 69.0394
 margin_top = 11.087
 margin_right = 271.039
 margin_bottom = 31.087
-text = "ENet"
+text = "WebRTC (mqtt signal)"
 items = [ "ENet", null, false, 0, null, "WebSocket", null, false, 1, null, "WebRTC (websocket signal)", null, true, 2, null, "WebRTC (mqtt signal)", null, false, 3, null ]
-selected = 0
+selected = 3
 __meta__ = {
 "_edit_use_anchors_": false
 }
@@ -314,7 +314,7 @@ margin_top = 7.0
 margin_right = 199.879
 margin_bottom = 31.0
 hint_tooltip = "MQTT broker URL"
-text = "mosquitto.doesliverpool.xyz"
+text = "test.mosquitto.org"
 __meta__ = {
 "_edit_use_anchors_": false
 }

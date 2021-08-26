@@ -72,7 +72,8 @@ func senddata(data):
 	elif websocket != null:
 		#print("putting packet ", Array(data))
 		var E = websocket.put_packet(data)
-		assert (E == 0)
+		if E != 0:
+			print("bad websocket packet E=", E)
 	
 var in_wait_msg = false
 func _process(delta):
@@ -237,8 +238,6 @@ func connect_to_server(usessl=false):
 		print("EE3 ", E3)
 		
 	print("Connected to mqtt broker ", self.server)
-	emit_signal("broker_connected")
-	
 	var msg = firstmessagetoserver()
 	senddata(msg)
 	
@@ -256,6 +255,7 @@ func connect_to_server(usessl=false):
 
 	#return data[2] & 1
 	in_wait_msg = false
+	emit_signal("broker_connected")
 	return true
 
 func websocket_connect_to_server():
@@ -273,36 +273,21 @@ func websocket_connect_to_server():
 
 	websocket = websocketclient.get_peer(1)
 	var Dcd = 20
-	while not websocket.is_connected_to_host():
+	while websocket != null and not websocket.is_connected_to_host():
 		websocketclient.poll()
 		Dcd -= 1
 		if Dcd == 0:
 			print("connecting to host")
 			Dcd = 20
 		yield(get_tree().create_timer(0.1), "timeout")
-
+	if websocket == null:
+		return
 
 	var msg = firstmessagetoserver()
 
 	yield(get_tree().create_timer(0.5), "timeout")
-	print("Connected to mqtt broker ", self.server)
-	emit_signal("broker_connected")
-	
-	#print(Array(msg))
-	#msg = PoolByteArray([16,46,0,4,77,81,84,84,4,38,0,0,0,10,49,54,49,57,53,53,53,52,53,49,0,13,109,101,116,101,115,116,47,115,116,97,116,117,115,0,7,115,116,111,112,112,101,100])
-	#yield(get_tree().create_timer(0.5), "timeout")
+	print("Connected to mqtt broker, now handshaking ", self.server)
 	senddata(msg)
-	#var E1 = websocket.put_packet(msg)
-	#websocketclient.poll()
-	#assert (E1 == 0)
-	
-	#while true:
-	#	websocketclient.poll()
-	#	print("packets available ", websocket.get_available_packet_count())
-	#	if websocket.get_available_packet_count() != 0:
-	#		print(Array(websocket.get_packet()))
-	#	yield(get_tree().create_timer(0.1), "timeout")
-
 	
 	var data = yield(YreceivedbuffernextNbytes(4), "completed")
 	print("dddd ", data)
@@ -321,6 +306,7 @@ func websocket_connect_to_server():
 
 	#return data[2] & 1
 	in_wait_msg = false
+	emit_signal("broker_connected")
 	return true
 
 func is_connected_to_server():

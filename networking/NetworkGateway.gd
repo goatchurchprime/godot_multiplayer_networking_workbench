@@ -1,11 +1,16 @@
 extends Panel
 
+# keep trying to get the HTML5 version working (not connecting to mqtt!)
+# http://goatchurchprime.github.io/godot_multiplayer_networking_workbench/minimal_peer_networking.html
+# Then provide as a 3 panel demo, and ask if the webrtc could 
+# route the data through the server instead of peer to peer.  
+# (it leaves the situation in difficult states of partial connections)
 
+# (websocket disable too) 
 
 
 export var remoteservers = [ "192.168.43.1", "192.168.8.111" ]
 
-var websocketobjecttopoll = null
 
 
 enum NETWORK_OPTIONS { NETWORK_OFF = 0
@@ -122,8 +127,8 @@ func _ready():
 		yield(get_tree().create_timer(1.5), "timeout")
 		$NetworkOptions.select(NETWORK_OPTIONS.AS_SERVER)
 	if OS.has_feature("HTML5"):
-		$NetworkOptions.get_item(NETWORK_OPTIONS.LOCAL_NETWORK).disabled = true
-		$MQTTsignalling/brokeraddress/usewebsocket.pressed = false
+		$NetworkOptions.set_item_disabled(NETWORK_OPTIONS.LOCAL_NETWORK,  true)
+		$MQTTsignalling/brokeraddress/usewebsocket.pressed = true
 		$MQTTsignalling/brokeraddress/usewebsocket.disabled = true
 
 func _input(event):
@@ -145,12 +150,6 @@ func _input(event):
 func setnetworkoff():
 	$NetworkOptions.select(NETWORK_OPTIONS.NETWORK_OFF)
 	
-
-	
-var Dudpcount = 0
-func _process(delta):
-	if websocketobjecttopoll != null:
-		websocketobjecttopoll.poll()
 
 
 				

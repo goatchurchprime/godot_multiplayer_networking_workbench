@@ -45,6 +45,7 @@ func server_packet_received(id, v):
 func _on_StartWebRTCmultiplayer_toggled(button_pressed):
 	if button_pressed:
 		var networkedmultiplayerserver = WebRTCMultiplayer.new()
+		print(networkedmultiplayerserver.server_relay)
 		var servererror = networkedmultiplayerserver.initialize(1, true)
 		assert (servererror == 0)
 		PlayerConnections.SetNetworkedMultiplayerPeer(networkedmultiplayerserver)

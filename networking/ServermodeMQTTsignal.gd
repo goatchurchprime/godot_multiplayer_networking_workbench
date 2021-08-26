@@ -14,7 +14,6 @@ signal mqttsig_client_connected(id)
 signal mqttsig_client_disconnected(id)
 signal mqttsig_packet_received(id, v)
 
-
 # Messages: topic: room/clientid/[packet|server|client]/[clientid-to|]
 # 			payload: {"subject":type, ...}
 
@@ -64,10 +63,25 @@ func received_mqtt(topic, msg):
 			else:
 				print("Unrecognized topic ", topic)
 
+func on_broker_disconnect():
+	$StartServer.pressed = false
+	
+func on_broker_connect():
+	MQTT.subscribe("%s/+/packet/%s" % [roomname, MQTT.client_id])
+	MQTT.subscribe("%s/+/server" % roomname)
+	var statustopic = "%s/%s/server" % [roomname, MQTT.client_id]
+	MQTT.publish(statustopic, to_json({"subject":"open"}), true)
+	$StartServer/statuslabel.text = "connected"
+	$ClientsList.set_item_text(0, MQTT.client_id)
+	$WebRTCmultiplayerserver/StartWebRTCmultiplayer.disabled = false
+	if SetupMQTTsignal.get_node("autoconnect").pressed:
+		$WebRTCmultiplayerserver/StartWebRTCmultiplayer.pressed = true
 		
 func _on_StartServer_toggled(button_pressed):
 	if button_pressed:
 		MQTT.connect("received_message", self, "received_mqtt")
+		MQTT.connect("broker_connected", self, "on_broker_connect")
+		MQTT.connect("broker_disconnected", self, "on_broker_disconnect")
 		roomname = SetupMQTTsignal.get_node("roomname").text
 		randomize()
 		MQTT.client_id = "s%d" % randi()
@@ -78,21 +92,15 @@ func _on_StartServer_toggled(button_pressed):
 		MQTT.set_last_will(statustopic, to_json({"subject":"dead"}), true)
 		$StartServer/statuslabel.text = "connecting"
 		if SetupMQTTsignal.get_node("brokeraddress/usewebsocket").pressed:
-			yield(MQTT.websocket_connect_to_server(), "completed")
+			MQTT.websocket_connect_to_server()
 		else:
-			yield(MQTT.connect_to_server(), "completed")
-		MQTT.subscribe("%s/+/packet/%s" % [roomname, MQTT.client_id])
-		MQTT.subscribe("%s/+/server" % roomname)
-		MQTT.publish(statustopic, to_json({"subject":"open"}), true)
-		$StartServer/statuslabel.text = "connected"
-		$ClientsList.set_item_text(0, MQTT.client_id)
-		$WebRTCmultiplayerserver/StartWebRTCmultiplayer.disabled = false
-		if SetupMQTTsignal.get_node("autoconnect").pressed:
-			$WebRTCmultiplayerserver/StartWebRTCmultiplayer.pressed = true
+			MQTT.connect_to_server()
 
 	else:
 		print("Disconnecting MQTT")
 		MQTT.disconnect("received_message", self, "received_mqtt")
+		MQTT.disconnect("broker_connected", self, "on_broker_connect")
+		MQTT.disconnect("broker_disconnected", self, "on_broker_disconnect")
 		MQTT.disconnect_from_server()
 		$StartServer/statuslabel.text = "off"
 		SetupMQTTsignal.get_node("client_id").text = ""
@@ -102,7 +110,6 @@ func _on_StartServer_toggled(button_pressed):
 		$ClientsList.add_item("none", 0)
 		clientidtowclientid.clear()
 		wclientidtoclientid.clear()
-		emit_signal("mqttsig_server_stopped")
 		$WebRTCmultiplayerserver/StartWebRTCmultiplayer.disabled = true
 		
 		

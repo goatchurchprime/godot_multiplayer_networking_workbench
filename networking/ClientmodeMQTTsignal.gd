@@ -69,10 +69,20 @@ func received_mqtt(topic, msg):
 					
 			else:
 				print("Unrecognized topic ", topic)
+
+func on_broker_connect():
+	MQTT.subscribe("%s/+/server" % roomname)
+	MQTT.publish(statustopic, to_json({"subject":"unconnected"}))
+	$StartClient/statuslabel.text = "pending"
+
+func on_broker_disconnect():
+	$StartClient.pressed = false
 		
 func _on_StartClient_toggled(button_pressed):
 	if button_pressed:
 		MQTT.connect("received_message", self, "received_mqtt")
+		MQTT.connect("broker_connected", self, "on_broker_connect")
+		MQTT.connect("broker_disconnected", self, "on_broker_disconnect")
 		roomname = SetupMQTTsignal.get_node("roomname").text
 		randomize()
 		MQTT.client_id = "c%d" % randi()
@@ -83,17 +93,16 @@ func _on_StartClient_toggled(button_pressed):
 		MQTT.set_last_will(statustopic, to_json({"subject":"dead"}), true)
 		$StartClient/statuslabel.text = "connecting"
 		if SetupMQTTsignal.get_node("brokeraddress/usewebsocket").pressed:
-			yield(MQTT.websocket_connect_to_server(), "completed")
+			MQTT.websocket_connect_to_server()
 		else:
-			yield(MQTT.connect_to_server(), "completed")
+			MQTT.connect_to_server()
 		
-		MQTT.subscribe("%s/+/server" % roomname)
-		MQTT.publish(statustopic, to_json({"subject":"unconnected"}))
-		$StartClient/statuslabel.text = "pending"
 
 	else:
 		print("Disconnecting MQTT")
 		MQTT.disconnect("received_message", self, "received_mqtt")
+		MQTT.disconnect("broker_connected", self, "on_broker_connect")
+		MQTT.disconnect("broker_disconnected", self, "on_broker_disconnect")
 		MQTT.disconnect_from_server()
 		statustopic = ""
 		selectedserver = ""
