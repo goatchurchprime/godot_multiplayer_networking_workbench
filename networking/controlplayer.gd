@@ -6,6 +6,9 @@ var localavatardisplacement = Vector3(0,0,-0.1)*0
 func processlocalavatarposition(delta):
 	var vec = Vector2((-1 if Input.is_action_pressed("ui_left") else 0) + (1 if Input.is_action_pressed("ui_right") else 0), 
 					  (-1 if Input.is_action_pressed("ui_up") else 0) + (1 if Input.is_action_pressed("ui_down") else 0))
+	processlocalavatarpositionVec(vec, delta)
+	
+func processlocalavatarpositionVec(vec, delta):
 	rect_position = Vector2(clamp(rect_position.x + vec.x*200*delta, 0, 500), 
 							clamp(rect_position.y + vec.y*200*delta, 0, 300))
 		
