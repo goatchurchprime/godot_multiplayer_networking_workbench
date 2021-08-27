@@ -186,13 +186,11 @@ margin_bottom = -256.0
 color = Color( 0.215686, 0.145098, 0.294118, 1 )
 
 [node name="Servermode" type="Control" parent="MQTTsignalling"]
-visible = false
 anchor_right = 1.0
 anchor_bottom = 1.0
-margin_left = 322.0
-margin_top = 7.0
-margin_right = -7.0
-margin_bottom = -17.0
+margin_left = 364.0
+margin_top = 11.0
+margin_bottom = -8.00012
 script = ExtResource( 7 )
 
 [node name="WebRTCmultiplayerserver" type="Control" parent="MQTTsignalling/Servermode"]
@@ -250,12 +248,13 @@ __meta__ = {
 }
 
 [node name="Clientmode" type="Control" parent="MQTTsignalling"]
+visible = false
 anchor_right = 1.0
 anchor_bottom = 1.0
-margin_left = 325.0
-margin_top = 22.0
-margin_right = -32.0
-margin_bottom = -14.0
+margin_left = 375.335
+margin_top = 10.9231
+margin_right = -14.6655
+margin_bottom = -14.077
 script = ExtResource( 8 )
 __meta__ = {
 "_edit_use_anchors_": false
@@ -264,7 +263,7 @@ __meta__ = {
 [node name="WebRTCmultiplayerclient" type="Control" parent="MQTTsignalling/Clientmode"]
 margin_left = -3.0
 margin_top = 9.0
-margin_right = 183.0
+margin_right = 135.0
 margin_bottom = 35.0
 script = ExtResource( 9 )
 __meta__ = {
@@ -272,25 +271,25 @@ __meta__ = {
 }
 
 [node name="StartWebRTCmultiplayer" type="Button" parent="MQTTsignalling/Clientmode/WebRTCmultiplayerclient"]
-margin_left = 3.0
-margin_top = -0.0768967
-margin_right = 130.0
-margin_bottom = 19.9231
+margin_left = 8.4729
+margin_top = 15.0
+margin_right = 135.473
+margin_bottom = 35.0
 toggle_mode = true
 text = "StartWebrtc client"
 
 [node name="statuslabel" type="Label" parent="MQTTsignalling/Clientmode/WebRTCmultiplayerclient"]
 margin_left = 8.4729
-margin_top = 23.5227
+margin_top = 38.5227
 margin_right = 50.4729
-margin_bottom = 44.5227
+margin_bottom = 59.5227
 text = "null"
 
 [node name="StartClient" type="Button" parent="MQTTsignalling/Clientmode"]
 margin_left = 5.47289
-margin_top = -15.0769
+margin_top = -0.0769186
 margin_right = 87.4729
-margin_bottom = 4.92311
+margin_bottom = 19.9231
 toggle_mode = true
 text = "Start mqtt"
 __meta__ = {
@@ -311,19 +310,19 @@ __meta__ = {
 script = ExtResource( 4 )
 
 [node name="brokeraddress" type="LineEdit" parent="MQTTsignalling"]
-margin_left = 4.87899
+margin_left = 5.0
 margin_top = 7.0
-margin_right = 199.879
+margin_right = 226.0
 margin_bottom = 31.0
 hint_tooltip = "MQTT broker URL"
-text = "test.mosquitto.org"
+text = "broker.mqttdashboard.com:8000"
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
 [node name="usewebsocket" type="CheckBox" parent="MQTTsignalling/brokeraddress"]
-margin_left = 203.0
-margin_right = 302.0
+margin_left = 237.121
+margin_right = 336.121
 margin_bottom = 24.0
 text = "Websocket"
 __meta__ = {
@@ -348,10 +347,10 @@ margin_bottom = 21.0477
 text = "Roomname:"
 
 [node name="VSeparator" type="VSeparator" parent="MQTTsignalling"]
-margin_left = 311.0
-margin_top = 22.0769
-margin_right = 322.0
-margin_bottom = 62.0769
+margin_left = 347.879
+margin_top = 24.0
+margin_right = 358.879
+margin_bottom = 64.0
 
 [node name="mqttautoconnect" type="CheckBox" parent="MQTTsignalling"]
 margin_left = 168.0

@@ -13,6 +13,7 @@ export var client_id = ""
 #var websocketurl = "ws://node-red.dynamicdevices.co.uk:1880/ws/test"
 var websocketurl = "ws://test.mosquitto.org:8080/mqtt"
 #var websocketurl = "ws://echo.websocket.org"
+
 	
 var socket = null
 var sslsocket = null

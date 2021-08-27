@@ -87,8 +87,10 @@ func _on_StartClient_toggled(button_pressed):
 		randomize()
 		MQTT.client_id = "c%d" % randi()
 		SetupMQTTsignal.get_node("client_id").text = MQTT.client_id
-		MQTT.server = SetupMQTTsignal.get_node("brokeraddress").text
-		MQTT.websocketurl = "ws://%s:8080/mqtt" % MQTT.server
+		var brokersplit = SetupMQTTsignal.get_node("brokeraddress").text.split(":", true, 1)
+		MQTT.server = brokersplit[0]
+		var websocketport = 8080 if len(brokersplit) == 1 else int(brokersplit[1])
+		MQTT.websocketurl = "ws://%s:%d/mqtt" % [MQTT.server, websocketport]
 		statustopic = "%s/%s/client" % [roomname, MQTT.client_id]
 		MQTT.set_last_will(statustopic, to_json({"subject":"dead"}), true)
 		$StartClient/statuslabel.text = "connecting"
