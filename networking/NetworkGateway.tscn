@@ -1,4 +1,4 @@
-[gd_scene load_steps=13 format=2]
+[gd_scene load_steps=15 format=2]
 
 [ext_resource path="res://networking/NetworkGateway.gd" type="Script" id=1]
 [ext_resource path="res://networking/SignallingWebsocket.gd" type="Script" id=2]
@@ -12,6 +12,8 @@
 [ext_resource path="res://networking/UDPdiscoveryclient.gd" type="Script" id=10]
 [ext_resource path="res://networking/Enetmultiplayerserver.gd" type="Script" id=11]
 [ext_resource path="res://networking/PlayerConnections.gd" type="Script" id=12]
+[ext_resource path="res://networking/Websocketmultiplayerserver.gd" type="Script" id=13]
+[ext_resource path="res://networking/Websocketmultiplayerclient.gd" type="Script" id=14]
 
 [node name="NetworkGateway" type="Panel"]
 self_modulate = Color( 0.32549, 0.317647, 0.317647, 1 )
@@ -385,6 +387,7 @@ pressed = true
 text = "autoconnect"
 
 [node name="ENetMultiplayer" type="ColorRect" parent="."]
+visible = false
 margin_left = 9.72998
 margin_top = 74.5704
 margin_right = 363.73
@@ -447,6 +450,73 @@ margin_bottom = 40.056
 pressed = true
 text = "autoconnect"
 
+[node name="WebSocketMultiplayer" type="ColorRect" parent="."]
+visible = false
+margin_left = 9.72998
+margin_top = 74.5704
+margin_right = 363.73
+margin_bottom = 132.57
+color = Color( 0.0980392, 0.305882, 0.160784, 1 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Servermode" type="Control" parent="WebSocketMultiplayer"]
+margin_left = 157.0
+margin_top = 4.0
+margin_right = 339.0
+margin_bottom = 49.0
+script = ExtResource( 13 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="StartWebSocketmultiplayer" type="Button" parent="WebSocketMultiplayer/Servermode"]
+margin_right = 127.0
+margin_bottom = 24.0
+toggle_mode = true
+text = "Start WebSocket server"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Clientmode" type="Control" parent="WebSocketMultiplayer"]
+margin_left = 157.0
+margin_top = 4.0
+margin_right = 346.0
+margin_bottom = 50.0
+script = ExtResource( 14 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="StartWebSocketmultiplayer" type="Button" parent="WebSocketMultiplayer/Clientmode"]
+margin_left = 1.52588e-05
+margin_top = -0.086998
+margin_right = 127.0
+margin_bottom = 23.913
+toggle_mode = true
+text = "Start WebSocket client"
+
+[node name="Label" type="Label" parent="WebSocketMultiplayer"]
+margin_left = 8.74201
+margin_top = 4.087
+margin_right = 119.742
+margin_bottom = 18.087
+text = "WebSocket multiplayer"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="autoconnect" type="CheckBox" parent="WebSocketMultiplayer"]
+anchor_bottom = 0.068
+margin_left = 8.74202
+margin_top = 20.0
+margin_right = 115.742
+margin_bottom = 40.056
+pressed = true
+text = "autoconnect"
+
 [node name="PlayerConnections" type="ColorRect" parent="."]
 margin_left = 9.0
 margin_top = 135.0
@@ -492,6 +562,7 @@ margin_right = 539.0
 margin_bottom = 79.0
 
 [node name="Interpdelay" type="HSlider" parent="."]
+visible = false
 margin_left = 217.879
 margin_top = 326.177
 margin_right = 529.879
@@ -514,6 +585,7 @@ __meta__ = {
 }
 
 [node name="DoppelgangerPanel" type="Panel" parent="."]
+visible = false
 margin_left = 3.0
 margin_top = 305.0
 margin_right = 551.0
@@ -578,4 +650,6 @@ script = ExtResource( 2 )
 [connection signal="toggled" from="MQTTsignalling/Clientmode/StartClient" to="MQTTsignalling/Clientmode" method="_on_StartClient_toggled"]
 [connection signal="toggled" from="ENetMultiplayer/Servermode/StartENetmultiplayer" to="ENetMultiplayer/Servermode" method="_on_StartENetmultiplayer_toggled"]
 [connection signal="toggled" from="ENetMultiplayer/Clientmode/StartENetmultiplayer" to="ENetMultiplayer/Clientmode" method="_on_StartENetmultiplayer_toggled"]
+[connection signal="toggled" from="WebSocketMultiplayer/Servermode/StartWebSocketmultiplayer" to="WebSocketMultiplayer/Servermode" method="_on_StartWebSocketmultiplayer_toggled"]
+[connection signal="toggled" from="WebSocketMultiplayer/Clientmode/StartWebSocketmultiplayer" to="WebSocketMultiplayer/Clientmode" method="_on_StartWebSocketmultiplayer_toggled"]
 [connection signal="toggled" from="PlayerConnections/Doppelganger" to="PlayerConnections" method="_on_Doppelganger_toggled"]

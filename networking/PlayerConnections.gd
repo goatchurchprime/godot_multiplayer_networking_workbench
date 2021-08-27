@@ -102,8 +102,8 @@ func networkplayer_connected_to_server(serverisself):
 
 func clientplayer_connection_failed():
 	connectionlog("_connection failed\n")
-	NetworkGateway.get_node("NetworkOptions").select(NetworkGateway.NETWORK_OPTIONS.NETWORK_OFF)
-
+	NetworkGateway.setnetworkoff()
+	
 func updateplayerlist():
 	var plp = $PlayerList.get_item_text($PlayerList.selected).split(" ")[0].replace("*", "")
 	$PlayerList.clear()

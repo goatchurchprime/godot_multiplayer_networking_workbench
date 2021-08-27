@@ -2,11 +2,6 @@ extends Panel
 
 # keep trying to get the HTML5 version working (not connecting to mqtt!)
 # http://goatchurchprime.github.io/godot_multiplayer_networking_workbench/minimal_peer_networking.html
-# Then provide as a 3 panel demo, and ask if the webrtc could 
-# route the data through the server instead of peer to peer.  
-# (it leaves the situation in difficult states of partial connections)
-
-# (websocket disable too) 
 
 
 export var remoteservers = [ "192.168.43.1", "192.168.8.111" ]
@@ -33,6 +28,7 @@ func _on_ProtocolOptions_item_selected(np):
 	assert ($NetworkOptions.selected == 0 and $NetworkOptionsMQTTWebRTC.selected == 0)
 	var selectasmqttwebrtc = (np == NETWORK_PROTOCOL.WEBRTC_MQTTSIGNAL)
 	var selectasenet = (np == NETWORK_PROTOCOL.ENET)
+	var selectaswebsocket = (np == NETWORK_PROTOCOL.WEBSOCKET)	
 	$NetworkOptions.visible = not selectasmqttwebrtc
 	$NetworkOptionsMQTTWebRTC.visible = selectasmqttwebrtc
 	$MQTTsignalling.visible = selectasmqttwebrtc
@@ -44,6 +40,10 @@ func _on_ProtocolOptions_item_selected(np):
 	$ENetMultiplayer.visible = selectasenet
 	$ENetMultiplayer/Servermode.visible = false
 	$ENetMultiplayer/Clientmode.visible = false
+	$WebSocketMultiplayer.visible = selectaswebsocket
+	$WebSocketMultiplayer/Servermode.visible = false
+	$WebSocketMultiplayer/Clientmode.visible = false
+
 	
 func _on_OptionButton_item_selected(ns):
 	var selectasoff = (ns == NETWORK_OPTIONS.NETWORK_OFF)
@@ -69,6 +69,8 @@ func _on_OptionButton_item_selected(ns):
 		$UDPipdiscovery/Clientmode.stopUDPreceiving()
 	$ENetMultiplayer/Servermode/StartENetmultiplayer.pressed = false
 	$ENetMultiplayer/Clientmode/StartENetmultiplayer.pressed = false
+	$WebSocketMultiplayer/Servermode/StartWebSocketmultiplayer.pressed = false
+	$WebSocketMultiplayer/Clientmode/StartWebSocketmultiplayer.pressed = false
 	
 	var np = $ProtocolOptions.selected 
 	assert (np != NETWORK_PROTOCOL.WEBRTC_MQTTSIGNAL)
@@ -77,6 +79,8 @@ func _on_OptionButton_item_selected(ns):
 	var selectasclient = (ns > NETWORK_OPTIONS.LOCAL_NETWORK)
 	var selectassearchingclient = (ns == NETWORK_OPTIONS.LOCAL_NETWORK)
 	var selectUDPipdiscoveryserver = selectasserver and (not OS.has_feature("Server")) and (not OS.has_feature("HTML5"))
+	var selectasenet = (np == NETWORK_PROTOCOL.ENET)
+	var selectaswebsocket = (np == NETWORK_PROTOCOL.WEBSOCKET)	
 
 	if selectasoff:
 		$UDPipdiscovery.visible = (not OS.has_feature("Server")) and (not OS.has_feature("HTML5"))
@@ -90,7 +94,6 @@ func _on_OptionButton_item_selected(ns):
 	if selectassearchingclient:
 		$UDPipdiscovery/Clientmode.startUDPreceiving()
 	
-	var selectasenet = (np == NETWORK_PROTOCOL.ENET)
 	if selectasenet:
 		$ENetMultiplayer/Servermode.visible = selectasserver
 		$ENetMultiplayer/Clientmode.visible = selectasclient or selectassearchingclient
@@ -101,6 +104,15 @@ func _on_OptionButton_item_selected(ns):
 			if selectasclient:
 				$ENetMultiplayer/Clientmode/StartENetmultiplayer.pressed = true
 
+	if selectaswebsocket:
+		$WebSocketMultiplayer/Servermode.visible = selectasserver
+		$WebSocketMultiplayer/Clientmode.visible = selectasclient or selectassearchingclient
+		$WebSocketMultiplayer/Clientmode/StartWebSocketmultiplayer.disabled = selectassearchingclient
+		if $WebSocketMultiplayer/autoconnect.pressed:
+			if selectasserver:
+				$WebSocketMultiplayer/Servermode/StartWebSocketmultiplayer.pressed = true
+			if selectasclient:
+				$WebSocketMultiplayer/Clientmode/StartWebSocketmultiplayer.pressed = true
 
 func _on_udpenabled_toggled(button_pressed):
 	$NetworkOptions.set_item_disabled(NETWORK_OPTIONS.LOCAL_NETWORK, not button_pressed)
@@ -146,13 +158,10 @@ func _input(event):
 		elif (event.scancode == KEY_G):
 			$PlayerConnections/Doppelganger.pressed = not $PlayerConnections/Doppelganger.pressed
 
-
 func setnetworkoff():
 	$NetworkOptions.select(NETWORK_OPTIONS.NETWORK_OFF)
-	
-
-
-				
+	_on_OptionButton_item_selected(NETWORK_OPTIONS.NETWORK_OFF)
+					
 func _data_channel_received(channel: Object):
 	print("_data_channel_received ", channel)
 
