@@ -8,16 +8,16 @@ export var remoteservers = [ "192.168.43.1", "192.168.8.111" ]
 
 
 
-enum NETWORK_OPTIONS { NETWORK_OFF = 0
-					   AS_SERVER = 1,
-					   LOCAL_NETWORK = 2,
-					   FIXED_URL = 3,
-					 }
 enum NETWORK_PROTOCOL { ENET = 0, 
 						WEBSOCKET = 1,
 						WEBRTC_WEBSOCKETSIGNAL = 2
 						WEBRTC_MQTTSIGNAL = 3
 					  }
+enum NETWORK_OPTIONS { NETWORK_OFF = 0
+					   AS_SERVER = 1,
+					   LOCAL_NETWORK = 2,
+					   FIXED_URL = 3,
+					 }
 
 const errordecodes = { ERR_ALREADY_IN_USE:"ERR_ALREADY_IN_USE", 
 					   ERR_CANT_CREATE:"ERR_CANT_CREATE"
@@ -140,8 +140,12 @@ func _ready():
 		$NetworkOptions.select(NETWORK_OPTIONS.AS_SERVER)
 	if OS.has_feature("HTML5"):
 		$NetworkOptions.set_item_disabled(NETWORK_OPTIONS.LOCAL_NETWORK,  true)
+		$NetworkOptions.set_item_disabled(NETWORK_OPTIONS.AS_SERVER,  true)
 		$MQTTsignalling/brokeraddress/usewebsocket.pressed = true
 		$MQTTsignalling/brokeraddress/usewebsocket.disabled = true
+		$ProtocolOptions.set_item_disabled(NETWORK_PROTOCOL.ENET)
+		$ProtocolOptions.selected = max(NETWORK_PROTOCOL.WEBSOCKET, $ProtocolOptions.selected)
+
 
 func _input(event):
 	if event is InputEventKey and event.pressed:
