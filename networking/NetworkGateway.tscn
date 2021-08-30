@@ -1,4 +1,4 @@
-[gd_scene load_steps=15 format=2]
+[gd_scene load_steps=17 format=2]
 
 [ext_resource path="res://networking/NetworkGateway.gd" type="Script" id=1]
 [ext_resource path="res://networking/SignallingWebsocket.gd" type="Script" id=2]
@@ -14,6 +14,8 @@
 [ext_resource path="res://networking/PlayerConnections.gd" type="Script" id=12]
 [ext_resource path="res://networking/Websocketmultiplayerserver.gd" type="Script" id=13]
 [ext_resource path="res://networking/Websocketmultiplayerclient.gd" type="Script" id=14]
+[ext_resource path="res://networking/ServermodeWebSocketsignal.gd" type="Script" id=15]
+[ext_resource path="res://networking/ClientmodeWebSocketsignal.gd" type="Script" id=16]
 
 [node name="NetworkGateway" type="Panel"]
 self_modulate = Color( 0.32549, 0.317647, 0.317647, 1 )
@@ -31,9 +33,9 @@ margin_left = 69.0394
 margin_top = 11.087
 margin_right = 271.039
 margin_bottom = 31.087
-text = "WebRTC (mqtt signal)"
-items = [ "ENet", null, false, 0, null, "WebSocket", null, false, 1, null, "WebRTC (websocket signal)", null, true, 2, null, "WebRTC (mqtt signal)", null, false, 3, null ]
-selected = 3
+text = "WebRTC (websocket signal)"
+items = [ "ENet", null, false, 0, null, "WebSocket", null, false, 1, null, "WebRTC (websocket signal)", null, false, 2, null, "WebRTC (mqtt signal)", null, false, 3, null ]
+selected = 2
 __meta__ = {
 "_edit_use_anchors_": false
 }
@@ -177,6 +179,7 @@ pressed = true
 text = "enable"
 
 [node name="MQTTsignalling" type="ColorRect" parent="."]
+visible = false
 anchor_right = 1.0
 anchor_bottom = 1.0
 margin_left = 12.0
@@ -389,7 +392,6 @@ pressed = true
 text = "autoconnect"
 
 [node name="WebSocketsignalling" type="ColorRect" parent="."]
-visible = false
 anchor_right = 1.0
 anchor_bottom = 1.0
 margin_left = 12.0
@@ -402,11 +404,13 @@ __meta__ = {
 }
 
 [node name="Servermode" type="Control" parent="WebSocketsignalling"]
+visible = false
 anchor_right = 1.0
 anchor_bottom = 1.0
 margin_left = 364.0
 margin_top = 11.0
 margin_bottom = -8.00012
+script = ExtResource( 15 )
 
 [node name="WebRTCmultiplayerserver" type="Control" parent="WebSocketsignalling/Servermode"]
 margin_left = 2.8562
@@ -445,21 +449,14 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="StartServer" type="Button" parent="WebSocketsignalling/Servermode"]
-margin_left = -134.13
-margin_top = -11.0
-margin_right = -25.13
-margin_bottom = 8.99997
-text = "Start WS server"
-
 [node name="Clientmode" type="Control" parent="WebSocketsignalling"]
-visible = false
 anchor_right = 1.0
 anchor_bottom = 1.0
-margin_left = 375.335
-margin_top = 10.9231
-margin_right = -14.6655
-margin_bottom = -14.077
+margin_left = 375.0
+margin_top = 11.0
+margin_right = -15.0
+margin_bottom = -2.99973
+script = ExtResource( 16 )
 __meta__ = {
 "_edit_use_anchors_": false
 }
@@ -476,9 +473,9 @@ __meta__ = {
 
 [node name="StartWebRTCmultiplayer" type="Button" parent="WebSocketsignalling/Clientmode/WebRTCmultiplayerclient"]
 margin_left = 8.4729
-margin_top = 15.0
+margin_top = 8.0
 margin_right = 135.473
-margin_bottom = 35.0
+margin_bottom = 28.0
 toggle_mode = true
 text = "StartWebrtc client"
 
@@ -488,27 +485,6 @@ margin_top = 38.5227
 margin_right = 50.4729
 margin_bottom = 59.5227
 text = "null"
-
-[node name="StartClient" type="Button" parent="WebSocketsignalling/Clientmode"]
-margin_left = 5.47289
-margin_top = -0.0769186
-margin_right = 87.4729
-margin_bottom = 19.9231
-toggle_mode = true
-text = "Start mqtt"
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="statuslabel" type="Label" parent="WebSocketsignalling/Clientmode/StartClient"]
-margin_left = 97.3852
-margin_top = 3.92308
-margin_right = 137.386
-margin_bottom = 17.9231
-text = "Off"
-__meta__ = {
-"_edit_use_anchors_": false
-}
 
 [node name="VSeparator" type="VSeparator" parent="WebSocketsignalling"]
 margin_left = 347.879
@@ -542,13 +518,6 @@ text = "autoconnect"
 __meta__ = {
 "_edit_use_anchors_": false
 }
-
-[node name="CheckBox" type="CheckBox" parent="WebSocketsignalling"]
-margin_left = 8.747
-margin_top = 24.0
-margin_right = 32.747
-margin_bottom = 48.0
-text = "websocket_autoconnect"
 
 [node name="ENetMultiplayer" type="ColorRect" parent="."]
 visible = false
@@ -813,9 +782,7 @@ script = ExtResource( 2 )
 [connection signal="toggled" from="MQTTsignalling/Clientmode/WebRTCmultiplayerclient/StartWebRTCmultiplayer" to="MQTTsignalling/Clientmode/WebRTCmultiplayerclient" method="_on_StartWebRTCmultiplayer_toggled"]
 [connection signal="toggled" from="MQTTsignalling/Clientmode/StartClient" to="MQTTsignalling/Clientmode" method="_on_StartClient_toggled"]
 [connection signal="toggled" from="WebSocketsignalling/Servermode/WebRTCmultiplayerserver/StartWebRTCmultiplayer" to="WebSocketsignalling/Servermode/WebRTCmultiplayerserver" method="_on_StartWebRTCmultiplayer_toggled"]
-[connection signal="toggled" from="WebSocketsignalling/Servermode/StartServer" to="WebSocketsignalling/Servermode" method="_on_StartServer_toggled"]
 [connection signal="toggled" from="WebSocketsignalling/Clientmode/WebRTCmultiplayerclient/StartWebRTCmultiplayer" to="WebSocketsignalling/Clientmode/WebRTCmultiplayerclient" method="_on_StartWebRTCmultiplayer_toggled"]
-[connection signal="toggled" from="WebSocketsignalling/Clientmode/StartClient" to="WebSocketsignalling/Clientmode" method="_on_StartClient_toggled"]
 [connection signal="toggled" from="ENetMultiplayer/Servermode/StartENetmultiplayer" to="ENetMultiplayer/Servermode" method="_on_StartENetmultiplayer_toggled"]
 [connection signal="toggled" from="ENetMultiplayer/Clientmode/StartENetmultiplayer" to="ENetMultiplayer/Clientmode" method="_on_StartENetmultiplayer_toggled"]
 [connection signal="toggled" from="WebSocketMultiplayer/Servermode/StartWebSocketmultiplayer" to="WebSocketMultiplayer/Servermode" method="_on_StartWebSocketmultiplayer_toggled"]

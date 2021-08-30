@@ -94,6 +94,7 @@ func _on_StartServer_toggled(button_pressed):
 		MQTT.connect("broker_connected", self, "on_broker_connect")
 		MQTT.connect("broker_disconnected", self, "on_broker_disconnect")
 		roomname = SetupMQTTsignal.get_node("roomname").text
+		$StartServer/statuslabel.text = "on"
 		randomize()
 		MQTT.client_id = "s%d" % randi()
 		SetupMQTTsignal.get_node("client_id").text = MQTT.client_id
@@ -118,11 +119,10 @@ func _on_StartServer_toggled(button_pressed):
 		$StartServer/statuslabel.text = "off"
 		SetupMQTTsignal.get_node("client_id").text = ""
 		for s in clientidtowclientid:
-			emit_signal("mqttsig_client_disconnected", clientidtowclientid[s])		
+			emit_signal("mqttsig_client_disconnected", clientidtowclientid[s])
 		$ClientsList.clear()
 		$ClientsList.add_item("none", 0)
 		clientidtowclientid.clear()
 		wclientidtoclientid.clear()
-		$WebRTCmultiplayerserver/StartWebRTCmultiplayer.disabled = true
 		
 		
