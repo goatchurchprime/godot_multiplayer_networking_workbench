@@ -2,7 +2,7 @@ extends Node
 
 var doppelgangernode = null
 var PlayerConnections = null
-var viaplayerconnections = false
+var viaplayerconnections = true
 
 const CFI_TIMESTAMP 		= -1 
 

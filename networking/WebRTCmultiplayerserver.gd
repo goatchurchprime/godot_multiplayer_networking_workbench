@@ -2,7 +2,6 @@ extends Control
 
 onready var serversignalling = get_parent()
 onready var PlayerConnections = get_node("../../../PlayerConnections")
-var enable_experimental_server_relay = true
 
 func server_ice_candidate_created(mid_name, index_name, sdp_name, id):
 	serversignalling.sendpacket_toclient(id, {"subject":"ice_candidate", "mid_name":mid_name, "index_name":index_name, "sdp_name":sdp_name})
@@ -48,10 +47,7 @@ func _on_StartWebRTCmultiplayer_toggled(button_pressed):
 		var networkedmultiplayerserver = WebRTCMultiplayer.new()
 		var servererror = networkedmultiplayerserver.initialize(1, true)
 		assert (servererror == 0)
-		if enable_experimental_server_relay and networkedmultiplayerserver.has_method("set_server_relay_enabled"):
-			print("!!! enabling server relay !!!")
-			networkedmultiplayerserver.set_server_relay_enabled(true)
-			PlayerConnections.server_relay_player_connections = true
+		PlayerConnections.webrtc_server_relay = true
 		PlayerConnections.SetNetworkedMultiplayerPeer(networkedmultiplayerserver)
 			
 		assert (get_tree().get_network_unique_id() == 1)
@@ -63,7 +59,7 @@ func _on_StartWebRTCmultiplayer_toggled(button_pressed):
 		serversignalling.disconnect("mqttsig_client_connected", self, "server_client_connected") 
 		serversignalling.disconnect("mqttsig_client_disconnected", self, "server_client_disconnected") 
 		serversignalling.disconnect("mqttsig_packet_received", self, "server_packet_received") 
-		PlayerConnections.server_relay_player_connections = false
+		PlayerConnections.webrtc_server_relay = false
 		if get_tree().get_network_peer() != null:
 			PlayerConnections.force_server_disconnect()
 
