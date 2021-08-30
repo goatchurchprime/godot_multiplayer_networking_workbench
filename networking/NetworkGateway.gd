@@ -64,6 +64,8 @@ func _on_OptionButton_item_selected(ns):
 	$WebSocketMultiplayer/Clientmode/StartWebSocketmultiplayer.pressed = false
 	if $WebSocketsignalling/Servermode.websocketserver != null:
 		$WebSocketsignalling/Servermode.stopwebsocketsignalserver()
+	if $WebSocketsignalling/Clientmode.websocketclient != null:
+		$WebSocketsignalling/Clientmode.stopwebsocketsignalclient()
 
 	var np = $ProtocolOptions.selected 
 	assert (np != NETWORK_PROTOCOL.WEBRTC_MQTTSIGNAL)
@@ -109,14 +111,16 @@ func _on_OptionButton_item_selected(ns):
 				$WebSocketMultiplayer/Clientmode/StartWebSocketmultiplayer.pressed = true
 
 	if selectaswebrtcwebsocket:
+		$WebSocketsignalling/Servermode.visible = selectasserver
+		$WebSocketsignalling/Clientmode.visible = selectasclient or selectassearchingclient
 		$WebSocketsignalling/Servermode/WebRTCmultiplayerserver/StartWebRTCmultiplayer.pressed = false
 		$WebSocketsignalling/Servermode/WebRTCmultiplayerserver/StartWebRTCmultiplayer.disabled = true
 		$WebSocketsignalling/Clientmode/WebRTCmultiplayerclient/StartWebRTCmultiplayer.pressed = false
 		$WebSocketsignalling/Clientmode/WebRTCmultiplayerclient/StartWebRTCmultiplayer.disabled = true
 		if selectasserver:
 			$WebSocketsignalling/Servermode.startwebsocketsignalserver()
-		#if selectasclient:
-		#	$WebSocketsignalling/Clientmode.startwebsocketsignalclient()
+		if selectasclient:
+			$WebSocketsignalling/Clientmode.startwebsocketsignalclient()
 
 
 func _on_udpenabled_toggled(button_pressed):

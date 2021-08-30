@@ -1,13 +1,13 @@
 extends Control
 
-signal mqttsig_connection_established(clientid)
+signal mqttsig_connection_established(wclientid)
 signal mqttsig_connection_closed()
 signal mqttsig_packet_received(v)
 
 onready var NetworkGateway = get_node("../..")
 var websocketclient = null
 const websocketprotocol = "webrtc-signalling"
-var clientid = 0
+var wclientid = 0
 
 func _ready():
 	set_process(false)
@@ -16,8 +16,7 @@ func _process(delta):
 	websocketclient.poll()
 
 func sendpacket_toserver(v):
-	var p = to_json(v)
-	websocketclient.put_packet(p)
+	websocketclient.get_peer(1).put_packet(var2bytes(v))
 
 func wsc_connection_closed(was_clean_close: bool):
 	print("wsc_connection_closed ", was_clean_close)
@@ -30,7 +29,7 @@ func wsc_connection_error():
 func wsc_connection_established(protocol: String):
 	print("wsc_connection_established ", protocol)
 	get_node("../client_id").text = "connecting"
-	clientid = -1
+	wclientid = -1
 
 func wsc_server_close_request(code: int, reason: String):
 	print("wsc_server_close_request ", code, " ", reason)
@@ -39,12 +38,15 @@ func wsc_server_close_request(code: int, reason: String):
 func wsc_data_received():
 	while websocketclient.get_peer(1).get_available_packet_count() != 0:
 		var p = websocketclient.get_peer(1).get_packet()
-		var v = parse_json(p)
+		var v = bytes2var(p)
 		if v != null and v.has("subject"):
 			if v["subject"] == "firstmessage":
-				assert (clientid == -1)
-				clientid = v["clientid"]
-				get_node("../client_id").text = str(clientid)
+				assert (wclientid == -1)
+				wclientid = v["clientid"]
+				get_node("../client_id").text = str(wclientid)
+				$WebRTCmultiplayerclient/StartWebRTCmultiplayer.disabled = false
+				if get_node("../autoconnect").pressed:
+					$WebRTCmultiplayerclient/StartWebRTCmultiplayer.pressed = true
 			else:
 				emit_signal("mqttsig_packet_received", v)
 
@@ -78,4 +80,4 @@ func stopwebsocketsignalclient():
 	websocketclient.disconnect("data_received", self, "wsc_data_received")
 	websocketclient = null
 	get_node("../client_id").text = "off"
-	clientid = 0
+	wclientid = 0

@@ -54,7 +54,6 @@ func client_packet_received(v):
 
 func _on_StartWebRTCmultiplayer_toggled(button_pressed):
 	if button_pressed:
-		assert (clientsignalling.wclientid != 0)
 		clientsignalling.connect("mqttsig_connection_established", self, "client_connection_established") 
 		clientsignalling.connect("mqttsig_connection_closed", self, "client_connection_closed") 
 		clientsignalling.connect("mqttsig_packet_received", self, "client_packet_received") 
