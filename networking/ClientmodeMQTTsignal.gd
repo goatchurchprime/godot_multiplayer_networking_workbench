@@ -99,7 +99,6 @@ func _on_StartClient_toggled(button_pressed):
 		else:
 			MQTT.connect_to_server()
 		
-
 	else:
 		print("Disconnecting MQTT")
 		MQTT.disconnect("received_message", self, "received_mqtt")

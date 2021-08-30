@@ -230,8 +230,12 @@ func connect_to_server(usessl=false):
 	socket.connect_to_host(self.server, self.port)
 	while not socket.is_connected_to_host():
 		yield(get_tree().create_timer(0.2), "timeout")
+		if socket == null:
+			return false
 	while socket.get_status() != StreamPeerTCP.STATUS_CONNECTED:
 		yield(get_tree().create_timer(0.2), "timeout")
+		if socket == null:
+			return false
 
 	if usessl:
 		sslsocket = StreamPeerSSL.new()
@@ -456,7 +460,7 @@ func wait_msg():
 	var msg = data if binarymessages else data.get_string_from_ascii()
 	
 	emit_signal("received_message", topic, msg)
-	print("Received message", [topic, msg.substr(0, 30)])
+	#print("Received message", [topic, msg.substr(0, 30)])
 	
 #	self.cb(topic, msg)
 	if op & 6 == 2:

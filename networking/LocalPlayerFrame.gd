@@ -1,6 +1,8 @@
 extends Node
 
 var doppelgangernode = null
+var PlayerConnections = null
+var viaplayerconnections = false
 
 const CFI_TIMESTAMP 		= -1 
 
@@ -37,8 +39,10 @@ func thinframedata(fd):
 			framedata0[k] = v
 	return vd
 
+remote func networkedavatarthinnedframedata(vd):
+	print("networkedavatarthinnedframedata shouldn't get called on LocalPlayer")
 
-var framedividerVal = 5
+var framedividerVal = 20
 var framedividerCount = framedividerVal
 var DframereportCount = 0
 var Dcumulativebytes = 0
@@ -66,7 +70,11 @@ func _process(delta):
 	
 	if get_parent().networkID >= 1:
 		vd[CFI_TIMESTAMP] = tstamp
-		rpc("networkedavatarthinnedframedata", vd)
+		if viaplayerconnections:
+			vd["playernodename"] = get_parent().get_name()
+			PlayerConnections.rpc("networkedavatarthinnedframedataPC", vd)
+		else:
+			rpc("networkedavatarthinnedframedata", vd)
 		
 	if doppelgangernode != null:
 		vd[CFI_TIMESTAMP] = tstamp + 100

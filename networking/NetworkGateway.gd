@@ -33,9 +33,7 @@ func _on_ProtocolOptions_item_selected(np):
 	$NetworkOptionsMQTTWebRTC.visible = selectasmqttwebrtc
 	$MQTTsignalling.visible = selectasmqttwebrtc
 	$MQTTsignalling/Servermode.visible = false
-	$MQTTsignalling/Servermode/WebRTCmultiplayerserver/StartWebRTCmultiplayer.disabled = true
 	$MQTTsignalling/Clientmode.visible = false
-	$MQTTsignalling/Clientmode/WebRTCmultiplayerclient/StartWebRTCmultiplayer.disabled = true
 	$UDPipdiscovery.visible = $NetworkOptions.visible and (not OS.has_feature("Server")) and (not OS.has_feature("HTML5"))
 	$ENetMultiplayer.visible = selectasenet
 	$ENetMultiplayer/Servermode.visible = false
@@ -46,17 +44,10 @@ func _on_ProtocolOptions_item_selected(np):
 
 	
 func _on_OptionButton_item_selected(ns):
+	print("_on_OptionButton_item_selected_on_OptionButton_item_selected_on_OptionButton_item_selected ", ns)
 	var selectasoff = (ns == NETWORK_OPTIONS.NETWORK_OFF)
 	if not selectasoff:
 		$PlayerConnections/ConnectionLog.text = ""
-	if $MQTTsignalling.visible:
-		$MQTTsignalling/Servermode/WebRTCmultiplayerserver.pressed = false
-		$MQTTsignalling/Servermode/WebRTCmultiplayerserver/StartWebRTCmultiplayer.disabled = true
-		$MQTTsignalling/Servermode.visible = false
-		$MQTTsignalling/Clientmode/WebRTCmultiplayerclient.pressed = false
-		$MQTTsignalling/Clientmode/WebRTCmultiplayerclient/StartWebRTCmultiplayer.disabled = true		
-		$MQTTsignalling/Clientmode.visible = false
-
 
 	if $PlayerConnections.LocalPlayer.networkID != 0:
 		if get_tree().get_network_peer() != null:
@@ -120,6 +111,8 @@ func _on_udpenabled_toggled(button_pressed):
 func _on_NetworkOptionsMQTTWebRTC_item_selected(ns):
 	assert ($ProtocolOptions.selected == NETWORK_PROTOCOL.WEBRTC_MQTTSIGNAL)
 	var selectasoff = (ns == NETWORK_OPTIONS.NETWORK_OFF)
+	if not selectasoff:
+		$PlayerConnections/ConnectionLog.text = ""
 	var selectasserver = (ns == NETWORK_OPTIONS.AS_SERVER)
 	var selectasclient = (ns >= NETWORK_OPTIONS.LOCAL_NETWORK)
 	$MQTTsignalling/Servermode.visible = selectasserver
@@ -129,6 +122,11 @@ func _on_NetworkOptionsMQTTWebRTC_item_selected(ns):
 		$MQTTsignalling/Servermode/StartServer.pressed = selectasserver
 	if $MQTTsignalling/mqttautoconnect.pressed or $MQTTsignalling/Clientmode/StartClient.pressed:
 		$MQTTsignalling/Clientmode/StartClient.pressed = selectasclient
+	$MQTTsignalling/Servermode/WebRTCmultiplayerserver/StartWebRTCmultiplayer.pressed = false
+	$MQTTsignalling/Servermode/WebRTCmultiplayerserver/StartWebRTCmultiplayer.disabled = true
+	$MQTTsignalling/Clientmode/WebRTCmultiplayerclient/StartWebRTCmultiplayer.pressed = false
+	$MQTTsignalling/Clientmode/WebRTCmultiplayerclient/StartWebRTCmultiplayer.disabled = true
+
 
 func _ready():
 	for rs in remoteservers:
@@ -143,7 +141,7 @@ func _ready():
 		$NetworkOptions.set_item_disabled(NETWORK_OPTIONS.AS_SERVER,  true)
 		$MQTTsignalling/brokeraddress/usewebsocket.pressed = true
 		$MQTTsignalling/brokeraddress/usewebsocket.disabled = true
-		$ProtocolOptions.set_item_disabled(NETWORK_PROTOCOL.ENET)
+		$ProtocolOptions.set_item_disabled(NETWORK_PROTOCOL.ENET, true)
 		$ProtocolOptions.selected = max(NETWORK_PROTOCOL.WEBSOCKET, $ProtocolOptions.selected)
 
 

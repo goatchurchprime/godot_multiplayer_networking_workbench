@@ -9,6 +9,8 @@ var roomname = ""
 var nextclientnumber = 2
 var clientidtowclientid = { }
 var wclientidtoclientid = { }
+var clearlostretainedclients = true
+var clearlostretainedservers = true
 
 signal mqttsig_client_connected(id)
 signal mqttsig_client_disconnected(id)
@@ -37,7 +39,8 @@ func received_mqtt(topic, msg):
 					nextclientnumber += 1
 					clientidtowclientid[sendingclientid] = wclientid
 					wclientidtoclientid[wclientid] = sendingclientid
-					MQTT.subscribe("%s/%s/client" % [roomname, sendingclientid])
+					if not clearlostretainedclients:
+						MQTT.subscribe("%s/%s/client" % [roomname, sendingclientid])
 					var t = "%s/%s/packet/%s" % [roomname, MQTT.client_id, sendingclientid]
 					MQTT.publish(t, to_json({"subject":"connection_established", "wclientid":wclientid}))
 					emit_signal("mqttsig_client_connected", wclientid)
@@ -45,20 +48,25 @@ func received_mqtt(topic, msg):
 					$ClientsList.selected = $ClientsList.get_item_count()-1
 				
 			elif len(stopic) == 3 and stopic[2] == "client":
-				if clientidtowclientid.has(sendingclientid) and v["subject"] == "dead":
-					#MQTT.unsubscribe("%s/%s/client" % [roomname, sendingclientid])
-					var wclientid = clientidtowclientid[sendingclientid]
-					emit_signal("mqttsig_client_disconnected", wclientid)
-					clientidtowclientid.erase(sendingclientid)
-					wclientidtoclientid.erase(wclientid)
-					MQTT.publish(topic, "", true)
-					var idx = $ClientsList.get_item_index(int(sendingclientid))
-					print(idx)
-					$ClientsList.remove_item(idx)
+				if v["subject"] == "dead":
+					if clientidtowclientid.has(sendingclientid):
+						#MQTT.unsubscribe("%s/%s/client" % [roomname, sendingclientid])
+						var wclientid = clientidtowclientid[sendingclientid]
+						emit_signal("mqttsig_client_disconnected", wclientid)
+						clientidtowclientid.erase(sendingclientid)
+						wclientidtoclientid.erase(wclientid)
+						MQTT.publish(topic, "", true)
+						var idx = $ClientsList.get_item_index(int(sendingclientid))
+						print(idx)
+						$ClientsList.remove_item(idx)
+					else:
+						if clearlostretainedclients:
+							MQTT.publish(topic, "", true)
 
 			elif len(stopic) == 3 and stopic[2] == "server":
 				if v["subject"] == "dead":
-					MQTT.publish(topic, "", true)
+					if clearlostretainedservers:
+						MQTT.publish(topic, "", true)
 
 			else:
 				print("Unrecognized topic ", topic)
@@ -68,7 +76,10 @@ func on_broker_disconnect():
 	
 func on_broker_connect():
 	MQTT.subscribe("%s/+/packet/%s" % [roomname, MQTT.client_id])
-	MQTT.subscribe("%s/+/server" % roomname)
+	if clearlostretainedservers:
+		MQTT.subscribe("%s/+/server" % roomname)
+	if clearlostretainedclients:
+		MQTT.subscribe("%s/+/client" % roomname)
 	var statustopic = "%s/%s/server" % [roomname, MQTT.client_id]
 	MQTT.publish(statustopic, to_json({"subject":"open"}), true)
 	$StartServer/statuslabel.text = "connected"
