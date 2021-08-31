@@ -42,7 +42,7 @@ func thinframedata(fd):
 remote func networkedavatarthinnedframedata(vd):
 	print("networkedavatarthinnedframedata shouldn't get called on LocalPlayer")
 
-var framedividerVal = 20
+var framedividerVal = 10
 var framedividerCount = framedividerVal
 var DframereportCount = 0
 var Dcumulativebytes = 0

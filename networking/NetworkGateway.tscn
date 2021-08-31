@@ -177,6 +177,265 @@ margin_bottom = 27.0
 pressed = true
 text = "enable"
 
+[node name="ENetMultiplayer" type="ColorRect" parent="."]
+margin_left = 9.72998
+margin_top = 74.5704
+margin_right = 363.73
+margin_bottom = 132.57
+color = Color( 0.0980392, 0.305882, 0.160784, 1 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Servermode" type="Control" parent="ENetMultiplayer"]
+margin_left = 157.0
+margin_top = 4.0
+margin_right = 339.0
+margin_bottom = 49.0
+script = ExtResource( 11 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="StartENetmultiplayer" type="Button" parent="ENetMultiplayer/Servermode"]
+margin_right = 127.0
+margin_bottom = 24.0
+toggle_mode = true
+text = "Start ENet server"
+
+[node name="Clientmode" type="Control" parent="ENetMultiplayer"]
+margin_left = 157.0
+margin_top = 4.0
+margin_right = 346.0
+margin_bottom = 50.0
+script = ExtResource( 3 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="StartENetmultiplayer" type="Button" parent="ENetMultiplayer/Clientmode"]
+margin_left = 1.52588e-05
+margin_top = -0.086998
+margin_right = 127.0
+margin_bottom = 23.913
+toggle_mode = true
+text = "Start ENet client"
+
+[node name="Label" type="Label" parent="ENetMultiplayer"]
+margin_left = 8.74201
+margin_top = 4.087
+margin_right = 119.742
+margin_bottom = 18.087
+text = "ENet multiplayer"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="autoconnect" type="CheckBox" parent="ENetMultiplayer"]
+anchor_bottom = 0.068
+margin_left = 8.74202
+margin_top = 20.0
+margin_right = 115.742
+margin_bottom = 40.056
+pressed = true
+text = "autoconnect"
+
+[node name="WebSocketMultiplayer" type="ColorRect" parent="."]
+visible = false
+margin_left = 9.72998
+margin_top = 74.5704
+margin_right = 363.73
+margin_bottom = 132.57
+color = Color( 0.0980392, 0.305882, 0.160784, 1 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Servermode" type="Control" parent="WebSocketMultiplayer"]
+margin_left = 157.0
+margin_top = 4.0
+margin_right = 339.0
+margin_bottom = 49.0
+script = ExtResource( 13 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="StartWebSocketmultiplayer" type="Button" parent="WebSocketMultiplayer/Servermode"]
+margin_right = 127.0
+margin_bottom = 24.0
+toggle_mode = true
+text = "Start WebSocket server"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Clientmode" type="Control" parent="WebSocketMultiplayer"]
+margin_left = 157.0
+margin_top = 4.0
+margin_right = 346.0
+margin_bottom = 50.0
+script = ExtResource( 14 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="StartWebSocketmultiplayer" type="Button" parent="WebSocketMultiplayer/Clientmode"]
+margin_left = -0.25798
+margin_top = -0.086998
+margin_right = 155.742
+margin_bottom = 23.913
+toggle_mode = true
+text = "Start WebSocket client"
+
+[node name="Label" type="Label" parent="WebSocketMultiplayer"]
+margin_left = 8.74201
+margin_top = 4.087
+margin_right = 119.742
+margin_bottom = 18.087
+text = "WebSocket multiplayer"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="autoconnect" type="CheckBox" parent="WebSocketMultiplayer"]
+anchor_bottom = 0.068
+margin_left = 8.74202
+margin_top = 20.0
+margin_right = 115.742
+margin_bottom = 40.056
+pressed = true
+text = "autoconnect"
+
+[node name="WebSocketsignalling" type="ColorRect" parent="."]
+visible = false
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_left = 12.0
+margin_top = 74.5704
+margin_right = -13.9999
+margin_bottom = -249.43
+color = Color( 0.145098, 0.231373, 0.294118, 1 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Servermode" type="Control" parent="WebSocketsignalling"]
+visible = false
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_left = 364.0
+margin_top = 11.0
+margin_bottom = -8.00012
+script = ExtResource( 15 )
+
+[node name="WebRTCmultiplayerserver" type="Control" parent="WebSocketsignalling/Servermode"]
+margin_left = 2.8562
+margin_top = 47.5227
+margin_right = 229.856
+margin_bottom = 129.523
+script = ExtResource( 6 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="StartWebRTCmultiplayer" type="Button" parent="WebSocketsignalling/Servermode/WebRTCmultiplayerserver"]
+margin_left = -7.97717
+margin_top = -23.5996
+margin_right = 123.023
+margin_bottom = -3.59962
+toggle_mode = true
+text = "StartWebrtc server"
+
+[node name="statuslabel" type="Label" parent="WebSocketsignalling/Servermode/WebRTCmultiplayerserver"]
+margin_left = 137.999
+margin_top = -19.9523
+margin_right = 177.999
+margin_bottom = -3.95229
+text = "null"
+
+[node name="ClientsList" type="OptionButton" parent="WebSocketsignalling/Servermode"]
+margin_left = 2.8562
+margin_top = -3.15384
+margin_right = 140.856
+margin_bottom = 16.8462
+text = "none"
+items = [ "none", null, false, 0, null ]
+selected = 0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Clientmode" type="Control" parent="WebSocketsignalling"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_left = 375.0
+margin_top = 11.0
+margin_right = -15.0
+margin_bottom = -2.99973
+script = ExtResource( 16 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="WebRTCmultiplayerclient" type="Control" parent="WebSocketsignalling/Clientmode"]
+margin_left = -3.0
+margin_top = 9.0
+margin_right = 135.0
+margin_bottom = 35.0
+script = ExtResource( 9 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="StartWebRTCmultiplayer" type="Button" parent="WebSocketsignalling/Clientmode/WebRTCmultiplayerclient"]
+margin_left = 8.4729
+margin_top = 8.0
+margin_right = 135.473
+margin_bottom = 28.0
+toggle_mode = true
+text = "StartWebrtc client"
+
+[node name="statuslabel" type="Label" parent="WebSocketsignalling/Clientmode/WebRTCmultiplayerclient"]
+margin_left = 8.4729
+margin_top = 38.5227
+margin_right = 50.4729
+margin_bottom = 59.5227
+text = "null"
+
+[node name="VSeparator" type="VSeparator" parent="WebSocketsignalling"]
+margin_left = 347.879
+margin_top = 5.087
+margin_right = 358.879
+margin_bottom = 45.087
+
+[node name="client_id" type="LineEdit" parent="WebSocketsignalling"]
+margin_left = 130.0
+margin_right = 214.0
+margin_bottom = 24.0
+editable = false
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Label" type="Label" parent="WebSocketsignalling/client_id"]
+margin_left = -130.108
+margin_top = 5.26646
+margin_right = -6.10782
+margin_bottom = 19.2665
+text = "websocket clientid:"
+
+[node name="autoconnect" type="CheckBox" parent="WebSocketsignalling"]
+margin_left = 242.0
+margin_top = 27.4296
+margin_right = 349.0
+margin_bottom = 51.4296
+pressed = true
+text = "autoconnect"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
 [node name="MQTTsignalling" type="ColorRect" parent="."]
 visible = false
 anchor_right = 1.0
@@ -390,265 +649,6 @@ margin_bottom = 85.5704
 pressed = true
 text = "autoconnect"
 
-[node name="WebSocketsignalling" type="ColorRect" parent="."]
-anchor_right = 1.0
-anchor_bottom = 1.0
-margin_left = 12.0
-margin_top = 74.5704
-margin_right = -13.9999
-margin_bottom = -249.43
-color = Color( 0.145098, 0.231373, 0.294118, 1 )
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="Servermode" type="Control" parent="WebSocketsignalling"]
-visible = false
-anchor_right = 1.0
-anchor_bottom = 1.0
-margin_left = 364.0
-margin_top = 11.0
-margin_bottom = -8.00012
-script = ExtResource( 15 )
-
-[node name="WebRTCmultiplayerserver" type="Control" parent="WebSocketsignalling/Servermode"]
-margin_left = 2.8562
-margin_top = 47.5227
-margin_right = 229.856
-margin_bottom = 129.523
-script = ExtResource( 6 )
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="StartWebRTCmultiplayer" type="Button" parent="WebSocketsignalling/Servermode/WebRTCmultiplayerserver"]
-margin_left = -7.97717
-margin_top = -23.5996
-margin_right = 123.023
-margin_bottom = -3.59962
-toggle_mode = true
-text = "StartWebrtc server"
-
-[node name="statuslabel" type="Label" parent="WebSocketsignalling/Servermode/WebRTCmultiplayerserver"]
-margin_left = 137.999
-margin_top = -19.9523
-margin_right = 177.999
-margin_bottom = -3.95229
-text = "null"
-
-[node name="ClientsList" type="OptionButton" parent="WebSocketsignalling/Servermode"]
-margin_left = 2.8562
-margin_top = -3.15384
-margin_right = 140.856
-margin_bottom = 16.8462
-text = "none"
-items = [ "none", null, false, 0, null ]
-selected = 0
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="Clientmode" type="Control" parent="WebSocketsignalling"]
-anchor_right = 1.0
-anchor_bottom = 1.0
-margin_left = 375.0
-margin_top = 11.0
-margin_right = -15.0
-margin_bottom = -2.99973
-script = ExtResource( 16 )
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="WebRTCmultiplayerclient" type="Control" parent="WebSocketsignalling/Clientmode"]
-margin_left = -3.0
-margin_top = 9.0
-margin_right = 135.0
-margin_bottom = 35.0
-script = ExtResource( 9 )
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="StartWebRTCmultiplayer" type="Button" parent="WebSocketsignalling/Clientmode/WebRTCmultiplayerclient"]
-margin_left = 8.4729
-margin_top = 8.0
-margin_right = 135.473
-margin_bottom = 28.0
-toggle_mode = true
-text = "StartWebrtc client"
-
-[node name="statuslabel" type="Label" parent="WebSocketsignalling/Clientmode/WebRTCmultiplayerclient"]
-margin_left = 8.4729
-margin_top = 38.5227
-margin_right = 50.4729
-margin_bottom = 59.5227
-text = "null"
-
-[node name="VSeparator" type="VSeparator" parent="WebSocketsignalling"]
-margin_left = 347.879
-margin_top = 5.087
-margin_right = 358.879
-margin_bottom = 45.087
-
-[node name="client_id" type="LineEdit" parent="WebSocketsignalling"]
-margin_left = 130.0
-margin_right = 214.0
-margin_bottom = 24.0
-editable = false
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="Label" type="Label" parent="WebSocketsignalling/client_id"]
-margin_left = -130.108
-margin_top = 5.26646
-margin_right = -6.10782
-margin_bottom = 19.2665
-text = "websocket clientid:"
-
-[node name="autoconnect" type="CheckBox" parent="WebSocketsignalling"]
-margin_left = 242.0
-margin_top = 27.4296
-margin_right = 349.0
-margin_bottom = 51.4296
-pressed = true
-text = "autoconnect"
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="ENetMultiplayer" type="ColorRect" parent="."]
-visible = false
-margin_left = 9.72998
-margin_top = 74.5704
-margin_right = 363.73
-margin_bottom = 132.57
-color = Color( 0.0980392, 0.305882, 0.160784, 1 )
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="Servermode" type="Control" parent="ENetMultiplayer"]
-margin_left = 157.0
-margin_top = 4.0
-margin_right = 339.0
-margin_bottom = 49.0
-script = ExtResource( 11 )
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="StartENetmultiplayer" type="Button" parent="ENetMultiplayer/Servermode"]
-margin_right = 127.0
-margin_bottom = 24.0
-toggle_mode = true
-text = "Start ENet server"
-
-[node name="Clientmode" type="Control" parent="ENetMultiplayer"]
-margin_left = 157.0
-margin_top = 4.0
-margin_right = 346.0
-margin_bottom = 50.0
-script = ExtResource( 3 )
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="StartENetmultiplayer" type="Button" parent="ENetMultiplayer/Clientmode"]
-margin_left = 1.52588e-05
-margin_top = -0.086998
-margin_right = 127.0
-margin_bottom = 23.913
-toggle_mode = true
-text = "Start ENet client"
-
-[node name="Label" type="Label" parent="ENetMultiplayer"]
-margin_left = 8.74201
-margin_top = 4.087
-margin_right = 119.742
-margin_bottom = 18.087
-text = "ENet multiplayer"
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="autoconnect" type="CheckBox" parent="ENetMultiplayer"]
-anchor_bottom = 0.068
-margin_left = 8.74202
-margin_top = 20.0
-margin_right = 115.742
-margin_bottom = 40.056
-pressed = true
-text = "autoconnect"
-
-[node name="WebSocketMultiplayer" type="ColorRect" parent="."]
-visible = false
-margin_left = 9.72998
-margin_top = 74.5704
-margin_right = 363.73
-margin_bottom = 132.57
-color = Color( 0.0980392, 0.305882, 0.160784, 1 )
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="Servermode" type="Control" parent="WebSocketMultiplayer"]
-margin_left = 157.0
-margin_top = 4.0
-margin_right = 339.0
-margin_bottom = 49.0
-script = ExtResource( 13 )
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="StartWebSocketmultiplayer" type="Button" parent="WebSocketMultiplayer/Servermode"]
-margin_right = 127.0
-margin_bottom = 24.0
-toggle_mode = true
-text = "Start WebSocket server"
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="Clientmode" type="Control" parent="WebSocketMultiplayer"]
-margin_left = 157.0
-margin_top = 4.0
-margin_right = 346.0
-margin_bottom = 50.0
-script = ExtResource( 14 )
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="StartWebSocketmultiplayer" type="Button" parent="WebSocketMultiplayer/Clientmode"]
-margin_left = -0.25798
-margin_top = -0.086998
-margin_right = 155.742
-margin_bottom = 23.913
-toggle_mode = true
-text = "Start WebSocket client"
-
-[node name="Label" type="Label" parent="WebSocketMultiplayer"]
-margin_left = 8.74201
-margin_top = 4.087
-margin_right = 119.742
-margin_bottom = 18.087
-text = "WebSocket multiplayer"
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="autoconnect" type="CheckBox" parent="WebSocketMultiplayer"]
-anchor_bottom = 0.068
-margin_left = 8.74202
-margin_top = 20.0
-margin_right = 115.742
-margin_bottom = 40.056
-pressed = true
-text = "autoconnect"
-
 [node name="PlayerConnections" type="ColorRect" parent="."]
 margin_left = 9.0
 margin_top = 135.0
@@ -717,7 +717,6 @@ __meta__ = {
 }
 
 [node name="DoppelgangerPanel" type="Panel" parent="."]
-visible = false
 margin_left = 3.0
 margin_top = 305.0
 margin_right = 551.0
@@ -773,14 +772,14 @@ __meta__ = {
 [connection signal="item_selected" from="NetworkOptions" to="." method="_on_OptionButton_item_selected"]
 [connection signal="item_selected" from="NetworkOptionsMQTTWebRTC" to="." method="_on_NetworkOptionsMQTTWebRTC_item_selected"]
 [connection signal="toggled" from="UDPipdiscovery/udpenabled" to="." method="_on_udpenabled_toggled"]
-[connection signal="toggled" from="MQTTsignalling/Servermode/WebRTCmultiplayerserver/StartWebRTCmultiplayer" to="MQTTsignalling/Servermode/WebRTCmultiplayerserver" method="_on_StartWebRTCmultiplayer_toggled"]
-[connection signal="toggled" from="MQTTsignalling/Servermode/StartServer" to="MQTTsignalling/Servermode" method="_on_StartServer_toggled"]
-[connection signal="toggled" from="MQTTsignalling/Clientmode/WebRTCmultiplayerclient/StartWebRTCmultiplayer" to="MQTTsignalling/Clientmode/WebRTCmultiplayerclient" method="_on_StartWebRTCmultiplayer_toggled"]
-[connection signal="toggled" from="MQTTsignalling/Clientmode/StartClient" to="MQTTsignalling/Clientmode" method="_on_StartClient_toggled"]
-[connection signal="toggled" from="WebSocketsignalling/Servermode/WebRTCmultiplayerserver/StartWebRTCmultiplayer" to="WebSocketsignalling/Servermode/WebRTCmultiplayerserver" method="_on_StartWebRTCmultiplayer_toggled"]
-[connection signal="toggled" from="WebSocketsignalling/Clientmode/WebRTCmultiplayerclient/StartWebRTCmultiplayer" to="WebSocketsignalling/Clientmode/WebRTCmultiplayerclient" method="_on_StartWebRTCmultiplayer_toggled"]
 [connection signal="toggled" from="ENetMultiplayer/Servermode/StartENetmultiplayer" to="ENetMultiplayer/Servermode" method="_on_StartENetmultiplayer_toggled"]
 [connection signal="toggled" from="ENetMultiplayer/Clientmode/StartENetmultiplayer" to="ENetMultiplayer/Clientmode" method="_on_StartENetmultiplayer_toggled"]
 [connection signal="toggled" from="WebSocketMultiplayer/Servermode/StartWebSocketmultiplayer" to="WebSocketMultiplayer/Servermode" method="_on_StartWebSocketmultiplayer_toggled"]
 [connection signal="toggled" from="WebSocketMultiplayer/Clientmode/StartWebSocketmultiplayer" to="WebSocketMultiplayer/Clientmode" method="_on_StartWebSocketmultiplayer_toggled"]
+[connection signal="toggled" from="WebSocketsignalling/Servermode/WebRTCmultiplayerserver/StartWebRTCmultiplayer" to="WebSocketsignalling/Servermode/WebRTCmultiplayerserver" method="_on_StartWebRTCmultiplayer_toggled"]
+[connection signal="toggled" from="WebSocketsignalling/Clientmode/WebRTCmultiplayerclient/StartWebRTCmultiplayer" to="WebSocketsignalling/Clientmode/WebRTCmultiplayerclient" method="_on_StartWebRTCmultiplayer_toggled"]
+[connection signal="toggled" from="MQTTsignalling/Servermode/WebRTCmultiplayerserver/StartWebRTCmultiplayer" to="MQTTsignalling/Servermode/WebRTCmultiplayerserver" method="_on_StartWebRTCmultiplayer_toggled"]
+[connection signal="toggled" from="MQTTsignalling/Servermode/StartServer" to="MQTTsignalling/Servermode" method="_on_StartServer_toggled"]
+[connection signal="toggled" from="MQTTsignalling/Clientmode/WebRTCmultiplayerclient/StartWebRTCmultiplayer" to="MQTTsignalling/Clientmode/WebRTCmultiplayerclient" method="_on_StartWebRTCmultiplayer_toggled"]
+[connection signal="toggled" from="MQTTsignalling/Clientmode/StartClient" to="MQTTsignalling/Clientmode" method="_on_StartClient_toggled"]
 [connection signal="toggled" from="PlayerConnections/Doppelganger" to="PlayerConnections" method="_on_Doppelganger_toggled"]

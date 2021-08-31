@@ -19,7 +19,7 @@ func _ready():
 	if not LocalPlayer.has_node("PlayerFrame"):
 		var playerframe = Node.new()
 		playerframe.name = "PlayerFrame"
-		playerframe.set_script(load("res://networking/LocalPlayerFrame.gd"))
+		playerframe.set_script(load("res://networking/PlayerFrameLocal.gd"))
 		LocalPlayer.add_child(playerframe)
 	LocalPlayer.get_node("PlayerFrame").PlayerConnections = self
 
@@ -225,7 +225,7 @@ func newremoteplayer(avatardata):
 		if not remoteplayer.has_node("PlayerFrame"):
 			var playerframe = Node.new()
 			playerframe.name = "PlayerFrame"
-			playerframe.set_script(load("res://networking/RemotePlayerFrame.gd"))
+			playerframe.set_script(load("res://networking/PlayerFrameRemote.gd"))
 			remoteplayer.add_child(playerframe)
 		remoteplayer.initavatar(avatardata)
 		PlayersNode.add_child(remoteplayer)
