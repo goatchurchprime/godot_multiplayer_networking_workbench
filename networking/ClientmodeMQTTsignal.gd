@@ -22,6 +22,10 @@ func sendpacket_toserver(v):
 	var t = "%s/%s/packet/%s" % [roomname, MQTT.client_id, selectedserver]
 	MQTT.publish(t, to_json(v))
 	
+func isconnectedtosignalserver():
+	return serverconnected
+
+
 func received_mqtt(topic, msg):
 	if msg == "":  return
 	var stopic = topic.split("/")

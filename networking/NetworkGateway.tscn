@@ -1,7 +1,6 @@
-[gd_scene load_steps=17 format=2]
+[gd_scene load_steps=16 format=2]
 
 [ext_resource path="res://networking/NetworkGateway.gd" type="Script" id=1]
-[ext_resource path="res://networking/SignallingWebsocket.gd" type="Script" id=2]
 [ext_resource path="res://networking/Enetmultiplayerclient.gd" type="Script" id=3]
 [ext_resource path="res://networking/MQTT.gd" type="Script" id=4]
 [ext_resource path="res://networking/UDPdiscoveryserver.gd" type="Script" id=5]
@@ -769,9 +768,6 @@ text = "Netdropsimulation:"
 __meta__ = {
 "_edit_use_anchors_": false
 }
-
-[node name="SignallingWebsocket" type="Node" parent="."]
-script = ExtResource( 2 )
 
 [connection signal="item_selected" from="ProtocolOptions" to="." method="_on_ProtocolOptions_item_selected"]
 [connection signal="item_selected" from="NetworkOptions" to="." method="_on_OptionButton_item_selected"]

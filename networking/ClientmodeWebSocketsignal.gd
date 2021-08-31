@@ -18,6 +18,9 @@ func _process(delta):
 func sendpacket_toserver(v):
 	websocketclient.get_peer(1).put_packet(var2bytes(v))
 
+func isconnectedtosignalserver():
+	return websocketclient != null and websocketclient.get_peer(1).is_connected_to_host()
+
 func wsc_connection_closed(was_clean_close: bool):
 	print("wsc_connection_closed ", was_clean_close)
 	get_parent().setnetworkoff()
@@ -44,6 +47,7 @@ func wsc_data_received():
 				assert (wclientid == -1)
 				wclientid = v["clientid"]
 				get_node("../client_id").text = str(wclientid)
+				emit_signal("mqttsig_connection_established", int(wclientid))
 				$WebRTCmultiplayerclient/StartWebRTCmultiplayer.disabled = false
 				if get_node("../autoconnect").pressed:
 					$WebRTCmultiplayerclient/StartWebRTCmultiplayer.pressed = true

@@ -27,6 +27,7 @@ const errordecodes = { ERR_ALREADY_IN_USE:"ERR_ALREADY_IN_USE",
 func _on_ProtocolOptions_item_selected(np):
 	assert ($NetworkOptions.selected == 0 and $NetworkOptionsMQTTWebRTC.selected == 0)
 	var selectasmqttwebrtc = (np == NETWORK_PROTOCOL.WEBRTC_MQTTSIGNAL)
+	var selectaswebrtcwebsocket = (np == NETWORK_PROTOCOL.WEBRTC_WEBSOCKETSIGNAL)
 	var selectasenet = (np == NETWORK_PROTOCOL.ENET)
 	var selectaswebsocket = (np == NETWORK_PROTOCOL.WEBSOCKET)	
 	$NetworkOptions.visible = not selectasmqttwebrtc
@@ -41,6 +42,9 @@ func _on_ProtocolOptions_item_selected(np):
 	$WebSocketMultiplayer.visible = selectaswebsocket
 	$WebSocketMultiplayer/Servermode.visible = false
 	$WebSocketMultiplayer/Clientmode.visible = false
+	$WebSocketsignalling.visible = selectaswebrtcwebsocket
+	$WebSocketsignalling/Servermode.visible = false
+	$WebSocketsignalling/Clientmode.visible = false
 
 	
 func _on_OptionButton_item_selected(ns):

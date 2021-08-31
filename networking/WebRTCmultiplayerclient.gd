@@ -57,7 +57,8 @@ func _on_StartWebRTCmultiplayer_toggled(button_pressed):
 		clientsignalling.connect("mqttsig_connection_established", self, "client_connection_established") 
 		clientsignalling.connect("mqttsig_connection_closed", self, "client_connection_closed") 
 		clientsignalling.connect("mqttsig_packet_received", self, "client_packet_received") 
-		clientsignalling.sendpacket_toserver({"subject":"request_offer"})
+		if clientsignalling.isconnectedtosignalserver():
+			clientsignalling.sendpacket_toserver({"subject":"request_offer"})
 		$statuslabel.text = "request_offer"
 		
 	else:
