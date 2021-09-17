@@ -23,11 +23,11 @@ func isconnectedtosignalserver():
 
 func wsc_connection_closed(was_clean_close: bool):
 	print("wsc_connection_closed ", was_clean_close)
-	get_parent().setnetworkoff()
+	get_parent().get_parent().setnetworkoff()
 	
 func wsc_connection_error():
 	print("wsc_connection_error")
-	get_parent().setnetworkoff()
+	get_parent().get_parent().setnetworkoff()
 	
 func wsc_connection_established(protocol: String):
 	print("wsc_connection_established ", protocol)
@@ -36,7 +36,7 @@ func wsc_connection_established(protocol: String):
 
 func wsc_server_close_request(code: int, reason: String):
 	print("wsc_server_close_request ", code, " ", reason)
-	get_parent().setnetworkoff()
+	get_parent().get_parent().setnetworkoff()
 
 func wsc_data_received():
 	while websocketclient.get_peer(1).get_available_packet_count() != 0:
@@ -72,7 +72,7 @@ func startwebsocketsignalclient():
 		set_process(true)
 	else:
 		print("Bad start websocket")
-		get_parent().setnetworkoff()
+		get_parent().get_parent().setnetworkoff()
 
 func stopwebsocketsignalclient():
 	assert (websocketclient != null)

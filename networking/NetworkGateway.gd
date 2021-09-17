@@ -3,6 +3,7 @@ extends Panel
 # keep trying to get the HTML5 version working (not connecting to mqtt!)
 # http://goatchurchprime.github.io/godot_multiplayer_networking_workbench/minimal_peer_networking.html
 
+# make sure you download the webrtc libraries from here: https://github.com/godotengine/webrtc-native/releases
 
 export var remoteservers = [ "192.168.43.1", "192.168.8.111" ]
 
