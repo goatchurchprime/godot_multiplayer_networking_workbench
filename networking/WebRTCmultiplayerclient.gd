@@ -33,18 +33,22 @@ func client_packet_received(v):
 		peer.initialize({"iceServers": [ { "urls": ["stun:stun.l.google.com:19302"] } ] })
 		peer.connect("session_description_created", self, "client_session_description_created")
 		peer.connect("ice_candidate_created", self, "client_ice_candidate_created")
-		var E = peer.set_remote_description("offer", v["data"])
-		if E != 0:	print("Errrr ", E)
 
 		var networkedmultiplayerclient = WebRTCMultiplayer.new()
-		E = networkedmultiplayerclient.initialize(clientsignalling.wclientid, true)
+		print("Errr4A ", peer.get_connection_state())
+		var E = networkedmultiplayerclient.initialize(clientsignalling.wclientid, true)
 		if E != 0:	print("Errrr2 ", E)
+		print("Errr4 ", peer.get_connection_state())
 		E = networkedmultiplayerclient.add_peer(peer, 1)
 		if E != 0:	print("Errrr3 ", E)
+		E = peer.set_remote_description("offer", v["data"])
+		if E != 0:	print("Errrr ", E)
+
+		PlayerConnections.SetNetworkedMultiplayerPeer(networkedmultiplayerclient)
 		get_tree().set_network_peer(networkedmultiplayerclient)
 		assert (get_tree().get_network_unique_id() == clientsignalling.wclientid)
 		$statuslabel.text = "receive offer"
-		get_node("../../../PlayerConnections").LocalPlayer.networkID = -1
+
 			
 	elif v["subject"] == "ice_candidate":
 		assert (get_tree().network_peer.is_class("WebRTCMultiplayer"))

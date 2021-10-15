@@ -19,6 +19,9 @@ func server_client_connected(id):
 func server_client_disconnected(id):
 	print("server client_disconnected ", id)
 
+func Ddata_channel_created(channel):
+	print("DDDdata_channel_created ", channel)
+
 func server_packet_received(id, v):
 	#print("server packet_received ", id, v["subject"])
 	if v["subject"] == "request_offer":
@@ -26,6 +29,8 @@ func server_packet_received(id, v):
 		peer.initialize({"iceServers": [ { "urls": ["stun:stun.l.google.com:19302"] } ] })
 		peer.connect("session_description_created", self, "server_session_description_created", [id])
 		peer.connect("ice_candidate_created", self, "server_ice_candidate_created", [id])
+		print("serverpacket peer.get_connection_state() ", peer.get_connection_state())
+		peer.connect("data_channel_received", self, "Ddata_channel_created")
 		get_tree().network_peer.add_peer(peer, id)
 		var webrtcpeererror = peer.create_offer()
 		print("peer create offer ", peer, "Error:", webrtcpeererror)
@@ -42,6 +47,7 @@ func server_packet_received(id, v):
 		peer["connection"].add_ice_candidate(v["mid_name"], v["index_name"], v["sdp_name"])
 		$statuslabel.text = "ice_candidate"
 
+
 func _on_StartWebRTCmultiplayer_toggled(button_pressed):
 	if button_pressed:
 		var networkedmultiplayerserver = WebRTCMultiplayer.new()
@@ -49,7 +55,7 @@ func _on_StartWebRTCmultiplayer_toggled(button_pressed):
 		assert (servererror == 0)
 		PlayerConnections.webrtc_server_relay = true
 		PlayerConnections.SetNetworkedMultiplayerPeer(networkedmultiplayerserver)
-			
+		
 		assert (get_tree().get_network_unique_id() == 1)
 		serversignalling.connect("mqttsig_client_connected", self, "server_client_connected") 
 		serversignalling.connect("mqttsig_client_disconnected", self, "server_client_disconnected") 

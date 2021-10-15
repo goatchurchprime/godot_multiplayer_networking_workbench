@@ -16,6 +16,8 @@ func startUDPbroadcasting():
 	udpdiscoverybroadcasterperiodtimer = udpdiscoverybroadcasterperiod
 	$broadcastperiod.editable = false
 	get_node("../udpenabled").disabled = true
+	for localinterfaces in IP.get_local_interfaces():
+		print(localinterfaces["name"], " ", localinterfaces["friendly"], " ", localinterfaces["addresses"])
 	set_process(true)
 
 func stopUDPbroadcasting():

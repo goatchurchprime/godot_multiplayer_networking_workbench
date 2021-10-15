@@ -178,6 +178,7 @@ pressed = true
 text = "enable"
 
 [node name="ENetMultiplayer" type="ColorRect" parent="."]
+visible = false
 margin_left = 9.72998
 margin_top = 74.5704
 margin_right = 363.73
@@ -308,7 +309,6 @@ pressed = true
 text = "autoconnect"
 
 [node name="WebSocketsignalling" type="ColorRect" parent="."]
-visible = false
 anchor_right = 1.0
 anchor_bottom = 1.0
 margin_left = 12.0
@@ -397,10 +397,10 @@ toggle_mode = true
 text = "StartWebrtc client"
 
 [node name="statuslabel" type="Label" parent="WebSocketsignalling/Clientmode/WebRTCmultiplayerclient"]
-margin_left = 8.4729
-margin_top = 38.5227
-margin_right = 50.4729
-margin_bottom = 59.5227
+margin_left = 98.0308
+margin_top = -34.9594
+margin_right = 166.031
+margin_bottom = -20.9594
 text = "null"
 
 [node name="VSeparator" type="VSeparator" parent="WebSocketsignalling"]

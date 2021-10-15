@@ -117,6 +117,17 @@ func updateplayerlist():
 			$PlayerList.selected = $PlayerList.get_item_count() - 1
 
 func network_player_connected(id):
+	print("NNnetwork_player_connected ", id, "  Lid ", LocalPlayer.networkID)
+
+	# tests here to work out if connections are being made before all the channels are completely ready!
+	var Dpeer = get_tree().get_network_peer()
+	if Dpeer is WebRTCMultiplayer:
+		var DDpeer = Dpeer.get_peer(id)
+		print("DDpeer ", DDpeer)
+		for channel in DDpeer["channels"]:
+			print("channel readystate ", channel, " ", channel.get_ready_state())
+		#print(Dpeer.get_connection_state())
+		
 	if LocalPlayer.networkID == -1:
 		deferred_playerconnections.push_back(id)
 		connectionlog("_add playerid %d (defer)\n" % id)

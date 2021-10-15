@@ -42,7 +42,11 @@ func wss_client_disconnected(id: int, was_clean_close: bool):
 	assert (cidx != -1)
 	clientsconnected.remove(cidx)
 	var idx = $ClientsList.get_item_index(id)
+	print($ClientsList.selected)
+	if $ClientsList.selected == idx:
+		$ClientsList.selected = 0
 	$ClientsList.remove_item(idx)
+	
 
 func startwebsocketsignalserver():
 	assert (websocketserver == null)
