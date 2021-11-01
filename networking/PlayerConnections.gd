@@ -228,14 +228,15 @@ remote func networkedavatarthinnedframedataPC(vd):
 	var rpcsenderid = get_tree().get_rpc_sender_id()
 	var remoteplayer = PlayersNode.get_node_or_null(vd["playernodename"])
 	if remoteplayer != null:
+		vd["received_timestamp"] = OS.get_ticks_msec()*0.001
 		remoteplayer.get_node("PlayerFrame").networkedavatarthinnedframedata(vd)
+		get_node("../TimelineVisualizer/Viewport/TimelineDiagram").marknetworkdataat(vd)
 	else:
 		print("networkedavatarthinnedframedataPC called before spawning")
 	if webrtc_server_relay:
 		for fid in remote_players_idstonodenames:
 			if fid != rpcsenderid:
 				rpc_id(fid, "networkedavatarthinnedframedataPC", vd)
-
 	
 func newremoteplayer(avatardata):
 	var remoteplayer = PlayersNode.get_node_or_null(avatardata["playernodename"])
@@ -251,6 +252,7 @@ func newremoteplayer(avatardata):
 		if "framedata0" in avatardata:
 			remoteplayer.get_node("PlayerFrame").networkedavatarthinnedframedata(avatardata["framedata0"])
 		print("Adding remoteplayer: ", avatardata["playernodename"])
+		get_node("../TimelineVisualizer/Viewport/TimelineDiagram").newtimelineremoteplayer(avatardata)
 	else:
 		print("** remoteplayer already exists: ", avatardata["playernodename"])
 	return remoteplayer
@@ -261,6 +263,7 @@ func removeremoteplayer(playernodename):
 		PlayersNode.remove_child(remoteplayer)
 		remoteplayer.queue_free()
 		print("Removing remoteplayer: ", playernodename)
+		get_node("../TimelineVisualizer/Viewport/TimelineDiagram").removetimelineremoteplayer(playernodename)
 	else:
 		print("** remoteplayer already removed: ", playernodename)
 	

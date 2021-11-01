@@ -1,6 +1,7 @@
-[gd_scene load_steps=16 format=2]
+[gd_scene load_steps=18 format=2]
 
 [ext_resource path="res://networking/NetworkGateway.gd" type="Script" id=1]
+[ext_resource path="res://networking/TimelineDiagram.tscn" type="PackedScene" id=2]
 [ext_resource path="res://networking/Enetmultiplayerclient.gd" type="Script" id=3]
 [ext_resource path="res://networking/MQTT.gd" type="Script" id=4]
 [ext_resource path="res://networking/UDPdiscoveryserver.gd" type="Script" id=5]
@@ -15,6 +16,9 @@
 [ext_resource path="res://networking/Websocketmultiplayerclient.gd" type="Script" id=14]
 [ext_resource path="res://networking/ServermodeWebSocketsignal.gd" type="Script" id=15]
 [ext_resource path="res://networking/ClientmodeWebSocketsignal.gd" type="Script" id=16]
+
+[sub_resource type="ViewportTexture" id=1]
+viewport_path = NodePath("TimelineVisualizer/Viewport")
 
 [node name="NetworkGateway" type="Panel"]
 self_modulate = Color( 0.32549, 0.317647, 0.317647, 1 )
@@ -785,6 +789,22 @@ margin_right = -4.79895
 margin_bottom = 28.3466
 text = "drop
 out%:"
+
+[node name="TimelineVisualizer" type="TextureRect" parent="."]
+margin_left = 3.8728
+margin_top = 268.436
+margin_right = 553.873
+margin_bottom = 368.436
+texture = SubResource( 1 )
+flip_v = true
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Viewport" type="Viewport" parent="TimelineVisualizer"]
+size = Vector2( 550, 100 )
+
+[node name="TimelineDiagram" parent="TimelineVisualizer/Viewport" instance=ExtResource( 2 )]
 
 [connection signal="item_selected" from="ProtocolOptions" to="." method="_on_ProtocolOptions_item_selected"]
 [connection signal="item_selected" from="NetworkOptions" to="." method="_on_OptionButton_item_selected"]

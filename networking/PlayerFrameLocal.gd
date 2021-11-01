@@ -2,9 +2,7 @@ extends Node
 
 var doppelgangernode = null
 var NetworkGatewayForDoppelganger = null
-
 var PlayerConnections = null
-var viaplayerconnections = true
 
 const CFI_TIMESTAMP 		= -1 
 
@@ -41,9 +39,6 @@ func thinframedata(fd):
 			framedata0[k] = v
 	return vd
 
-remote func networkedavatarthinnedframedata(vd):
-	print("networkedavatarthinnedframedata shouldn't get called on LocalPlayer")
-
 
 var framedividerVal = 10
 var framedividerCount = framedividerVal
@@ -70,23 +65,25 @@ func _process(delta):
 			Dframebytesprev = Dcumulativebytes
 		Dcumulativebytes= 0
 		DframereportCount = 0
+
+	vd[CFI_TIMESTAMP] = tstamp
+	PlayerConnections.get_node("../TimelineVisualizer/Viewport/TimelineDiagram").marknetworkdataat(vd)
 	
 	if get_parent().networkID >= 1:
-		vd[CFI_TIMESTAMP] = tstamp
-		if viaplayerconnections:
-			vd["playernodename"] = get_parent().get_name()
-			PlayerConnections.rpc("networkedavatarthinnedframedataPC", vd)
-		else:
-			rpc("networkedavatarthinnedframedata", vd)
+		vd["playernodename"] = get_parent().get_name()
+		PlayerConnections.rpc("networkedavatarthinnedframedataPC", vd)
 		
 	if doppelgangernode != null:
 		vd[CFI_TIMESTAMP] = tstamp + int(NetworkGatewayForDoppelganger.get_node("DoppelgangerPanel/netoffset").text)
+		vd["playernodename"] = "Doppelganger"
 		get_parent().changethinnedframedatafordoppelganger(vd)
 		var doppelgangerdelay = NetworkGatewayForDoppelganger.getrandomdoppelgangerdelay()
 		if doppelgangerdelay != -1.0:
 			yield(get_tree().create_timer(doppelgangerdelay*0.001), "timeout")
 			if doppelgangernode != null:
+				vd["received_timestamp"] = OS.get_ticks_msec()*0.001
 				doppelgangernode.get_node("PlayerFrame").networkedavatarthinnedframedata(vd)
+				PlayerConnections.get_node("../TimelineVisualizer/Viewport/TimelineDiagram").marknetworkdataat(vd)
 
 
 
