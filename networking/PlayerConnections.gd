@@ -21,6 +21,8 @@ func _ready():
 		playerframe.name = "PlayerFrame"
 		playerframe.set_script(load("res://networking/PlayerFrameLocal.gd"))
 		LocalPlayer.add_child(playerframe)
+	else:
+		assert (LocalPlayer.get_node("PlayerFrame").get_script().resource_path == "res://networking/PlayerFrameLocal.gd")
 	LocalPlayer.get_node("PlayerFrame").PlayerConnections = self
 
 	randomize()
@@ -185,16 +187,22 @@ remote func serverrelay_network_player_disconnected(id):
 func _on_Doppelganger_toggled(button_pressed):
 	var DoppelgangerPanel = get_node("../DoppelgangerPanel")
 	if button_pressed:
-		DoppelgangerPanel.visible = true
+		#DoppelgangerPanel.visible = true
+		DoppelgangerPanel.get_node("netoffset").editable = false
+		DoppelgangerPanel.get_node("netdelaymin").editable = false
 		var avatardata = LocalPlayer.avatarinitdata()
 		avatardata["playernodename"] = "Doppelganger"
 		var fd = LocalPlayer.get_node("PlayerFrame").framedata0.duplicate()
 		LocalPlayer.changethinnedframedatafordoppelganger(fd)
 		avatardata["framedata0"] = fd
 		LocalPlayer.get_node("PlayerFrame").doppelgangernode = newremoteplayer(avatardata)
+		LocalPlayer.get_node("PlayerFrame").NetworkGatewayForDoppelganger = get_node("..")
 	else:
-		DoppelgangerPanel.visible = false
+		#DoppelgangerPanel.visible = false
+		DoppelgangerPanel.get_node("netoffset").editable = true
+		DoppelgangerPanel.get_node("netdelaymin").editable = true
 		LocalPlayer.get_node("PlayerFrame").doppelgangernode = null
+		LocalPlayer.get_node("PlayerFrame").NetworkGatewayForDoppelganger = null
 		removeremoteplayer("Doppelganger")
 	updateplayerlist()
 

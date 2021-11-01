@@ -22,7 +22,7 @@ enum NETWORK_OPTIONS { NETWORK_OFF = 0
 const errordecodes = { ERR_ALREADY_IN_USE:"ERR_ALREADY_IN_USE", 
 					   ERR_CANT_CREATE:"ERR_CANT_CREATE"
 					 }
-
+var rng = RandomNumberGenerator.new()
 
 func _on_ProtocolOptions_item_selected(np):
 	assert ($NetworkOptions.selected == 0 and $NetworkOptionsMQTTWebRTC.selected == 0)
@@ -165,7 +165,7 @@ func _ready():
 		$MQTTsignalling/brokeraddress/usewebsocket.disabled = true
 		$ProtocolOptions.set_item_disabled(NETWORK_PROTOCOL.ENET, true)
 		$ProtocolOptions.selected = max(NETWORK_PROTOCOL.WEBSOCKET, $ProtocolOptions.selected)
-
+	rng.randomize()
 
 func _input(event):
 	if event is InputEventKey and event.pressed:
@@ -182,12 +182,31 @@ func _input(event):
 		elif (event.scancode == KEY_G):
 			$PlayerConnections/Doppelganger.pressed = not $PlayerConnections/Doppelganger.pressed
 
+	elif event is InputEventMouseButton and event.is_pressed() and (event.button_index == BUTTON_WHEEL_UP or event.button_index == BUTTON_WHEEL_DOWN):
+		var swnode = get_focus_owner()
+		var s = 1 if event.button_index == BUTTON_WHEEL_UP else -1
+		if swnode == $DoppelgangerPanel/netdelaymin and swnode.editable:
+			swnode.text = String(max(10, int(swnode.text)+5*s))
+		if swnode == $DoppelgangerPanel/netoffset and swnode.editable:
+			swnode.text = String(int(swnode.text)+1000*s)
+		if swnode == $DoppelgangerPanel/netdelayadd:
+			swnode.text = String(max(0, int(swnode.text)+5*s))
+		if swnode == $DoppelgangerPanel/netdroppc:
+			swnode.text = String(max(0.0, float(swnode.text)+0.1*s))
+
+func getrandomdoppelgangerdelay():
+	if rng.randf_range(0, 100) < float(get_node("DoppelgangerPanel/netdroppc").text):
+		return -1.0
+	var netdelayadd = float(get_node("DoppelgangerPanel/netdelayadd").text)
+	return int(get_node("DoppelgangerPanel/netdelaymin").text) + max(0.0, rng.randfn(netdelayadd, netdelayadd*0.4))
+
 func setnetworkoff():
 	$NetworkOptions.select(NETWORK_OPTIONS.NETWORK_OFF)
 	_on_OptionButton_item_selected(NETWORK_OPTIONS.NETWORK_OFF)
 					
 func _data_channel_received(channel: Object):
 	print("_data_channel_received ", channel)
+
 
 
 

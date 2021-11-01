@@ -411,8 +411,9 @@ margin_bottom = 45.087
 
 [node name="client_id" type="LineEdit" parent="WebSocketsignalling"]
 margin_left = 130.0
+margin_top = 3.36739
 margin_right = 214.0
-margin_bottom = 24.0
+margin_bottom = 27.3674
 editable = false
 __meta__ = {
 "_edit_use_anchors_": false
@@ -663,7 +664,7 @@ __meta__ = {
 [node name="Label" type="Label" parent="PlayerConnections"]
 margin_right = 40.0
 margin_bottom = 14.0
-text = "Player connections"
+text = "Player connections:"
 
 [node name="PlayerList" type="OptionButton" parent="PlayerConnections"]
 margin_left = 6.74203
@@ -678,9 +679,9 @@ __meta__ = {
 }
 
 [node name="Doppelganger" type="CheckBox" parent="PlayerConnections"]
-margin_left = 6.74203
+margin_left = 7.0
 margin_top = 50.0
-margin_right = 132.742
+margin_right = 125.0
 margin_bottom = 74.0
 text = "doppelganger"
 __meta__ = {
@@ -693,80 +694,97 @@ margin_top = 5.0
 margin_right = 539.0
 margin_bottom = 79.0
 
-[node name="Interpdelay" type="HSlider" parent="."]
-visible = false
-margin_left = 217.879
-margin_top = 326.177
-margin_right = 529.879
-margin_bottom = 344.177
-max_value = 1000.0
-value = 300.0
+[node name="DoppelgangerPanel" type="ColorRect" parent="."]
+margin_left = 8.0
+margin_top = 226.0
+margin_right = 556.0
+margin_bottom = 263.0
+color = Color( 0.235294, 0.101961, 0.101961, 1 )
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="InterpdelayLabel" type="Label" parent="Interpdelay"]
-margin_left = -208.149
-margin_top = -0.654202
-margin_right = -56.149
-margin_bottom = 19.3458
-rect_pivot_offset = Vector2( 103.791, -1.38985 )
-text = "Interpdelay:"
+[node name="Label" type="Label" parent="DoppelgangerPanel"]
+margin_left = -1.0
+margin_right = 148.0
+margin_bottom = 31.0
+text = "Doppelganger network
+traffic parameters (ms)"
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="DoppelgangerPanel" type="Panel" parent="."]
-margin_left = 3.0
-margin_top = 305.0
-margin_right = 551.0
-margin_bottom = 370.0
+[node name="netoffset" type="LineEdit" parent="DoppelgangerPanel"]
+margin_left = 182.622
+margin_top = 3.83232
+margin_right = 240.622
+margin_bottom = 27.8323
+text = "-4000"
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="Netdelay" type="HSlider" parent="DoppelgangerPanel"]
-margin_left = 223.215
-margin_top = 12.233
-margin_right = 535.215
-margin_bottom = 30.233
-max_value = 1000.0
-value = 100.0
+[node name="Label" type="Label" parent="DoppelgangerPanel/netoffset"]
+margin_left = -31.6189
+margin_top = -1.4126
+margin_right = -5.6189
+margin_bottom = 29.5874
+text = "off
+set:"
+
+[node name="netdelaymin" type="LineEdit" parent="DoppelgangerPanel"]
+margin_left = 281.157
+margin_top = 5.17487
+margin_right = 339.157
+margin_bottom = 29.1749
+text = "70"
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="NetdelayLabel" type="Label" parent="DoppelgangerPanel/Netdelay"]
-margin_left = -214.215
-margin_top = -0.233002
-margin_right = -26.215
-margin_bottom = 16.767
-rect_pivot_offset = Vector2( 103.791, -1.38985 )
-text = "Netdelaysimulation:"
+[node name="Label" type="Label" parent="DoppelgangerPanel/netdelaymin"]
+margin_left = -38.3952
+margin_top = -3.34961
+margin_right = -4.3952
+margin_bottom = 27.6504
+text = "delay
+min:"
+
+[node name="netdelayadd" type="LineEdit" parent="DoppelgangerPanel"]
+margin_left = 385.926
+margin_top = 3.5874
+margin_right = 443.926
+margin_bottom = 27.5874
+text = "30"
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="Netdroprate" type="HSlider" parent="DoppelgangerPanel"]
-margin_left = 221.508
-margin_top = 41.6386
-margin_right = 533.508
-margin_bottom = 59.6386
-max_value = 1000.0
+[node name="Label" type="Label" parent="DoppelgangerPanel/netdelayadd"]
+margin_left = -41.2115
+margin_top = -1.06607
+margin_right = -3.21155
+margin_bottom = 29.9339
+text = "delay
+add:"
+
+[node name="netdroppc" type="LineEdit" parent="DoppelgangerPanel"]
+margin_left = 489.107
+margin_top = 4.3811
+margin_right = 547.107
+margin_bottom = 28.3811
+text = "0.1"
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="NetdroprateLabel" type="Label" parent="DoppelgangerPanel/Netdroprate"]
-margin_left = -215.508
-margin_top = -5.6386
-margin_right = -27.508
-margin_bottom = 11.3614
-rect_pivot_offset = Vector2( 103.791, -1.38985 )
-text = "Netdropsimulation:"
-__meta__ = {
-"_edit_use_anchors_": false
-}
+[node name="Label" type="Label" parent="DoppelgangerPanel/netdroppc"]
+margin_left = -42.799
+margin_top = -2.65344
+margin_right = -4.79895
+margin_bottom = 28.3466
+text = "drop
+out%:"
 
 [connection signal="item_selected" from="ProtocolOptions" to="." method="_on_ProtocolOptions_item_selected"]
 [connection signal="item_selected" from="NetworkOptions" to="." method="_on_OptionButton_item_selected"]

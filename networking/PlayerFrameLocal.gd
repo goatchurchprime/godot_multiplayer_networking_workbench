@@ -1,6 +1,8 @@
 extends Node
 
 var doppelgangernode = null
+var NetworkGatewayForDoppelganger = null
+
 var PlayerConnections = null
 var viaplayerconnections = true
 
@@ -42,6 +44,7 @@ func thinframedata(fd):
 remote func networkedavatarthinnedframedata(vd):
 	print("networkedavatarthinnedframedata shouldn't get called on LocalPlayer")
 
+
 var framedividerVal = 10
 var framedividerCount = framedividerVal
 var DframereportCount = 0
@@ -77,9 +80,13 @@ func _process(delta):
 			rpc("networkedavatarthinnedframedata", vd)
 		
 	if doppelgangernode != null:
-		vd[CFI_TIMESTAMP] = tstamp + 100
+		vd[CFI_TIMESTAMP] = tstamp + int(NetworkGatewayForDoppelganger.get_node("DoppelgangerPanel/netoffset").text)
 		get_parent().changethinnedframedatafordoppelganger(vd)
-		doppelgangernode.get_node("PlayerFrame").call_deferred("networkedavatarthinnedframedata", vd)
+		var doppelgangerdelay = NetworkGatewayForDoppelganger.getrandomdoppelgangerdelay()
+		if doppelgangerdelay != -1.0:
+			yield(get_tree().create_timer(doppelgangerdelay*0.001), "timeout")
+			if doppelgangernode != null:
+				doppelgangernode.get_node("PlayerFrame").networkedavatarthinnedframedata(vd)
 
 
 
