@@ -14,6 +14,7 @@ func processlocalavatarpositionVec(vec, delta):
 		
 func avatartoframedata():
 	var fd = { "rect_position":	rect_position }
+	fd["fire_key"] = Input.is_key_pressed(KEY_SPACE)
 	return fd
 
 func framedatatoavatar(fd):

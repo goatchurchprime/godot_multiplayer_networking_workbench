@@ -183,16 +183,22 @@ func _input(event):
 			$PlayerConnections/Doppelganger.pressed = not $PlayerConnections/Doppelganger.pressed
 
 	elif event is InputEventMouseButton and event.is_pressed() and (event.button_index == BUTTON_WHEEL_UP or event.button_index == BUTTON_WHEEL_DOWN):
-		var swnode = get_focus_owner()
 		var s = 1 if event.button_index == BUTTON_WHEEL_UP else -1
-		if swnode == $DoppelgangerPanel/netdelaymin and swnode.editable:
-			swnode.text = String(max(10, int(swnode.text)+5*s))
-		if swnode == $DoppelgangerPanel/netoffset and swnode.editable:
-			swnode.text = String(int(swnode.text)+1000*s)
-		if swnode == $DoppelgangerPanel/netdelayadd:
-			swnode.text = String(max(0, int(swnode.text)+5*s))
-		if swnode == $DoppelgangerPanel/netdroppc:
-			swnode.text = String(max(0.0, float(swnode.text)+0.1*s))
+		var relposition = event.position - $TimelineVisualizer.rect_global_position
+		if relposition >= Vector2(0,0) and relposition <= $TimelineVisualizer.rect_size:
+			$TimelineVisualizer/TimeTracking.pressed = false
+			var relclick = relposition/$TimelineVisualizer.rect_size
+			$TimelineVisualizer/Viewport/TimelineDiagram.zoomtimeline(relclick, s)
+		elif $DoppelgangerPanel.get_rect().has_point(event.position):
+			var swnode = get_focus_owner()
+			if swnode == $DoppelgangerPanel/netdelaymin and swnode.editable:
+				swnode.text = String(max(10, int(swnode.text)+5*s))
+			elif swnode == $DoppelgangerPanel/netoffset and swnode.editable:
+				swnode.text = String(int(swnode.text)+1000*s)
+			elif swnode == $DoppelgangerPanel/netdelayadd:
+				swnode.text = String(max(0, int(swnode.text)+5*s))
+			elif swnode == $DoppelgangerPanel/netdroppc:
+				swnode.text = String(max(0.0, float(swnode.text)+0.1*s))
 
 func getrandomdoppelgangerdelay():
 	if rng.randf_range(0, 100) < float(get_node("DoppelgangerPanel/netdroppc").text):

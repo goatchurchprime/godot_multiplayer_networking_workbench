@@ -791,9 +791,9 @@ text = "drop
 out%:"
 
 [node name="TimelineVisualizer" type="TextureRect" parent="."]
-margin_left = 3.8728
+margin_left = 4.0
 margin_top = 268.436
-margin_right = 553.873
+margin_right = 554.0
 margin_bottom = 368.436
 texture = SubResource( 1 )
 flip_v = true
@@ -805,6 +805,34 @@ __meta__ = {
 size = Vector2( 550, 100 )
 
 [node name="TimelineDiagram" parent="TimelineVisualizer/Viewport" instance=ExtResource( 2 )]
+
+[node name="TimeScalebar" type="Line2D" parent="TimelineVisualizer"]
+position = Vector2( 102.364, 89.1906 )
+points = PoolVector2Array( 0, 0, 100, 0 )
+width = 5.0
+default_color = Color( 0.917647, 0.929412, 0.968627, 1 )
+
+[node name="Label" type="Label" parent="TimelineVisualizer/TimeScalebar"]
+margin_left = -44.0006
+margin_top = -7.72986
+margin_right = -4.00065
+margin_bottom = 6.27014
+text = "1 sec"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="TimeTracking" type="Button" parent="TimelineVisualizer"]
+margin_left = 9.0
+margin_top = 77.0
+margin_right = 54.0
+margin_bottom = 97.0
+toggle_mode = true
+pressed = true
+text = "Track"
+__meta__ = {
+"_edit_use_anchors_": false
+}
 
 [connection signal="item_selected" from="ProtocolOptions" to="." method="_on_ProtocolOptions_item_selected"]
 [connection signal="item_selected" from="NetworkOptions" to="." method="_on_OptionButton_item_selected"]
@@ -821,3 +849,4 @@ size = Vector2( 550, 100 )
 [connection signal="toggled" from="MQTTsignalling/Clientmode/WebRTCmultiplayerclient/StartWebRTCmultiplayer" to="MQTTsignalling/Clientmode/WebRTCmultiplayerclient" method="_on_StartWebRTCmultiplayer_toggled"]
 [connection signal="toggled" from="MQTTsignalling/Clientmode/StartClient" to="MQTTsignalling/Clientmode" method="_on_StartClient_toggled"]
 [connection signal="toggled" from="PlayerConnections/Doppelganger" to="PlayerConnections" method="_on_Doppelganger_toggled"]
+[connection signal="toggled" from="TimelineVisualizer/TimeTracking" to="TimelineVisualizer/Viewport/TimelineDiagram" method="_on_TimeTracking_toggled"]
