@@ -193,8 +193,8 @@ func _on_Doppelganger_toggled(button_pressed):
 		var avatardata = LocalPlayer.avatarinitdata()
 		avatardata["playernodename"] = "Doppelganger"
 		var fd = LocalPlayer.get_node("PlayerFrame").framedata0.duplicate()
-		LocalPlayer.changethinnedframedatafordoppelganger(fd)
-		avatardata["framedata0"] = fd
+		#LocalPlayer.changethinnedframedatafordoppelganger(fd)
+		#avatardata["framedata0"] = fd
 		LocalPlayer.get_node("PlayerFrame").doppelgangernode = newremoteplayer(avatardata)
 		LocalPlayer.get_node("PlayerFrame").NetworkGatewayForDoppelganger = get_node("..")
 	else:
@@ -228,7 +228,6 @@ remote func networkedavatarthinnedframedataPC(vd):
 	var rpcsenderid = get_tree().get_rpc_sender_id()
 	var remoteplayer = PlayersNode.get_node_or_null(vd["playernodename"])
 	if remoteplayer != null:
-		vd["received_timestamp"] = OS.get_ticks_msec()*0.001
 		remoteplayer.get_node("PlayerFrame").networkedavatarthinnedframedata(vd)
 		get_node("../TimelineVisualizer/Viewport/TimelineDiagram").marknetworkdataat(vd)
 	else:

@@ -1,18 +1,16 @@
 extends Node2D
 
-const CFI_TIMESTAMP 		= -1 
 
 func marknetworkdataat(vd):
 	var marker = Line2D.new()
 	marker.width = 20.0
-	var t = vd.get("received_timestamp", vd[CFI_TIMESTAMP])
+	var t = vd.get(NCONSTANTS.CFI_TIMESTAMP_RECIEVED, vd[NCONSTANTS.CFI_TIMESTAMP])
 	var seglen = len(var2bytes(vd))/10.0+3.0
 	marker.points = PoolVector2Array([Vector2(t*1000, 0), Vector2(t*1000, seglen)])
 	if vd.has("playernodename"):
 		$Players.get_node(vd["playernodename"]).get_node("TimeMarks").add_child(marker)
 	else:
 		$Players/LocalPlayer/TimeMarks.add_child(marker)
-
 
 func newtimelineremoteplayer(avatardata):
 	var remotetimelineplayernode = Node2D.new()
@@ -34,6 +32,9 @@ func settimescalebar():
 	#TimeScalebar.points.set(1, Vector2($Camerafollownode/Camera2D.zoom.x, 0))
 	TimeScalebar.points = PoolVector2Array([Vector2(0,0), Vector2(1000.0/($Camerafollownode/Camera2D.zoom.x), 0)])
 
+func _ready():
+	settimescalebar()
+
 func zoomtimeline(relclick, s):
 	var viewport = get_parent()
 	var cp = relclick*get_parent().size
@@ -47,12 +48,6 @@ func zoomtimeline(relclick, s):
 	$Camerafollownode/Camera2D.drag_margin_v_enabled = false
 	$Camerafollownode.position = screencentre
 	settimescalebar()
-	
-	#var marker = Line2D.new()
-	#marker.width = 3.0
-	#marker.points = PoolVector2Array([mpt+Vector2(0, 10), mpt, mpt+Vector2(10, 0)])
-	#$Players/LocalPlayer/TimeMarks.add_child(marker)
-	
 	
 func _on_TimeTracking_toggled(button_pressed):
 	$CurrentTime/RemoteTransform2D.update_position = button_pressed

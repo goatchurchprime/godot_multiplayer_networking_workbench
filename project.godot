@@ -8,6 +8,16 @@
 
 config_version=4
 
+_global_script_classes=[ {
+"base": "Reference",
+"class": "NCONSTANTS",
+"language": "GDScript",
+"path": "res://networking/NCONSTANTS.gd"
+} ]
+_global_script_class_icons={
+"NCONSTANTS": ""
+}
+
 [application]
 
 config/name="multiplayer networking workbench"

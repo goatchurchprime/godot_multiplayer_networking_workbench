@@ -13,12 +13,12 @@ func processlocalavatarpositionVec(vec, delta):
 							clamp(rect_position.y + vec.y*200*delta, 0, 300))
 		
 func avatartoframedata():
-	var fd = { "rect_position":	rect_position }
-	fd["fire_key"] = Input.is_key_pressed(KEY_SPACE)
+	var fd = { NCONSTANTS.CFI_RECT_POSITION :	rect_position }
+	fd[NCONSTANTS.CFI_FIRE_KEY] = Input.is_key_pressed(KEY_SPACE)
 	return fd
 
 func framedatatoavatar(fd):
-	rect_position = fd["rect_position"]
+	rect_position = fd[NCONSTANTS.CFI_RECT_POSITION]
 
 func initavatar(avatardata):
 	if avatardata.has("playernodename"):
@@ -36,5 +36,5 @@ func avatarinitdata():
 	return avatardata
 	
 static func changethinnedframedatafordoppelganger(fd):
-	if fd.has("rect_position"):
-		fd["rect_position"].x = 500 - fd["rect_position"].x
+	if fd.has(NCONSTANTS.CFI_RECT_POSITION):
+		fd[NCONSTANTS.CFI_RECT_POSITION].x = 500 - fd[NCONSTANTS.CFI_RECT_POSITION].x
