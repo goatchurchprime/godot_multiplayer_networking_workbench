@@ -200,8 +200,8 @@ func _input(event):
 			elif swnode == $DoppelgangerPanel/netdroppc:
 				swnode.text = String(max(0.0, float(swnode.text)+0.1*s))
 
-func getrandomdoppelgangerdelay():
-	if rng.randf_range(0, 100) < float(get_node("DoppelgangerPanel/netdroppc").text):
+func getrandomdoppelgangerdelay(disabledropout=false):
+	if not disabledropout and rng.randf_range(0, 100) < float(get_node("DoppelgangerPanel/netdroppc").text):
 		return -1.0
 	var netdelayadd = float(get_node("DoppelgangerPanel/netdelayadd").text)
 	return int(get_node("DoppelgangerPanel/netdelaymin").text) + max(0.0, rng.randfn(netdelayadd, netdelayadd*0.4))

@@ -41,6 +41,7 @@ func _ready():
 
 	LocalPlayer.networkID = 0
 	LocalPlayer.set_name("R%d" % LocalPlayer.networkID) 
+	get_node("../TimelineVisualizer/Viewport/TimelineDiagram/Players/LocalPlayer").set_name(LocalPlayer.get_name())
 
 
 func connectionlog(txt):
@@ -68,6 +69,7 @@ func networkplayer_server_disconnected(serverisself):
 	print("setnetworkpeer null")
 	LocalPlayer.networkID = 0
 	LocalPlayer.set_name("R%d" % LocalPlayer.networkID) 
+	get_node("../TimelineVisualizer/Viewport/TimelineDiagram/Players/LocalPlayer").set_name(LocalPlayer.get_name())
 	deferred_playerconnections.clear()
 	for id in remote_players_idstonodenames.duplicate():
 		network_player_disconnected(id)
@@ -97,6 +99,7 @@ func networkplayer_connected_to_server(serverisself):
 	LocalPlayer.networkID = get_tree().get_network_unique_id()
 	assert (LocalPlayer.networkID >= 1)
 	LocalPlayer.set_name("R%d" % LocalPlayer.networkID)
+	get_node("../TimelineVisualizer/Viewport/TimelineDiagram/Players/LocalPlayer").set_name(LocalPlayer.get_name())
 	connectionlog("_my networkid=%d\n" % LocalPlayer.networkID)
 	print("my playerid=", LocalPlayer.networkID)
 	for id in deferred_playerconnections:
@@ -193,8 +196,12 @@ func _on_Doppelganger_toggled(button_pressed):
 		var avatardata = LocalPlayer.avatarinitdata()
 		avatardata["playernodename"] = "Doppelganger"
 		var fd = LocalPlayer.get_node("PlayerFrame").framedata0.duplicate()
-		#LocalPlayer.changethinnedframedatafordoppelganger(fd)
-		#avatardata["framedata0"] = fd
+		fd.erase(NCONSTANTS.CFI_TIMESTAMP_F0)
+		var doppelnetoffset = float(get_node("../DoppelgangerPanel/netoffset").text)*0.001
+		LocalPlayer.changethinnedframedatafordoppelganger(fd, doppelnetoffset)
+		avatardata["framedata0"] = fd
+		var doppelgangerdelay = get_node("..").getrandomdoppelgangerdelay(true)
+		yield(get_tree().create_timer(doppelgangerdelay*0.001), "timeout")
 		LocalPlayer.get_node("PlayerFrame").doppelgangernode = newremoteplayer(avatardata)
 		LocalPlayer.get_node("PlayerFrame").NetworkGatewayForDoppelganger = get_node("..")
 	else:
@@ -229,7 +236,7 @@ remote func networkedavatarthinnedframedataPC(vd):
 	var remoteplayer = PlayersNode.get_node_or_null(vd["playernodename"])
 	if remoteplayer != null:
 		remoteplayer.get_node("PlayerFrame").networkedavatarthinnedframedata(vd)
-		get_node("../TimelineVisualizer/Viewport/TimelineDiagram").marknetworkdataat(vd)
+		get_node("../TimelineVisualizer/Viewport/TimelineDiagram").marknetworkdataat(vd, remoteplayer.get_name())
 	else:
 		print("networkedavatarthinnedframedataPC called before spawning")
 	if webrtc_server_relay:

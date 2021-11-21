@@ -5,7 +5,7 @@ var NetworkGatewayForDoppelganger = null
 var PlayerConnections = null
 
 
-static func thinframedata(fd0, fd, bnothinning):
+static func thinframedata_updatef0(fd0, fd, bnothinning):
 	var vd = { }
 	for k in fd:
 		assert (k != NCONSTANTS.CFI_TIMESTAMP)
@@ -54,7 +54,7 @@ var Dframebytesprev = 0
 var heartbeatfullframeseconds = 5.0
 var minframeseconds = 0.1
 
-var framedata0 = { NCONSTANTS.CFI_TIMESTAMP:0.0 }
+var framedata0 = { NCONSTANTS.CFI_TIMESTAMP:0.0, NCONSTANTS.CFI_TIMESTAMP_F0:0.0 }
 func _process(delta):
 	get_parent().processlocalavatarposition(delta)
 
@@ -62,13 +62,17 @@ func _process(delta):
 	var dft = tstamp - framedata0[NCONSTANTS.CFI_TIMESTAMP]
 	if dft < minframeseconds:
 		return
+	framedata0[NCONSTANTS.CFI_TIMESTAMPPREV] = framedata0[NCONSTANTS.CFI_TIMESTAMP_F0]
+	framedata0[NCONSTANTS.CFI_TIMESTAMP_F0] = tstamp
+
 	var fd = get_parent().avatartoframedata()
-	var vd = thinframedata(framedata0, fd, (dft >= heartbeatfullframeseconds))
+	var vd = thinframedata_updatef0(framedata0, fd, (dft >= heartbeatfullframeseconds))
 	if len(vd) == 0:
 		return
-	vd[NCONSTANTS.CFI_TIMESTAMPPREV] = framedata0[NCONSTANTS.CFI_TIMESTAMP]
-	vd[NCONSTANTS.CFI_TIMESTAMP] = tstamp
 	framedata0[NCONSTANTS.CFI_TIMESTAMP] = tstamp
+	vd[NCONSTANTS.CFI_TIMESTAMPPREV] = framedata0[NCONSTANTS.CFI_TIMESTAMPPREV]
+	vd[NCONSTANTS.CFI_TIMESTAMP] = tstamp
+	#print("vv ", vd)
 	
 	Dcumulativebytes += len(var2bytes(vd))
 	DframereportCount += 1
@@ -79,24 +83,20 @@ func _process(delta):
 		Dcumulativebytes= 0
 		DframereportCount = 0
 
-	PlayerConnections.get_node("../TimelineVisualizer/Viewport/TimelineDiagram").marknetworkdataat(vd)
+	PlayerConnections.get_node("../TimelineVisualizer/Viewport/TimelineDiagram").marknetworkdataat(vd, get_node("..").name)
 	
 	if get_parent().networkID >= 1:
-		#vd["playernodename"] = get_parent().get_name()
 		PlayerConnections.rpc("networkedavatarthinnedframedataPC", vd)
 		
 	if doppelgangernode != null:
 		var doppelnetoffset = float(NetworkGatewayForDoppelganger.get_node("DoppelgangerPanel/netoffset").text)*0.001
-		vd[NCONSTANTS.CFI_TIMESTAMP] += doppelnetoffset
-		vd[NCONSTANTS.CFI_TIMESTAMPPREV] += doppelnetoffset
-		#vd["playernodename"] = "Doppelganger"
-		get_parent().changethinnedframedatafordoppelganger(vd)
+		get_parent().changethinnedframedatafordoppelganger(vd, doppelnetoffset)
 		var doppelgangerdelay = NetworkGatewayForDoppelganger.getrandomdoppelgangerdelay()
 		if doppelgangerdelay != -1.0:
 			yield(get_tree().create_timer(doppelgangerdelay*0.001), "timeout")
 			if doppelgangernode != null:
 				doppelgangernode.get_node("PlayerFrame").networkedavatarthinnedframedata(vd)
-				PlayerConnections.get_node("../TimelineVisualizer/Viewport/TimelineDiagram").marknetworkdataat(vd)
+				PlayerConnections.get_node("../TimelineVisualizer/Viewport/TimelineDiagram").marknetworkdataat(vd, doppelgangernode.get_name())
 
 
 

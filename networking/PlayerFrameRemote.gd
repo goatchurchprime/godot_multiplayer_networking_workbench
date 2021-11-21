@@ -6,6 +6,7 @@ var mintimestampoffset = 0.0
 var laglatency = 0.2
 
 func networkedavatarthinnedframedata(vd):
+	assert (not vd.has(NCONSTANTS.CFI_TIMESTAMP_F0))
 	vd[NCONSTANTS.CFI_TIMESTAMP_RECIEVED] = OS.get_ticks_msec()*0.001
 	var timestampoffset = vd[NCONSTANTS.CFI_TIMESTAMP_RECIEVED] - vd[NCONSTANTS.CFI_TIMESTAMP]
 	if len(framestack) == 0 or timestampoffset < mintimestampoffset:
@@ -16,6 +17,7 @@ func networkedavatarthinnedframedata(vd):
 		framestack.push_back(framestack[-1].duplicate())
 		framestack[-1].erase(NCONSTANTS.CFI_TIMESTAMP_RECIEVED)
 		framestack[-1][NCONSTANTS.CFI_TIMESTAMP] = vd[NCONSTANTS.CFI_TIMESTAMPPREV]
+		print("ff ", framestack[-1])
 
 	var fd = framestack[-1].duplicate() if len(framestack) != 0 else { }
 	for k in vd:
@@ -25,6 +27,7 @@ func networkedavatarthinnedframedata(vd):
 func _process(delta):
 	var t = OS.get_ticks_msec()*0.001 - mintimestampoffset - laglatency
 	while len(framestack) >= 2 and t > framestack[1][NCONSTANTS.CFI_TIMESTAMP]:
+		print("kk ", framestack[0])
 		framestack.pop_front()
 	if len(framestack) == 1:
 		get_parent().framedatatoavatar(framestack[0])
@@ -43,7 +46,7 @@ func _process(delta):
 					v = v0
 				elif ty == TYPE_QUAT:
 					var dv = v0*v1.inverse()
-					print(dv, "something spectial")
+					print(dv, "something special")
 				else:
 					v = lerp(v0, v1, lam)
 				ld[k] = v
