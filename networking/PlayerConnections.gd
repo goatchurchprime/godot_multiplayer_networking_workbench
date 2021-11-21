@@ -41,7 +41,6 @@ func _ready():
 
 	LocalPlayer.networkID = 0
 	LocalPlayer.set_name("R%d" % LocalPlayer.networkID) 
-	get_node("../TimelineVisualizer/Viewport/TimelineDiagram/Players/LocalPlayer").set_name(LocalPlayer.get_name())
 
 
 func connectionlog(txt):
@@ -69,7 +68,6 @@ func networkplayer_server_disconnected(serverisself):
 	print("setnetworkpeer null")
 	LocalPlayer.networkID = 0
 	LocalPlayer.set_name("R%d" % LocalPlayer.networkID) 
-	get_node("../TimelineVisualizer/Viewport/TimelineDiagram/Players/LocalPlayer").set_name(LocalPlayer.get_name())
 	deferred_playerconnections.clear()
 	for id in remote_players_idstonodenames.duplicate():
 		network_player_disconnected(id)
@@ -99,7 +97,6 @@ func networkplayer_connected_to_server(serverisself):
 	LocalPlayer.networkID = get_tree().get_network_unique_id()
 	assert (LocalPlayer.networkID >= 1)
 	LocalPlayer.set_name("R%d" % LocalPlayer.networkID)
-	get_node("../TimelineVisualizer/Viewport/TimelineDiagram/Players/LocalPlayer").set_name(LocalPlayer.get_name())
 	connectionlog("_my networkid=%d\n" % LocalPlayer.networkID)
 	print("my playerid=", LocalPlayer.networkID)
 	for id in deferred_playerconnections:
@@ -146,7 +143,8 @@ func network_player_added(id, via_server_relay):
 	remote_players_idstonodenames[id] = null
 	print("players_connected_list: ", remote_players_idstonodenames)
 	var avatardata = LocalPlayer.avatarinitdata()
-	avatardata["framedata0"] = LocalPlayer.get_node("PlayerFrame").framedata0
+	avatardata["framedata0"] = LocalPlayer.get_node("PlayerFrame").framedata0.duplicate()
+	avatardata["framedata0"].erase(NCONSTANTS.CFI_TIMESTAMP_F0)
 	print("calling spawnintoremoteplayer at ", id, " (from ", LocalPlayer.networkID, ")", (" via serverrelay" if via_server_relay else ""))
 	#yield(get_tree().create_timer(1.0), "timeout")   # allow for webrtc to complete connection
 	if not via_server_relay:
@@ -233,7 +231,7 @@ remote func spawnintoremoteplayer(avatardata):
 
 remote func networkedavatarthinnedframedataPC(vd):
 	var rpcsenderid = get_tree().get_rpc_sender_id()
-	var remoteplayer = PlayersNode.get_node_or_null(vd["playernodename"])
+	var remoteplayer = PlayersNode.get_node_or_null(vd[NCONSTANTS.CFI_PLAYER_NODENAME])
 	if remoteplayer != null:
 		remoteplayer.get_node("PlayerFrame").networkedavatarthinnedframedata(vd)
 		get_node("../TimelineVisualizer/Viewport/TimelineDiagram").marknetworkdataat(vd, remoteplayer.get_name())

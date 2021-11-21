@@ -5,7 +5,7 @@ extends Panel
 
 # make sure you download the webrtc libraries from here: https://github.com/godotengine/webrtc-native/releases
 
-export var remoteservers = [ "192.168.43.1", "192.168.8.111", "192.168.1.31" ]
+export var remoteservers = [ "192.168.43.1", "192.168.8.111", "192.168.43.193" ]
 
 
 enum NETWORK_PROTOCOL { ENET = 0, 
