@@ -4,6 +4,7 @@ var doppelgangernode = null
 var NetworkGatewayForDoppelganger = null
 var PlayerConnections = null
 
+var networkID = 0   # 0:unconnected, 1:server, -1:connecting, >1:connected to client
 
 static func thinframedata_updatef0(fd0, fd, bnothinning):
 	var vd = { }
@@ -83,9 +84,10 @@ func _process(delta):
 		Dcumulativebytes= 0
 		DframereportCount = 0
 
-	PlayerConnections.get_node("../TimelineVisualizer/Viewport/TimelineDiagram").marknetworkdataat(vd, "LocalPlayer")
+	if PlayerConnections.get_node("../TimelineVisualizer").visible:
+		PlayerConnections.get_node("../TimelineVisualizer/Viewport/TimelineDiagram").marknetworkdataat(vd, "LocalPlayer")
 	
-	if get_parent().networkID >= 1:
+	if networkID >= 1:
 		vd[NCONSTANTS.CFI_PLAYER_NODENAME] = get_parent().get_name()
 		PlayerConnections.rpc("networkedavatarthinnedframedataPC", vd)
 		
@@ -97,7 +99,8 @@ func _process(delta):
 			yield(get_tree().create_timer(doppelgangerdelay*0.001), "timeout")
 			if doppelgangernode != null:
 				doppelgangernode.get_node("PlayerFrame").networkedavatarthinnedframedata(vd)
-				PlayerConnections.get_node("../TimelineVisualizer/Viewport/TimelineDiagram").marknetworkdataat(vd, doppelgangernode.get_name())
+				if PlayerConnections.get_node("../TimelineVisualizer").visible:
+					PlayerConnections.get_node("../TimelineVisualizer/Viewport/TimelineDiagram").marknetworkdataat(vd, doppelgangernode.get_name())
 
 
 

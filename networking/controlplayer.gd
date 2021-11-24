@@ -1,6 +1,5 @@
 extends Label
 
-var networkID = 0   # 0:unconnected, 1:server, -1:connecting, >1:connected to client
 
 var localavatardisplacement = Vector3(0,0,-0.1)*0
 func processlocalavatarposition(delta):
@@ -20,21 +19,24 @@ func avatartoframedata():
 func framedatatoavatar(fd):
 	rect_position = fd[NCONSTANTS.CFI_RECT_POSITION]
 
-func initavatar(avatardata):
-	if avatardata.has("playernodename"):
+func initavatar(avatardata, firstlocalinit):
+	if firstlocalinit:
+		rect_position.y += randi()%300
+		modulate = Color.yellow
+	else:
 		set_name(avatardata["playernodename"])
-	if avatardata.has("networkid"):
-		networkID = avatardata["networkid"]
+		get_node("PlayerFrame").networkID = avatardata["networkid"]
 	text = avatardata["labeltext"]
 
 func avatarinitdata():
-	var avatardata = { "playernodename":get_name(),
-					   "avatarsceneresource":filename, 
-					   "networkid":networkID, 
+	var avatardata = { "avatarsceneresource":filename, 
 					   "labeltext":text
 					 }
 	return avatardata
 	
+func playername():
+	return text
+
 static func changethinnedframedatafordoppelganger(fd, doppelnetoffset):
 	fd[NCONSTANTS.CFI_TIMESTAMP] += doppelnetoffset
 	fd[NCONSTANTS.CFI_TIMESTAMPPREV] += doppelnetoffset

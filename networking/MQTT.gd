@@ -26,7 +26,7 @@ var ssl_params = null
 var pid = 0
 var user = null
 var pswd = null
-var keepalive = 0
+var keepalive = 60
 var lw_topic = null
 var lw_msg = null
 var lw_qos = 0
@@ -184,7 +184,7 @@ func firstmessagetoserver():
 	msg.append(0x04);
 	msg.append(0x02);
 	msg.append(0x00);
-	msg.append(0x00);
+	msg.append(0x3C);
 
 	msg[1] = 10 + 2 + len(self.client_id)
 	msg[9] = (1<<1) if clean_session else 0

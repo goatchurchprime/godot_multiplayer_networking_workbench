@@ -5,6 +5,12 @@ extends Panel
 
 # make sure you download the webrtc libraries from here: https://github.com/godotengine/webrtc-native/releases
 
+# check UDP works on phone or network
+# Timeline visualizer able to disable
+# make this system operate in VR gaming (using the OQ_network thing)
+# Insert by symlink to help with development of code
+
+
 export var remoteservers = [ "192.168.43.1", "192.168.8.111", "192.168.43.193" ]
 
 
@@ -53,11 +59,11 @@ func _on_OptionButton_item_selected(ns):
 	if not selectasoff:
 		$PlayerConnections/ConnectionLog.text = ""
 
-	if $PlayerConnections.LocalPlayer.networkID != 0:
+	if $PlayerConnections.LocalPlayer.get_node("PlayerFrame").networkID != 0:
 		if get_tree().get_network_peer() != null:
-			print("closing connection ", $PlayerConnections.LocalPlayer.networkID, get_tree().get_network_peer())
+			print("closing connection ", $PlayerConnections.LocalPlayer.get_node("PlayerFrame").networkID, get_tree().get_network_peer())
 		$PlayerConnections.force_server_disconnect()
-	assert ($PlayerConnections.LocalPlayer.networkID == 0)
+	assert ($PlayerConnections.LocalPlayer.get_node("PlayerFrame").networkID == 0)
 	if $UDPipdiscovery/Servermode.is_processing():
 		$UDPipdiscovery/Servermode.stopUDPbroadcasting()
 	if $UDPipdiscovery/Clientmode.is_processing():
@@ -182,7 +188,7 @@ func _input(event):
 		elif (event.scancode == KEY_G):
 			$PlayerConnections/Doppelganger.pressed = not $PlayerConnections/Doppelganger.pressed
 
-	elif event is InputEventMouseButton and event.is_pressed() and (event.button_index == BUTTON_WHEEL_UP or event.button_index == BUTTON_WHEEL_DOWN):
+	elif event is InputEventMouseButton and event.is_pressed() and $TimelineVisualizer.visible and (event.button_index == BUTTON_WHEEL_UP or event.button_index == BUTTON_WHEEL_DOWN):
 		var s = 1 if event.button_index == BUTTON_WHEEL_UP else -1
 		var relposition = event.position - $TimelineVisualizer.rect_global_position
 		if relposition >= Vector2(0,0) and relposition <= $TimelineVisualizer.rect_size:
@@ -204,8 +210,9 @@ func getrandomdoppelgangerdelay(disabledropout=false):
 	if not disabledropout and rng.randf_range(0, 100) < float(get_node("DoppelgangerPanel/netdroppc").text):
 		return -1.0
 	var netdelayadd = float(get_node("DoppelgangerPanel/netdelayadd").text)
-	return int(get_node("DoppelgangerPanel/netdelaymin").text) + max(0.0, rng.randfn(netdelayadd, netdelayadd*0.4))
-
+	var doppelgangerdelay = int(get_node("DoppelgangerPanel/netdelaymin").text) + max(0.0, rng.randfn(netdelayadd, netdelayadd*0.4))
+	return doppelgangerdelay
+	
 func setnetworkoff():
 	$NetworkOptions.select(NETWORK_OPTIONS.NETWORK_OFF)
 	_on_OptionButton_item_selected(NETWORK_OPTIONS.NETWORK_OFF)

@@ -791,6 +791,7 @@ text = "drop
 out%:"
 
 [node name="TimelineVisualizer" type="TextureRect" parent="."]
+visible = false
 margin_left = 4.0
 margin_top = 268.436
 margin_right = 554.0
