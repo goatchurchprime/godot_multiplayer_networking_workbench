@@ -23,9 +23,6 @@ func initavatar(avatardata, firstlocalinit):
 	if firstlocalinit:
 		rect_position.y += randi()%300
 		modulate = Color.yellow
-	else:
-		set_name(avatardata["playernodename"])
-		get_node("PlayerFrame").networkID = avatardata["networkid"]
 	text = avatardata["labeltext"]
 
 func avatarinitdata():
