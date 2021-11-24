@@ -36,9 +36,9 @@ margin_left = 69.0394
 margin_top = 11.087
 margin_right = 271.039
 margin_bottom = 31.087
-text = "WebRTC (websocket signal)"
+text = "ENet"
 items = [ "ENet", null, false, 0, null, "WebSocket", null, false, 1, null, "WebRTC (websocket signal)", null, false, 2, null, "WebRTC (mqtt signal)", null, false, 3, null ]
-selected = 2
+selected = 0
 __meta__ = {
 "_edit_use_anchors_": false
 }
