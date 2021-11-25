@@ -1,5 +1,4 @@
-extends Label
-
+extends Node2D
 
 var localavatardisplacement = Vector3(0,0,-0.1)*0
 func processlocalavatarposition(delta):
@@ -8,34 +7,35 @@ func processlocalavatarposition(delta):
 	processlocalavatarpositionVec(vec, delta)
 	
 func processlocalavatarpositionVec(vec, delta):
-	rect_position = Vector2(clamp(rect_position.x + vec.x*200*delta, 0, 500), 
-							clamp(rect_position.y + vec.y*200*delta, 0, 300))
+	position = Vector2(clamp(position.x + vec.x*200*delta, 65, 500), 
+					   clamp(position.y + vec.y*200*delta, 7, 339))
 		
 func avatartoframedata():
-	var fd = { NCONSTANTS.CFI_RECT_POSITION :	rect_position }
+	var fd = { NCONSTANTS.CFI_RECT_POSITION: position }
 	fd[NCONSTANTS.CFI_FIRE_KEY] = Input.is_key_pressed(KEY_SPACE)
 	return fd
 
 func framedatatoavatar(fd):
-	rect_position = fd[NCONSTANTS.CFI_RECT_POSITION]
+	position = fd[NCONSTANTS.CFI_RECT_POSITION]
 
 func initavatar(avatardata, firstlocalinit):
 	if firstlocalinit:
-		rect_position.y += randi()%300
+		position.y += randi()%300
 		modulate = Color.yellow
-	text = avatardata["labeltext"]
+	$ColorRect/Label.text = avatardata["labeltext"]
 
 func avatarinitdata():
 	var avatardata = { "avatarsceneresource":filename, 
-					   "labeltext":text
+					   "labeltext":$ColorRect/Label.text
 					 }
 	return avatardata
 	
 func playername():
-	return text
+	return $ColorRect/Label.text 
 
 static func changethinnedframedatafordoppelganger(fd, doppelnetoffset):
 	fd[NCONSTANTS.CFI_TIMESTAMP] += doppelnetoffset
 	fd[NCONSTANTS.CFI_TIMESTAMPPREV] += doppelnetoffset
 	if fd.has(NCONSTANTS.CFI_RECT_POSITION):
-		fd[NCONSTANTS.CFI_RECT_POSITION].x = 500 - fd[NCONSTANTS.CFI_RECT_POSITION].x
+		#fd[NCONSTANTS.CFI_RECT_POSITION].x = 500 - fd[NCONSTANTS.CFI_RECT_POSITION].x
+		fd[NCONSTANTS.CFI_RECT_POSITION].y = 339 - fd[NCONSTANTS.CFI_RECT_POSITION].y

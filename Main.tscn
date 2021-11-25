@@ -1,9 +1,16 @@
-[gd_scene load_steps=5 format=2]
+[gd_scene load_steps=8 format=2]
 
 [ext_resource path="res://networking/NetworkGateway.tscn" type="PackedScene" id=1]
 [ext_resource path="res://networking/controlplayer.tscn" type="PackedScene" id=2]
 [ext_resource path="res://networking/JoystickControls.gd" type="Script" id=3]
 [ext_resource path="res://networking/PlayerFrameLocal.gd" type="Script" id=4]
+[ext_resource path="res://PingPongBall.gd" type="Script" id=5]
+
+[sub_resource type="SphereMesh" id=1]
+radius = 10.0
+height = 20.0
+
+[sub_resource type="CircleShape2D" id=2]
 
 [node name="Main" type="Control"]
 anchor_right = 1.0
@@ -25,6 +32,16 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
+[node name="PingPongBall" type="Area2D" parent="JoystickControls"]
+position = Vector2( 100, 100 )
+script = ExtResource( 5 )
+
+[node name="MeshInstance2D" type="MeshInstance2D" parent="JoystickControls/PingPongBall"]
+mesh = SubResource( 1 )
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="JoystickControls/PingPongBall"]
+shape = SubResource( 2 )
+
 [node name="Players" type="Control" parent="."]
 margin_left = 8.29956
 margin_top = 380.591
@@ -35,13 +52,7 @@ __meta__ = {
 }
 
 [node name="LocalPlayer" parent="Players" instance=ExtResource( 2 )]
-anchor_top = 0.291
-anchor_bottom = 1.229
-margin_left = 10.1021
-margin_top = 0.0847054
-margin_right = -499.898
-margin_bottom = -155.693
-text = "MePlayer"
+position = Vector2( 90, 20 )
 
 [node name="PlayerFrame" type="Node" parent="Players/LocalPlayer"]
 script = ExtResource( 4 )
