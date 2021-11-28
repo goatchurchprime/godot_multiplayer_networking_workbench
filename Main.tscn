@@ -1,4 +1,4 @@
-[gd_scene load_steps=8 format=2]
+[gd_scene load_steps=9 format=2]
 
 [ext_resource path="res://networking/NetworkGateway.tscn" type="PackedScene" id=1]
 [ext_resource path="res://networking/controlplayer.tscn" type="PackedScene" id=2]
@@ -11,6 +11,9 @@ radius = 10.0
 height = 20.0
 
 [sub_resource type="CircleShape2D" id=2]
+
+[sub_resource type="RectangleShape2D" id=3]
+extents = Vector2( 10, 180 )
 
 [node name="Main" type="Control"]
 anchor_right = 1.0
@@ -32,7 +35,7 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="PingPongBall" type="Area2D" parent="JoystickControls"]
+[node name="PingPongBall" type="KinematicBody2D" parent="JoystickControls"]
 position = Vector2( 100, 100 )
 script = ExtResource( 5 )
 
@@ -41,6 +44,18 @@ mesh = SubResource( 1 )
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="JoystickControls/PingPongBall"]
 shape = SubResource( 2 )
+
+[node name="StaticBody2D" type="StaticBody2D" parent="JoystickControls"]
+position = Vector2( 0, 175 )
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="JoystickControls/StaticBody2D"]
+shape = SubResource( 3 )
+
+[node name="StaticBody2D2" type="StaticBody2D" parent="JoystickControls"]
+position = Vector2( 555, 175 )
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="JoystickControls/StaticBody2D2"]
+shape = SubResource( 3 )
 
 [node name="Players" type="Control" parent="."]
 margin_left = 8.29956

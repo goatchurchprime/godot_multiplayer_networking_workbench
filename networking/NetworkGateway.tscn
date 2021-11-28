@@ -18,6 +18,7 @@
 [ext_resource path="res://networking/ClientmodeWebSocketsignal.gd" type="Script" id=16]
 
 [sub_resource type="ViewportTexture" id=1]
+resource_local_to_scene = false
 viewport_path = NodePath("TimelineVisualizer/Viewport")
 
 [node name="NetworkGateway" type="Panel"]

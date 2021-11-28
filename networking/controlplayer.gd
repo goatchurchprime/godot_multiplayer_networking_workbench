@@ -1,14 +1,18 @@
 extends Node2D
 
-var localavatardisplacement = Vector3(0,0,-0.1)*0
+var localavatarvelocity = Vector2()
+var batvelocity = 200
+
 func processlocalavatarposition(delta):
 	var vec = Vector2((-1 if Input.is_action_pressed("ui_left") else 0) + (1 if Input.is_action_pressed("ui_right") else 0), 
 					  (-1 if Input.is_action_pressed("ui_up") else 0) + (1 if Input.is_action_pressed("ui_down") else 0))
-	processlocalavatarpositionVec(vec, delta)
+	var mousecommandvelocity = get_node("/root/Main/JoystickControls").mousecommandvelocity
+	processlocalavatarpositionVec(vec + mousecommandvelocity, delta)
 	
 func processlocalavatarpositionVec(vec, delta):
-	position = Vector2(clamp(position.x + vec.x*200*delta, 65, 500), 
-					   clamp(position.y + vec.y*200*delta, 7, 339))
+	localavatarvelocity = vec
+	position = Vector2(clamp(position.x + vec.x*batvelocity*delta, 65, 500), 
+					   clamp(position.y + vec.y*batvelocity*delta, 7, 339))
 		
 func avatartoframedata():
 	var fd = { NCONSTANTS.CFI_RECT_POSITION: position }

@@ -452,9 +452,9 @@ func wait_msg():
 	var data = yield(YreceivedbuffernextNbytes(topic_len), "completed")
 	var topic = data.get_string_from_ascii()
 	sz -= topic_len + 2
-	var pid
+	var pid1
 	if op & 6:
-		pid = yield(Yreceivedbuffernext2byteWord(), "completed")
+		pid1 = yield(Yreceivedbuffernext2byteWord(), "completed")
 		sz -= 2
 	data = yield(YreceivedbuffernextNbytes(sz), "completed")
 	var msg = data if binarymessages else data.get_string_from_ascii()
@@ -467,8 +467,8 @@ func wait_msg():
 		var pkt = PoolByteArray()
 		pkt.append(0x40);
 		pkt.append(0x02);
-		pkt.append(pid >> 8);
-		pkt.append(pid & 0xFF);
+		pkt.append(pid1 >> 8);
+		pkt.append(pid1 & 0xFF);
 		socket.write(pkt)
 	elif op & 6 == 4:
 		assert(0)
