@@ -1,7 +1,6 @@
 extends Control
 
 signal mqttsig_connection_established(wclientid)   # (badly named: applies to websocket signalling too)
-signal mqttsig_connection_closed()
 signal mqttsig_packet_received(v)
 
 onready var NetworkGateway = get_node("../..")

@@ -5,6 +5,7 @@ extends ColorRect
 export var playernodepath : NodePath = "/root/Main/Players"
 onready var PlayersNode = get_node(playernodepath)
 var LocalPlayer = null
+var ServerPlayer = null
 
 var deferred_playerconnections = [ ]
 var remote_players_idstonodenames = { }
@@ -55,7 +56,6 @@ func SetNetworkedMultiplayerPeer(peer):
 
 func clientplayer_server_disconnected():
 	networkplayer_server_disconnected(false)
-	
 	
 func networkplayer_server_disconnected(serverisself):
 	connectionlog("_server(self) disconnect\n" if serverisself else "_server disconnect\n")
@@ -256,6 +256,8 @@ func newremoteplayer(avatardata):
 		remoteplayer.get_node("PlayerFrame").networkID = avatardata["networkid"]
 		remoteplayer.initavatar(avatardata, false)
 		PlayersNode.add_child(remoteplayer)
+		if remoteplayer.get_node("PlayerFrame").networkID == 1:
+			ServerPlayer = remoteplayer
 		if "framedata0" in avatardata:
 			remoteplayer.get_node("PlayerFrame").networkedavatarthinnedframedata(avatardata["framedata0"])
 		print("Adding remoteplayer: ", avatardata["playernodename"])
@@ -268,6 +270,8 @@ func newremoteplayer(avatardata):
 func removeremoteplayer(playernodename):
 	var remoteplayer = PlayersNode.get_node_or_null(playernodename)
 	if remoteplayer != null:
+		if remoteplayer.get_node("PlayerFrame").networkID == 1:
+			ServerPlayer = null
 		PlayersNode.remove_child(remoteplayer)
 		remoteplayer.queue_free()
 		print("Removing remoteplayer: ", playernodename)
