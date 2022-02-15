@@ -19,6 +19,7 @@ func _gui_input(event):
 			else:
 				mousebuttondown = false
 	elif event is InputEventMouseMotion and mousebuttondown:
+		print(event.position, " ", OS.get_ticks_msec())
 		mouseposition = event.position
 	if mouseposition != null:
 		mousecommandvelocity = Vector2((-1 if mouseposition.x < rect_size.x/3 else 0) + (1 if mouseposition.x > 2*rect_size.x/3 else 0), 
