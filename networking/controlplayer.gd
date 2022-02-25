@@ -22,10 +22,14 @@ func avatartoframedata():
 func framedatatoavatar(fd):
 	position = fd[NCONSTANTS.CFI_RECT_POSITION]
 
-func initavatar(avatardata, firstlocalinit):
-	if firstlocalinit:
-		position.y += randi()%300
-		modulate = Color.yellow
+var possibleusernames = ["Alice", "Beth", "Cath", "Dan", "Earl", "Fred", "George", "Harry", "Ivan", "John", "Kevin", "Larry", "Martin", "Oliver", "Peter", "Quentin", "Robert", "Samuel", "Thomas", "Ulrik", "Victor", "Wayne", "Xavier", "Youngs", "Zephir"]
+func initavatarlocal():
+	randomize()
+	position.y += randi()%300
+	modulate = Color.yellow
+	$ColorRect/Label.text = possibleusernames[randi()%len(possibleusernames)]
+
+func initavatarremote(avatardata):
 	$ColorRect/Label.text = avatardata["labeltext"]
 
 func avatarinitdata():

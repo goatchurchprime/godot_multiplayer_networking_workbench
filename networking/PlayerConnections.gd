@@ -9,7 +9,6 @@ var ServerPlayer = null
 
 var deferred_playerconnections = [ ]
 var remote_players_idstonodenames = { }
-var possibleusernames = ["Alice", "Beth", "Cath", "Dan", "Earl", "Fred", "George", "Harry", "Ivan", "John", "Kevin", "Larry", "Martin", "Oliver", "Peter", "Quentin", "Robert", "Samuel", "Thomas", "Ulrik", "Victor", "Wayne", "Xavier", "Youngs", "Zephir"]
 
 onready var NetworkGateway = get_node("..")
 var webrtc_server_relay = false
@@ -26,9 +25,7 @@ func _ready():
 		assert (LocalPlayer.get_node("PlayerFrame").get_script().resource_path == "res://networking/PlayerFrameLocal.gd")
 	LocalPlayer.get_node("PlayerFrame").PlayerConnections = self
 
-	randomize()
-	var randomplayername = possibleusernames[randi()%len(possibleusernames)]
-	LocalPlayer.initavatar({"labeltext":randomplayername}, true)
+	LocalPlayer.initavatarlocal()
 
 	get_tree().connect("network_peer_connected", self, "network_player_connected")
 	get_tree().connect("network_peer_disconnected", self, "network_player_disconnected")
@@ -254,7 +251,7 @@ func newremoteplayer(avatardata):
 			remoteplayer.add_child(playerframe)
 		remoteplayer.set_name(avatardata["playernodename"])
 		remoteplayer.get_node("PlayerFrame").networkID = avatardata["networkid"]
-		remoteplayer.initavatar(avatardata, false)
+		remoteplayer.initavatarremote(avatardata)
 		PlayersNode.add_child(remoteplayer)
 		if remoteplayer.get_node("PlayerFrame").networkID == 1:
 			ServerPlayer = remoteplayer

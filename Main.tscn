@@ -18,6 +18,7 @@ extents = Vector2( 10, 180 )
 [node name="Main" type="Control"]
 anchor_right = 1.0
 anchor_bottom = 1.0
+margin_bottom = -900.0
 __meta__ = {
 "_edit_use_anchors_": false
 }
