@@ -1,7 +1,7 @@
 [gd_scene load_steps=18 format=2]
 
 [ext_resource path="res://addons/player-networking/NetworkGateway.gd" type="Script" id=1]
-[ext_resource path="res://networking/TimelineDiagram.tscn" type="PackedScene" id=2]
+[ext_resource path="res://addons/player-networking/TimelineDiagram.tscn" type="PackedScene" id=2]
 [ext_resource path="res://addons/player-networking/Enetmultiplayerserver.gd" type="Script" id=3]
 [ext_resource path="res://addons/player-networking/PlayerConnections.gd" type="Script" id=4]
 [ext_resource path="res://addons/player-networking/UDPdiscoveryserver.gd" type="Script" id=5]
