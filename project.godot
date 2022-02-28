@@ -12,7 +12,7 @@ _global_script_classes=[ {
 "base": "Reference",
 "class": "NCONSTANTS",
 "language": "GDScript",
-"path": "res://networking/NCONSTANTS.gd"
+"path": "res://addons/player-networking/NCONSTANTS.gd"
 } ]
 _global_script_class_icons={
 "NCONSTANTS": ""

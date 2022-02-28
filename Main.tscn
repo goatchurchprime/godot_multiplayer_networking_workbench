@@ -1,7 +1,7 @@
 [gd_scene load_steps=9 format=2]
 
 [ext_resource path="res://addons/player-networking/PlayerFrameLocal.gd" type="Script" id=1]
-[ext_resource path="res://addons/player-networking/controlplayer.tscn" type="PackedScene" id=2]
+[ext_resource path="res://controlplayer.tscn" type="PackedScene" id=2]
 [ext_resource path="res://addons/player-networking/NetworkGateway.tscn" type="PackedScene" id=3]
 [ext_resource path="res://JoystickControls.gd" type="Script" id=4]
 [ext_resource path="res://PingPongBall.gd" type="Script" id=5]
@@ -67,7 +67,7 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="RemotePlayer" parent="Players" instance=ExtResource( 2 )]
+[node name="LocalPlayer" parent="Players" instance=ExtResource( 2 )]
 
-[node name="PlayerFrame" type="Node" parent="Players/RemotePlayer"]
+[node name="PlayerFrame" type="Node" parent="Players/LocalPlayer"]
 script = ExtResource( 1 )
