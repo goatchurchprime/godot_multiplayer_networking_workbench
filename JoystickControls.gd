@@ -3,10 +3,18 @@ extends ColorRect
 var mousecommandvelocity = Vector2(0, 0)
 var mousebuttondown = false
 
+
+
 func _ready():
 	get_node("../Players").set_mouse_filter(Control.MOUSE_FILTER_IGNORE)
 	connect("mouse_exited", self, "_gui_input", [null])
 	get_node("/root").connect("size_changed", self, "window_size_changed")
+	var NetworkGateway = get_node("../NetworkGateway")
+	#NetworkGateway.initialstate(NetworkGateway.get_node("ProtocolOptions").selected, NetworkGateway.NETWORK_OPTIONS.NETWORK_OFF)
+	NetworkGateway.initialstatemqttwebrtc(NetworkGateway.NETWORK_OPTIONS_MQTT_WEBRTC.AS_SERVER, "tomato", "")
+	if OS.has_feature("Server"):
+		yield(get_tree().create_timer(1.5), "timeout")
+		NetworkGateway.get_node("NetworkOptions").select(NetworkGateway.NETWORK_OPTIONS.AS_SERVER)
 
 func _gui_input(event):
 	var mouseposition = null

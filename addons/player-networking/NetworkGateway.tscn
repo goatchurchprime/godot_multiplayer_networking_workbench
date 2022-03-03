@@ -96,7 +96,7 @@ margin_top = 11.087
 margin_right = 542.04
 margin_bottom = 31.087
 text = "Network off"
-items = [ "Network off", null, false, 0, null, "As server", null, false, 1, null, "As client", null, false, 3, null ]
+items = [ "Network off", null, false, 0, null, "As server", null, false, 1, null, "As client", null, false, 3, null, "As required", null, false, 3, null ]
 selected = 0
 __meta__ = {
 "_edit_use_anchors_": false
@@ -442,7 +442,6 @@ __meta__ = {
 }
 
 [node name="MQTTsignalling" type="ColorRect" parent="."]
-visible = false
 anchor_right = 1.0
 anchor_bottom = 1.0
 margin_left = 12.0

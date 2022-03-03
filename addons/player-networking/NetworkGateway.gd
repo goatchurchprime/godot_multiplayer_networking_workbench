@@ -21,13 +21,56 @@ enum NETWORK_PROTOCOL { ENET = 0,
 enum NETWORK_OPTIONS { NETWORK_OFF = 0
 					   AS_SERVER = 1,
 					   LOCAL_NETWORK = 2,
-					   FIXED_URL = 3,
+					   FIXED_URL = 3
 					 }
+
+enum NETWORK_OPTIONS_MQTT_WEBRTC { 
+					   NETWORK_OFF = 0
+					   AS_SERVER = 1,
+					   AS_CLIENT = 2,
+					   AS_NECESSARY = 3
+					 }
+
 
 const errordecodes = { ERR_ALREADY_IN_USE:"ERR_ALREADY_IN_USE", 
 					   ERR_CANT_CREATE:"ERR_CANT_CREATE"
 					 }
 var rng = RandomNumberGenerator.new()
+
+
+func _ready():
+	for rs in remoteservers:
+		$NetworkOptions.add_item(rs)
+	if OS.has_feature("HTML5"):
+		$NetworkOptions.set_item_disabled(NETWORK_OPTIONS.LOCAL_NETWORK,  true)
+		$NetworkOptions.set_item_disabled(NETWORK_OPTIONS.AS_SERVER,  true)
+		$MQTTsignalling/brokeraddress/usewebsocket.pressed = true
+		$MQTTsignalling/brokeraddress/usewebsocket.disabled = true
+		$ProtocolOptions.set_item_disabled(NETWORK_PROTOCOL.ENET, true)
+		$ProtocolOptions.selected = max(NETWORK_PROTOCOL.WEBSOCKET, $ProtocolOptions.selected)
+	rng.randomize()
+
+func initialstateoff(protocol):
+	assert (protocol >= NETWORK_PROTOCOL.ENET and protocol <= NETWORK_PROTOCOL.WEBRTC_MQTTSIGNAL)
+	$ProtocolOptions.selected = protocol
+	_on_ProtocolOptions_item_selected($ProtocolOptions.selected)
+	_on_udpenabled_toggled($UDPipdiscovery/udpenabled.pressed)
+
+func initialstatemqttwebrtc(networkoption, roomname, brokeraddress):
+	$ProtocolOptions.selected = NETWORK_PROTOCOL.WEBRTC_MQTTSIGNAL
+	_on_ProtocolOptions_item_selected($ProtocolOptions.selected)
+	if brokeraddress:
+		var wsb = brokeraddress.split("://", true, 1)
+		if len(wsb) == 2:
+			if wsb[0].begins_with("ws"):
+				$MQTTsignalling/brokeraddress/usewebsocket.pressed = true
+			brokeraddress = wsb[1]
+		$MQTTsignalling/brokeraddress.text = brokeraddress
+	if roomname:
+		$MQTTsignalling/roomname.text = roomname
+	$NetworkOptionsMQTTWebRTC.selected = networkoption
+	_on_NetworkOptionsMQTTWebRTC_item_selected($NetworkOptionsMQTTWebRTC.selected)
+
 
 func _on_ProtocolOptions_item_selected(np):
 	assert ($NetworkOptions.selected == 0 and $NetworkOptionsMQTTWebRTC.selected == 0)
@@ -153,24 +196,6 @@ func _on_NetworkOptionsMQTTWebRTC_item_selected(ns):
 	$MQTTsignalling/Servermode/WebRTCmultiplayerserver/StartWebRTCmultiplayer.disabled = true
 	$MQTTsignalling/Clientmode/WebRTCmultiplayerclient/StartWebRTCmultiplayer.pressed = false
 	$MQTTsignalling/Clientmode/WebRTCmultiplayerclient/StartWebRTCmultiplayer.disabled = true
-
-
-func _ready():
-	for rs in remoteservers:
-		$NetworkOptions.add_item(rs)
-	_on_ProtocolOptions_item_selected($ProtocolOptions.selected)
-	_on_udpenabled_toggled($UDPipdiscovery/udpenabled.pressed)
-	if OS.has_feature("Server"):
-		yield(get_tree().create_timer(1.5), "timeout")
-		$NetworkOptions.select(NETWORK_OPTIONS.AS_SERVER)
-	if OS.has_feature("HTML5"):
-		$NetworkOptions.set_item_disabled(NETWORK_OPTIONS.LOCAL_NETWORK,  true)
-		$NetworkOptions.set_item_disabled(NETWORK_OPTIONS.AS_SERVER,  true)
-		$MQTTsignalling/brokeraddress/usewebsocket.pressed = true
-		$MQTTsignalling/brokeraddress/usewebsocket.disabled = true
-		$ProtocolOptions.set_item_disabled(NETWORK_PROTOCOL.ENET, true)
-		$ProtocolOptions.selected = max(NETWORK_PROTOCOL.WEBSOCKET, $ProtocolOptions.selected)
-	rng.randomize()
 
 func _input(event):
 	if event is InputEventKey and event.pressed:
