@@ -23,9 +23,8 @@ viewport_path = NodePath("TimelineVisualizer/Viewport")
 
 [node name="NetworkGateway" type="Panel"]
 self_modulate = Color( 0.32549, 0.317647, 0.317647, 1 )
-margin_left = 4.74915
 margin_top = -0.707108
-margin_right = 563.749
+margin_right = 550.0
 margin_bottom = 378.293
 script = ExtResource( 1 )
 __meta__ = {
@@ -37,9 +36,9 @@ margin_left = 69.0394
 margin_top = 11.087
 margin_right = 271.039
 margin_bottom = 31.087
-text = "ENet"
+text = "WebRTC (mqtt signal)"
 items = [ "ENet", null, false, 0, null, "WebSocket", null, false, 1, null, "WebRTC (websocket signal)", null, false, 2, null, "WebRTC (mqtt signal)", null, false, 3, null ]
-selected = 0
+selected = 3
 __meta__ = {
 "_edit_use_anchors_": false
 }
@@ -658,7 +657,7 @@ text = "autoconnect"
 [node name="PlayerConnections" type="ColorRect" parent="."]
 margin_left = 9.0
 margin_top = 135.0
-margin_right = 556.0
+margin_right = 545.0
 margin_bottom = 222.0
 color = Color( 0.0156863, 0.0313726, 0.392157, 1 )
 script = ExtResource( 4 )
@@ -694,15 +693,15 @@ __meta__ = {
 }
 
 [node name="ConnectionLog" type="TextEdit" parent="PlayerConnections"]
-margin_left = 305.0
-margin_top = 5.0
-margin_right = 539.0
-margin_bottom = 79.0
+margin_left = 293.864
+margin_top = 4.1091
+margin_right = 527.864
+margin_bottom = 78.1091
 
 [node name="DoppelgangerPanel" type="ColorRect" parent="."]
 margin_left = 8.0
 margin_top = 226.0
-margin_right = 556.0
+margin_right = 544.0
 margin_bottom = 263.0
 color = Color( 0.235294, 0.101961, 0.101961, 1 )
 __meta__ = {
@@ -711,7 +710,7 @@ __meta__ = {
 
 [node name="Label" type="Label" parent="DoppelgangerPanel"]
 margin_left = -1.0
-margin_right = 148.0
+margin_right = 144.0
 margin_bottom = 31.0
 text = "Doppelganger network
 traffic parameters (ms)"
@@ -720,28 +719,28 @@ __meta__ = {
 }
 
 [node name="netoffset" type="LineEdit" parent="DoppelgangerPanel"]
-margin_left = 182.622
-margin_top = 3.83232
-margin_right = 240.622
-margin_bottom = 27.8323
+margin_left = 171.486
+margin_top = 5.16867
+margin_right = 229.486
+margin_bottom = 29.1687
 text = "-4000"
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
 [node name="Label" type="Label" parent="DoppelgangerPanel/netoffset"]
-margin_left = -31.6189
-margin_top = -1.4126
-margin_right = -5.6189
-margin_bottom = 29.5874
+margin_left = -25.3826
+margin_top = -2.3035
+margin_right = 0.617401
+margin_bottom = 28.6965
 text = "off
 set:"
 
 [node name="netdelaymin" type="LineEdit" parent="DoppelgangerPanel"]
-margin_left = 281.157
-margin_top = 5.17487
-margin_right = 339.157
-margin_bottom = 29.1749
+margin_left = 270.912
+margin_top = 5.62032
+margin_right = 328.912
+margin_bottom = 29.6203
 text = "70"
 __meta__ = {
 "_edit_use_anchors_": false
@@ -756,10 +755,10 @@ text = "delay
 min:"
 
 [node name="netdelayadd" type="LineEdit" parent="DoppelgangerPanel"]
-margin_left = 385.926
-margin_top = 3.5874
-margin_right = 443.926
-margin_bottom = 27.5874
+margin_left = 373.899
+margin_top = 4.92375
+margin_right = 431.899
+margin_bottom = 28.9237
 text = "30"
 __meta__ = {
 "_edit_use_anchors_": false
@@ -774,20 +773,20 @@ text = "delay
 add:"
 
 [node name="netdroppc" type="LineEdit" parent="DoppelgangerPanel"]
-margin_left = 489.107
-margin_top = 4.3811
-margin_right = 547.107
-margin_bottom = 28.3811
+margin_left = 470.398
+margin_top = 3.4902
+margin_right = 528.398
+margin_bottom = 27.4902
 text = "0.1"
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
 [node name="Label" type="Label" parent="DoppelgangerPanel/netdroppc"]
-margin_left = -42.799
-margin_top = -2.65344
-margin_right = -4.79895
-margin_bottom = 28.3466
+margin_left = -36.1173
+margin_top = -2.20799
+margin_right = 1.88279
+margin_bottom = 28.792
 text = "drop
 out%:"
 

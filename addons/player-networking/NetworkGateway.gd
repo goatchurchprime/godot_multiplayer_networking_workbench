@@ -181,9 +181,16 @@ func _input(event):
 		elif (event.scancode == KEY_3):	bsel = 3
 		elif (event.scancode == KEY_4):	bsel = 4
 
-		if bsel != -1 and $NetworkOptions.selected != bsel:
-			$NetworkOptions.select(bsel)
-			_on_OptionButton_item_selected(bsel)
+		if bsel != -1:
+			if $ProtocolOptions.selected == NETWORK_PROTOCOL.WEBRTC_MQTTSIGNAL:
+				if $NetworkOptionsMQTTWebRTC.selected != bsel:
+					$NetworkOptionsMQTTWebRTC.select(bsel)
+					_on_NetworkOptionsMQTTWebRTC_item_selected(bsel)
+			else:
+				if $NetworkOptions.selected != bsel:
+					$NetworkOptions.select(bsel)
+					_on_OptionButton_item_selected(bsel)
+
 		elif (event.scancode == KEY_G):
 			$PlayerConnections/Doppelganger.pressed = not $PlayerConnections/Doppelganger.pressed
 

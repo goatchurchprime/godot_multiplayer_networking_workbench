@@ -93,7 +93,7 @@ func _process(delta):
 		
 	if doppelgangernode != null:
 		var doppelnetoffset = float(NetworkGatewayForDoppelganger.get_node("DoppelgangerPanel/netoffset").text)*0.001
-		get_parent().changethinnedframedatafordoppelganger(vd, doppelnetoffset)
+		get_parent().changethinnedframedatafordoppelganger(vd, doppelnetoffset, false)
 		var doppelgangerdelay = NetworkGatewayForDoppelganger.getrandomdoppelgangerdelay()
 		if doppelgangerdelay != -1.0:
 			yield(get_tree().create_timer(doppelgangerdelay*0.001), "timeout")

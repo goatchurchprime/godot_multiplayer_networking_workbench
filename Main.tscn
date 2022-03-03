@@ -28,7 +28,7 @@ __meta__ = {
 [node name="JoystickControls" type="ColorRect" parent="."]
 margin_left = 11.0
 margin_top = 383.0
-margin_right = 567.0
+margin_right = 539.0
 margin_bottom = 729.0
 color = Color( 0.14902, 0.215686, 0.141176, 1 )
 script = ExtResource( 4 )
@@ -56,13 +56,14 @@ shape = SubResource( 3 )
 position = Vector2( 555, 175 )
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="JoystickControls/StaticBody2D2"]
+position = Vector2( -32.9628, 0 )
 shape = SubResource( 3 )
 
 [node name="Players" type="Control" parent="."]
-margin_left = 8.29956
-margin_top = 380.591
-margin_right = 577.3
-margin_bottom = 561.591
+margin_left = 8.0
+margin_top = 381.0
+margin_right = 548.0
+margin_bottom = 562.0
 __meta__ = {
 "_edit_use_anchors_": false
 }

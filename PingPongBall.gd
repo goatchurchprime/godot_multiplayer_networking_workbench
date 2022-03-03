@@ -22,8 +22,8 @@ func _physics_process(delta):
 	var t1 = OS.get_ticks_msec()*0.001
 	Dcdelta += delta
 	Di += 1
-	if (Di % 60) == 0:
-		print(OS.get_ticks_msec()*0.001 - Dcdelta)
+	#if (Di % 60) == 0:
+	#	print(OS.get_ticks_msec()*0.001 - Dcdelta)
 
 	var sendballupdate = (t1 > pingpongprevframet0 + pingpongheartbeatseconds)
 	

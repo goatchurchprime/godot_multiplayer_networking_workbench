@@ -197,7 +197,7 @@ func _on_Doppelganger_toggled(button_pressed):
 		fd[NCONSTANTS.CFI_TIMESTAMP] = fd[NCONSTANTS.CFI_TIMESTAMP_F0]
 		fd.erase(NCONSTANTS.CFI_TIMESTAMP_F0)
 		var doppelnetoffset = float(get_node("../DoppelgangerPanel/netoffset").text)*0.001
-		LocalPlayer.changethinnedframedatafordoppelganger(fd, doppelnetoffset)
+		LocalPlayer.changethinnedframedatafordoppelganger(fd, doppelnetoffset, true)
 		avatardata["framedata0"] = fd
 		var doppelgangerdelay = get_node("..").getrandomdoppelgangerdelay(true)
 		yield(get_tree().create_timer(doppelgangerdelay*0.001), "timeout")

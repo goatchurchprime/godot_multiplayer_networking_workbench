@@ -41,7 +41,7 @@ func avatarinitdata():
 func playername():
 	return $ColorRect/Label.text 
 
-static func changethinnedframedatafordoppelganger(fd, doppelnetoffset):
+static func changethinnedframedatafordoppelganger(fd, doppelnetoffset, isframe0):
 	fd[NCONSTANTS.CFI_TIMESTAMP] += doppelnetoffset
 	fd[NCONSTANTS.CFI_TIMESTAMPPREV] += doppelnetoffset
 	if fd.has(NCONSTANTS.CFI_RECT_POSITION):
