@@ -454,7 +454,6 @@ __meta__ = {
 }
 
 [node name="Servermode" type="Control" parent="MQTTsignalling"]
-visible = false
 anchor_right = 1.0
 anchor_bottom = 1.0
 margin_left = 364.0
@@ -488,9 +487,10 @@ margin_bottom = 23.4773
 text = "null"
 
 [node name="StartServer" type="Button" parent="MQTTsignalling/Servermode"]
-margin_left = -0.000419617
-margin_right = 75.9996
-margin_bottom = 20.0
+margin_left = -138.594
+margin_top = 51.6189
+margin_right = -62.5937
+margin_bottom = 71.6189
 toggle_mode = true
 text = "Start mqtt"
 __meta__ = {
@@ -517,6 +517,7 @@ __meta__ = {
 }
 
 [node name="Clientmode" type="Control" parent="MQTTsignalling"]
+visible = false
 anchor_right = 1.0
 anchor_bottom = 1.0
 margin_left = 375.335
@@ -554,10 +555,10 @@ margin_bottom = 59.5227
 text = "null"
 
 [node name="StartClient" type="Button" parent="MQTTsignalling/Clientmode"]
-margin_left = 5.47289
-margin_top = -0.0769186
-margin_right = 87.4729
-margin_bottom = 19.9231
+margin_left = -152.919
+margin_top = 53.6633
+margin_right = -70.9194
+margin_bottom = 73.6634
 toggle_mode = true
 text = "Start mqtt"
 __meta__ = {
@@ -646,12 +647,30 @@ margin_bottom = 20.4773
 text = "mqtt clientid:"
 
 [node name="autoconnect" type="CheckBox" parent="MQTTsignalling"]
-margin_left = 205.879
-margin_top = 61.5704
-margin_right = 312.879
-margin_bottom = 85.5704
+margin_left = 386.192
+margin_top = 7.12305
+margin_right = 493.192
+margin_bottom = 31.123
 pressed = true
 text = "autoconnect"
+
+[node name="StartMQTT" type="Button" parent="MQTTsignalling"]
+margin_left = 59.3967
+margin_top = 246.781
+margin_right = 135.397
+margin_bottom = 266.781
+toggle_mode = true
+text = "Start mqtt"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="statuslabel" type="Label" parent="MQTTsignalling/StartMQTT"]
+margin_left = 87.4729
+margin_top = 3.92308
+margin_right = 138.473
+margin_bottom = 22.9231
+text = "Off"
 
 [node name="PlayerConnections" type="ColorRect" parent="."]
 margin_left = 9.0
@@ -845,7 +864,6 @@ __meta__ = {
 [connection signal="toggled" from="WebSocketsignalling/Servermode/WebRTCmultiplayerserver/StartWebRTCmultiplayer" to="WebSocketsignalling/Servermode/WebRTCmultiplayerserver" method="_on_StartWebRTCmultiplayer_toggled"]
 [connection signal="toggled" from="WebSocketsignalling/Clientmode/WebRTCmultiplayerclient/StartWebRTCmultiplayer" to="WebSocketsignalling/Clientmode/WebRTCmultiplayerclient" method="_on_StartWebRTCmultiplayer_toggled"]
 [connection signal="toggled" from="MQTTsignalling/Servermode/WebRTCmultiplayerserver/StartWebRTCmultiplayer" to="MQTTsignalling/Servermode/WebRTCmultiplayerserver" method="_on_StartWebRTCmultiplayer_toggled"]
-[connection signal="toggled" from="MQTTsignalling/Servermode/StartServer" to="MQTTsignalling/Servermode" method="_on_StartServer_toggled"]
 [connection signal="toggled" from="MQTTsignalling/Clientmode/WebRTCmultiplayerclient/StartWebRTCmultiplayer" to="MQTTsignalling/Clientmode/WebRTCmultiplayerclient" method="_on_StartWebRTCmultiplayer_toggled"]
-[connection signal="toggled" from="MQTTsignalling/Clientmode/StartClient" to="MQTTsignalling/Clientmode" method="_on_StartClient_toggled"]
+[connection signal="toggled" from="MQTTsignalling/StartMQTT" to="MQTTsignalling/Servermode" method="_on_StartServer_toggled"]
 [connection signal="toggled" from="PlayerConnections/Doppelganger" to="PlayerConnections" method="_on_Doppelganger_toggled"]

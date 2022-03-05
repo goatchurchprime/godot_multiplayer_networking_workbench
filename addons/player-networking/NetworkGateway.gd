@@ -196,12 +196,21 @@ func _on_NetworkOptionsMQTTWebRTC_item_selected(ns):
 	$MQTTsignalling/Servermode/StartServer.pressed = false
 	$MQTTsignalling/Clientmode/StartClient.pressed = false
 
+	if $MQTTsignalling/Servermode/StartServer.is_connected("toggled", $MQTTsignalling/Servermode, "_on_StartServer_toggled"):
+		$MQTTsignalling/Servermode/StartServer.disconnect("toggled", $MQTTsignalling/Servermode, "_on_StartServer_toggled")
+	if $MQTTsignalling/Clientmode/StartClient.is_connected("toggled", $MQTTsignalling/Clientmode, "_on_StartClient_toggled"):
+		$MQTTsignalling/Clientmode/StartClient.disconnect("toggled", $MQTTsignalling/Clientmode, "_on_StartClient_toggled")
+
 	var selectasserver = (ns == NETWORK_OPTIONS_MQTT_WEBRTC.AS_SERVER)
 	var selectasclient = (ns == NETWORK_OPTIONS_MQTT_WEBRTC.AS_CLIENT)
 	var selectasnecessary = (ns == NETWORK_OPTIONS_MQTT_WEBRTC.AS_NECESSARY)
 	$MQTTsignalling/Servermode.visible = selectasserver
 	$MQTTsignalling/Clientmode.visible = selectasclient
 	$ProtocolOptions.disabled = not selectasoff
+	if selectasserver:
+		$MQTTsignalling/Servermode/StartServer.connect("toggled", $MQTTsignalling/Servermode, "_on_StartServer_toggled")
+	if selectasclient or selectasnecessary:
+		$MQTTsignalling/Clientmode/StartClient.connect("toggled", $MQTTsignalling/Clientmode, "_on_StartClient_toggled")
 	if $MQTTsignalling/mqttautoconnect.pressed:
 		$MQTTsignalling/Servermode/StartServer.pressed = selectasserver
 	if $MQTTsignalling/mqttautoconnect.pressed:

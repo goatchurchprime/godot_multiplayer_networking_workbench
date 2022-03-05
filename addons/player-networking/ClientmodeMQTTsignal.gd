@@ -3,6 +3,9 @@ extends Control
 
 onready var SetupMQTTsignal = get_parent()
 onready var MQTT = SetupMQTTsignal.get_node("MQTT")
+onready var StartMQTT = SetupMQTTsignal.get_node("StartMQTT")
+onready var StartMQTTstatuslabel = SetupMQTTsignal.get_node("StartMQTT/statuslabel")
+
 var roomname = ""
 var wclientid = 0
 
