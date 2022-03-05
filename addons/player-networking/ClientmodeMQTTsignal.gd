@@ -17,7 +17,7 @@ signal mqttsig_packet_received(v)
 
 # mosquitto_sub -h broker.mqttdashboard.com -t "tomato/#" -v
 
-var openserverslist = [ ]
+var openserversconnections = { }
 var selectedserver = ""
 var serverconnected = false
 var statustopic = ""
@@ -35,11 +35,17 @@ func sendpacket_toserver(v):
 func isconnectedtosignalserver():
 	return serverconnected
 
+var Nmaxnconnectionstoserver = 3
 func choosefromopenservers():
-	selectedserver = openserverslist[0]
-	MQTT.subscribe("%s/%s/packet/%s" % [roomname, selectedserver, MQTT.client_id])
-	var t = "%s/%s/packet/%s" % [roomname, MQTT.client_id, selectedserver]
-	MQTT.publish(t, to_json({"subject":"request_connection"}))
+	selectedserver = null
+	for ss in openserversconnections:
+		if openserversconnections[ss] < Nmaxnconnectionstoserver:
+			if selectedserver == null or openserversconnections[ss] > openserversconnections[selectedserver]:
+				selectedserver = ss
+	if selectedserver != null:
+		MQTT.subscribe("%s/%s/packet/%s" % [roomname, selectedserver, MQTT.client_id])
+		var t = "%s/%s/packet/%s" % [roomname, MQTT.client_id, selectedserver]
+		MQTT.publish(t, to_json({"subject":"request_connection"}))
 
 func received_mqtt(topic, msg):
 	if msg == "":  return
@@ -50,15 +56,14 @@ func received_mqtt(topic, msg):
 			var sendingserverid = stopic[1]
 
 			if len(stopic) == 3 and stopic[2] == "server":
-				var si = openserverslist.find(sendingserverid)
-				if v["subject"] == "open" and si == -1:
-					openserverslist.append(sendingserverid)
+				if v["subject"] == "serveropen" and not openserversconnections.has(sendingserverid):
+					openserversconnections[sendingserverid] = v.get("nconnections", 0)
 					if StartMQTT.pressed and selectedserver == "":
 						if not waitingforserverstoshow:
 							choosefromopenservers()
 							
-				if v["subject"] == "dead" and si != -1:
-					openserverslist.remove(si)
+				if v["subject"] == "dead" and openserversconnections.has(sendingserverid):
+					openserversconnections.erase(sendingserverid)
 					if selectedserver == sendingserverid:
 						if serverconnected:
 							emit_signal("mqttsig_connection_closed")
@@ -124,14 +129,17 @@ func _on_StartClient_toggled(button_pressed):
 			yield(get_tree().create_timer(waittimeforservertoshow), "timeout")
 			waitingforserverstoshow = false
 		if StartMQTT.pressed:
-			if selectasnecessary and len(openserverslist) == 0:
+			var converttoservertype = selectasnecessary
+			for ss in openserversconnections:
+				if openserversconnections[ss] < Nmaxnconnectionstoserver:
+					converttoservertype = false
+			if converttoservertype:
 				NetworkGateway.selectandtrigger_networkoption(NetworkGateway.NETWORK_OPTIONS_MQTT_WEBRTC.AS_SERVER)
 			else:
 				NetworkGateway.get_node("NetworkOptionsMQTTWebRTC").selected = NetworkGateway.NETWORK_OPTIONS_MQTT_WEBRTC.AS_CLIENT
 				visible = true
 				assert (selectedserver == "")
-				if len(openserverslist) != 0:
-					choosefromopenservers()
+				choosefromopenservers()
 				
 	else:
 		print("Disconnecting MQTT")
@@ -142,7 +150,7 @@ func _on_StartClient_toggled(button_pressed):
 		statustopic = ""
 		selectedserver = ""
 		serverconnected = false
-		openserverslist.clear()
+		openserversconnections.clear()
 		StartMQTTstatuslabel.text = "off"
 		SetupMQTTsignal.get_node("client_id").text = ""
 		emit_signal("mqttsig_connection_closed")
