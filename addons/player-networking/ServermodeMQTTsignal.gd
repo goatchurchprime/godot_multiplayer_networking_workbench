@@ -3,6 +3,9 @@ extends Control
 
 onready var SetupMQTTsignal = get_parent()
 onready var MQTT = SetupMQTTsignal.get_node("MQTT")
+onready var StartMQTT = $StartServer # SetupMQTTsignal.get_node("StartMQTT")
+onready var StartMQTTstatuslabel = SetupMQTTsignal.get_node("StartMQTT/statuslabel")
+
 var roomname = ""
 
 	
@@ -75,7 +78,7 @@ func received_mqtt(topic, msg):
 				print("Unrecognized topic ", topic)
 
 func on_broker_disconnect():
-	$StartServer.pressed = false
+	StartMQTT.pressed = false
 	
 func on_broker_connect():
 	MQTT.subscribe("%s/+/packet/%s" % [roomname, MQTT.client_id])
@@ -85,7 +88,7 @@ func on_broker_connect():
 		MQTT.subscribe("%s/+/client" % roomname)
 	statustopic = "%s/%s/server" % [roomname, MQTT.client_id]
 	MQTT.publish(statustopic, to_json({"subject":"open", "nconnections":len(clientidtowclientid)}), true)
-	$StartServer/statuslabel.text = "connected"
+	StartMQTTstatuslabel.text = "connected"
 	$ClientsList.set_item_text(0, MQTT.client_id)
 	$WebRTCmultiplayerserver/StartWebRTCmultiplayer.disabled = false
 	if SetupMQTTsignal.get_node("autoconnect").pressed:
@@ -97,7 +100,7 @@ func _on_StartServer_toggled(button_pressed):
 		MQTT.connect("broker_connected", self, "on_broker_connect")
 		MQTT.connect("broker_disconnected", self, "on_broker_disconnect")
 		roomname = SetupMQTTsignal.get_node("roomname").text
-		$StartServer/statuslabel.text = "on"
+		StartMQTTstatuslabel.text = "on"
 		randomize()
 		MQTT.client_id = "s%d" % randi()
 		SetupMQTTsignal.get_node("client_id").text = MQTT.client_id
@@ -107,7 +110,7 @@ func _on_StartServer_toggled(button_pressed):
 		MQTT.websocketurl = "ws://%s:%d/mqtt" % [MQTT.server, websocketport]
 		var statustopic = "%s/%s/server" % [roomname, MQTT.client_id]
 		MQTT.set_last_will(statustopic, to_json({"subject":"dead"}), true)
-		$StartServer/statuslabel.text = "connecting"
+		StartMQTTstatuslabel.text = "connecting"
 		if SetupMQTTsignal.get_node("brokeraddress/usewebsocket").pressed:
 			MQTT.websocket_connect_to_server()
 		else:
@@ -119,7 +122,7 @@ func _on_StartServer_toggled(button_pressed):
 		MQTT.disconnect("broker_connected", self, "on_broker_connect")
 		MQTT.disconnect("broker_disconnected", self, "on_broker_disconnect")
 		MQTT.disconnect_from_server()
-		$StartServer/statuslabel.text = "off"
+		StartMQTTstatuslabel.text = "off"
 		SetupMQTTsignal.get_node("client_id").text = ""
 		for s in clientidtowclientid:
 			emit_signal("mqttsig_client_disconnected", clientidtowclientid[s])

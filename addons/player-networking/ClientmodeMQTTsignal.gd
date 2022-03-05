@@ -3,7 +3,8 @@ extends Control
 
 onready var SetupMQTTsignal = get_parent()
 onready var MQTT = SetupMQTTsignal.get_node("MQTT")
-onready var StartMQTT = SetupMQTTsignal.get_node("StartMQTT")
+
+onready var StartMQTT = $StartClient # SetupMQTTsignal.get_node("StartMQTT")
 onready var StartMQTTstatuslabel = SetupMQTTsignal.get_node("StartMQTT/statuslabel")
 
 var roomname = ""
@@ -52,7 +53,7 @@ func received_mqtt(topic, msg):
 				var si = openserverslist.find(sendingserverid)
 				if v["subject"] == "open" and si == -1:
 					openserverslist.append(sendingserverid)
-					if $StartClient.pressed and selectedserver == "":
+					if StartMQTT.pressed and selectedserver == "":
 						if not waitingforserverstoshow:
 							choosefromopenservers()
 							
@@ -61,7 +62,7 @@ func received_mqtt(topic, msg):
 					if selectedserver == sendingserverid:
 						if serverconnected:
 							emit_signal("mqttsig_connection_closed")
-							$StartClient/statuslabel.text = "stopped"
+							StartMQTTstatuslabel.text = "stopped"
 							wclientid = 0
 							serverconnected = false
 							$WebRTCmultiplayerclient/StartWebRTCmultiplayer.disabled = true
@@ -75,7 +76,7 @@ func received_mqtt(topic, msg):
 						serverconnected = true
 						wclientid = int(v["wclientid"])
 						emit_signal("mqttsig_connection_established", int(v["wclientid"]))
-						$StartClient/statuslabel.text = "connected"
+						StartMQTTstatuslabel.text = "connected"
 						MQTT.publish(statustopic, to_json({"subject":"connected"}))
 						$WebRTCmultiplayerclient/StartWebRTCmultiplayer.disabled = false
 						if SetupMQTTsignal.get_node("autoconnect").pressed:
@@ -90,10 +91,10 @@ func received_mqtt(topic, msg):
 func on_broker_connect():
 	MQTT.subscribe("%s/+/server" % roomname)
 	MQTT.publish(statustopic, to_json({"subject":"unconnected"}))
-	$StartClient/statuslabel.text = "pending"
+	StartMQTTstatuslabel.text = "pending"
 
 func on_broker_disconnect():
-	$StartClient.pressed = false
+	StartMQTT.pressed = false
 		
 func _on_StartClient_toggled(button_pressed):
 	if button_pressed:
@@ -113,7 +114,7 @@ func _on_StartClient_toggled(button_pressed):
 		MQTT.websocketurl = "ws://%s:%d/mqtt" % [MQTT.server, websocketport]
 		statustopic = "%s/%s/client" % [roomname, MQTT.client_id]
 		MQTT.set_last_will(statustopic, to_json({"subject":"dead"}), true)
-		$StartClient/statuslabel.text = "connecting"
+		StartMQTTstatuslabel.text = "connecting"
 		if SetupMQTTsignal.get_node("brokeraddress/usewebsocket").pressed:
 			MQTT.websocket_connect_to_server()
 		else:
@@ -122,7 +123,7 @@ func _on_StartClient_toggled(button_pressed):
 			waitingforserverstoshow = true
 			yield(get_tree().create_timer(waittimeforservertoshow), "timeout")
 			waitingforserverstoshow = false
-		if $StartClient.pressed:
+		if StartMQTT.pressed:
 			if selectasnecessary and len(openserverslist) == 0:
 				NetworkGateway.selectandtrigger_networkoption(NetworkGateway.NETWORK_OPTIONS_MQTT_WEBRTC.AS_SERVER)
 			else:
@@ -141,7 +142,7 @@ func _on_StartClient_toggled(button_pressed):
 		selectedserver = ""
 		serverconnected = false
 		openserverslist.clear()
-		$StartClient/statuslabel.text = "off"
+		StartMQTTstatuslabel.text = "off"
 		SetupMQTTsignal.get_node("client_id").text = ""
 		emit_signal("mqttsig_connection_closed")
 		wclientid = 0
