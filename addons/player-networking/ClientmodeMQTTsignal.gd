@@ -10,10 +10,15 @@ signal mqttsig_connection_established(wclientid)
 signal mqttsig_connection_closed()
 signal mqttsig_packet_received(v)
 
+
+# mosquitto_sub -h broker.mqttdashboard.com -t "tomato/#" -v
+
 var openserverslist = [ ]
 var selectedserver = ""
 var serverconnected = false
 var statustopic = ""
+
+var waitingforserverstoshow = false
 var waittimeforservertoshow = 1.2
 
 # Messages: topic: room/clientid/[packet|server|client]/[clientid-to|]
@@ -25,6 +30,12 @@ func sendpacket_toserver(v):
 	
 func isconnectedtosignalserver():
 	return serverconnected
+
+func choosefromopenservers():
+	selectedserver = openserverslist[0]
+	MQTT.subscribe("%s/%s/packet/%s" % [roomname, selectedserver, MQTT.client_id])
+	var t = "%s/%s/packet/%s" % [roomname, MQTT.client_id, selectedserver]
+	MQTT.publish(t, to_json({"subject":"request_connection"}))
 
 func received_mqtt(topic, msg):
 	if msg == "":  return
@@ -39,10 +50,8 @@ func received_mqtt(topic, msg):
 				if v["subject"] == "open" and si == -1:
 					openserverslist.append(sendingserverid)
 					if $StartClient.pressed and selectedserver == "":
-						selectedserver = openserverslist[0]
-						MQTT.subscribe("%s/%s/packet/%s" % [roomname, selectedserver, MQTT.client_id])
-						var t = "%s/%s/packet/%s" % [roomname, MQTT.client_id, selectedserver]
-						MQTT.publish(t, to_json({"subject":"request_connection"}))
+						if not waitingforserverstoshow:
+							choosefromopenservers()
 				if v["subject"] == "dead" and si != -1:
 					openserverslist.remove(si)
 					if selectedserver == sendingserverid:
@@ -86,6 +95,7 @@ func _on_StartClient_toggled(button_pressed):
 	if button_pressed:
 		var NetworkGateway = get_node("../..")
 		var selectasnecessary = (NetworkGateway.get_node("NetworkOptionsMQTTWebRTC").selected == NetworkGateway.NETWORK_OPTIONS_MQTT_WEBRTC.AS_NECESSARY)
+		var selectasclient = (NetworkGateway.get_node("NetworkOptionsMQTTWebRTC").selected == NetworkGateway.NETWORK_OPTIONS_MQTT_WEBRTC.AS_CLIENT)
 		MQTT.connect("received_message", self, "received_mqtt")
 		MQTT.connect("broker_connected", self, "on_broker_connect")
 		MQTT.connect("broker_disconnected", self, "on_broker_disconnect")
@@ -104,13 +114,18 @@ func _on_StartClient_toggled(button_pressed):
 			MQTT.websocket_connect_to_server()
 		else:
 			MQTT.connect_to_server()
-		if selectasnecessary:
+		if selectasnecessary or selectasclient:
+			waitingforserverstoshow = true
 			yield(get_tree().create_timer(waittimeforservertoshow), "timeout")
-			if $StartClient.pressed:
-				if len(openserverslist) == 0:
-					NetworkGateway.selectandtrigger_networkoption(NetworkGateway.NETWORK_OPTIONS_MQTT_WEBRTC.AS_SERVER)
-				else:
-					NetworkGateway.selectandtrigger_networkoption(NetworkGateway.NETWORK_OPTIONS_MQTT_WEBRTC.AS_CLIENT)
+			waitingforserverstoshow = false
+		if $StartClient.pressed:
+			if selectasnecessary and len(openserverslist) == 0:
+				NetworkGateway.selectandtrigger_networkoption(NetworkGateway.NETWORK_OPTIONS_MQTT_WEBRTC.AS_SERVER)
+			else:
+				NetworkGateway.get_node("NetworkOptionsMQTTWebRTC").selected = NetworkGateway.NETWORK_OPTIONS_MQTT_WEBRTC.AS_CLIENT
+				visible = true
+				assert (selectedserver == "")
+				choosefromopenservers()
 				
 	else:
 		print("Disconnecting MQTT")
