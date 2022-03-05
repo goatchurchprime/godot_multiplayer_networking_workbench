@@ -52,6 +52,7 @@ func received_mqtt(topic, msg):
 					if $StartClient.pressed and selectedserver == "":
 						if not waitingforserverstoshow:
 							choosefromopenservers()
+							
 				if v["subject"] == "dead" and si != -1:
 					openserverslist.remove(si)
 					if selectedserver == sendingserverid:

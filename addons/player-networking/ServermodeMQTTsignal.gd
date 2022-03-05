@@ -11,6 +11,7 @@ var clientidtowclientid = { }
 var wclientidtoclientid = { }
 var clearlostretainedclients = true
 var clearlostretainedservers = true
+var statustopic = ""
 
 signal mqttsig_client_connected(id)
 signal mqttsig_client_disconnected(id)
@@ -43,6 +44,7 @@ func received_mqtt(topic, msg):
 						MQTT.subscribe("%s/%s/client" % [roomname, sendingclientid])
 					var t = "%s/%s/packet/%s" % [roomname, MQTT.client_id, sendingclientid]
 					MQTT.publish(t, to_json({"subject":"connection_established", "wclientid":wclientid}))
+					MQTT.publish(statustopic, to_json({"subject":"open", "nconnections":len(clientidtowclientid)}), true)
 					emit_signal("mqttsig_client_connected", wclientid)
 					$ClientsList.add_item(sendingclientid, int(sendingclientid))
 					$ClientsList.selected = $ClientsList.get_item_count()-1
@@ -59,6 +61,7 @@ func received_mqtt(topic, msg):
 						var idx = $ClientsList.get_item_index(int(sendingclientid))
 						print(idx)
 						$ClientsList.remove_item(idx)
+						MQTT.publish(statustopic, to_json({"subject":"open", "nconnections":len(clientidtowclientid)}), true)
 					else:
 						if clearlostretainedclients:
 							MQTT.publish(topic, "", true)
@@ -80,8 +83,8 @@ func on_broker_connect():
 		MQTT.subscribe("%s/+/server" % roomname)
 	if clearlostretainedclients:
 		MQTT.subscribe("%s/+/client" % roomname)
-	var statustopic = "%s/%s/server" % [roomname, MQTT.client_id]
-	MQTT.publish(statustopic, to_json({"subject":"open"}), true)
+	statustopic = "%s/%s/server" % [roomname, MQTT.client_id]
+	MQTT.publish(statustopic, to_json({"subject":"open", "nconnections":len(clientidtowclientid)}), true)
 	$StartServer/statuslabel.text = "connected"
 	$ClientsList.set_item_text(0, MQTT.client_id)
 	$WebRTCmultiplayerserver/StartWebRTCmultiplayer.disabled = false
