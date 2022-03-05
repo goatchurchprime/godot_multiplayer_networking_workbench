@@ -71,9 +71,19 @@ func initialstatemqttwebrtc(networkoption, roomname, brokeraddress):
 	$NetworkOptionsMQTTWebRTC.selected = networkoption
 	_on_NetworkOptionsMQTTWebRTC_item_selected($NetworkOptionsMQTTWebRTC.selected)
 
+func selectandtrigger_networkoption(networkoption):
+	if $ProtocolOptions.selected == NETWORK_PROTOCOL.WEBRTC_MQTTSIGNAL:
+		if $NetworkOptionsMQTTWebRTC.selected != networkoption:
+			$NetworkOptionsMQTTWebRTC.selected = networkoption
+			_on_NetworkOptionsMQTTWebRTC_item_selected(networkoption)
+	else:
+		$NetworkOptions.selected = networkoption
+		if $NetworkOptions.selected != networkoption:
+			$NetworkOptions.selected = networkoption
+			_on_NetworkOptions_item_selected(networkoption)
 
 func _on_ProtocolOptions_item_selected(np):
-	assert ($NetworkOptions.selected == 0 and $NetworkOptionsMQTTWebRTC.selected == 0)
+	assert ($NetworkOptions.selected == NETWORK_OPTIONS.NETWORK_OFF and $NetworkOptionsMQTTWebRTC.selected == NETWORK_OPTIONS_MQTT_WEBRTC.NETWORK_OFF)
 	var selectasmqttwebrtc = (np == NETWORK_PROTOCOL.WEBRTC_MQTTSIGNAL)
 	var selectaswebrtcwebsocket = (np == NETWORK_PROTOCOL.WEBRTC_WEBSOCKETSIGNAL)
 	var selectasenet = (np == NETWORK_PROTOCOL.ENET)
@@ -95,7 +105,7 @@ func _on_ProtocolOptions_item_selected(np):
 	$WebSocketsignalling/Clientmode.visible = false
 
 	
-func _on_OptionButton_item_selected(ns):
+func _on_NetworkOptions_item_selected(ns):
 	print("_on_OptionButton_item_selected_on_OptionButton_item_selected_on_OptionButton_item_selected ", ns)
 	var selectasoff = (ns == NETWORK_OPTIONS.NETWORK_OFF)
 	if not selectasoff:
@@ -183,15 +193,19 @@ func _on_NetworkOptionsMQTTWebRTC_item_selected(ns):
 	var selectasoff = (ns == NETWORK_OPTIONS.NETWORK_OFF)
 	if not selectasoff:
 		$PlayerConnections/ConnectionLog.text = ""
-	var selectasserver = (ns == NETWORK_OPTIONS.AS_SERVER)
-	var selectasclient = (ns >= NETWORK_OPTIONS.LOCAL_NETWORK)
+	$MQTTsignalling/Servermode/StartServer.pressed = false
+	$MQTTsignalling/Clientmode/StartClient.pressed = false
+
+	var selectasserver = (ns == NETWORK_OPTIONS_MQTT_WEBRTC.AS_SERVER)
+	var selectasclient = (ns == NETWORK_OPTIONS_MQTT_WEBRTC.AS_CLIENT)
+	var selectasnecessary = (ns == NETWORK_OPTIONS_MQTT_WEBRTC.AS_NECESSARY)
 	$MQTTsignalling/Servermode.visible = selectasserver
 	$MQTTsignalling/Clientmode.visible = selectasclient
 	$ProtocolOptions.disabled = not selectasoff
-	if $MQTTsignalling/mqttautoconnect.pressed or $MQTTsignalling/Servermode/StartServer.pressed:
+	if $MQTTsignalling/mqttautoconnect.pressed:
 		$MQTTsignalling/Servermode/StartServer.pressed = selectasserver
-	if $MQTTsignalling/mqttautoconnect.pressed or $MQTTsignalling/Clientmode/StartClient.pressed:
-		$MQTTsignalling/Clientmode/StartClient.pressed = selectasclient
+	if $MQTTsignalling/mqttautoconnect.pressed:
+		$MQTTsignalling/Clientmode/StartClient.pressed = selectasclient or selectasnecessary
 	$MQTTsignalling/Servermode/WebRTCmultiplayerserver/StartWebRTCmultiplayer.pressed = false
 	$MQTTsignalling/Servermode/WebRTCmultiplayerserver/StartWebRTCmultiplayer.disabled = true
 	$MQTTsignalling/Clientmode/WebRTCmultiplayerclient/StartWebRTCmultiplayer.pressed = false
@@ -207,14 +221,7 @@ func _input(event):
 		elif (event.scancode == KEY_4):	bsel = 4
 
 		if bsel != -1:
-			if $ProtocolOptions.selected == NETWORK_PROTOCOL.WEBRTC_MQTTSIGNAL:
-				if $NetworkOptionsMQTTWebRTC.selected != bsel:
-					$NetworkOptionsMQTTWebRTC.select(bsel)
-					_on_NetworkOptionsMQTTWebRTC_item_selected(bsel)
-			else:
-				if $NetworkOptions.selected != bsel:
-					$NetworkOptions.select(bsel)
-					_on_OptionButton_item_selected(bsel)
+			selectandtrigger_networkoption(bsel)
 
 		elif (event.scancode == KEY_G):
 			$PlayerConnections/Doppelganger.pressed = not $PlayerConnections/Doppelganger.pressed
@@ -244,9 +251,8 @@ func getrandomdoppelgangerdelay(disabledropout=false):
 	var doppelgangerdelay = int(get_node("DoppelgangerPanel/netdelaymin").text) + max(0.0, rng.randfn(netdelayadd, netdelayadd*0.4))
 	return doppelgangerdelay
 	
-func setnetworkoff():
-	$NetworkOptions.select(NETWORK_OPTIONS.NETWORK_OFF)
-	_on_OptionButton_item_selected(NETWORK_OPTIONS.NETWORK_OFF)
+func setnetworkoff():	
+	selectandtrigger_networkoption(NETWORK_OPTIONS.NETWORK_OFF)
 					
 func _data_channel_received(channel: Object):
 	print("_data_channel_received ", channel)

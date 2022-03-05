@@ -42,5 +42,4 @@ func _process(delta):
 			if ns == NetworkGateway.NETWORK_OPTIONS.LOCAL_NETWORK:
 				NetworkOptions.add_item(receivedIPnumber)
 				ns = NetworkOptions.get_item_count() - 1
-			NetworkOptions.select(ns)
-			NetworkGateway._on_OptionButton_item_selected(ns)
+			NetworkGateway.selectandtrigger_networkoption(ns)

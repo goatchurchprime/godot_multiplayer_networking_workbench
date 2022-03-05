@@ -96,7 +96,7 @@ margin_top = 11.087
 margin_right = 542.04
 margin_bottom = 31.087
 text = "Network off"
-items = [ "Network off", null, false, 0, null, "As server", null, false, 1, null, "As client", null, false, 3, null, "As required", null, false, 3, null ]
+items = [ "Network off", null, false, 0, null, "As server", null, false, 1, null, "As client", null, false, 3, null, "As necessary", null, false, 3, null ]
 selected = 0
 __meta__ = {
 "_edit_use_anchors_": false
@@ -454,6 +454,7 @@ __meta__ = {
 }
 
 [node name="Servermode" type="Control" parent="MQTTsignalling"]
+visible = false
 anchor_right = 1.0
 anchor_bottom = 1.0
 margin_left = 364.0
@@ -516,7 +517,6 @@ __meta__ = {
 }
 
 [node name="Clientmode" type="Control" parent="MQTTsignalling"]
-visible = false
 anchor_right = 1.0
 anchor_bottom = 1.0
 margin_left = 375.335
@@ -835,7 +835,7 @@ __meta__ = {
 }
 
 [connection signal="item_selected" from="ProtocolOptions" to="." method="_on_ProtocolOptions_item_selected"]
-[connection signal="item_selected" from="NetworkOptions" to="." method="_on_OptionButton_item_selected"]
+[connection signal="item_selected" from="NetworkOptions" to="." method="_on_NetworkOptions_item_selected"]
 [connection signal="item_selected" from="NetworkOptionsMQTTWebRTC" to="." method="_on_NetworkOptionsMQTTWebRTC_item_selected"]
 [connection signal="toggled" from="UDPipdiscovery/udpenabled" to="." method="_on_udpenabled_toggled"]
 [connection signal="toggled" from="ENetMultiplayer/Servermode/StartENetmultiplayer" to="ENetMultiplayer/Servermode" method="_on_StartENetmultiplayer_toggled"]

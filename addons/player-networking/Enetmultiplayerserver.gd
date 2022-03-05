@@ -14,7 +14,7 @@ func _on_StartENetmultiplayer_toggled(button_pressed):
 			PlayerConnections.connectionlog("Server error: %d\n" % servererror)
 			print("networkedmultiplayer createserver Error: ", servererror)
 			print("*** is there a server running on this port already? ", portnumber)
-			NetworkGateway.get_node("NetworkOptions").select(NetworkGateway.NETWORK_OPTIONS.NETWORK_OFF)
+			NetworkGateway.selectandtrigger_networkoption(NetworkGateway.NETWORK_OPTIONS.NETWORK_OFF)
 
 	else:
 		if get_tree().get_network_peer() != null:

@@ -28,7 +28,7 @@ func _on_StartWebSocketmultiplayer_toggled(button_pressed):
 			set_process(true)
 		else:
 			print("Bad start websocket")
-			NetworkGateway.get_node("NetworkOptions").select(NetworkGateway.NETWORK_OPTIONS.NETWORK_OFF)
+			NetworkGateway.selectandtrigger_networkoption(NetworkGateway.NETWORK_OPTIONS.NETWORK_OFF)
 			
 	else:
 		if get_tree().get_network_peer() != null:
