@@ -486,24 +486,6 @@ margin_right = 176.184
 margin_bottom = 23.4773
 text = "null"
 
-[node name="StartServer" type="Button" parent="MQTTsignalling/Servermode"]
-margin_left = -138.594
-margin_top = 51.6189
-margin_right = -62.5937
-margin_bottom = 71.6189
-toggle_mode = true
-text = "Start mqtt"
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="statuslabel" type="Label" parent="MQTTsignalling/Servermode/StartServer"]
-margin_left = 87.4729
-margin_top = 3.92308
-margin_right = 138.473
-margin_bottom = 22.9231
-text = "Off"
-
 [node name="ClientsList" type="OptionButton" parent="MQTTsignalling/Servermode"]
 margin_left = -0.000427246
 margin_top = 24.0
@@ -554,27 +536,6 @@ margin_right = 50.4729
 margin_bottom = 59.5227
 text = "null"
 
-[node name="StartClient" type="Button" parent="MQTTsignalling/Clientmode"]
-margin_left = -152.919
-margin_top = 53.6633
-margin_right = -70.9194
-margin_bottom = 73.6634
-toggle_mode = true
-text = "Start mqtt"
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="statuslabel" type="Label" parent="MQTTsignalling/Clientmode/StartClient"]
-margin_left = 97.3852
-margin_top = 3.92308
-margin_right = 137.386
-margin_bottom = 17.9231
-text = "Off"
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
 [node name="MQTT" type="Node" parent="MQTTsignalling"]
 script = ExtResource( 16 )
 
@@ -590,9 +551,10 @@ __meta__ = {
 }
 
 [node name="usewebsocket" type="CheckBox" parent="MQTTsignalling/brokeraddress"]
-margin_left = 237.121
-margin_right = 336.121
-margin_bottom = 24.0
+margin_left = 208.13
+margin_top = 55.1545
+margin_right = 307.13
+margin_bottom = 79.1545
 text = "Websocket"
 __meta__ = {
 "_edit_use_anchors_": false
@@ -647,18 +609,18 @@ margin_bottom = 20.4773
 text = "mqtt clientid:"
 
 [node name="autoconnect" type="CheckBox" parent="MQTTsignalling"]
-margin_left = 386.192
-margin_top = 7.12305
-margin_right = 493.192
-margin_bottom = 31.123
+margin_left = 408.112
+margin_top = 5.70883
+margin_right = 515.112
+margin_bottom = 29.7088
 pressed = true
 text = "autoconnect"
 
 [node name="StartMQTT" type="Button" parent="MQTTsignalling"]
-margin_left = 59.3967
-margin_top = 246.781
-margin_right = 135.397
-margin_bottom = 266.781
+margin_left = 229.81
+margin_top = 9.89952
+margin_right = 305.81
+margin_bottom = 29.8995
 toggle_mode = true
 text = "Start mqtt"
 __meta__ = {

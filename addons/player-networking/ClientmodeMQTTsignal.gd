@@ -4,7 +4,7 @@ extends Control
 onready var SetupMQTTsignal = get_parent()
 onready var MQTT = SetupMQTTsignal.get_node("MQTT")
 
-onready var StartMQTT = $StartClient # SetupMQTTsignal.get_node("StartMQTT")
+onready var StartMQTT = SetupMQTTsignal.get_node("StartMQTT")
 onready var StartMQTTstatuslabel = SetupMQTTsignal.get_node("StartMQTT/statuslabel")
 
 var roomname = ""
@@ -130,7 +130,8 @@ func _on_StartClient_toggled(button_pressed):
 				NetworkGateway.get_node("NetworkOptionsMQTTWebRTC").selected = NetworkGateway.NETWORK_OPTIONS_MQTT_WEBRTC.AS_CLIENT
 				visible = true
 				assert (selectedserver == "")
-				choosefromopenservers()
+				if len(openserverslist) != 0:
+					choosefromopenservers()
 				
 	else:
 		print("Disconnecting MQTT")

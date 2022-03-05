@@ -193,13 +193,12 @@ func _on_NetworkOptionsMQTTWebRTC_item_selected(ns):
 	var selectasoff = (ns == NETWORK_OPTIONS.NETWORK_OFF)
 	if not selectasoff:
 		$PlayerConnections/ConnectionLog.text = ""
-	$MQTTsignalling/Servermode/StartServer.pressed = false
-	$MQTTsignalling/Clientmode/StartClient.pressed = false
-
-	if $MQTTsignalling/Servermode/StartServer.is_connected("toggled", $MQTTsignalling/Servermode, "_on_StartServer_toggled"):
-		$MQTTsignalling/Servermode/StartServer.disconnect("toggled", $MQTTsignalling/Servermode, "_on_StartServer_toggled")
-	if $MQTTsignalling/Clientmode/StartClient.is_connected("toggled", $MQTTsignalling/Clientmode, "_on_StartClient_toggled"):
-		$MQTTsignalling/Clientmode/StartClient.disconnect("toggled", $MQTTsignalling/Clientmode, "_on_StartClient_toggled")
+	$MQTTsignalling/StartMQTT.pressed = false
+	yield(get_tree(), "idle_frame")
+	if $MQTTsignalling/StartMQTT.is_connected("toggled", $MQTTsignalling/Servermode, "_on_StartServer_toggled"):
+		$MQTTsignalling/StartMQTT.disconnect("toggled", $MQTTsignalling/Servermode, "_on_StartServer_toggled")
+	if $MQTTsignalling/StartMQTT.is_connected("toggled", $MQTTsignalling/Clientmode, "_on_StartClient_toggled"):
+		$MQTTsignalling/StartMQTT.disconnect("toggled", $MQTTsignalling/Clientmode, "_on_StartClient_toggled")
 
 	var selectasserver = (ns == NETWORK_OPTIONS_MQTT_WEBRTC.AS_SERVER)
 	var selectasclient = (ns == NETWORK_OPTIONS_MQTT_WEBRTC.AS_CLIENT)
@@ -208,13 +207,15 @@ func _on_NetworkOptionsMQTTWebRTC_item_selected(ns):
 	$MQTTsignalling/Clientmode.visible = selectasclient
 	$ProtocolOptions.disabled = not selectasoff
 	if selectasserver:
-		$MQTTsignalling/Servermode/StartServer.connect("toggled", $MQTTsignalling/Servermode, "_on_StartServer_toggled")
+		$MQTTsignalling/StartMQTT.connect("toggled", $MQTTsignalling/Servermode, "_on_StartServer_toggled")
+		if $MQTTsignalling/mqttautoconnect.pressed:
+			$MQTTsignalling/StartMQTT.pressed = true
 	if selectasclient or selectasnecessary:
-		$MQTTsignalling/Clientmode/StartClient.connect("toggled", $MQTTsignalling/Clientmode, "_on_StartClient_toggled")
-	if $MQTTsignalling/mqttautoconnect.pressed:
-		$MQTTsignalling/Servermode/StartServer.pressed = selectasserver
-	if $MQTTsignalling/mqttautoconnect.pressed:
-		$MQTTsignalling/Clientmode/StartClient.pressed = selectasclient or selectasnecessary
+		$MQTTsignalling/StartMQTT.connect("toggled", $MQTTsignalling/Clientmode, "_on_StartClient_toggled")
+		if $MQTTsignalling/mqttautoconnect.pressed:
+			$MQTTsignalling/StartMQTT.pressed = true
+#	if $MQTTsignalling/mqttautoconnect.pressed:
+#		$MQTTsignalling/StartMQTT.pressed = selectasclient or selectasnecessary
 	$MQTTsignalling/Servermode/WebRTCmultiplayerserver/StartWebRTCmultiplayer.pressed = false
 	$MQTTsignalling/Servermode/WebRTCmultiplayerserver/StartWebRTCmultiplayer.disabled = true
 	$MQTTsignalling/Clientmode/WebRTCmultiplayerclient/StartWebRTCmultiplayer.pressed = false
