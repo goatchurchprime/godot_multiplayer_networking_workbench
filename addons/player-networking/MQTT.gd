@@ -271,6 +271,7 @@ func websocket_connect_to_server():
 
 	websocketclient = WebSocketClient.new()
 	#websocketurl = "ws://node-red.dynamicdevices.co.uk:1880/ws/test"
+	print("Connecting to websocketurl: ", websocketurl)
 	var E = websocketclient.connect_to_url(websocketurl, PoolStringArray(["mqttv3.1"])) # , false, PoolStringArray(headers))	
 	#var E = websocketclient.connect_to_url(websocketurl)	
 	if E != 0:

@@ -45,7 +45,7 @@ func _process(delta):
 				elif ty == TYPE_INT:
 					v = v0
 				elif ty == TYPE_QUAT:
-					v = v0.slerpni(v1, lam)
+					v = v0.slerp(v1, lam)
 				else:
 					v = lerp(v0, v1, lam)
 				ld[k] = v

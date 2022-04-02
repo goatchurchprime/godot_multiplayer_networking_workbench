@@ -1,7 +1,7 @@
 # Godot Multiplayer networking workbench
 
 This utility exposes the workings of the three highlevel multiplayer networking protocols (ENet, Websockets, and WebRTC) 
-and enables VR players to compress, transmit and unpack their avatar movements across the network.
+and has hooks to enable VR players to compress, transmit, unpack and interpolate their avatar movements across the network.
 
 ## Installation
 
@@ -24,6 +24,31 @@ such as a lobby.
 
 The main script **NetworkGateway.gd** manages the choice of protocol and the connections, while **PlayerConnections.gd** manages 
 the players spawning and removal.
+
+### Network connecting
+
+The toy example included is an ineffective pong game with the network provisioning code in the JoystickControls.gd script.
+We connect using WebRTC at startup so it works out of the box.  This is done with the call to `NetworkGateway.initialstatemqttwebrtc()`
+
+Signalling is all done through the the public broker connected to [HiveMQ](http://www.mqtt-dashboard.com/) and you can sniff 
+out all the signals if you run the command:
+
+> mosquitto_sub -h broker.mqttdashboard.com -t "tomato/#" -v
+
+This dumps everything in the room `tomato` to the command line.  You can choose other rooms, so that connection 
+can be like jit.si.  
+
+The use of a public MQTT broker to initiate the connections means we can set the connection to "As necessary", which means 
+that if there's live server on the channel it starts out as a server, otherwise it starts as a client and connects to it.
+(Automatic handover code for when the server drops out is partly working, but unreliable, and could be finished if 
+there is a sufficient use-case.)
+
+You can select a different protocol (ENet or Websockets) when the Network is off, and then select server or client.
+There will be UDP packets sent by the server to help any clients on the same router network to find and connect to it 
+without needing to look up the local IP number.  (Or you can set this running on a external server with a fixed IP number 
+on the internet)
+
+### Players
 
 By default it uses the path `/root/Main/Players` as the node that keeps the players together, and considers the first node in there 
 as the **LocalPlayer**.

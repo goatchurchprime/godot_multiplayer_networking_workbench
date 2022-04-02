@@ -13,9 +13,12 @@ func _ready():
 	var NetworkGateway = get_node("../NetworkGateway")
 
 	if Dinitializewebrtcmode:
+		#var brokeraddress = "ws://broker.hivemq.com:8000"
+		var brokeraddress = "broker.hivemq.com"
+		#var brokeraddress = "mqtt.dynamicdevices.co.uk"
 		#NetworkGateway.initialstate(NetworkGateway.get_node("ProtocolOptions").selected, NetworkGateway.NETWORK_OPTIONS.NETWORK_OFF)
-		NetworkGateway.initialstatemqttwebrtc(NetworkGateway.NETWORK_OPTIONS_MQTT_WEBRTC.AS_NECESSARY, "tomato", "")
-		#NetworkGateway.initialstatemqttwebrtc(NetworkGateway.NETWORK_OPTIONS_MQTT_WEBRTC.AS_CLIENT, "tomato", "")
+		NetworkGateway.initialstatemqttwebrtc(NetworkGateway.NETWORK_OPTIONS_MQTT_WEBRTC.AS_NECESSARY, "tomato", brokeraddress)
+
 
 	if OS.has_feature("Server"):
 		yield(get_tree().create_timer(1.5), "timeout")
