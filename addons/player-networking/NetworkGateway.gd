@@ -11,7 +11,7 @@ extends Panel
 # Insert by symlink to help with development of code
 
 
-export var remoteservers = [ "127.0.0.1" ]
+export var remoteservers = [ "127.0.0.1", "10.0.29.2" ]
 
 enum NETWORK_PROTOCOL { ENET = 0, 
 						WEBSOCKET = 1,
@@ -77,7 +77,6 @@ func selectandtrigger_networkoption(networkoption):
 			$NetworkOptionsMQTTWebRTC.selected = networkoption
 			_on_NetworkOptionsMQTTWebRTC_item_selected(networkoption)
 	else:
-		$NetworkOptions.selected = networkoption
 		if $NetworkOptions.selected != networkoption:
 			$NetworkOptions.selected = networkoption
 			_on_NetworkOptions_item_selected(networkoption)

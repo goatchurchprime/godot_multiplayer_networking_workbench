@@ -2,7 +2,7 @@ extends Control
 
 var udpdiscoveryport = 4546
 const broadcastudpipnum = "255.255.255.255"
-const broadcastservermsg = "GodotServer_here!"
+const broadcastserverheader = "GodotServer_here!"
 var udpdiscoveryreceivingserver = null
 
 func _ready():
@@ -30,16 +30,19 @@ func _process(delta):
 		var pkt = peer.get_packet()
 		var spkt = pkt.get_string_from_utf8().split(" ")
 		print("Received: ", spkt, " from ", peer.get_packet_ip())
-		if spkt[0] == broadcastservermsg:
+		if spkt[0] == broadcastserverheader:
+			var likelyserveraddresses =  spkt[1].substr(1).split(",")  if len(spkt) > 1 and spkt[1][0] == "@"  else [ ]
 			var NetworkGateway = get_node("../..")
 			var NetworkOptions = NetworkGateway.get_node("NetworkOptions")
 			var receivedIPnumber = peer.get_packet_ip()
-			var ns = NetworkOptions.selected
-			for nsi in range(NetworkGateway.NETWORK_OPTIONS.FIXED_URL, NetworkOptions.get_item_count()):
-				if receivedIPnumber == NetworkOptions.get_item_text(nsi):
-					ns = nsi
-					break
-			if ns == NetworkGateway.NETWORK_OPTIONS.LOCAL_NETWORK:
-				NetworkOptions.add_item(receivedIPnumber)
-				ns = NetworkOptions.get_item_count() - 1
-			NetworkGateway.selectandtrigger_networkoption(ns)
+			if not (receivedIPnumber in likelyserveraddresses):
+				likelyserveraddresses.push_back(receivedIPnumber)
+			var listedserveraddresses = [ ]
+			for i in range(NetworkGateway.NETWORK_OPTIONS.FIXED_URL, NetworkOptions.get_item_count()):
+				listedserveraddresses.push_back(NetworkOptions.get_item_text(i))
+			for likelyserveripaddress in likelyserveraddresses:
+				if not (likelyserveripaddress in listedserveraddresses):
+					NetworkOptions.add_item(likelyserveripaddress)
+					listedserveraddresses.push_back(likelyserveripaddress)
+			print("eeep", NetworkGateway.get_node("NetworkOptions").selected)
+			NetworkGateway.selectandtrigger_networkoption(listedserveraddresses.find(likelyserveraddresses[0]) + NetworkGateway.NETWORK_OPTIONS.FIXED_URL)

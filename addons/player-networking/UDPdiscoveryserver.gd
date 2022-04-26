@@ -3,8 +3,9 @@ extends Control
 var udpdiscoveryport = 4546
 const broadcastudpipnum = "255.255.255.255"
 var udpdiscoverybroadcasterperiod = 2.0
-const broadcastservermsg = "GodotServer_here!"
+const broadcastserverheader = "GodotServer_here!"
 var udpdiscoverybroadcasterperiodtimer = udpdiscoverybroadcasterperiod
+var broadcastservermsg = ""
 
 func _ready():
 	set_process(false)
@@ -16,8 +17,18 @@ func startUDPbroadcasting():
 	udpdiscoverybroadcasterperiodtimer = udpdiscoverybroadcasterperiod
 	$broadcastperiod.editable = false
 	get_node("../udpenabled").disabled = true
+	print("IP.get_local_interfaces...")
 	for localinterfaces in IP.get_local_interfaces():
 		print(localinterfaces["name"], " ", localinterfaces["friendly"], " ", localinterfaces["addresses"])
+	var likelyserveraddresses = [ ]
+	for a in IP.get_local_addresses():
+		var la = a.split(".")
+		if len(la) == 4:
+			if int(la[0]) == 10 or int(la[0]) == 192:
+				likelyserveraddresses.push_back(a)
+	print("likelyserveraddresses ", likelyserveraddresses)
+	broadcastservermsg = broadcastserverheader + " @" + PoolStringArray(likelyserveraddresses).join(",")
+	print("UDP broadcast message: ", broadcastservermsg)
 	set_process(true)
 
 func stopUDPbroadcasting():
@@ -32,7 +43,7 @@ func _process(delta):
 		var udpdiscoverybroadcaster = PacketPeerUDP.new()
 		udpdiscoverybroadcaster.set_broadcast_enabled(true)
 		var err0 = udpdiscoverybroadcaster.set_dest_address(broadcastudpipnum, udpdiscoveryport)
-		var err1 = udpdiscoverybroadcaster.put_packet((broadcastservermsg+" "+str(12)).to_utf8())
+		var err1 = udpdiscoverybroadcaster.put_packet(broadcastservermsg.to_utf8())
 		if err0 != 0 or err1 != 0:
 			print("udpdiscoverybroadcaster error ", err0, " ", err1)
 		udpdiscoverybroadcasterperiodtimer = udpdiscoverybroadcasterperiod

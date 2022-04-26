@@ -4,7 +4,7 @@ var mousecommandvelocity = Vector2(0, 0)
 var mousebuttondown = false
 
 
-var Dinitializewebrtcmode = true
+var Dinitializewebrtcmode = false
 
 func _ready():
 	get_node("../Players").set_mouse_filter(Control.MOUSE_FILTER_IGNORE)
