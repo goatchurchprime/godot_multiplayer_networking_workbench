@@ -20,7 +20,8 @@ func avatartoframedata():
 	return fd
 
 func framedatatoavatar(fd):
-	position = fd[NCONSTANTS.CFI_RECT_POSITION]
+	if fd.has(NCONSTANTS.CFI_RECT_POSITION):
+		position = fd[NCONSTANTS.CFI_RECT_POSITION]
 
 var possibleusernames = ["Alice", "Beth", "Cath", "Dan", "Earl", "Fred", "George", "Harry", "Ivan", "John", "Kevin", "Larry", "Martin", "Oliver", "Peter", "Quentin", "Robert", "Samuel", "Thomas", "Ulrik", "Victor", "Wayne", "Xavier", "Youngs", "Zephir"]
 func initavatarlocal():
