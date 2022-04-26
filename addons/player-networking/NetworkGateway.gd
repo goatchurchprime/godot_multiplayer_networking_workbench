@@ -11,7 +11,7 @@ extends Panel
 # Insert by symlink to help with development of code
 
 
-export var remoteservers = [ "127.0.0.1", "10.0.29.2" ]
+export var remoteservers = [ "127.0.0.1" ]
 
 enum NETWORK_PROTOCOL { ENET = 0, 
 						WEBSOCKET = 1,
