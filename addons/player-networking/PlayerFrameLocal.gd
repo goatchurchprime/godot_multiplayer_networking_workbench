@@ -18,7 +18,7 @@ static func thinframedata_updatef0(fd0, fd, bnothinning):
 				pass
 			elif ty == TYPE_QUAT:
 				var dv = v0*v.inverse()
-				if dv.w > 0.995:
+				if dv.w > 0.9994:  # 2 degrees
 					v = null
 			elif ty == TYPE_VECTOR3:
 				var dv = v0 - v
