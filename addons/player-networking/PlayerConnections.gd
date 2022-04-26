@@ -280,3 +280,13 @@ func removeremoteplayer(playernodename):
 	else:
 		print("** remoteplayer already removed: ", playernodename)
 	
+
+
+func _on_PlayerList_item_selected(index):
+	var player = PlayersNode.get_child(index)
+	$PlayerLagSlider.value = 0.0 if player == LocalPlayer else player.get_node("PlayerFrame").laglatency
+	
+func _on_PlayerLagSlider_value_changed(value):
+	var player = PlayersNode.get_child($PlayerList.selected)
+	if player != LocalPlayer:
+		player.get_node("PlayerFrame").laglatency = value
