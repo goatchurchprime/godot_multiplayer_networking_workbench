@@ -39,12 +39,14 @@ func _process(delta):
 			
 
 	var t = OS.get_ticks_msec()*0.001 - mintimestampoffset - laglatency
+	var completedframeL = { }
 	while len(framestack) > 0 and t > framestack[0][NCONSTANTS.CFI_TIMESTAMP]:
 		var fd = framestack.pop_front()
 		for k in fd:
 			completedframe0[k] = fd[k]
+			completedframeL[k] = fd[k]
 		if len(framestack) == 0:
-			get_parent().framedatatoavatar(fd)
+			get_parent().framedatatoavatar(completedframeL)
 			
 	if len(framestack) > 0 and t > framestack[0][NCONSTANTS.CFI_TIMESTAMPPREV]:
 		var lam = inverse_lerp(framestack[0][NCONSTANTS.CFI_TIMESTAMPPREV], framestack[0][NCONSTANTS.CFI_TIMESTAMP], t)
@@ -56,14 +58,17 @@ func _process(delta):
 				var v = null
 				var ty = typeof(v1)
 				if ty == TYPE_BOOL:
-					v = v0
+					continue # v = v0  (filled in by completedframeL)
 				elif ty == TYPE_INT:
-					v = v0
+					continue # v = v0  (filled in by completedframeL)
 				elif ty == TYPE_QUAT:
 					v = v0.slerp(v1, lam)
 				else:
 					v = lerp(v0, v1, lam)
 				ld[k] = v
-					
+				completedframeL.erase(k)
+		for k in completedframeL:
+			ld[k] = completedframeL[k]
+			
 		get_parent().framedatatoavatar(ld)
 	

@@ -545,7 +545,7 @@ margin_top = 7.0
 margin_right = 226.0
 margin_bottom = 31.0
 hint_tooltip = "MQTT broker URL"
-text = "broker.mqttdashboard.com:8000"
+text = "mqtt.dynamicdevices.co.uk"
 __meta__ = {
 "_edit_use_anchors_": false
 }

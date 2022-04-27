@@ -15,7 +15,7 @@ signal mqttsig_connection_closed()
 signal mqttsig_packet_received(v)
 
 
-# mosquitto_sub -h broker.mqttdashboard.com -t "tomato/#" -v
+# mosquitto_sub -h broker.mqttdashboard.com -t "cucumber/#" -v
 # mosquitto_sub -h mqtt.dynamicdevices.co.uk -t "tomato/#" -v
 
 var openserversconnections = { }
