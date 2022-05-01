@@ -50,11 +50,11 @@ func _ready():
 		$ProtocolOptions.selected = max(NETWORK_PROTOCOL.WEBSOCKET, $ProtocolOptions.selected)
 	rng.randomize()
 
-func initialstateoff(protocol):
-	assert (protocol >= NETWORK_PROTOCOL.ENET and protocol <= NETWORK_PROTOCOL.WEBRTC_MQTTSIGNAL)
+func initialstatenormal(protocol, networkoption):
+	assert (protocol >= NETWORK_PROTOCOL.ENET and protocol <= NETWORK_PROTOCOL.WEBRTC_WEBSOCKETSIGNAL)
 	$ProtocolOptions.selected = protocol
 	_on_ProtocolOptions_item_selected($ProtocolOptions.selected)
-	_on_udpenabled_toggled($UDPipdiscovery/udpenabled.pressed)
+	selectandtrigger_networkoption(networkoption)
 
 func initialstatemqttwebrtc(networkoption, roomname, brokeraddress):
 	$ProtocolOptions.selected = NETWORK_PROTOCOL.WEBRTC_MQTTSIGNAL
@@ -220,7 +220,7 @@ func _on_NetworkOptionsMQTTWebRTC_item_selected(ns):
 	$MQTTsignalling/Clientmode/WebRTCmultiplayerclient/StartWebRTCmultiplayer.pressed = false
 	$MQTTsignalling/Clientmode/WebRTCmultiplayerclient/StartWebRTCmultiplayer.disabled = true
 
-func _input(event):
+func _input(event):   # this can be supporessed by set_process_input(false)
 	if event is InputEventKey and event.pressed:
 		var bsel = -1
 		if (event.scancode == KEY_0):	bsel = 0
