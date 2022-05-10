@@ -100,6 +100,7 @@ func on_broker_connect():
 	StartMQTTstatuslabel.text = "pending"
 
 func on_broker_disconnect():
+	print("MQTT broker disconnected")
 	StartMQTT.pressed = false
 		
 func _on_StartClient_toggled(button_pressed):

@@ -26,7 +26,8 @@ var ssl_params = null
 var pid = 0
 var user = null
 var pswd = null
-var keepalive = 60
+var keepalive = 120
+var pinginterval = 30
 var lw_topic = null
 var lw_msg = null
 var lw_qos = 0
@@ -77,6 +78,7 @@ func senddata(data):
 			print("bad websocket packet E=", E)
 	
 var in_wait_msg = false
+var pingticksnext0 = 0
 func _process(delta):
 	if socket != null and socket.is_connected_to_host():
 		var n = socket.get_available_bytes()
@@ -100,6 +102,10 @@ func _process(delta):
 			print("Packets ", websocket.get_available_packet_count())
 			receivedbuffer.append_array(websocket.get_packet())
 			#print("nnn ", Array(receivedbuffer))
+
+	if pingticksnext0 < OS.get_ticks_msec():
+		ping()
+		pingticksnext0 = OS.get_ticks_msec() + pinginterval*1000
 
 	if in_wait_msg:
 		return
@@ -442,6 +448,7 @@ func wait_msg():
 	if res == 0:
 		return false # raise OSError(-1)
 	if res == 0xD0:  # PINGRESP
+		#print("PINGRESP")
 		var sz = yield(Yreceivedbuffernextbyte(), "completed")
 		assert(sz == 0)
 		return null
