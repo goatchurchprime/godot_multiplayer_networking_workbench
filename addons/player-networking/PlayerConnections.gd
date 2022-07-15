@@ -343,22 +343,27 @@ func _on_MicRecord_button_up():
 		recordingeffect.set_recording_active(false)
 		var recording = recordingeffect.get_recording()
 		var pcmData = recording.get_data()
-		var lmicrecordingdata = { "format":recording.get_format(), 
-								  "mix_rate":recording.get_mix_rate(),
-								  "is_stereo":recording.is_stereo() }
+		micrecordingdata = { "format":recording.get_format(), 
+							 "mix_rate":recording.get_mix_rate(),
+							 "is_stereo":recording.is_stereo() }
 		if $MicRecord.has_node("OpusEncoder"):
-			lmicrecordingdata["opusEncoded"] = $MicRecord/OpusEncoder.encode(pcmData)
+			micrecordingdata["opusEncoded"] = $MicRecord/OpusEncoder.encode(pcmData)
 		else:
-			lmicrecordingdata["pcmData"] = pcmData
-		print(" created data bytes ", len(var2bytes(lmicrecordingdata)), "  ", len(pcmData))
-		set_micrecord(lmicrecordingdata)
+			micrecordingdata["pcmData"] = pcmData
+		print(" created data bytes ", len(var2bytes(micrecordingdata)), "  ", len(pcmData))
+		$MicRecord/RecordSize.text = "l-"+str(len(micrecordingdata.get("opusEncoded", micrecordingdata.get("pcmData"))))
 
-remote func set_micrecord(lmicrecordingdata):
+remote func remotesetmicrecord(lmicrecordingdata):
 	micrecordingdata = lmicrecordingdata
-	$MicRecord/RecordSize.text = str(len(micrecordingdata.get("opusEncoded", micrecordingdata.get("pcmData"))))
+	$MicRecord/RecordSize.text = "r-"+str(len(micrecordingdata.get("opusEncoded", micrecordingdata.get("pcmData"))))
+	if webrtc_server_relay:
+		var rpcsenderid = get_tree().get_rpc_sender_id()
+		for fid in remote_players_idstonodenames:
+			if fid != rpcsenderid:
+				rpc_id(fid, "remotesetmicrecord", lmicrecordingdata)
 
 func _on_SendRecord_pressed():
-	rpc("set_micrecord", micrecordingdata)
+	rpc("remotesetmicrecord", micrecordingdata)
 
 func _on_PlayRecord_pressed():
 	print("_on_PlayRecord_pressed")
