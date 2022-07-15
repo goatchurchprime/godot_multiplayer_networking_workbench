@@ -299,7 +299,6 @@ const max_recording_seconds = 5.0
 var recordingnumberC = 1
 var recordingeffect = null
 var capturingeffect = null
-
 func micaudioinit():
 	var recordbus_idx = AudioServer.get_bus_index("Recorder")
 	assert ($MicRecord/AudioStreamRecorder.bus == "Recorder")
@@ -326,6 +325,14 @@ func micaudioinit():
 		OpusDecoder.name = "OpusDecoder"
 		$MicRecord.add_child(OpusDecoder)
 
+	if $MicRecord.has_node("OpusDecoder"):
+		var fin = File.new()
+		var fname = "res://addons/player-networking/welcomespeech.res"
+		if fin.file_exists(fname):
+			fin.open(fname, File.READ)
+			micrecordingdata = fin.get_var()
+			fin.close()
+			$MicRecord/RecordSize.text = "w-"+str(len(micrecordingdata.get("opusEncoded", micrecordingdata.get("pcmData"))))
 
 func _on_MicRecord_button_down():
 	if not recordingeffect.is_recording_active():
@@ -337,6 +344,8 @@ func _on_MicRecord_button_down():
 		yield(get_tree().create_timer(max_recording_seconds), "timeout")
 		if micrecordingdata != null and lrecordingnumberC == recordingnumberC:
 			_on_MicRecord_button_up()
+		if OS.get_name() == "X11":
+			print("Warning mic doesn't work on Linux (godot issue 33184)")
 		
 func _on_MicRecord_button_up():
 	if recordingeffect.is_recording_active():
@@ -361,9 +370,16 @@ remote func remotesetmicrecord(lmicrecordingdata):
 		for fid in remote_players_idstonodenames:
 			if fid != rpcsenderid:
 				rpc_id(fid, "remotesetmicrecord", lmicrecordingdata)
+	
 
 func _on_SendRecord_pressed():
 	rpc("remotesetmicrecord", micrecordingdata)
+	#var fout = File.new()
+	#var fname = "user://welcomespeech.dat"
+	#print("saving ", ProjectSettings.globalize_path(fname))
+	#fout.open(fname, File.WRITE)
+	#fout.store_var(micrecordingdata)
+	#fout.close()
 
 func _on_PlayRecord_pressed():
 	print("_on_PlayRecord_pressed")
