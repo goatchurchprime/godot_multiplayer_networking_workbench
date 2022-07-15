@@ -307,8 +307,11 @@ func micaudioinit():
 	assert (AudioServer.is_bus_mute(recordbus_idx) == true)
 	recordingeffect = AudioServer.get_bus_effect(recordbus_idx, 0)
 	assert (recordingeffect.is_class("AudioEffectRecord"))
-	capturingeffect = AudioServer.get_bus_effect(recordbus_idx, 1)
-	assert (capturingeffect.is_class("AudioEffectCapture"))
+
+	# we can use this capturing object ring buffer to collect and batch up chunks
+	# see godot-voip demo.  Also how to use AudioStreamGeneratorPlayback etc
+	#capturingeffect = AudioServer.get_bus_effect(recordbus_idx, 1)
+	#assert (capturingeffect.is_class("AudioEffectCapture"))
 
 	var OpusEncoderNode = load("res://addons/opus/OpusEncoderNode.gdns")
 	if OpusEncoderNode != null:
@@ -340,14 +343,22 @@ func _on_MicRecord_button_up():
 		recordingeffect.set_recording_active(false)
 		var recording = recordingeffect.get_recording()
 		var pcmData = recording.get_data()
-		micrecordingdata = { "format":recording.get_format(), 
-							 "mix_rate":recording.get_mix_rate(),
-							 "is_stereo":recording.is_stereo() }
+		var lmicrecordingdata = { "format":recording.get_format(), 
+								  "mix_rate":recording.get_mix_rate(),
+								  "is_stereo":recording.is_stereo() }
 		if $MicRecord.has_node("OpusEncoder"):
-			micrecordingdata["opusEncoded"] = $MicRecord/OpusEncoder.encode(pcmData)
+			lmicrecordingdata["opusEncoded"] = $MicRecord/OpusEncoder.encode(pcmData)
 		else:
-			micrecordingdata["pcmData"] = pcmData
-		print(" created data bytes ", len(var2bytes(micrecordingdata)), "  ", len(pcmData))
+			lmicrecordingdata["pcmData"] = pcmData
+		print(" created data bytes ", len(var2bytes(lmicrecordingdata)), "  ", len(pcmData))
+		set_micrecord(lmicrecordingdata)
+
+remote func set_micrecord(lmicrecordingdata):
+	micrecordingdata = lmicrecordingdata
+	$MicRecord/RecordSize.text = str(len(micrecordingdata.get("opusEncoded", micrecordingdata.get("pcmData"))))
+
+func _on_SendRecord_pressed():
+	rpc("set_micrecord", micrecordingdata)
 
 func _on_PlayRecord_pressed():
 	print("_on_PlayRecord_pressed")
@@ -364,14 +375,6 @@ func _on_PlayRecord_pressed():
 			print("audio playing bytes ", len(audioStream.data))
 		else:
 			print("No decodable audio data here")
-		$MicRecord/PlayRecord/AudioStreamPlayer.stream = audioStream
-		$MicRecord/PlayRecord/AudioStreamPlayer.play()
+		$MicRecord/AudioStreamPlayer.stream = audioStream
+		$MicRecord/AudioStreamPlayer.play()
 
-	else:
-		if $MicRecord/PlayRecord/AudioStreamPlayer2.playing:
-			$MicRecord/PlayRecord/AudioStreamPlayer2.stop()
-		else:
-			$MicRecord/PlayRecord/AudioStreamPlayer2.play()
-
-func _on_PlayRecord_button_down():
-	print("_on_PlayRecord_button_down")
