@@ -24,6 +24,10 @@ config/name="multiplayer networking workbench"
 run/main_scene="res://Main.tscn"
 config/icon="res://icon.png"
 
+[audio]
+
+enable_audio_input=true
+
 [debug]
 
 gdscript/warnings/unused_variable=false

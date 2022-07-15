@@ -1,4 +1,4 @@
-[gd_scene load_steps=18 format=2]
+[gd_scene load_steps=20 format=2]
 
 [ext_resource path="res://addons/player-networking/NetworkGateway.gd" type="Script" id=1]
 [ext_resource path="res://addons/player-networking/TimelineDiagram.tscn" type="PackedScene" id=2]
@@ -16,6 +16,9 @@
 [ext_resource path="res://addons/player-networking/WebRTCmultiplayerclient.gd" type="Script" id=14]
 [ext_resource path="res://addons/player-networking/ClientmodeMQTTsignal.gd" type="Script" id=15]
 [ext_resource path="res://addons/player-networking/MQTT.gd" type="Script" id=16]
+[ext_resource path="res://Intro.ogg" type="AudioStream" id=17]
+
+[sub_resource type="AudioStreamMicrophone" id=2]
 
 [sub_resource type="ViewportTexture" id=1]
 resource_local_to_scene = false
@@ -646,21 +649,53 @@ __meta__ = {
 }
 
 [node name="Label" type="Label" parent="PlayerConnections"]
-margin_right = 40.0
-margin_bottom = 14.0
-text = "Player connections:"
+margin_left = 6.36398
+margin_top = 2.82843
+margin_right = 56.364
+margin_bottom = 16.8284
+text = "Players:"
 
 [node name="PlayerList" type="OptionButton" parent="PlayerConnections"]
-margin_left = 6.74203
-margin_top = 18.0
-margin_right = 286.742
-margin_bottom = 46.0
+margin_left = 58.0
+margin_right = 284.0
+margin_bottom = 20.0
 text = "me"
 items = [ "me", null, false, 0, null ]
 selected = 0
 __meta__ = {
 "_edit_use_anchors_": false
 }
+
+[node name="MicRecord" type="Button" parent="PlayerConnections"]
+margin_left = 13.2929
+margin_top = 27.1213
+margin_right = 92.2929
+margin_bottom = 47.1213
+text = "MicRecord"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="PlayerConnections/MicRecord"]
+stream = SubResource( 2 )
+autoplay = true
+bus = "Record"
+
+[node name="PlayRecord" type="Button" parent="PlayerConnections/MicRecord"]
+margin_left = 84.853
+margin_top = -3.05176e-05
+margin_right = 166.853
+margin_bottom = 20.0
+text = "PlayRecord"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="PlayerConnections/MicRecord/PlayRecord"]
+autoplay = true
+
+[node name="AudioStreamPlayer2" type="AudioStreamPlayer" parent="PlayerConnections/MicRecord/PlayRecord"]
+stream = ExtResource( 17 )
 
 [node name="Doppelganger" type="CheckBox" parent="PlayerConnections"]
 margin_left = 2.32806
@@ -840,5 +875,9 @@ __meta__ = {
 [connection signal="toggled" from="MQTTsignalling/Clientmode/WebRTCmultiplayerclient/StartWebRTCmultiplayer" to="MQTTsignalling/Clientmode/WebRTCmultiplayerclient" method="_on_StartWebRTCmultiplayer_toggled"]
 [connection signal="toggled" from="MQTTsignalling/StartMQTT" to="MQTTsignalling/Servermode" method="_on_StartServer_toggled"]
 [connection signal="item_selected" from="PlayerConnections/PlayerList" to="PlayerConnections" method="_on_PlayerList_item_selected"]
+[connection signal="button_down" from="PlayerConnections/MicRecord" to="PlayerConnections" method="_on_MicRecord_button_down"]
+[connection signal="button_up" from="PlayerConnections/MicRecord" to="PlayerConnections" method="_on_MicRecord_button_up"]
+[connection signal="button_down" from="PlayerConnections/MicRecord/PlayRecord" to="PlayerConnections" method="_on_PlayRecord_button_down"]
+[connection signal="pressed" from="PlayerConnections/MicRecord/PlayRecord" to="PlayerConnections" method="_on_PlayRecord_pressed"]
 [connection signal="toggled" from="PlayerConnections/Doppelganger" to="PlayerConnections" method="_on_Doppelganger_toggled"]
 [connection signal="value_changed" from="PlayerConnections/PlayerLagSlider" to="PlayerConnections" method="_on_PlayerLagSlider_value_changed"]

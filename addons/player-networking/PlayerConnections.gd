@@ -40,6 +40,7 @@ func _ready():
 	LocalPlayer.get_node("PlayerFrame").networkID = 0
 	LocalPlayer.set_name("R%d" % LocalPlayer.get_node("PlayerFrame").networkID) 
 
+	micaudioinit()
 
 func connectionlog(txt):
 	$ConnectionLog.text += txt
@@ -290,3 +291,78 @@ func _on_PlayerLagSlider_value_changed(value):
 	var player = PlayersNode.get_child($PlayerList.selected)
 	if player != LocalPlayer:
 		player.get_node("PlayerFrame").laglatency = value
+
+
+
+var micrecordingdata = null
+const max_recording_seconds = 5.0
+var recordingnumberC = 1
+var recordingeffect = null
+
+func micaudioinit():
+	var idx = AudioServer.get_bus_index("Record")
+	recordingeffect = AudioServer.get_bus_effect(idx, 0)
+	var OpusEncoderNode = load("res://addons/opus/OpusEncoderNode.gdns")
+	if OpusEncoderNode != null:
+		var OpusEncoder = OpusEncoderNode.new()
+		OpusEncoder.name = "OpusEncoder"
+		$MicRecord.add_child(OpusEncoder)
+	else:
+		print("Missing Opus plugin library")
+	var OpusDecoderNode = load("res://addons/opus/OpusDecoderNode.gdns")
+	if OpusDecoderNode != null:
+		var OpusDecoder = OpusDecoderNode.new()
+		OpusDecoder.name = "OpusDecoder"
+		$MicRecord.add_child(OpusDecoder)
+
+func _on_MicRecord_button_down():
+	if not recordingeffect.is_recording_active():
+		recordingnumberC += 1
+		micrecordingdata = null
+		yield(get_tree().create_timer(0.1), "timeout")
+		var lrecordingnumberC = recordingnumberC
+		recordingeffect.set_recording_active(true)
+		yield(get_tree().create_timer(max_recording_seconds), "timeout")
+		if micrecordingdata != null and lrecordingnumberC == recordingnumberC:
+			_on_MicRecord_button_up()
+		
+func _on_MicRecord_button_up():
+	if recordingeffect.is_recording_active():
+		recordingeffect.set_recording_active(false)
+		var recording = recordingeffect.get_recording()
+		var pcmData = recording.get_data()
+		micrecordingdata = { "format":recording.get_format(), 
+							 "mix_rate":recording.get_mix_rate(),
+							 "is_stereo":recording.is_stereo() }
+		if $MicRecord.has_node("OpusEncoder"):
+			micrecordingdata["opusEncoded"] = $MicRecord/OpusEncoder.encode(pcmData)
+		else:
+			micrecordingdata["pcmData"] = pcmData
+		print(" created data bytes ", len(var2bytes(micrecordingdata)), "  ", len(pcmData))
+
+func _on_PlayRecord_pressed():
+	print("_on_PlayRecord_pressed")
+	if micrecordingdata != null:
+		var audioStream = AudioStreamSample.new()
+		audioStream.set_format(micrecordingdata["format"])
+		audioStream.set_mix_rate(micrecordingdata["mix_rate"])
+		audioStream.set_stereo(micrecordingdata["is_stereo"])
+		if micrecordingdata.has("opusEncoded") and $MicRecord.has_node("OpusDecoder"):
+			audioStream.data = $MicRecord/OpusDecoder.decode(micrecordingdata["opusEncoded"])
+			print("audio playing bytes ", len(audioStream.data))
+		elif micrecordingdata.has("pcmData"):
+			audioStream.data = micrecordingdata["pcmData"]
+			print("audio playing bytes ", len(audioStream.data))
+		else:
+			print("No decodable audio data here")
+		$MicRecord/PlayRecord/AudioStreamPlayer.stream = audioStream
+		$MicRecord/PlayRecord/AudioStreamPlayer.play()
+
+	else:
+		if $MicRecord/PlayRecord/AudioStreamPlayer2.playing:
+			$MicRecord/PlayRecord/AudioStreamPlayer2.stop()
+		else:
+			$MicRecord/PlayRecord/AudioStreamPlayer2.play()
+
+func _on_PlayRecord_button_down():
+	print("_on_PlayRecord_button_down")
