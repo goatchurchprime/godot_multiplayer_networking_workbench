@@ -704,7 +704,7 @@ __meta__ = {
 [node name="AudioStreamRecorder" type="AudioStreamPlayer" parent="PlayerConnections/MicRecord"]
 stream = SubResource( 2 )
 autoplay = true
-bus = "Record"
+bus = "Recorder"
 
 [node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="PlayerConnections/MicRecord"]
 autoplay = true

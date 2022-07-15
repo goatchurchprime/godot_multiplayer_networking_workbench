@@ -301,8 +301,8 @@ var recordingeffect = null
 var capturingeffect = null
 
 func micaudioinit():
-	var recordbus_idx = AudioServer.get_bus_index("Record")
-	assert ($MicRecord/AudioStreamRecorder.bus == "Record")
+	var recordbus_idx = AudioServer.get_bus_index("Recorder")
+	assert ($MicRecord/AudioStreamRecorder.bus == "Recorder")
 	assert ($MicRecord/AudioStreamRecorder.stream.is_class("AudioStreamMicrophone"))
 	assert (AudioServer.is_bus_mute(recordbus_idx) == true)
 	recordingeffect = AudioServer.get_bus_effect(recordbus_idx, 0)
