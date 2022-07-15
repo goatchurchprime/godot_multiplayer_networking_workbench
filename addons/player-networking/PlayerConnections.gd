@@ -298,10 +298,18 @@ var micrecordingdata = null
 const max_recording_seconds = 5.0
 var recordingnumberC = 1
 var recordingeffect = null
+var capturingeffect = null
 
 func micaudioinit():
-	var idx = AudioServer.get_bus_index("Record")
-	recordingeffect = AudioServer.get_bus_effect(idx, 0)
+	var recordbus_idx = AudioServer.get_bus_index("Record")
+	assert ($MicRecord/AudioStreamRecorder.bus == "Record")
+	assert ($MicRecord/AudioStreamRecorder.stream.is_class("AudioStreamMicrophone"))
+	assert (AudioServer.is_bus_mute(recordbus_idx) == true)
+	recordingeffect = AudioServer.get_bus_effect(recordbus_idx, 0)
+	assert (recordingeffect.is_class("AudioEffectRecord"))
+	capturingeffect = AudioServer.get_bus_effect(recordbus_idx, 1)
+	assert (capturingeffect.is_class("AudioEffectCapture"))
+
 	var OpusEncoderNode = load("res://addons/opus/OpusEncoderNode.gdns")
 	if OpusEncoderNode != null:
 		var OpusEncoder = OpusEncoderNode.new()
@@ -314,6 +322,7 @@ func micaudioinit():
 		var OpusDecoder = OpusDecoderNode.new()
 		OpusDecoder.name = "OpusDecoder"
 		$MicRecord.add_child(OpusDecoder)
+
 
 func _on_MicRecord_button_down():
 	if not recordingeffect.is_recording_active():
