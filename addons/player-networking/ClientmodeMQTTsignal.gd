@@ -120,12 +120,12 @@ func _on_StartClient_toggled(button_pressed):
 		StartMQTTstatuslabel.text = "connecting"
 		var brokerurl = SetupMQTTsignal.get_node("brokeraddress").text
 		MQTT.connect_to_broker(brokerurl)
-		print("hi there")
 		
 		if selectasnecessary or selectasclient:
 			waitingforserverstoshow = true
 			yield(get_tree().create_timer(waittimeforservertoshow), "timeout")
 			waitingforserverstoshow = false
+			
 		if StartMQTT.pressed:
 			var converttoservertype = selectasnecessary
 			for ss in openserversconnections:

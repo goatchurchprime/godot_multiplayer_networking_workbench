@@ -13,14 +13,35 @@ var socket = null
 var sslsocket = null
 var websocketclient = null
 var websocket = null
-var bbrokerconnected = false
+
+const BCM_NOCONNECTION = 0
+const BCM_WAITING_WEBSOCKET_CONNECTION = 1
+const BCM_WAITING_SOCKET_CONNECTION = 2
+const BCM_WAITING_SSL_SOCKET_CONNECTION = 3
+const BCM_FAILED_CONNECTION = 5
+const BCM_WAITING_CONNMESSAGE = 10
+const BCM_WAITING_CONNACK = 19
+const BCM_CONNECTED = 20
+
+var brokerconnectmode = BCM_NOCONNECTION
 
 var regexbrokerurl = RegEx.new()
 
+const DEFAULTBROKERPORT_TCP = 1883
+const DEFAULTBROKERPORT_SSL = 8884
+const DEFAULTBROKERPORT_WS = 8080
+const DEFAULTBROKERPORT_WSS = 8081
+
+const CP_PINGREQ = 0xC0
+const CP_PINGRESP = 0xd0
+const CP_CONNACK = 0x20
+const CP_CONNECT = 0x10
+const CP_PUBLISH = 0x30
+const CP_SUBSCRIBE = 0x82
+const CP_SUBACK = 0x90
+
 var binarymessages = false
 
-var ssl = false
-var ssl_params = null
 var pid = 0
 var user = null
 var pswd = null
@@ -35,40 +56,7 @@ signal received_message(topic, message)
 signal broker_connected()
 signal broker_disconnected()
 
-
 var receivedbuffer : PoolByteArray = PoolByteArray()
-
-func receivedbufferlength():
-	return receivedbuffer.size()
-	
-func YreceivedbuffernextNbytes(n):
-	yield(get_tree(), "idle_frame")
-	if n == 0:
-		return PoolByteArray()
-	var Dcount = 0
-	while receivedbufferlength() < n:
-		yield(get_tree().create_timer(0.1), "timeout")
-		Dcount += 1
-		if (Dcount % 20) == 0 and (n == 4):
-			print("received hanging on 4 bytes return")
-		if socket == null and websocket == null:
-			return PoolByteArray([0,0,0,0])
-			
-	#var sv = socket.get_data(n)
-	#assert (sv[0] == 0)  # error
-	#return sv[1]
-	var v = receivedbuffer.subarray(0, n-1)
-
-	# make this a longer buffer so the front doesn't have to be trimmed off too often
-	receivedbuffer = receivedbuffer.subarray(n, -1) if n != receivedbuffer.size() else PoolByteArray()
-	return v
-
-func Yreceivedbuffernext2byteWord():
-	var v = yield(YreceivedbuffernextNbytes(2), "completed")
-	return (v[0]<<8) + v[1]
-
-func Yreceivedbuffernextbyte():
-	return yield(YreceivedbuffernextNbytes(1), "completed")[0]
 
 func senddata(data):
 	var E = 0
@@ -81,9 +69,7 @@ func senddata(data):
 	if E != 0:
 		print("bad senddata packet E=", E)
 	
-var in_wait_msg = false
-var pingticksnext0 = 0
-func _process(delta):
+func receiveintobuffer():
 	if socket != null and socket.is_connected_to_host():
 		var n = socket.get_available_bytes()
 		if n != 0:
@@ -105,29 +91,58 @@ func _process(delta):
 		while websocket.get_available_packet_count() != 0:
 			print("Packets ", websocket.get_available_packet_count())
 			receivedbuffer.append_array(websocket.get_packet())
+	
+	
+var pingticksnext0 = 0
+func _process(delta):
+	if brokerconnectmode == BCM_NOCONNECTION:
+		pass
+	elif brokerconnectmode == BCM_WAITING_WEBSOCKET_CONNECTION:
+		websocketclient.poll()
+		if websocket.is_connected_to_host():
+			brokerconnectmode = BCM_WAITING_CONNMESSAGE
+			
+	elif brokerconnectmode == BCM_WAITING_SOCKET_CONNECTION:
+		if socket.is_connected_to_host():
+			if socket.get_status() == StreamPeerTCP.STATUS_CONNECTED:
+				brokerconnectmode = BCM_WAITING_CONNMESSAGE
 
-	if pingticksnext0 < OS.get_ticks_msec():
-		ping()
-		pingticksnext0 = OS.get_ticks_msec() + pinginterval*1000
+	elif brokerconnectmode == BCM_WAITING_SSL_SOCKET_CONNECTION:
+		if socket.is_connected_to_host():
+			if sslsocket == null:
+				sslsocket = StreamPeerSSL.new()
+				print("calling sslsocket.connect_to_stream()...")
+				var E3 = sslsocket.connect_to_stream(socket)
+				print("finish calling sslsocket.connect_to_stream()")
+				if E3 != 0:
+					print("bad sslsocket.connect_to_stream E=", E3)
+					brokerconnectmode = BCM_FAILED_CONNECTION
+					sslsocket = null
+			if sslsocket != null and sslsocket.get_status() == StreamPeerSSL.STATUS_CONNECTED:
+				print("CCSS ", sslsocket.get_status())
+				if sslsocket.get_status() == StreamPeerSSL.STATUS_CONNECTED:
+					brokerconnectmode = BCM_WAITING_CONNMESSAGE
+				
+	elif brokerconnectmode == BCM_WAITING_CONNMESSAGE:
+		senddata(firstmessagetoserver())
+		brokerconnectmode = BCM_WAITING_CONNACK
+		
+	elif brokerconnectmode == BCM_WAITING_CONNACK or brokerconnectmode == BCM_CONNECTED:
+		receiveintobuffer()
+		wait_msg()
+		if brokerconnectmode == BCM_CONNECTED and pingticksnext0 < OS.get_ticks_msec():
+			senddata(PoolByteArray([CP_PINGREQ, 0x00]))
+			pingticksnext0 = OS.get_ticks_msec() + pinginterval*1000
 
-	wait_msg()
+	elif brokerconnectmode == BCM_FAILED_CONNECTION:
+		cleanupsockets()
+
 
 func _ready():
 	regexbrokerurl.compile('^(wss://|ws://|ssl://)?([^:\\s]+)(:\\d+)?(/\\S*)?$')
 	if client_id == "":
 		randomize()
-		client_id = str(randi())
-
-func Y_recv_len():
-	var n = 0
-	var sh = 0
-	var b
-	while 1:
-		b = yield(Yreceivedbuffernextbyte(), "completed")
-		n |= (b & 0x7f) << sh
-		if not b & 0x80:
-			return n
-		sh += 7
+		client_id = "rr%d" % randi()
 
 func set_last_will(topic, msg, retain=false, qos=0):
 	assert((0 <= qos) and (qos <= 2))
@@ -140,7 +155,7 @@ func set_last_will(topic, msg, retain=false, qos=0):
 func firstmessagetoserver():
 	var clean_session = true
 	var msg = PoolByteArray()
-	msg.append(0x10);
+	msg.append(CP_CONNECT);
 	msg.append(0x00);
 	msg.append(0x00);
 	msg.append(0x04);
@@ -200,12 +215,11 @@ func cleanupsockets(retval=false):
 		websocketclient = null
 	else:
 		assert (websocket == null)
-		
-	in_wait_msg = false
+	brokerconnectmode = BCM_NOCONNECTION
 	return retval
-	
+
 func connect_to_broker(brokerurl):
-	# regexbrokerurl.compile('^(wss://|ws://|ssl://)?([^:\\s]+)(:\\d+)?(/\\S*)?$')
+	assert (brokerconnectmode == BCM_NOCONNECTION)
 	var brokermatch = regexbrokerurl.search(brokerurl)
 	if brokermatch == null:
 		print("unrecognized brokerurl pattern:", brokerurl)
@@ -215,15 +229,11 @@ func connect_to_broker(brokerurl):
 	var brokerserver = brokercomponents[2]
 	var iswebsocket = (brokerprotocol == "ws://" or brokerprotocol == "wss://")
 	var isssl = (brokerprotocol == "ssl://" or brokerprotocol == "wss://")
-	var brokerport = ((8081 if isssl else 8080) if iswebsocket else (8884 if isssl else 1883))
+	var brokerport = ((DEFAULTBROKERPORT_WSS if isssl else DEFAULTBROKERPORT_WS) if iswebsocket else (DEFAULTBROKERPORT_SSL if isssl else DEFAULTBROKERPORT_TCP))
 	if brokercomponents[3]:
 		brokerport = int(brokercomponents[3].substr(1)) 
 	var brokerpath = brokercomponents[4] if brokercomponents[4] else "/"
 	
-	if client_id == "":
-		client_id = "rr%d" % randi()
-	in_wait_msg = true
-
 	var Dcount = 0
 	if iswebsocket:
 		websocketclient = WebSocketClient.new()
@@ -234,84 +244,29 @@ func connect_to_broker(brokerurl):
 		if E != 0:
 			print("websocketclient.connect_to_url Err: ", E)
 			return cleanupsockets(false)
-			
 		websocket = websocketclient.get_peer(1)
-		while not websocket.is_connected_to_host():
-			websocketclient.poll()
-			if (Dcount % 20) == 0:
-				print("connecting to websocket host")
-			Dcount += 1
-			yield(get_tree().create_timer(0.1), "timeout")
-			if websocket == null:
-				return cleanupsockets(false)
+		brokerconnectmode = BCM_WAITING_WEBSOCKET_CONNECTION
 
 	else:
 		socket = StreamPeerTCP.new()
 		print("Connecting to %s:%s" % [brokerserver, brokerport])
 		socket.connect_to_host(brokerserver, brokerport)
-		yield(get_tree().create_timer(0.1), "timeout")
-		while not socket.is_connected_to_host() and (socket.get_status() != StreamPeerTCP.STATUS_CONNECTED):
-			if (Dcount % 20) == 0:
-				print("connecting to socket host")
-			Dcount += 1
-			yield(get_tree().create_timer(0.1), "timeout")
-			if socket == null:
-				return cleanupsockets(false)
-
-		if isssl:
-			sslsocket = StreamPeerSSL.new()
-			var E3 = sslsocket.connect_to_stream(socket)
-			if E3 != 0:
-				print("bad sslsocket.connect_to_stream E=", E3)
-				return cleanupsockets(false)
+		brokerconnectmode = BCM_WAITING_SSL_SOCKET_CONNECTION if isssl else BCM_WAITING_SOCKET_CONNECTION
 		
-	print("Connection open to mqtt broker ", brokerurl)
-	var msg = firstmessagetoserver()
-	senddata(msg)
-	in_wait_msg = false
-	return true
-		
-	var data = yield(YreceivedbuffernextNbytes(4), "completed")
-	if data == null:
-		print("failed on first message")
-		return cleanupsockets(false)
-		
-	if not (data[0] == 0x20 and data[1] == 0x02):
-		print("MQTT first message bad return ", data)
-		return cleanupsockets(false)
-		
-	if data[3] != 0:
-		print("MQTT exception ", data[3])
-		return cleanupsockets(false)
-
-	in_wait_msg = false
-	emit_signal("broker_connected")
-	bbrokerconnected = true
-	print("broker_connected lw_msg=", PoolByteArray(lw_topic).get_string_from_ascii(), PoolByteArray(lw_msg).get_string_from_ascii())
 	return true
 
-func is_connected_to_server():
-	if socket != null and socket.is_connected_to_host():
-		return true
-	if websocket != null and websocket.is_connected_to_host():
-		return true
-	return false
 
 func disconnect_from_server():
-	#senddata(PoolByteArray([0xE0, 0x00]))
-	if bbrokerconnected:
+	if brokerconnectmode == BCM_CONNECTED:
+		senddata(PoolByteArray([0xE0, 0x00]))
 		emit_signal("broker_disconnected")
 	cleanupsockets()
 	
-func ping():
-	senddata(PoolByteArray([0xC0, 0x00]))
-
 func publish(topic, msg, retain=false, qos=0):
 	if not binarymessages:
 		msg = msg.to_ascii()
 	topic = topic.to_ascii()
 	
-	#print("publishing ", topic, " ", msg)
 	if socket != null:
 		if not socket.is_connected_to_host():
 			return
@@ -322,7 +277,7 @@ func publish(topic, msg, retain=false, qos=0):
 		return
 
 	var pkt = PoolByteArray()
-	pkt.append(0x30);
+	pkt.append(CP_PUBLISH);
 	pkt.append(0x00);
 		
 	pkt[0] |= ((1<<1) if qos else 0) | (1 if retain else 0)
@@ -349,27 +304,14 @@ func publish(topic, msg, retain=false, qos=0):
 		pkt.append(self.pid & 0xFF)
 	pkt.append_array(msg)
 	senddata(pkt)
-	
-	if qos == 1:
-		while 1:
-			var op = yield(Ywait_msg(), "completed")
-			if op == 0x40:
-				sz = yield(Yreceivedbuffernextbyte(), "completed")
-				assert(sz == 0x02)
-				var rcv_pid = yield(Yreceivedbuffernext2byteWord(), "completed")
-				if self.pid == rcv_pid:
-					return
-	elif qos == 2:
-		assert(0)
+
 
 func subscribe(topic, qos=0):
 	self.pid += 1
 	topic = topic.to_ascii()
-
-	var msg = PoolByteArray()
-
-	msg.append(0x82);
 	var length = 2 + 2 + len(topic) + 1
+	var msg = PoolByteArray()
+	msg.append(CP_SUBSCRIBE);
 	msg.append(length)
 	msg.append(self.pid >> 8)
 	msg.append(self.pid & 0xFF)
@@ -377,54 +319,8 @@ func subscribe(topic, qos=0):
 	msg.append(len(topic) & 0xFF)
 	msg.append_array(topic)
 	msg.append(qos);
-	
 	senddata(msg)
 
-func Ywait_msg():
-	yield(get_tree(), "idle_frame") 
-	if receivedbufferlength() <= 0:
-		return
-		
-	var res = yield(Yreceivedbuffernextbyte(), "completed")
-
-	if res == null:
-		return null
-	if res == 0:
-		return false # raise OSError(-1)
-	if res == 0xD0:  # PINGRESP
-		#print("PINGRESP")
-		var sz = yield(Yreceivedbuffernextbyte(), "completed")
-		assert(sz == 0)
-		return null
-	var op = res
-	if op & 0xf0 != 0x30:
-		return op
-		
-	var sz = yield(Y_recv_len(), "completed")
-	var topic_len = yield(Yreceivedbuffernext2byteWord(), "completed")
-	var data = yield(YreceivedbuffernextNbytes(topic_len), "completed")
-	var topic = data.get_string_from_ascii()
-	sz -= topic_len + 2
-	var pid1
-	if op & 6:
-		pid1 = yield(Yreceivedbuffernext2byteWord(), "completed")
-		sz -= 2
-	data = yield(YreceivedbuffernextNbytes(sz), "completed")
-	var msg = data if binarymessages else data.get_string_from_ascii()
-	
-	emit_signal("received_message", topic, msg)
-	
-	if op & 6 == 2:
-		senddata(PoolByteArray([0x40, 0x02, (pid1 >> 8), (pid1 & 0xFF)]))
-	elif op & 6 == 4:
-		assert(0)
-
-func trimreceivedbuffer(n):
-	if n == receivedbuffer.size():
-		 receivedbuffer = PoolByteArray()
-	else:
-		assert (n <= receivedbuffer.size())
-		receivedbuffer = receivedbuffer.subarray(n, -1)
 
 func wait_msg():
 	var n = receivedbuffer.size()
@@ -443,7 +339,7 @@ func wait_msg():
 		return 0
 		
 	var E = 0
-	if op == 0xd0:  # PINGRESP
+	if op == CP_PINGRESP:
 		if n >= 2:
 			E = 0 if (sz == 0) else 1
 			
@@ -467,7 +363,7 @@ func wait_msg():
 		elif op & 6 == 4:
 			assert(0)
 
-	elif op == 0x90:
+	elif op == CP_SUBACK:
 		if sz == 3:
 			var apid = (receivedbuffer[i]<<8) + receivedbuffer[i+1]
 			print("SUBACK", apid, " ", receivedbuffer[i+2])
@@ -476,7 +372,7 @@ func wait_msg():
 		else:
 			E = 1
 
-	elif op == 0x20:
+	elif op == CP_CONNACK:
 		if sz == 2:
 			var retcode = receivedbuffer[i+1]
 			print("CONNACK", retcode)
@@ -494,3 +390,9 @@ func wait_msg():
 	trimreceivedbuffer(i + sz)
 	return E
 
+func trimreceivedbuffer(n):
+	if n == receivedbuffer.size():
+		 receivedbuffer = PoolByteArray()
+	else:
+		assert (n <= receivedbuffer.size())
+		receivedbuffer = receivedbuffer.subarray(n, -1)
