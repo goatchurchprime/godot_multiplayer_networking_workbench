@@ -96,7 +96,10 @@ func received_mqtt(topic, msg):
 
 func on_broker_connect():
 	MQTT.subscribe("%s/+/server" % roomname)
+	MQTT.publish("lettuce", "junk1")
+	print("statustopic=",statustopic)
 	MQTT.publish(statustopic, to_json({"subject":"unconnected"}))
+	MQTT.publish("lettuce", "junk2")
 	StartMQTTstatuslabel.text = "pending"
 
 func on_broker_disconnect():
@@ -112,20 +115,17 @@ func _on_StartClient_toggled(button_pressed):
 		MQTT.connect("broker_connected", self, "on_broker_connect")
 		MQTT.connect("broker_disconnected", self, "on_broker_disconnect")
 		roomname = SetupMQTTsignal.get_node("roomname").text
+		StartMQTTstatuslabel.text = "on"
 		randomize()
 		MQTT.client_id = "c%d" % randi()
 		SetupMQTTsignal.get_node("client_id").text = MQTT.client_id
-		var brokersplit = SetupMQTTsignal.get_node("brokeraddress").text.split(":", true, 1)
-		MQTT.server = brokersplit[0]
-		var websocketport = 8080 if len(brokersplit) == 1 else int(brokersplit[1])
-		MQTT.websocketurl = "ws://%s:%d/mqtt" % [MQTT.server, websocketport]
 		statustopic = "%s/%s/client" % [roomname, MQTT.client_id]
 		MQTT.set_last_will(statustopic, to_json({"subject":"dead"}), true)
 		StartMQTTstatuslabel.text = "connecting"
-		if SetupMQTTsignal.get_node("brokeraddress/usewebsocket").pressed:
-			MQTT.websocket_connect_to_server()
-		else:
-			MQTT.connect_to_server()
+		var brokerurl = SetupMQTTsignal.get_node("brokeraddress").text
+		MQTT.connect_to_broker(brokerurl)
+		print("hi there")
+		
 		if selectasnecessary or selectasclient:
 			waitingforserverstoshow = true
 			yield(get_tree().create_timer(waittimeforservertoshow), "timeout")

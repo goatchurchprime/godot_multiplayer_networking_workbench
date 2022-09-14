@@ -16,6 +16,9 @@ If having difficulties on linux, don't forget to try:
 If you are on Nixos, it needs patchelf to fix it:
 > https://github.com/godotengine/webrtc-native/issues/44#issuecomment-922550575
 
+You can optionally install Godot-Opus from the AssetLib to enable audio compression.  
+Don't forget to enable audio input in your project settings and any export permissions.
+
 ## Operation
 
 The **NetworkGateway** scene runs the entire process and is composed of a tree of UI Control nodes 
@@ -33,9 +36,9 @@ We connect using WebRTC at startup so it works out of the box.  This is done wit
 Signalling is all done through the the public broker connected to [HiveMQ](http://www.mqtt-dashboard.com/) and you can sniff 
 out all the signals if you run the command:
 
-> mosquitto_sub -h mqtt.dynamicdevices.co.uk -t "tomato/#" -v
+> mosquitto_sub -h mqtt.dynamicdevices.co.uk -t "lettuce/#" -v
 
-This dumps everything in the room `tomato` to the command line.  You can choose other rooms, so that connection 
+This dumps everything in the room `lettuce` to the command line.  You can choose other rooms, so that connection 
 can be like jit.si.  
 
 The use of a public MQTT broker to initiate the connections means we can set the connection to "As necessary", which means 
