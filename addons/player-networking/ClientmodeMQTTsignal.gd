@@ -14,9 +14,8 @@ signal mqttsig_connection_established(wclientid)
 signal mqttsig_connection_closed()
 signal mqttsig_packet_received(v)
 
-
 # mosquitto_sub -h broker.mqttdashboard.com -t "cucumber/#" -v
-# mosquitto_sub -h mqtt.dynamicdevices.co.uk -t "tomato/#" -v
+# mosquitto_sub -h mosquitto.doesliverpool.xyz -v -t "lettuce/#"
 
 var openserversconnections = { }
 var selectedserver = ""
@@ -112,24 +111,21 @@ func _on_StartClient_toggled(button_pressed):
 		MQTT.connect("broker_connected", self, "on_broker_connect")
 		MQTT.connect("broker_disconnected", self, "on_broker_disconnect")
 		roomname = SetupMQTTsignal.get_node("roomname").text
+		StartMQTTstatuslabel.text = "on"
 		randomize()
 		MQTT.client_id = "c%d" % randi()
 		SetupMQTTsignal.get_node("client_id").text = MQTT.client_id
-		var brokersplit = SetupMQTTsignal.get_node("brokeraddress").text.split(":", true, 1)
-		MQTT.server = brokersplit[0]
-		var websocketport = 8080 if len(brokersplit) == 1 else int(brokersplit[1])
-		MQTT.websocketurl = "ws://%s:%d/mqtt" % [MQTT.server, websocketport]
 		statustopic = "%s/%s/client" % [roomname, MQTT.client_id]
 		MQTT.set_last_will(statustopic, to_json({"subject":"dead"}), true)
 		StartMQTTstatuslabel.text = "connecting"
-		if SetupMQTTsignal.get_node("brokeraddress/usewebsocket").pressed:
-			MQTT.websocket_connect_to_server()
-		else:
-			MQTT.connect_to_server()
+		var brokerurl = SetupMQTTsignal.get_node("brokeraddress").text
+		MQTT.connect_to_broker(brokerurl)
+		
 		if selectasnecessary or selectasclient:
 			waitingforserverstoshow = true
 			yield(get_tree().create_timer(waittimeforservertoshow), "timeout")
 			waitingforserverstoshow = false
+			
 		if StartMQTT.pressed:
 			var converttoservertype = selectasnecessary
 			for ss in openserversconnections:

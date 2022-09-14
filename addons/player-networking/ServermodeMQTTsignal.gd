@@ -7,7 +7,6 @@ onready var StartMQTT = SetupMQTTsignal.get_node("StartMQTT")
 onready var StartMQTTstatuslabel = SetupMQTTsignal.get_node("StartMQTT/statuslabel")
 
 var roomname = ""
-
 	
 var nextclientnumber = 2
 var clientidtowclientid = { }
@@ -104,17 +103,11 @@ func _on_StartServer_toggled(button_pressed):
 		randomize()
 		MQTT.client_id = "s%d" % randi()
 		SetupMQTTsignal.get_node("client_id").text = MQTT.client_id
-		var brokersplit = SetupMQTTsignal.get_node("brokeraddress").text.split(":", true, 1)
-		MQTT.server = brokersplit[0]
-		var websocketport = 8080 if len(brokersplit) == 1 else int(brokersplit[1])
-		MQTT.websocketurl = "ws://%s:%d/mqtt" % [MQTT.server, websocketport]
-		var statustopic = "%s/%s/server" % [roomname, MQTT.client_id]
+		statustopic = "%s/%s/server" % [roomname, MQTT.client_id]
 		MQTT.set_last_will(statustopic, to_json({"subject":"dead"}), true)
 		StartMQTTstatuslabel.text = "connecting"
-		if SetupMQTTsignal.get_node("brokeraddress/usewebsocket").pressed:
-			MQTT.websocket_connect_to_server()
-		else:
-			MQTT.connect_to_server()
+		var brokerurl = SetupMQTTsignal.get_node("brokeraddress").text
+		MQTT.connect_to_broker(brokerurl)
 
 	else:
 		print("Disconnecting MQTT")
@@ -130,5 +123,4 @@ func _on_StartServer_toggled(button_pressed):
 		$ClientsList.add_item("none", 0)
 		clientidtowclientid.clear()
 		wclientidtoclientid.clear()
-		
 		

@@ -10,7 +10,6 @@ extends Panel
 # make this system operate in VR gaming (using the OQ_network thing)
 # Insert by symlink to help with development of code
 
-
 export var remoteservers = [ "127.0.0.1" ]
 
 enum NETWORK_PROTOCOL { ENET = 0, 
@@ -44,8 +43,6 @@ func _ready():
 	if OS.has_feature("HTML5"):
 		$NetworkOptions.set_item_disabled(NETWORK_OPTIONS.LOCAL_NETWORK,  true)
 		$NetworkOptions.set_item_disabled(NETWORK_OPTIONS.AS_SERVER,  true)
-		$MQTTsignalling/brokeraddress/usewebsocket.pressed = true
-		$MQTTsignalling/brokeraddress/usewebsocket.disabled = true
 		$ProtocolOptions.set_item_disabled(NETWORK_PROTOCOL.ENET, true)
 		$ProtocolOptions.selected = max(NETWORK_PROTOCOL.WEBSOCKET, $ProtocolOptions.selected)
 	rng.randomize()
@@ -60,11 +57,6 @@ func initialstatemqttwebrtc(networkoption, roomname, brokeraddress):
 	$ProtocolOptions.selected = NETWORK_PROTOCOL.WEBRTC_MQTTSIGNAL
 	_on_ProtocolOptions_item_selected($ProtocolOptions.selected)
 	if brokeraddress:
-		var wsb = brokeraddress.split("://", true, 1)
-		if len(wsb) == 2:
-			if wsb[0].begins_with("ws"):
-				$MQTTsignalling/brokeraddress/usewebsocket.pressed = true
-			brokeraddress = wsb[1]
 		$MQTTsignalling/brokeraddress.text = brokeraddress
 	if roomname:
 		$MQTTsignalling/roomname.text = roomname

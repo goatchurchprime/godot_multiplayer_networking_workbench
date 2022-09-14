@@ -29,9 +29,6 @@ margin_top = -0.707108
 margin_right = 550.0
 margin_bottom = 378.293
 script = ExtResource( 1 )
-__meta__ = {
-"_edit_use_anchors_": false
-}
 
 [node name="ProtocolOptions" type="OptionButton" parent="."]
 margin_left = 69.0394
@@ -41,9 +38,6 @@ margin_bottom = 31.087
 text = "WebRTC (mqtt signal)"
 items = [ "ENet", null, false, 0, null, "WebSocket", null, false, 1, null, "WebRTC (websocket signal)", null, false, 2, null, "WebRTC (mqtt signal)", null, false, 3, null ]
 selected = 3
-__meta__ = {
-"_edit_use_anchors_": false
-}
 
 [node name="Label" type="Label" parent="ProtocolOptions"]
 margin_left = -57.201
@@ -66,7 +60,6 @@ __meta__ = {
 
 [node name="NetworkLabel" type="Label" parent="NetworkOptions"]
 margin_left = -82.1836
-margin_top = 3.57628e-07
 margin_right = -0.183296
 margin_bottom = 19.0
 rect_pivot_offset = Vector2( 103.791, -1.38985 )
@@ -106,7 +99,6 @@ __meta__ = {
 
 [node name="NetworkLabel" type="Label" parent="NetworkOptionsMQTTWebRTC"]
 margin_left = -82.1836
-margin_top = 3.57628e-07
 margin_right = -0.183296
 margin_bottom = 19.0
 rect_pivot_offset = Vector2( 103.791, -1.38985 )
@@ -547,20 +539,7 @@ margin_top = 7.0
 margin_right = 226.0
 margin_bottom = 31.0
 hint_tooltip = "MQTT broker URL"
-text = "mqtt.dynamicdevices.co.uk"
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="usewebsocket" type="CheckBox" parent="MQTTsignalling/brokeraddress"]
-margin_left = 208.13
-margin_top = 55.1545
-margin_right = 307.13
-margin_bottom = 79.1545
-text = "Websocket"
-__meta__ = {
-"_edit_use_anchors_": false
-}
+text = "mosquitto.doesliverpool.xyz"
 
 [node name="roomname" type="LineEdit" parent="MQTTsignalling"]
 margin_left = 88.3937
