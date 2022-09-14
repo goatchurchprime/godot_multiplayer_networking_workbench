@@ -14,9 +14,8 @@ signal mqttsig_connection_established(wclientid)
 signal mqttsig_connection_closed()
 signal mqttsig_packet_received(v)
 
-
 # mosquitto_sub -h broker.mqttdashboard.com -t "cucumber/#" -v
-# mosquitto_sub -h mqtt.dynamicdevices.co.uk -t "tomato/#" -v
+# mosquitto_sub -h mosquitto.doesliverpool.xyz -v -t "lettuce/#"
 
 var openserversconnections = { }
 var selectedserver = ""
@@ -96,10 +95,7 @@ func received_mqtt(topic, msg):
 
 func on_broker_connect():
 	MQTT.subscribe("%s/+/server" % roomname)
-	MQTT.publish("lettuce", "junk1")
-	print("statustopic=",statustopic)
 	MQTT.publish(statustopic, to_json({"subject":"unconnected"}))
-	MQTT.publish("lettuce", "junk2")
 	StartMQTTstatuslabel.text = "pending"
 
 func on_broker_disconnect():

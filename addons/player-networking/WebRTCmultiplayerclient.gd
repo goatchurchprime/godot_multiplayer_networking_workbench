@@ -49,7 +49,6 @@ func client_packet_received(v):
 		assert (get_tree().get_network_unique_id() == clientsignalling.wclientid)
 		$statuslabel.text = "receive offer"
 
-			
 	elif v["subject"] == "ice_candidate":
 		assert (get_tree().network_peer.is_class("WebRTCMultiplayer"))
 		var peer = get_tree().get_network_peer().get_peer(1)

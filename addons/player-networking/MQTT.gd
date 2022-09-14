@@ -113,10 +113,12 @@ func _process(delta):
 		return
 	if receivedbufferlength() <= 0:
 		return
-	in_wait_msg = true
-	while receivedbufferlength() > 0:
-		yield(wait_msg(), "completed")
-	in_wait_msg = false
+
+	wait_msg()
+#	in_wait_msg = true
+#	while receivedbufferlength() > 0:
+#		yield(Ywait_msg(), "completed")
+#	in_wait_msg = false
 
 func _ready():
 	regexbrokerurl.compile('^(wss://|ws://|ssl://)?([^:\\s]+)(:\\d+)?(/\\S*)?$')
@@ -356,7 +358,7 @@ func publish(topic, msg, retain=false, qos=0):
 	
 	if qos == 1:
 		while 1:
-			var op = yield(wait_msg(), "completed")
+			var op = yield(Ywait_msg(), "completed")
 			if op == 0x40:
 				sz = yield(Yreceivedbuffernextbyte(), "completed")
 				assert(sz == 0x02)
@@ -371,7 +373,7 @@ func subscribe(topic, qos=0):
 	topic = topic.to_ascii()
 
 	var msg = PoolByteArray()
-	# Must be an easier way of doing this...
+
 	msg.append(0x82);
 	var length = 2 + 2 + len(topic) + 1
 	msg.append(length)
@@ -383,19 +385,8 @@ func subscribe(topic, qos=0):
 	msg.append(qos);
 	
 	senddata(msg)
-	
-	assert (qos == 0)
-	while 0:
-		var op = yield(wait_msg(), "completed")
-		if op == 0x90:
-			var data = yield(YreceivedbuffernextNbytes(4), "completed")
-			assert(data[1] == (self.pid >> 8) and data[2] == (self.pid & 0x0F))
-			if data[3] == 0x80:
-				print("MQTT exception ", data[3])
-				return false
-			return true
 
-func wait_msg():
+func Ywait_msg():
 	yield(get_tree(), "idle_frame") 
 	if receivedbufferlength() <= 0:
 		return
@@ -433,4 +424,60 @@ func wait_msg():
 		senddata(PoolByteArray([0x40, 0x02, (pid1 >> 8), (pid1 & 0xFF)]))
 	elif op & 6 == 4:
 		assert(0)
+
+func trimreceivedbuffer(n):
+	if n == receivedbuffer.size():
+		 receivedbuffer = PoolByteArray()
+	else:
+		assert (n <= receivedbuffer.size())
+		receivedbuffer = receivedbuffer.subarray(n, -1)
+
+func wait_msg():
+	var n = receivedbuffer.size()
+	if n < 2:
+		return 0
+	var op = receivedbuffer[0]
+	var i = 1
+	var sz = receivedbuffer[i] & 0x7f
+	while (receivedbuffer[i] & 0x80):
+		i += 1
+		if i == n:
+			return 0
+		sz += (receivedbuffer[i] & 0x7f) << ((i-1)*7)
+	i += 1
+	if n < i + sz:
+		return 0
+		
+	var E = 0
+	if op == 0xd0:  # PINGRESP
+		if n >= 2:
+			E = 0 if (sz == 0) else 1
+			
+	elif op & 0xf0 == 0x30:
+		var topic_len = (receivedbuffer[i]<<8) + receivedbuffer[i+1]
+		var im = i + 2
+		var topic = receivedbuffer.subarray(im, im + topic_len - 1).get_string_from_ascii()
+		im += topic_len
+		var pid1 = 0
+		if op & 6:
+			pid1 = (receivedbuffer[im]<<8) + receivedbuffer[im+1]
+			im += 2
+		var data = receivedbuffer.subarray(im, i + sz - 1)
+		var msg = data if binarymessages else data.get_string_from_ascii()
+		
+		print("received topic=", topic, " msg=", msg)
+		emit_signal("received_message", topic, msg)
+		
+		if op & 6 == 2:
+			senddata(PoolByteArray([0x40, 0x02, (pid1 >> 8), (pid1 & 0xFF)]))
+		elif op & 6 == 4:
+			assert(0)
+
+	elif op == 0x90:
+		print("Subscribe acknowledgement ", receivedbuffer.subarray(i, i + sz - 1), self.pid)
+	else:
+		print("mqtt do something with op=%x" % op)
+
+	trimreceivedbuffer(i + sz)
+	return E
 
