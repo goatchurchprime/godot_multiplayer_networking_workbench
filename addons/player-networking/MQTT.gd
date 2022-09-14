@@ -13,6 +13,7 @@ var socket = null
 var sslsocket = null
 var websocketclient = null
 var websocket = null
+var bbrokerconnected = false
 
 var regexbrokerurl = RegEx.new()
 
@@ -109,16 +110,7 @@ func _process(delta):
 		ping()
 		pingticksnext0 = OS.get_ticks_msec() + pinginterval*1000
 
-	if in_wait_msg:
-		return
-	if receivedbufferlength() <= 0:
-		return
-
 	wait_msg()
-#	in_wait_msg = true
-#	while receivedbufferlength() > 0:
-#		yield(Ywait_msg(), "completed")
-#	in_wait_msg = false
 
 func _ready():
 	regexbrokerurl.compile('^(wss://|ws://|ssl://)?([^:\\s]+)(:\\d+)?(/\\S*)?$')
@@ -273,10 +265,12 @@ func connect_to_broker(brokerurl):
 				print("bad sslsocket.connect_to_stream E=", E3)
 				return cleanupsockets(false)
 		
-	print("Connected to mqtt broker ", brokerurl)
+	print("Connection open to mqtt broker ", brokerurl)
 	var msg = firstmessagetoserver()
 	senddata(msg)
-	
+	in_wait_msg = false
+	return true
+		
 	var data = yield(YreceivedbuffernextNbytes(4), "completed")
 	if data == null:
 		print("failed on first message")
@@ -292,6 +286,7 @@ func connect_to_broker(brokerurl):
 
 	in_wait_msg = false
 	emit_signal("broker_connected")
+	bbrokerconnected = true
 	print("broker_connected lw_msg=", PoolByteArray(lw_topic).get_string_from_ascii(), PoolByteArray(lw_msg).get_string_from_ascii())
 	return true
 
@@ -304,10 +299,9 @@ func is_connected_to_server():
 
 func disconnect_from_server():
 	#senddata(PoolByteArray([0xE0, 0x00]))
-	var wasconnected = is_connected_to_server()
-	cleanupsockets()
-	if wasconnected:
+	if bbrokerconnected:
 		emit_signal("broker_disconnected")
+	cleanupsockets()
 	
 func ping():
 	senddata(PoolByteArray([0xC0, 0x00]))
@@ -474,7 +468,26 @@ func wait_msg():
 			assert(0)
 
 	elif op == 0x90:
-		print("Subscribe acknowledgement ", receivedbuffer.subarray(i, i + sz - 1), self.pid)
+		if sz == 3:
+			var apid = (receivedbuffer[i]<<8) + receivedbuffer[i+1]
+			print("SUBACK", apid, " ", receivedbuffer[i+2])
+			if receivedbuffer[i+2] == 0x80:
+				E = 2
+		else:
+			E = 1
+
+	elif op == 0x20:
+		if sz == 2:
+			var retcode = receivedbuffer[i+1]
+			print("CONNACK", retcode)
+			if retcode == 0x00:
+				emit_signal("broker_connected")
+			else:
+				print("Bad connection retcode=", retcode) # see https://docs.oasis-open.org/mqtt/mqtt/v3.1.1/mqtt-v3.1.1.html
+				E = 3
+		else:
+			E = 1
+
 	else:
 		print("mqtt do something with op=%x" % op)
 
