@@ -26,7 +26,7 @@ var Dmaxarrivaldelay = 0
 
 func _process(delta):
 	if initialframestate == 1 and len(framestack) > 0:
-		get_parent().framedatatoavatar(framestack[0])
+		get_parent().PAV_framedatatoavatar(framestack[0])
 		initialframestate = 2
 		
 	if len(framestack) > 0:
@@ -37,7 +37,6 @@ func _process(delta):
 		else:
 			Dmaxarrivaldelay = max(Dmaxarrivaldelay, framestack[0][NCONSTANTS.CFI_ARRIVALDELAY])
 			
-
 	var t = OS.get_ticks_msec()*0.001 - mintimestampoffset - laglatency
 	var completedframeL = { }
 	while len(framestack) > 0 and t > framestack[0][NCONSTANTS.CFI_TIMESTAMP]:
@@ -46,7 +45,7 @@ func _process(delta):
 			completedframe0[k] = fd[k]
 			completedframeL[k] = fd[k]
 		if len(framestack) == 0:
-			get_parent().framedatatoavatar(completedframeL)
+			get_parent().PAV_framedatatoavatar(completedframeL)
 			
 	if len(framestack) > 0 and t > framestack[0][NCONSTANTS.CFI_TIMESTAMPPREV]:
 		var lam = inverse_lerp(framestack[0][NCONSTANTS.CFI_TIMESTAMPPREV], framestack[0][NCONSTANTS.CFI_TIMESTAMP], t)
@@ -70,5 +69,5 @@ func _process(delta):
 		for k in completedframeL:
 			ld[k] = completedframeL[k]
 			
-		get_parent().framedatatoavatar(ld)
+		get_parent().PAV_framedatatoavatar(ld)
 	
