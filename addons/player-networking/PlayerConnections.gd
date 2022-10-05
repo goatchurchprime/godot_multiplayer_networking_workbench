@@ -16,8 +16,16 @@ var remote_players_idstonodenames = { }
 onready var NetworkGateway = get_node("..")
 var webrtc_server_relay = false
 
+var DerasePlayerAvatar = false
+
 func _ready():
+	if DerasePlayerAvatar and PlayersNode.get_child_count() == 1:
+		PlayersNode.get_child(0).free()
+	
+	if PlayersNode.get_child_count() == 0:
+		PlayersNode.add_child(load("VRPlayerAvatar.tscn").instance())
 	assert (PlayersNode.get_child_count() == 1) 
+
 	LocalPlayer = PlayersNode.get_child(0)
 	if not LocalPlayer.has_node("PlayerFrame"):
 		var playerframe = Node.new()
@@ -28,7 +36,7 @@ func _ready():
 		assert (LocalPlayer.get_node("PlayerFrame").get_script().resource_path == playerframelocalgdscriptfile)
 	LocalPlayer.get_node("PlayerFrame").PlayerConnections = self
 
-	LocalPlayer.initavatarlocal()
+	LocalPlayer.PAV_initavatarlocal()
 
 	get_tree().connect("network_peer_connected", self, "network_player_connected")
 	get_tree().connect("network_peer_disconnected", self, "network_player_disconnected")
@@ -140,7 +148,7 @@ func network_player_added(id, via_server_relay):
 	assert (not remote_players_idstonodenames.has(id))
 	remote_players_idstonodenames[id] = null
 	print("players_connected_list: ", remote_players_idstonodenames)
-	var avatardata = LocalPlayer.avatarinitdata()
+	var avatardata = LocalPlayer.PAV_avatarinitdata()
 	avatardata["playernodename"] = LocalPlayer.get_name()
 	avatardata["networkid"] = LocalPlayer.get_node("PlayerFrame").networkID
 	avatardata["framedata0"] = LocalPlayer.get_node("PlayerFrame").framedata0.duplicate()
@@ -191,14 +199,14 @@ func _on_Doppelganger_toggled(button_pressed):
 		#DoppelgangerPanel.visible = true
 		DoppelgangerPanel.get_node("netoffset").editable = false
 		DoppelgangerPanel.get_node("netdelaymin").editable = false
-		var avatardata = LocalPlayer.avatarinitdata()
+		var avatardata = LocalPlayer.PAV_avatarinitdata()
 		avatardata["playernodename"] = "Doppelganger"
 		avatardata["networkid"] = LocalPlayer.get_node("PlayerFrame").networkID
 		var fd = LocalPlayer.get_node("PlayerFrame").framedata0.duplicate()
 		fd[NCONSTANTS.CFI_TIMESTAMP] = fd[NCONSTANTS.CFI_TIMESTAMP_F0]
 		fd.erase(NCONSTANTS.CFI_TIMESTAMP_F0)
 		var doppelnetoffset = float(get_node("../DoppelgangerPanel/netoffset").text)*0.001
-		LocalPlayer.changethinnedframedatafordoppelganger(fd, doppelnetoffset, true)
+		LocalPlayer.PAV_changethinnedframedatafordoppelganger(fd, doppelnetoffset, true)
 		avatardata["framedata0"] = fd
 		var doppelgangerdelay = get_node("..").getrandomdoppelgangerdelay(true)
 		yield(get_tree().create_timer(doppelgangerdelay*0.001), "timeout")
@@ -255,7 +263,7 @@ func newremoteplayer(avatardata):
 			remoteplayer.add_child(playerframe)
 		remoteplayer.set_name(avatardata["playernodename"])
 		remoteplayer.get_node("PlayerFrame").networkID = avatardata["networkid"]
-		remoteplayer.initavatarremote(avatardata)
+		remoteplayer.PAV_initavatarremote(avatardata)
 		PlayersNode.add_child(remoteplayer)
 		if remoteplayer.get_node("PlayerFrame").networkID == 1:
 			ServerPlayer = remoteplayer

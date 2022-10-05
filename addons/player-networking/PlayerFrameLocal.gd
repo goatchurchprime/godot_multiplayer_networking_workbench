@@ -57,7 +57,7 @@ var minframeseconds = 0.1
 
 var framedata0 = { NCONSTANTS.CFI_TIMESTAMP:0.0, NCONSTANTS.CFI_TIMESTAMP_F0:0.0 }
 func _process(delta):
-	get_parent().processlocalavatarposition(delta)
+	get_parent().PAV_processlocalavatarposition(delta)
 
 	var tstamp = OS.get_ticks_msec()*0.001
 	var dft = tstamp - framedata0[NCONSTANTS.CFI_TIMESTAMP]
@@ -66,7 +66,7 @@ func _process(delta):
 	framedata0[NCONSTANTS.CFI_TIMESTAMPPREV] = framedata0[NCONSTANTS.CFI_TIMESTAMP_F0]
 	framedata0[NCONSTANTS.CFI_TIMESTAMP_F0] = tstamp
 
-	var fd = get_parent().avatartoframedata()
+	var fd = get_parent().PAV_avatartoframedata()
 	var vd = thinframedata_updatef0(framedata0, fd, (dft >= heartbeatfullframeseconds))
 	if len(vd) == 0:
 		return
@@ -93,7 +93,7 @@ func _process(delta):
 		
 	if doppelgangernode != null:
 		var doppelnetoffset = float(NetworkGatewayForDoppelganger.get_node("DoppelgangerPanel/netoffset").text)*0.001
-		get_parent().changethinnedframedatafordoppelganger(vd, doppelnetoffset, false)
+		get_parent().PAV_changethinnedframedatafordoppelganger(vd, doppelnetoffset, false)
 		var doppelgangerdelay = NetworkGatewayForDoppelganger.getrandomdoppelgangerdelay()
 		if doppelgangerdelay != -1.0:
 			yield(get_tree().create_timer(doppelgangerdelay*0.001), "timeout")
