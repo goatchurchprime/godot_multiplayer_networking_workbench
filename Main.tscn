@@ -24,6 +24,7 @@ __meta__ = {
 }
 
 [node name="NetworkGateway" parent="." instance=ExtResource( 3 )]
+localplayerscene = "res://controlplayer.tscn"
 
 [node name="JoystickControls" type="ColorRect" parent="."]
 margin_left = 11.0
