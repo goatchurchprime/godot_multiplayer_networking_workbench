@@ -3,13 +3,10 @@ extends ColorRect
 # command for running locally on the unix partition
 # /mnt/c/Users/henry/godot/Godot_v3.2.3-stable_linux_server.64 --main-pack /mnt/c/Users/henry/godot/games/OQ_Networking_Demo/releases/OQ_Networking_Demo.pck
 
-export var playernodepath : NodePath = "/root/Main/Players"
-export var localplayerscene : String = "" # "res://controlplayer.tscn"
-	
+
 onready var playerframelocalgdscriptfile = get_parent().filename.get_base_dir() + "/PlayerFrameLocal.gd"
 onready var playerframeremotegdscriptfile = get_parent().filename.get_base_dir() + "/PlayerFrameRemote.gd"
 
-onready var PlayersNode = get_node(playernodepath)
 var LocalPlayer = null
 var ServerPlayer = null
 
@@ -17,14 +14,16 @@ var deferred_playerconnections = [ ]
 var remote_players_idstonodenames = { }
 
 onready var NetworkGateway = get_node("..")
+onready var PlayersNode = get_node(NetworkGateway.playersnodepath)
+
 var webrtc_server_relay = false
 
 
 func _ready():
-	if PlayersNode.get_child_count() == 1 and localplayerscene:
+	if PlayersNode.get_child_count() == 1 and NetworkGateway.localplayerscene:
 		PlayersNode.get_child(0).free()
 	if PlayersNode.get_child_count() == 0:
-		PlayersNode.add_child(load(localplayerscene).instance())
+		PlayersNode.add_child(load(NetworkGateway.localplayerscene).instance())
 	assert (PlayersNode.get_child_count() == 1) 
 
 	LocalPlayer = PlayersNode.get_child(0)
