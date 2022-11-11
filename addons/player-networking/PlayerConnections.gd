@@ -2,7 +2,10 @@ extends ColorRect
 
 # command for running locally on the unix partition
 # /mnt/c/Users/henry/godot/Godot_v3.2.3-stable_linux_server.64 --main-pack /mnt/c/Users/henry/godot/games/OQ_Networking_Demo/releases/OQ_Networking_Demo.pck
+
 export var playernodepath : NodePath = "/root/Main/Players"
+export var localplayerscene : String = "" # "res://controlplayer.tscn"
+	
 onready var playerframelocalgdscriptfile = get_parent().filename.get_base_dir() + "/PlayerFrameLocal.gd"
 onready var playerframeremotegdscriptfile = get_parent().filename.get_base_dir() + "/PlayerFrameRemote.gd"
 
@@ -16,14 +19,12 @@ var remote_players_idstonodenames = { }
 onready var NetworkGateway = get_node("..")
 var webrtc_server_relay = false
 
-var DerasePlayerAvatar = false
 
 func _ready():
-	if DerasePlayerAvatar and PlayersNode.get_child_count() == 1:
+	if PlayersNode.get_child_count() == 1 and localplayerscene:
 		PlayersNode.get_child(0).free()
-	
 	if PlayersNode.get_child_count() == 0:
-		PlayersNode.add_child(load("VRPlayerAvatar.tscn").instance())
+		PlayersNode.add_child(load(localplayerscene).instance())
 	assert (PlayersNode.get_child_count() == 1) 
 
 	LocalPlayer = PlayersNode.get_child(0)

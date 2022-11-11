@@ -547,9 +547,6 @@ margin_top = 34.5227
 margin_right = 168.394
 margin_bottom = 58.5227
 text = "lettuce"
-__meta__ = {
-"_edit_use_anchors_": false
-}
 
 [node name="Label" type="Label" parent="MQTTsignalling/roomname"]
 margin_left = -79.6517
@@ -622,9 +619,6 @@ margin_right = 545.0
 margin_bottom = 222.0
 color = Color( 0.0156863, 0.0313726, 0.392157, 1 )
 script = ExtResource( 4 )
-__meta__ = {
-"_edit_use_anchors_": false
-}
 
 [node name="Label" type="Label" parent="PlayerConnections"]
 margin_left = 6.36398
