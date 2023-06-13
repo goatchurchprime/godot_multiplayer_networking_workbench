@@ -644,9 +644,6 @@ margin_top = 27.1213
 margin_right = 92.2929
 margin_bottom = 47.1213
 text = "MicRecord"
-__meta__ = {
-"_edit_use_anchors_": false
-}
 
 [node name="SendRecord" type="Button" parent="PlayerConnections/MicRecord"]
 margin_left = 85.3071
@@ -670,9 +667,6 @@ margin_top = -0.669678
 margin_right = 272.0
 margin_bottom = 19.3303
 text = "Play"
-__meta__ = {
-"_edit_use_anchors_": false
-}
 
 [node name="AudioStreamRecorder" type="AudioStreamPlayer" parent="PlayerConnections/MicRecord"]
 stream = SubResource( 2 )

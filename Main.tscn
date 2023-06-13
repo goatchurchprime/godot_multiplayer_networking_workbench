@@ -33,9 +33,6 @@ margin_right = 539.0
 margin_bottom = 729.0
 color = Color( 0.14902, 0.215686, 0.141176, 1 )
 script = ExtResource( 4 )
-__meta__ = {
-"_edit_use_anchors_": false
-}
 
 [node name="PingPongBall" type="KinematicBody2D" parent="JoystickControls"]
 position = Vector2( 100, 100 )
@@ -59,6 +56,21 @@ position = Vector2( 555, 175 )
 [node name="CollisionShape2D" type="CollisionShape2D" parent="JoystickControls/StaticBody2D2"]
 position = Vector2( -32.9628, 0 )
 shape = SubResource( 3 )
+
+[node name="HelloWorld" type="OptionButton" parent="JoystickControls"]
+visible = false
+margin_left = 200.0
+margin_top = 20.0
+margin_right = 229.0
+margin_bottom = 40.0
+text = "--HelloWorld"
+items = [ "--HelloWorld", null, false, 0, null, "i86", null, false, 1, null, "arm", null, false, 2, null ]
+selected = 0
+
+[node name="TextEdit" type="TextEdit" parent="JoystickControls/HelloWorld"]
+margin_top = 35.0
+margin_right = 266.0
+margin_bottom = 135.0
 
 [node name="Players" type="Control" parent="."]
 margin_left = 8.0

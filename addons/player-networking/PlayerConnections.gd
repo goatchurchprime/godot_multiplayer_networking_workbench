@@ -48,6 +48,7 @@ func _ready():
 	LocalPlayer.get_node("PlayerFrame").networkID = 0
 	LocalPlayer.set_name("R%d" % LocalPlayer.get_node("PlayerFrame").networkID) 
 
+	print("skipping mic init")
 	micaudioinit()
 
 func connectionlog(txt):
