@@ -1,12 +1,12 @@
 extends Control
 
-onready var NetworkGateway = get_node("../..")
-onready var PlayerConnections = NetworkGateway.get_node("PlayerConnections")
+@onready var NetworkGateway = get_node("../..")
+@onready var PlayerConnections = NetworkGateway.get_node("PlayerConnections")
 
 func _on_StartENetmultiplayer_toggled(button_pressed):
 	if button_pressed:
 		var portnumber = int(NetworkGateway.get_node("NetworkOptions/portnumber").text)
-		var networkedmultiplayerserver = NetworkedMultiplayerENet.new()
+		var networkedmultiplayerserver = ENetMultiplayerPeer.new()
 		var servererror = networkedmultiplayerserver.create_server(portnumber)
 		if servererror == 0:
 			PlayerConnections.SetNetworkedMultiplayerPeer(networkedmultiplayerserver)
@@ -17,6 +17,6 @@ func _on_StartENetmultiplayer_toggled(button_pressed):
 			NetworkGateway.selectandtrigger_networkoption(NetworkGateway.NETWORK_OPTIONS.NETWORK_OFF)
 
 	else:
-		if get_tree().get_network_peer() != null:
+		if get_tree().get_multiplayer().multiplayer_peer != null:
 			PlayerConnections.force_server_disconnect()
 		

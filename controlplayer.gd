@@ -5,14 +5,14 @@ var batvelocity = 200
 
 func PAV_processlocalavatarposition(delta):
 	var vec = Vector2((-1 if Input.is_action_pressed("ui_left") else 0) + (1 if Input.is_action_pressed("ui_right") else 0), 
-					  (-1 if Input.is_action_pressed("ui_up") else 0) + (1 if Input.is_action_pressed("ui_down") else 0))
+						(-1 if Input.is_action_pressed("ui_up") else 0) + (1 if Input.is_action_pressed("ui_down") else 0))
 	var mousecommandvelocity = get_node("/root/Main/JoystickControls").mousecommandvelocity
 	processlocalavatarpositionVec(vec + mousecommandvelocity, delta)
 	
 func processlocalavatarpositionVec(vec, delta):
 	localavatarvelocity = vec
 	position = Vector2(clamp(position.x + vec.x*batvelocity*delta, 65, 500), 
-					   clamp(position.y + vec.y*batvelocity*delta, 7, 339))
+						clamp(position.y + vec.y*batvelocity*delta, 7, 339))
 		
 func PAV_avatartoframedata():
 	var fd = { NCONSTANTS.CFI_RECT_POSITION: position }
@@ -27,16 +27,16 @@ var possibleusernames = ["Alice", "Beth", "Cath", "Dan", "Earl", "Fred", "George
 func PAV_initavatarlocal():
 	randomize()
 	position.y += randi()%300
-	modulate = Color.yellow
+	modulate = Color.YELLOW
 	$ColorRect/Label.text = possibleusernames[randi()%len(possibleusernames)]
 
 func PAV_initavatarremote(avatardata):
 	$ColorRect/Label.text = avatardata["labeltext"]
 
 func PAV_avatarinitdata():
-	var avatardata = { "avatarsceneresource":filename, 
-					   "labeltext":$ColorRect/Label.text
-					 }
+	var avatardata = { "avatarsceneresource":scene_file_path, 
+						"labeltext":$ColorRect/Label.text
+						}
 	return avatardata
 	
 func playername():

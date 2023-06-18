@@ -1,7 +1,7 @@
-extends KinematicBody2D
+extends CharacterBody2D
 
-var velocity = Vector2(10, 5)
-onready var PlayerConnections = get_node("../../NetworkGateway/PlayerConnections")
+var lvelocity = Vector2(10, 5)
+@onready var PlayerConnections = get_node("../../NetworkGateway/PlayerConnections")
 
 var pingpongprevframet0 = 0.0
 var pingpongheartbeatseconds = 2.0
@@ -19,7 +19,7 @@ var Dcdelta = 0.0
 var Di = 0
 
 func _physics_process(delta):
-	var t1 = OS.get_ticks_msec()*0.001
+	var t1 = Time.get_ticks_msec()*0.001
 	Dcdelta += delta
 	Di += 1
 	#if (Di % 60) == 0:
@@ -38,7 +38,7 @@ func _physics_process(delta):
 					print("client bounce back ", position, serverpongposition)
 				
 				position = serverpongposition
-				velocity = serverpongvelocity
+				lvelocity = serverpongvelocity
 				print("Server pong update ", delta)
 				serverpongst1 = 0.0
 		else:
@@ -50,7 +50,7 @@ func _physics_process(delta):
 		if servertime > clientpongst1:
 			delta = servertime - clientpongst1
 			position = clientpongposition
-			velocity = clientpongvelocity
+			lvelocity = clientpongvelocity
 			print("client pong update ", delta)
 			clientpongst1 = 0.0
 			clientpongupdate = true
@@ -58,47 +58,53 @@ func _physics_process(delta):
 	
 	var ballcollision = false
 	for i in range(3):
-		var rel_vec = velocity*delta
+		var rel_vec = lvelocity*delta
 		var k = move_and_collide(rel_vec)
 		if k == null:
 			break
-		delta = k.remainder.length() / velocity.length()
-		var tval = k.normal.tangent().dot(velocity)
-		var vval = -k.normal.dot(velocity)*0.5 + k.normal.dot(k.collider_velocity)
-		velocity = k.normal.tangent()*tval + k.normal*vval
+		delta = k.get_remainder().length() / lvelocity.length()
+		var tval = k.get_normal().orthogonal().dot(lvelocity)
+		var vval = -k.get_normal().dot(lvelocity)*0.5 + k.get_normal().dot(k.get_collider_velocity())
+		lvelocity = k.get_normal().orthogonal()*tval + k.get_normal()*vval
 		ballcollision = true
 		if i == 2:
-			print("bail out move_and_collides ", delta, velocity, k.normal)
-	var rs = get_parent().rect_size
+			print("bail out move_and_collides ", delta, lvelocity, k.get_normal())
+	var rs = get_parent().size
 	if position.y > rs.y:
 		position.y -= rs.y
 		sendballupdate = true
 	if position.y < 0:
 		position.y += rs.y
 		sendballupdate = true
+	if position.x > rs.x:
+		position.x -= rs.x
+		sendballupdate = true
+	if position.x < 0:
+		position.x += rs.x
+		sendballupdate = true
 		
 	if sendballupdate or ballcollision:
 		pingpongprevframet0 = t1
-		if get_tree().is_network_server():
-			rpc("serverpingpongballupdate", t1 + delta, position, velocity, clientpongupdate)
+		if get_tree().get_multiplayer().is_server():
+			rpc("serverpingpongballupdate", t1 + delta, position, lvelocity, clientpongupdate)
 		elif ballcollision and PlayerConnections.ServerPlayer != null:
 			var ServerPlayerFrame = PlayerConnections.ServerPlayer.get_node("PlayerFrame")
 			var servertime = t1 + delta - ServerPlayerFrame.mintimestampoffset - ServerPlayerFrame.laglatency
-			rpc("clientpingpongballupdate", servertime, position, velocity)
+			rpc("clientpingpongballupdate", servertime, position, lvelocity)
 
-remote func serverpingpongballupdate(st1, sposition, svelocity, clientpongupdate):
-	assert (get_tree().get_rpc_sender_id() == 1)
+@rpc("any_peer") func serverpingpongballupdate(st1, sposition, svelocity, clientpongupdate):
+	assert (get_tree().get_multiplayer().get_remote_sender_id() == 1)
 	if serverpongst1 == 0.0 or st1 <= serverpongst1:
 		serverpongst1 = st1
 		serverpongposition = sposition
 		serverpongvelocity = svelocity
 		Dserverclientpongupdate = clientpongupdate
 
-remote func clientpingpongballupdate(st1, sposition, svelocity):
-	assert (get_tree().is_network_server())
+@rpc("any_peer") func clientpingpongballupdate(st1, sposition, svelocity):
+	assert (get_tree().get_multiplayer().is_server())
 	if clientpongst1 == 0.0 or st1 >= clientpongst1:
 		clientpongst1 = st1
-		print("ss ", OS.get_ticks_msec()*0.001, " ", st1)
+		print("ss ", Time.get_ticks_msec()*0.001, " ", st1)
 		clientpongposition = sposition
 		clientpongvelocity = svelocity
 	

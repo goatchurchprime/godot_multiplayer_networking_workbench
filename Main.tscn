@@ -1,75 +1,81 @@
-[gd_scene load_steps=9 format=2]
+[gd_scene load_steps=9 format=3 uid="uid://denbhipr26x6c"]
 
-[ext_resource path="res://addons/player-networking/PlayerFrameLocal.gd" type="Script" id=1]
-[ext_resource path="res://controlplayer.tscn" type="PackedScene" id=2]
-[ext_resource path="res://addons/player-networking/NetworkGateway.tscn" type="PackedScene" id=3]
-[ext_resource path="res://JoystickControls.gd" type="Script" id=4]
-[ext_resource path="res://PingPongBall.gd" type="Script" id=5]
+[ext_resource type="Script" path="res://addons/player-networking/PlayerFrameLocal.gd" id="1"]
+[ext_resource type="PackedScene" uid="uid://dhd8tliyhvtiw" path="res://controlplayer.tscn" id="2"]
+[ext_resource type="PackedScene" uid="uid://cfmoahalri06d" path="res://addons/player-networking/NetworkGateway.tscn" id="3"]
+[ext_resource type="Script" path="res://JoystickControls.gd" id="4"]
+[ext_resource type="Script" path="res://PingPongBall.gd" id="5"]
 
-[sub_resource type="SphereMesh" id=1]
+[sub_resource type="SphereMesh" id="1"]
 radius = 10.0
 height = 20.0
 
-[sub_resource type="CircleShape2D" id=2]
+[sub_resource type="CircleShape2D" id="2"]
 
-[sub_resource type="RectangleShape2D" id=3]
-extents = Vector2( 10, 180 )
+[sub_resource type="RectangleShape2D" id="3"]
+size = Vector2(39, 355)
 
 [node name="Main" type="Control"]
-anchor_right = 1.0
+layout_mode = 3
+anchor_right = 1.00018
 anchor_bottom = 1.0
-margin_bottom = -900.0
-__meta__ = {
-"_edit_use_anchors_": false
-}
+offset_top = -49.0
+offset_right = 138.9
+offset_bottom = -236.0
+grow_horizontal = 2
+grow_vertical = 2
+metadata/_edit_use_anchors_ = true
 
-[node name="NetworkGateway" parent="." instance=ExtResource( 3 )]
+[node name="NetworkGateway" parent="." instance=ExtResource("3")]
+layout_mode = 0
+offset_left = 4.0
+offset_top = 51.0
+offset_right = 663.0
+offset_bottom = 430.0
 localplayerscene = "res://controlplayer.tscn"
 
 [node name="JoystickControls" type="ColorRect" parent="."]
-margin_left = 11.0
-margin_top = 383.0
-margin_right = 539.0
-margin_bottom = 729.0
-color = Color( 0.14902, 0.215686, 0.141176, 1 )
-script = ExtResource( 4 )
-__meta__ = {
-"_edit_use_anchors_": false
-}
+layout_mode = 0
+offset_left = 11.0
+offset_top = 383.0
+offset_right = 648.0
+offset_bottom = 729.0
+color = Color(0.14902, 0.215686, 0.141176, 1)
+script = ExtResource("4")
 
-[node name="PingPongBall" type="KinematicBody2D" parent="JoystickControls"]
-position = Vector2( 100, 100 )
-script = ExtResource( 5 )
+[node name="PingPongBall" type="CharacterBody2D" parent="JoystickControls"]
+position = Vector2(100, 100)
+script = ExtResource("5")
 
 [node name="MeshInstance2D" type="MeshInstance2D" parent="JoystickControls/PingPongBall"]
-mesh = SubResource( 1 )
+mesh = SubResource("1")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="JoystickControls/PingPongBall"]
-shape = SubResource( 2 )
+shape = SubResource("2")
 
 [node name="StaticBody2D" type="StaticBody2D" parent="JoystickControls"]
-position = Vector2( 0, 175 )
+position = Vector2(0, 175)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="JoystickControls/StaticBody2D"]
-shape = SubResource( 3 )
+position = Vector2(13, 0)
+shape = SubResource("3")
 
 [node name="StaticBody2D2" type="StaticBody2D" parent="JoystickControls"]
-position = Vector2( 555, 175 )
+position = Vector2(555, 175)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="JoystickControls/StaticBody2D2"]
-position = Vector2( -32.9628, 0 )
-shape = SubResource( 3 )
+position = Vector2(66.5, -5.5)
+shape = SubResource("3")
 
 [node name="Players" type="Control" parent="."]
-margin_left = 8.0
-margin_top = 381.0
-margin_right = 548.0
-margin_bottom = 562.0
-__meta__ = {
-"_edit_use_anchors_": false
-}
+anchors_preset = 0
+offset_left = 54.0
+offset_top = 381.0
+offset_right = 609.0
+offset_bottom = 717.0
 
-[node name="LocalPlayer" parent="Players" instance=ExtResource( 2 )]
+[node name="LocalPlayer" parent="Players" instance=ExtResource("2")]
+position = Vector2(95, 40)
 
 [node name="PlayerFrame" type="Node" parent="Players/LocalPlayer"]
-script = ExtResource( 1 )
+script = ExtResource("1")

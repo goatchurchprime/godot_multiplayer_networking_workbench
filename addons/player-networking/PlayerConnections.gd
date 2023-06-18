@@ -4,8 +4,8 @@ extends ColorRect
 # /mnt/c/Users/henry/godot/Godot_v3.2.3-stable_linux_server.64 --main-pack /mnt/c/Users/henry/godot/games/OQ_Networking_Demo/releases/OQ_Networking_Demo.pck
 
 
-onready var playerframelocalgdscriptfile = get_parent().filename.get_base_dir() + "/PlayerFrameLocal.gd"
-onready var playerframeremotegdscriptfile = get_parent().filename.get_base_dir() + "/PlayerFrameRemote.gd"
+@onready var playerframelocalgdscriptfile = get_parent().scene_file_path.get_base_dir() + "/PlayerFrameLocal.gd"
+@onready var playerframeremotegdscriptfile = get_parent().scene_file_path.get_base_dir() + "/PlayerFrameRemote.gd"
 
 var LocalPlayer = null
 var ServerPlayer = null
@@ -13,8 +13,8 @@ var ServerPlayer = null
 var deferred_playerconnections = [ ]
 var remote_players_idstonodenames = { }
 
-onready var NetworkGateway = get_node("..")
-onready var PlayersNode = get_node(NetworkGateway.playersnodepath)
+@onready var NetworkGateway = get_node("..")
+@onready var PlayersNode = get_node(NetworkGateway.playersnodepath)
 
 var webrtc_server_relay = false
 
@@ -23,7 +23,7 @@ func _ready():
 	if PlayersNode.get_child_count() == 1 and NetworkGateway.localplayerscene:
 		PlayersNode.get_child(0).free()
 	if PlayersNode.get_child_count() == 0:
-		PlayersNode.add_child(load(NetworkGateway.localplayerscene).instance())
+		PlayersNode.add_child(load(NetworkGateway.localplayerscene).instantiate())
 	assert (PlayersNode.get_child_count() == 1) 
 
 	LocalPlayer = PlayersNode.get_child(0)
@@ -38,12 +38,12 @@ func _ready():
 
 	LocalPlayer.PAV_initavatarlocal()
 
-	get_tree().connect("network_peer_connected", self, "network_player_connected")
-	get_tree().connect("network_peer_disconnected", self, "network_player_disconnected")
+	get_tree().get_multiplayer().connect("peer_connected", Callable(self, "network_player_connected"))
+	get_tree().get_multiplayer().connect("peer_disconnected", Callable(self, "network_player_disconnected"))
 
-	get_tree().connect("connected_to_server", self, "clientplayer_connected_to_server")
-	get_tree().connect("connection_failed", self, "clientplayer_connection_failed")
-	get_tree().connect("server_disconnected", self, "clientplayer_server_disconnected")
+	get_tree().get_multiplayer().connect("connected_to_server", Callable(self, "clientplayer_connected_to_server"))
+	get_tree().get_multiplayer().connect("connection_failed", Callable(self, "clientplayer_connection_failed"))
+	get_tree().get_multiplayer().connect("server_disconnected", Callable(self, "clientplayer_server_disconnected"))
 
 	LocalPlayer.get_node("PlayerFrame").networkID = 0
 	LocalPlayer.set_name("R%d" % LocalPlayer.get_node("PlayerFrame").networkID) 
@@ -53,12 +53,13 @@ func _ready():
 func connectionlog(txt):
 	$ConnectionLog.text += txt
 	var cl = $ConnectionLog.get_line_count()
-	$ConnectionLog.cursor_set_line(cl)
+	$ConnectionLog.set_caret_line(cl)
 
 func SetNetworkedMultiplayerPeer(peer):
 	assert (peer != null)
-	get_tree().set_network_peer(peer)
-	if get_tree().is_network_server():
+	print(get_tree().get_multiplayer().multiplayer_peer)
+	get_tree().get_multiplayer().multiplayer_peer = peer
+	if get_tree().get_multiplayer().is_server():
 		networkplayer_connected_to_server(true)
 	else:
 		LocalPlayer.get_node("PlayerFrame").networkID = -1
@@ -70,7 +71,7 @@ func networkplayer_server_disconnected(serverisself):
 	connectionlog("_server(self) disconnect\n" if serverisself else "_server disconnect\n")
 	var ns = NetworkGateway.get_node("NetworkOptions").selected
 	print("(networkplayer_server_disconnected ", serverisself)
-	get_tree().set_network_peer(null)
+	get_tree().get_multiplayer().multiplayer_peer = OfflineMultiplayerPeer.new()
 	print("setnetworkpeer null")
 	LocalPlayer.get_node("PlayerFrame").networkID = 0
 	LocalPlayer.set_name("R%d" % LocalPlayer.get_node("PlayerFrame").networkID) 
@@ -80,11 +81,11 @@ func networkplayer_server_disconnected(serverisself):
 	print("*** _server_disconnected ", LocalPlayer.get_node("PlayerFrame").networkID)
 	updateplayerlist()
 	if NetworkGateway.get_node("ProtocolOptions").selected == NetworkGateway.NETWORK_PROTOCOL.ENET:
-		NetworkGateway.get_node("ENetMultiplayer/Servermode/StartENetmultiplayer").pressed = false
-		NetworkGateway.get_node("ENetMultiplayer/Clientmode/StartENetmultiplayer").pressed = false
+		NetworkGateway.get_node("ENetMultiplayer/Servermode/StartENetmultiplayer").button_pressed = false
+		NetworkGateway.get_node("ENetMultiplayer/Clientmode/StartENetmultiplayer").button_pressed = false
 	if NetworkGateway.get_node("ProtocolOptions").selected == NetworkGateway.NETWORK_PROTOCOL.WEBRTC_MQTTSIGNAL:
-		NetworkGateway.get_node("MQTTsignalling/Servermode/WebRTCmultiplayerserver/StartWebRTCmultiplayer").pressed = false
-		NetworkGateway.get_node("MQTTsignalling/Clientmode/WebRTCmultiplayerclient/StartWebRTCmultiplayer").pressed = false
+		NetworkGateway.get_node("MQTTsignalling/Servermode/WebRTCmultiplayerserver/StartWebRTCmultiplayer").button_pressed = false
+		NetworkGateway.get_node("MQTTsignalling/Clientmode/WebRTCmultiplayerclient/StartWebRTCmultiplayer").button_pressed = false
 		NetworkGateway.get_node("NetworkOptionsMQTTWebRTC").selected = NetworkGateway.NETWORK_OPTIONS.NETWORK_OFF
 	else:
 		NetworkGateway.get_node("NetworkOptions").selected = NetworkGateway.NETWORK_OPTIONS.NETWORK_OFF
@@ -94,13 +95,13 @@ func clientplayer_connected_to_server():
 	networkplayer_connected_to_server(false)
 	
 func force_server_disconnect():
-	if get_tree().get_network_peer() != null:
-		var serverisself = get_tree().is_network_server()
+	if get_tree().get_multiplayer().multiplayer_peer != null:
+		var serverisself = get_tree().get_multiplayer().is_server()
 		networkplayer_server_disconnected(serverisself)
 
 func networkplayer_connected_to_server(serverisself):
 	connectionlog("_server(self) connect\n" if serverisself else "_server connect\n")
-	LocalPlayer.get_node("PlayerFrame").networkID = get_tree().get_network_unique_id()
+	LocalPlayer.get_node("PlayerFrame").networkID = get_tree().get_multiplayer().get_unique_id()
 	assert (LocalPlayer.get_node("PlayerFrame").networkID >= 1)
 	LocalPlayer.set_name("R%d" % LocalPlayer.get_node("PlayerFrame").networkID)
 	connectionlog("_my networkid=%d\n" % LocalPlayer.get_node("PlayerFrame").networkID)
@@ -128,8 +129,8 @@ func network_player_connected(id):
 	print("NNnetwork_player_connected ", id, "  Lid ", LocalPlayer.get_node("PlayerFrame").networkID)
 
 	# tests here to work out if connections are being made before all the channels are completely ready!
-	var Dpeer = get_tree().get_network_peer()
-	if Dpeer is WebRTCMultiplayer:
+	var Dpeer = get_tree().get_multiplayer().multiplayer_peer
+	if Dpeer is WebRTCMultiplayerPeer:
 		var DDpeer = Dpeer.get_peer(id)
 		print("DDpeer ", DDpeer)
 		for channel in DDpeer["channels"]:
@@ -184,13 +185,13 @@ func network_player_removed(id, via_server_relay):
 		for fid in remote_players_idstonodenames:
 			rpc_id(fid, "serverrelay_network_player_disconnected", id)
 			
-remote func serverrelay_network_player_added(id):
+@rpc("any_peer") func serverrelay_network_player_added(id):
 	print("serverrelay_network_player_added ", id)
-	assert (id != get_tree().get_network_unique_id())
+	assert (id != get_tree().get_multiplayer().get_unique_id())
 	network_player_added(id, true)
 
-remote func serverrelay_network_player_disconnected(id):
-	assert (id != get_tree().get_network_unique_id())
+@rpc("any_peer") func serverrelay_network_player_disconnected(id):
+	assert (id != get_tree().get_multiplayer().get_unique_id())
 	network_player_removed(id, true)
 
 func _on_Doppelganger_toggled(button_pressed):
@@ -209,7 +210,7 @@ func _on_Doppelganger_toggled(button_pressed):
 		LocalPlayer.PAV_changethinnedframedatafordoppelganger(fd, doppelnetoffset, true)
 		avatardata["framedata0"] = fd
 		var doppelgangerdelay = get_node("..").getrandomdoppelgangerdelay(true)
-		yield(get_tree().create_timer(doppelgangerdelay*0.001), "timeout")
+		await get_tree().create_timer(doppelgangerdelay*0.001).timeout
 		LocalPlayer.get_node("PlayerFrame").doppelgangernode = newremoteplayer(avatardata)
 		LocalPlayer.get_node("PlayerFrame").NetworkGatewayForDoppelganger = get_node("..")
 	else:
@@ -221,30 +222,30 @@ func _on_Doppelganger_toggled(button_pressed):
 		removeremoteplayer("Doppelganger")
 	updateplayerlist()
 
-remote func spawnintoremoteplayer_relay(rpcid, avatardata):
-	assert (get_tree().is_network_server())
-	assert (get_tree().get_network_unique_id() == 1)
+@rpc("any_peer") func spawnintoremoteplayer_relay(rpcid, avatardata):
+	assert (get_tree().get_multiplayer().is_server())
+	assert (get_tree().get_multiplayer().get_unique_id() == 1)
 	rpc_id(rpcid, "spawnintoremoteplayer", avatardata)
 
-remote func spawnintoremoteplayer(avatardata):
+@rpc("any_peer") func spawnintoremoteplayer(avatardata):
 	var senderid = avatardata["networkid"]
-	var rpcsenderid = get_tree().get_rpc_sender_id()
+	var rpcsenderid = get_tree().get_multiplayer().get_remote_sender_id()
 	print("rec spawnintoremoteplayer from ", senderid, (" (server_relayed)" if senderid != rpcsenderid else ""))
 	connectionlog("spawn playerid %d\n" % senderid)
 	var remoteplayer = newremoteplayer(avatardata)
 	assert (senderid == avatardata["networkid"])
-	remoteplayer.get_node("PlayerFrame").set_network_master(senderid)
+	remoteplayer.get_node("PlayerFrame").set_multiplayer_authority(senderid)
 	assert (remote_players_idstonodenames[senderid] == null)
 	remote_players_idstonodenames[senderid] = remoteplayer.get_name()
 	updateplayerlist()
 
-remote func networkedavatarthinnedframedataPC(vd):
-	var rpcsenderid = get_tree().get_rpc_sender_id()
-	var remoteplayer = PlayersNode.get_node_or_null(vd[NCONSTANTS.CFI_PLAYER_NODENAME])
+@rpc("any_peer") func networkedavatarthinnedframedataPC(vd):
+	var rpcsenderid = get_tree().get_multiplayer().get_remote_sender_id()
+	var remoteplayer = PlayersNode.get_node_or_null(String(vd[NCONSTANTS.CFI_PLAYER_NODENAME]))
 	if remoteplayer != null:
 		remoteplayer.get_node("PlayerFrame").networkedavatarthinnedframedata(vd)
 		if get_node("../TimelineVisualizer").visible:
-			get_node("../TimelineVisualizer/Viewport/TimelineDiagram").marknetworkdataat(vd, remoteplayer.get_name())
+			get_node("../TimelineVisualizer/SubViewport/TimelineDiagram").marknetworkdataat(vd, remoteplayer.get_name())
 	else:
 		print("networkedavatarthinnedframedataPC called before spawning")
 	if webrtc_server_relay:
@@ -253,9 +254,12 @@ remote func networkedavatarthinnedframedataPC(vd):
 				rpc_id(fid, "networkedavatarthinnedframedataPC", vd)
 	
 func newremoteplayer(avatardata):
-	var remoteplayer = PlayersNode.get_node_or_null(avatardata["playernodename"])
+	print(avatardata)
+	print(avatardata["playernodename"])
+	print("::"+avatardata["playernodename"] + ";;")
+	var remoteplayer = PlayersNode.get_node_or_null(String(avatardata["playernodename"]))
 	if remoteplayer == null:
-		remoteplayer = load(avatardata["avatarsceneresource"]).instance()
+		remoteplayer = load(avatardata["avatarsceneresource"]).instantiate()
 		if not remoteplayer.has_node("PlayerFrame"):
 			var playerframe = Node.new()
 			playerframe.name = "PlayerFrame"
@@ -271,13 +275,13 @@ func newremoteplayer(avatardata):
 			remoteplayer.get_node("PlayerFrame").networkedavatarthinnedframedata(avatardata["framedata0"])
 		print("Adding remoteplayer: ", avatardata["playernodename"])
 		if get_node("../TimelineVisualizer").visible:
-			get_node("../TimelineVisualizer/Viewport/TimelineDiagram").newtimelineremoteplayer(avatardata)
+			get_node("../TimelineVisualizer/SubViewport/TimelineDiagram").newtimelineremoteplayer(avatardata)
 	else:
 		print("** remoteplayer already exists: ", avatardata["playernodename"])
 	return remoteplayer
 	
 func removeremoteplayer(playernodename):
-	var remoteplayer = PlayersNode.get_node_or_null(playernodename)
+	var remoteplayer = PlayersNode.get_node_or_null(String(playernodename))
 	if remoteplayer != null:
 		if remoteplayer.get_node("PlayerFrame").networkID == 1:
 			ServerPlayer = null
@@ -285,7 +289,7 @@ func removeremoteplayer(playernodename):
 		remoteplayer.queue_free()
 		print("Removing remoteplayer: ", playernodename)
 		if get_node("../TimelineVisualizer").visible:
-			get_node("../TimelineVisualizer/Viewport/TimelineDiagram").removetimelineremoteplayer(playernodename)
+			get_node("../TimelineVisualizer/SubViewport/TimelineDiagram").removetimelineremoteplayer(playernodename)
 	else:
 		print("** remoteplayer already removed: ", playernodename)
 	
@@ -334,10 +338,9 @@ func micaudioinit():
 		$MicRecord.add_child(OpusDecoder)
 
 	if $MicRecord.has_node("OpusDecoder"):
-		var fin = File.new()
 		var fname = "res://addons/player-networking/welcomespeech.res"
-		if fin.file_exists(fname):
-			fin.open(fname, File.READ)
+		if FileAccess.file_exists(fname):
+			var fin = FileAccess.open(fname, FileAccess.READ)
 			micrecordingdata = fin.get_var()
 			fin.close()
 			$MicRecord/RecordSize.text = "w-"+str(len(micrecordingdata.get("opusEncoded", micrecordingdata.get("pcmData"))))
@@ -346,10 +349,10 @@ func _on_MicRecord_button_down():
 	if not recordingeffect.is_recording_active():
 		recordingnumberC += 1
 		micrecordingdata = null
-		yield(get_tree().create_timer(0.1), "timeout")
+		await get_tree().create_timer(0.1).timeout
 		var lrecordingnumberC = recordingnumberC
 		recordingeffect.set_recording_active(true)
-		yield(get_tree().create_timer(max_recording_seconds), "timeout")
+		await get_tree().create_timer(max_recording_seconds).timeout
 		if micrecordingdata != null and lrecordingnumberC == recordingnumberC:
 			_on_MicRecord_button_up()
 		if OS.get_name() == "X11":
@@ -361,20 +364,20 @@ func _on_MicRecord_button_up():
 		var recording = recordingeffect.get_recording()
 		var pcmData = recording.get_data()
 		micrecordingdata = { "format":recording.get_format(), 
-							 "mix_rate":recording.get_mix_rate(),
-							 "is_stereo":recording.is_stereo() }
+							"mix_rate":recording.get_mix_rate(),
+							"is_stereo":recording.is_stereo() }
 		if $MicRecord.has_node("OpusEncoder"):
 			micrecordingdata["opusEncoded"] = $MicRecord/OpusEncoder.encode(pcmData)
 		else:
 			micrecordingdata["pcmData"] = pcmData
-		print(" created data bytes ", len(var2bytes(micrecordingdata)), "  ", len(pcmData))
+		print(" created data bytes ", len(var_to_bytes(micrecordingdata)), "  ", len(pcmData))
 		$MicRecord/RecordSize.text = "l-"+str(len(micrecordingdata.get("opusEncoded", micrecordingdata.get("pcmData"))))
 
-remote func remotesetmicrecord(lmicrecordingdata):
+@rpc("any_peer") func remotesetmicrecord(lmicrecordingdata):
 	micrecordingdata = lmicrecordingdata
 	$MicRecord/RecordSize.text = "r-"+str(len(micrecordingdata.get("opusEncoded", micrecordingdata.get("pcmData"))))
 	if webrtc_server_relay:
-		var rpcsenderid = get_tree().get_rpc_sender_id()
+		var rpcsenderid = get_tree().get_multiplayer().get_remote_sender_id()
 		for fid in remote_players_idstonodenames:
 			if fid != rpcsenderid:
 				rpc_id(fid, "remotesetmicrecord", lmicrecordingdata)
@@ -392,7 +395,7 @@ func _on_SendRecord_pressed():
 func _on_PlayRecord_pressed():
 	print("_on_PlayRecord_pressed")
 	if micrecordingdata != null:
-		var audioStream = AudioStreamSample.new()
+		var audioStream = AudioStreamWAV.new()
 		audioStream.set_format(micrecordingdata["format"])
 		audioStream.set_mix_rate(micrecordingdata["mix_rate"])
 		audioStream.set_stereo(micrecordingdata["is_stereo"])
