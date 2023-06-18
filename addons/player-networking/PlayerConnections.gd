@@ -57,7 +57,6 @@ func connectionlog(txt):
 
 func SetNetworkedMultiplayerPeer(peer):
 	assert (peer != null)
-	print(get_tree().get_multiplayer().multiplayer_peer)
 	get_tree().get_multiplayer().multiplayer_peer = peer
 	if get_tree().get_multiplayer().is_server():
 		networkplayer_connected_to_server(true)
@@ -72,7 +71,7 @@ func networkplayer_server_disconnected(serverisself):
 	var ns = NetworkGateway.get_node("NetworkOptions").selected
 	print("(networkplayer_server_disconnected ", serverisself)
 	get_tree().get_multiplayer().multiplayer_peer = OfflineMultiplayerPeer.new()
-	print("setnetworkpeer null")
+	print("setnetworkpeer OfflineMultiplayerPeer")
 	LocalPlayer.get_node("PlayerFrame").networkID = 0
 	LocalPlayer.set_name("R%d" % LocalPlayer.get_node("PlayerFrame").networkID) 
 	deferred_playerconnections.clear()
@@ -95,7 +94,7 @@ func clientplayer_connected_to_server():
 	networkplayer_connected_to_server(false)
 	
 func force_server_disconnect():
-	if get_tree().get_multiplayer().multiplayer_peer != null:
+	if not (get_tree().get_multiplayer().multiplayer_peer is OfflineMultiplayerPeer):
 		var serverisself = get_tree().get_multiplayer().is_server()
 		networkplayer_server_disconnected(serverisself)
 

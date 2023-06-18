@@ -24,16 +24,16 @@ func _on_StartWebSocketmultiplayer_toggled(button_pressed):
 		if clienterror == 0:
 			PlayerConnections.SetNetworkedMultiplayerPeer(lwebsocketclient)
 			websocketclient = lwebsocketclient
-			websocketclient.connect("connection_closed", Callable(self, "websocketshutdown"))
+			websocketclient.connect("server_disconnected", Callable(self, "websocketshutdown"))
 			set_process(true)
 		else:
 			print("Bad start websocket")
 			NetworkGateway.selectandtrigger_networkoption(NetworkGateway.NETWORK_OPTIONS.NETWORK_OFF)
 			
 	else:
-		if get_tree().get_multiplayer().multiplayer_peer != null:
+		if not (get_tree().get_multiplayer().multiplayer_peer is OfflineMultiplayerPeer):
 			PlayerConnections.force_server_disconnect()
 		if websocketclient != null:
-			websocketclient.disconnect_from_host()
+			websocketclient.close()
 
 

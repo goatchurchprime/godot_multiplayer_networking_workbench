@@ -194,6 +194,7 @@ button_pressed = true
 text = "enable"
 
 [node name="ENetMultiplayer" type="ColorRect" parent="."]
+visible = false
 layout_mode = 0
 offset_left = 11.0
 offset_top = 94.0
@@ -246,17 +247,17 @@ offset_bottom = 18.087
 text = "ENet multiplayer"
 
 [node name="autoconnect" type="CheckBox" parent="ENetMultiplayer"]
-layout_mode = 0
+layout_mode = 1
+anchors_preset = -1
 anchor_bottom = 0.068
-offset_left = 8.74202
-offset_top = 20.0
-offset_right = 115.742
-offset_bottom = 40.056
+offset_left = 13.0
+offset_top = 25.0
+offset_right = 138.0
+offset_bottom = 52.056
 button_pressed = true
 text = "autoconnect"
 
 [node name="WebSocketMultiplayer" type="ColorRect" parent="."]
-visible = false
 layout_mode = 0
 offset_left = 13.0
 offset_top = 95.0
@@ -307,12 +308,14 @@ offset_bottom = 18.087
 text = "WebSocket multiplayer"
 
 [node name="autoconnect" type="CheckBox" parent="WebSocketMultiplayer"]
-layout_mode = 0
+layout_mode = 1
+anchors_preset = -1
 anchor_bottom = 0.068
-offset_left = 8.74202
-offset_top = 20.0
-offset_right = 115.742
-offset_bottom = 40.056
+offset_left = 19.0
+offset_top = 25.0
+offset_right = 144.0
+offset_bottom = 52.056
+button_pressed = true
 text = "autoconnect"
 
 [node name="WebSocketsignalling" type="ColorRect" parent="."]

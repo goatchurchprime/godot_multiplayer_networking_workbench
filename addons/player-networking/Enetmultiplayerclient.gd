@@ -14,6 +14,6 @@ func _on_StartENetmultiplayer_toggled(button_pressed):
 			PlayerConnections.SetNetworkedMultiplayerPeer(networkedmultiplayerclient)
 
 	else:
-		if get_tree().get_multiplayer().multiplayer_peer != null:
+		if not (get_tree().get_multiplayer().multiplayer_peer is OfflineMultiplayerPeer):
 			PlayerConnections.force_server_disconnect()
 		

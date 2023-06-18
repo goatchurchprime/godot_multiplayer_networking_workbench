@@ -26,10 +26,10 @@ func _on_StartWebSocketmultiplayer_toggled(button_pressed):
 			NetworkGateway.selectandtrigger_networkoption(NetworkGateway.NETWORK_OPTIONS.NETWORK_OFF)
 
 	else:
-		if get_tree().get_multiplayer().multiplayer_peer != null:
+		if not (get_tree().get_multiplayer().multiplayer_peer is OfflineMultiplayerPeer):
 			PlayerConnections.force_server_disconnect()
 		if websocketserver != null:
-			websocketserver.stop()
+			websocketserver.close()
 			websocketserver = null
 			set_process(false)
 		

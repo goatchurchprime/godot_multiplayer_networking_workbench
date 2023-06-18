@@ -66,7 +66,7 @@ func _on_StartWebRTCmultiplayer_toggled(button_pressed):
 		serversignalling.disconnect("mqttsig_client_disconnected", Callable(self, "server_client_disconnected")) 
 		serversignalling.disconnect("mqttsig_packet_received", Callable(self, "server_packet_received")) 
 		PlayerConnections.webrtc_server_relay = false
-		if get_tree().get_multiplayer().multiplayer_peer != null:
+		if not (get_tree().get_multiplayer().multiplayer_peer is OfflineMultiplayerPeer):
 			PlayerConnections.force_server_disconnect()
 
 

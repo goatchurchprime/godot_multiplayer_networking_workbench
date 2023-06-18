@@ -21,7 +21,7 @@ func client_connection_established(lwclientid):
 		$statuslabel.text = "request_offer"
 
 func client_connection_closed():
-	if get_tree().get_multiplayer().multiplayer_peer != null:
+	if not (get_tree().get_multiplayer().multiplayer_peer is OfflineMultiplayerPeer):
 		var peer = get_tree().get_multiplayer().multiplayer_peer.get_peer(1)
 		peer["connection"].close()
 	print("server client_disconnected ")
@@ -68,5 +68,5 @@ func _on_StartWebRTCmultiplayer_toggled(button_pressed):
 		clientsignalling.disconnect("mqttsig_connection_established", Callable(self, "client_connection_established")) 
 		clientsignalling.disconnect("mqttsig_connection_closed", Callable(self, "client_connection_closed")) 
 		clientsignalling.disconnect("mqttsig_packet_received", Callable(self, "client_packet_received")) 
-		if get_tree().get_multiplayer().multiplayer_peer != null:
+		if not (get_tree().get_multiplayer().multiplayer_peer is OfflineMultiplayerPeer):
 			PlayerConnections.force_server_disconnect()
