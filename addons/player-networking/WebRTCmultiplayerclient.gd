@@ -50,7 +50,7 @@ func client_packet_received(v):
 		$statuslabel.text = "receive offer"
 
 	elif v["subject"] == "ice_candidate":
-		assert (get_tree().network_peer.is_class("WebRTCMultiplayerPeer"))
+		assert (get_tree().get_multiplayer().multiplayer_peer.is_class("WebRTCMultiplayerPeer"))
 		var peer = get_tree().get_multiplayer().multiplayer_peer.get_peer(1)
 		peer["connection"].add_ice_candidate(v["mid_name"], v["index_name"], v["sdp_name"])
 		$statuslabel.text = "rec ice_candidate"

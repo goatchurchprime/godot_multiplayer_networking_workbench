@@ -70,7 +70,7 @@ func senddata(data):
 		print("bad senddata packet E=", E)
 	
 func receiveintobuffer():
-	if socket != null and socket.is_connected_to_host():
+	if socket != null and socket.get_status() == StreamPeerTCP.STATUS_CONNECTED:
 		var n = socket.get_available_bytes()
 		if n != 0:
 			var sv = socket.get_data(n)
@@ -103,12 +103,13 @@ func _process(delta):
 			brokerconnectmode = BCM_WAITING_CONNMESSAGE
 			
 	elif brokerconnectmode == BCM_WAITING_SOCKET_CONNECTION:
-		if socket.is_connected_to_host():
-			if socket.get_status() == StreamPeerTCP.STATUS_CONNECTED:
-				brokerconnectmode = BCM_WAITING_CONNMESSAGE
+		socket.poll()
+		if socket.get_status() == StreamPeerTCP.STATUS_CONNECTED:
+			brokerconnectmode = BCM_WAITING_CONNMESSAGE
 
 	elif brokerconnectmode == BCM_WAITING_SSL_SOCKET_CONNECTION:
-		if socket.is_connected_to_host():
+		socket.poll()
+		if socket.get_status() == StreamPeerTCP.STATUS_CONNECTED:
 			if sslsocket == null:
 				sslsocket = StreamPeerTLS.new()
 				print("calling sslsocket.connect_to_stream()...")
@@ -250,7 +251,10 @@ func connect_to_broker(brokerurl):
 	else:
 		socket = StreamPeerTCP.new()
 		print("Connecting to %s:%s" % [brokerserver, brokerport])
-		socket.connect_to_host(brokerserver, brokerport)
+		var E = socket.connect_to_host(brokerserver, brokerport)
+		if E != 0:
+			print("socketclient.connect_to_url Err: ", E)
+			return cleanupsockets(false)
 		brokerconnectmode = BCM_WAITING_SSL_SOCKET_CONNECTION if isssl else BCM_WAITING_SOCKET_CONNECTION
 		
 	return true
@@ -268,7 +272,7 @@ func publish(topic, msg, retain=false, qos=0):
 	topic = topic.to_ascii_buffer()
 	
 	if socket != null:
-		if not socket.is_connected_to_host():
+		if not socket.get_status() == StreamPeerTCP.STATUS_CONNECTED:
 			return
 	elif websocket != null:
 		if not websocket.is_connected_to_host():

@@ -19,7 +19,7 @@ func startUDPbroadcasting():
 	get_node("../udpenabled").disabled = true
 	print("IP.get_local_interfaces...")
 	for localinterfaces in IP.get_local_interfaces():
-		print(localinterfaces["name"], " ", localinterfaces["friendly"], " ", localinterfaces["addresses"])
+		print("ii", localinterfaces["name"], " ", localinterfaces["friendly"], " ", localinterfaces["addresses"])
 	var likelyserveraddresses = [ ]
 	for a in IP.get_local_addresses():
 		var la = a.split(".")

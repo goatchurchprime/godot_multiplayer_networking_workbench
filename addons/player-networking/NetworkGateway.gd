@@ -187,7 +187,7 @@ func _on_NetworkOptionsMQTTWebRTC_item_selected(ns):
 	if not selectasoff:
 		$PlayerConnections/ConnectionLog.text = ""
 	$MQTTsignalling/StartMQTT.button_pressed = false
-	await get_tree().idle_frame
+	await get_tree().process_frame
 	if $MQTTsignalling/StartMQTT.is_connected("toggled", Callable($MQTTsignalling/Servermode, "_on_StartServer_toggled")):
 		$MQTTsignalling/StartMQTT.disconnect("toggled", Callable($MQTTsignalling/Servermode, "_on_StartServer_toggled"))
 	if $MQTTsignalling/StartMQTT.is_connected("toggled", Callable($MQTTsignalling/Clientmode, "_on_StartClient_toggled")):

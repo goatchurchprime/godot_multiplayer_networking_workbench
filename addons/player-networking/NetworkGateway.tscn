@@ -577,6 +577,7 @@ offset_left = 199.0
 offset_top = 37.0
 offset_right = 366.0
 offset_bottom = 68.0
+button_pressed = true
 text = "mqtt autoconnect"
 
 [node name="client_id" type="LineEdit" parent="MQTTsignalling"]
@@ -601,6 +602,7 @@ offset_left = 427.0
 offset_top = 3.0
 offset_right = 552.0
 offset_bottom = 34.0
+button_pressed = true
 text = "autoconnect"
 
 [node name="StartMQTT" type="Button" parent="MQTTsignalling"]
