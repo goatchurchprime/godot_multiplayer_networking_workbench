@@ -85,7 +85,7 @@ func _physics_process(delta):
 		
 	if sendballupdate or ballcollision:
 		pingpongprevframet0 = t1
-		if get_tree().get_multiplayer().is_server():
+		if multiplayer.is_server():
 			rpc("serverpingpongballupdate", t1 + delta, position, lvelocity, clientpongupdate)
 		elif ballcollision and PlayerConnections.ServerPlayer != null:
 			var ServerPlayerFrame = PlayerConnections.ServerPlayer.get_node("PlayerFrame")
@@ -93,7 +93,7 @@ func _physics_process(delta):
 			rpc("clientpingpongballupdate", servertime, position, lvelocity)
 
 @rpc("any_peer") func serverpingpongballupdate(st1, sposition, svelocity, clientpongupdate):
-	assert (get_tree().get_multiplayer().get_remote_sender_id() == 1)
+	assert (multiplayer.get_remote_sender_id() == 1)
 	if serverpongst1 == 0.0 or st1 <= serverpongst1:
 		serverpongst1 = st1
 		serverpongposition = sposition
@@ -101,7 +101,7 @@ func _physics_process(delta):
 		Dserverclientpongupdate = clientpongupdate
 
 @rpc("any_peer") func clientpingpongballupdate(st1, sposition, svelocity):
-	#assert (not get_tree().get_multiplayer().is_server())
+	#assert (not multiplayer.is_server())
 	if clientpongst1 == 0.0 or st1 >= clientpongst1:
 		clientpongst1 = st1
 		print("ss ", Time.get_ticks_msec()*0.001, " ", st1)

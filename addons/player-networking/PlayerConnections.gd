@@ -36,12 +36,12 @@ func _ready():
 
 	LocalPlayer.PAV_initavatarlocal()
 
-	get_tree().get_multiplayer().connect("peer_connected", Callable(self, "network_player_connected"))
-	get_tree().get_multiplayer().connect("peer_disconnected", Callable(self, "network_player_disconnected"))
+	multiplayer.connect("peer_connected", Callable(self, "network_player_connected"))
+	multiplayer.connect("peer_disconnected", Callable(self, "network_player_disconnected"))
 
-	get_tree().get_multiplayer().connect("connected_to_server", Callable(self, "clientplayer_connected_to_server"))
-	get_tree().get_multiplayer().connect("connection_failed", Callable(self, "clientplayer_connection_failed"))
-	get_tree().get_multiplayer().connect("server_disconnected", Callable(self, "clientplayer_server_disconnected"))
+	multiplayer.connect("connected_to_server", Callable(self, "clientplayer_connected_to_server"))
+	multiplayer.connect("connection_failed", Callable(self, "clientplayer_connection_failed"))
+	multiplayer.connect("server_disconnected", Callable(self, "clientplayer_server_disconnected"))
 
 	LocalPlayer.get_node("PlayerFrame").networkID = 0
 	LocalPlayer.set_name("R%d" % LocalPlayer.get_node("PlayerFrame").networkID) 
@@ -55,11 +55,12 @@ func connectionlog(txt):
 
 func SetNetworkedMultiplayerPeer(peer):
 	assert (peer != null)
-	get_tree().get_multiplayer().multiplayer_peer = peer
-	if get_tree().get_multiplayer().is_server():
+	multiplayer.multiplayer_peer = peer
+	if multiplayer.is_server():
 		networkplayer_connected_to_server(true)
 	else:
 		LocalPlayer.get_node("PlayerFrame").networkID = -1
+	assert (get_tree().multiplayer_poll)
 
 func clientplayer_server_disconnected():
 	networkplayer_server_disconnected(false)
@@ -68,7 +69,7 @@ func networkplayer_server_disconnected(serverisself):
 	connectionlog("_server(self) disconnect\n" if serverisself else "_server disconnect\n")
 	var ns = NetworkGateway.get_node("NetworkOptions").selected
 	print("(networkplayer_server_disconnected ", serverisself)
-	get_tree().get_multiplayer().multiplayer_peer = OfflineMultiplayerPeer.new()
+	multiplayer.multiplayer_peer = OfflineMultiplayerPeer.new()
 	print("setnetworkpeer OfflineMultiplayerPeer")
 	LocalPlayer.get_node("PlayerFrame").networkID = 0
 	LocalPlayer.set_name("R%d" % LocalPlayer.get_node("PlayerFrame").networkID) 
@@ -92,13 +93,13 @@ func clientplayer_connected_to_server():
 	networkplayer_connected_to_server(false)
 	
 func force_server_disconnect():
-	if not (get_tree().get_multiplayer().multiplayer_peer is OfflineMultiplayerPeer):
-		var serverisself = get_tree().get_multiplayer().is_server()
+	if not (multiplayer.multiplayer_peer is OfflineMultiplayerPeer):
+		var serverisself = multiplayer.is_server()
 		networkplayer_server_disconnected(serverisself)
 
 func networkplayer_connected_to_server(serverisself):
 	connectionlog("_server(self) connect\n" if serverisself else "_server connect\n")
-	LocalPlayer.get_node("PlayerFrame").networkID = get_tree().get_multiplayer().get_unique_id()
+	LocalPlayer.get_node("PlayerFrame").networkID = multiplayer.get_unique_id()
 	assert (LocalPlayer.get_node("PlayerFrame").networkID >= 1)
 	LocalPlayer.set_name("R%d" % LocalPlayer.get_node("PlayerFrame").networkID)
 	connectionlog("_my networkid=%d\n" % LocalPlayer.get_node("PlayerFrame").networkID)
@@ -193,7 +194,7 @@ func _on_Doppelganger_toggled(button_pressed):
 
 @rpc("any_peer") func spawnintoremoteplayer(avatardata):
 	var senderid = avatardata["networkid"]
-	var rpcsenderid = get_tree().get_multiplayer().get_remote_sender_id()
+	var rpcsenderid = multiplayer.get_remote_sender_id()
 	print("rec spawnintoremoteplayer from ", senderid)
 	connectionlog("spawn playerid %d\n" % senderid)
 	var remoteplayer = newremoteplayer(avatardata)
@@ -204,7 +205,7 @@ func _on_Doppelganger_toggled(button_pressed):
 	updateplayerlist()
 
 @rpc("any_peer") func networkedavatarthinnedframedataPC(vd):
-	var rpcsenderid = get_tree().get_multiplayer().get_remote_sender_id()
+	var rpcsenderid = multiplayer.get_remote_sender_id()
 	var remoteplayer = PlayersNode.get_node_or_null(String(vd[NCONSTANTS.CFI_PLAYER_NODENAME]))
 	if remoteplayer != null:
 		remoteplayer.get_node("PlayerFrame").networkedavatarthinnedframedata(vd)

@@ -7,15 +7,10 @@ extends Control
 func client_ice_candidate_created(mid_name, index_name, sdp_name):
 	clientsignalling.sendpacket_toserver({"subject":"ice_candidate", "mid_name":mid_name, "index_name":index_name, "sdp_name":sdp_name})
 
-var Dpeer = null
-
-func _physics_process(delta):
-	if Dpeer != null:
-		Dpeer.poll()
 
 func client_session_description_created(type, data):
 	assert (type == "answer")
-	var peer = get_tree().get_multiplayer().multiplayer_peer.get_peer(1)
+	var peer = multiplayer.multiplayer_peer.get_peer(1)
 	peer["connection"].set_local_description("answer", data)
 	clientsignalling.sendpacket_toserver({"subject":"answer", "data":data})
 	$statuslabel.text = "answer"
@@ -27,8 +22,8 @@ func client_connection_established(lwclientid):
 		$statuslabel.text = "request_offer"
 
 func client_connection_closed():
-	if not (get_tree().get_multiplayer().multiplayer_peer is OfflineMultiplayerPeer):
-		var peer = get_tree().get_multiplayer().multiplayer_peer.get_peer(1)
+	if not (multiplayer.multiplayer_peer is OfflineMultiplayerPeer):
+		var peer = multiplayer.multiplayer_peer.get_peer(1)
 		peer["connection"].close()
 	print("server client_disconnected ")
 
@@ -52,13 +47,13 @@ func client_packet_received(v):
 
 		PlayerConnections.SetNetworkedMultiplayerPeer(networkedmultiplayerclient)
 
-		assert (get_tree().get_multiplayer().get_unique_id() == clientsignalling.wclientid)
+		assert (multiplayer.get_unique_id() == clientsignalling.wclientid)
 		$statuslabel.text = "receive offer"
-		Dpeer = peer
+
 				
 	elif v["subject"] == "ice_candidate":
-		assert (get_tree().get_multiplayer().multiplayer_peer.is_class("WebRTCMultiplayerPeer"))
-		var peer = get_tree().get_multiplayer().multiplayer_peer.get_peer(1)
+		assert (multiplayer.multiplayer_peer.is_class("WebRTCMultiplayerPeer"))
+		var peer = multiplayer.multiplayer_peer.get_peer(1)
 		peer["connection"].add_ice_candidate(v["mid_name"], v["index_name"], v["sdp_name"])
 		$statuslabel.text = "rec ice_candidate"
 
@@ -75,5 +70,5 @@ func _on_StartWebRTCmultiplayer_toggled(button_pressed):
 		clientsignalling.disconnect("mqttsig_connection_established", Callable(self, "client_connection_established")) 
 		clientsignalling.disconnect("mqttsig_connection_closed", Callable(self, "client_connection_closed")) 
 		clientsignalling.disconnect("mqttsig_packet_received", Callable(self, "client_packet_received")) 
-		if not (get_tree().get_multiplayer().multiplayer_peer is OfflineMultiplayerPeer):
+		if not (multiplayer.multiplayer_peer is OfflineMultiplayerPeer):
 			PlayerConnections.force_server_disconnect()
