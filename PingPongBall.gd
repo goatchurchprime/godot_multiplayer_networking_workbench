@@ -101,7 +101,7 @@ func _physics_process(delta):
 		Dserverclientpongupdate = clientpongupdate
 
 @rpc("any_peer") func clientpingpongballupdate(st1, sposition, svelocity):
-	assert (get_tree().get_multiplayer().is_server())
+	#assert (not get_tree().get_multiplayer().is_server())
 	if clientpongst1 == 0.0 or st1 >= clientpongst1:
 		clientpongst1 = st1
 		print("ss ", Time.get_ticks_msec()*0.001, " ", st1)

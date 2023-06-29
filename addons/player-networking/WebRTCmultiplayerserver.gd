@@ -67,11 +67,12 @@ func _on_StartWebRTCmultiplayer_toggled(button_pressed):
 		networkedmultiplayerserver = WebRTCMultiplayerPeer.new()
 		#var servererror = networkedmultiplayerserver.initialize(1, true)
 		#assert (servererror == 0)
-		PlayerConnections.webrtc_server_relay = true
 		networkedmultiplayerserver.create_server()
+		assert(networkedmultiplayerserver.is_server_relay_supported())
+
 		PlayerConnections.SetNetworkedMultiplayerPeer(networkedmultiplayerserver)
-		
-		#assert (get_tree().get_multiplayer().get_unique_id() == 1)
+		assert(multiplayer.server_relay)
+		assert (multiplayer.get_unique_id() == 1)
 		serversignalling.connect("mqttsig_client_connected", Callable(self, "server_client_connected")) 
 		serversignalling.connect("mqttsig_client_disconnected", Callable(self, "server_client_disconnected")) 
 		serversignalling.connect("mqttsig_packet_received", Callable(self, "server_packet_received")) 
@@ -80,7 +81,6 @@ func _on_StartWebRTCmultiplayer_toggled(button_pressed):
 		serversignalling.disconnect("mqttsig_client_connected", Callable(self, "server_client_connected")) 
 		serversignalling.disconnect("mqttsig_client_disconnected", Callable(self, "server_client_disconnected")) 
 		serversignalling.disconnect("mqttsig_packet_received", Callable(self, "server_packet_received")) 
-		PlayerConnections.webrtc_server_relay = false
 		if not (get_tree().get_multiplayer().multiplayer_peer is OfflineMultiplayerPeer):
 			PlayerConnections.force_server_disconnect()
 

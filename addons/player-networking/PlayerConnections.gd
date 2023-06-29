@@ -16,8 +16,6 @@ var remote_players_idstonodenames = { }
 @onready var NetworkGateway = get_node("..")
 @onready var PlayersNode = get_node(NetworkGateway.playersnodepath)
 
-var webrtc_server_relay = false
-
 
 func _ready():
 	if PlayersNode.get_child_count() == 1 and NetworkGateway.localplayerscene:
@@ -106,7 +104,7 @@ func networkplayer_connected_to_server(serverisself):
 	connectionlog("_my networkid=%d\n" % LocalPlayer.get_node("PlayerFrame").networkID)
 	print("my playerid=", LocalPlayer.get_node("PlayerFrame").networkID)
 	for id in deferred_playerconnections:
-		network_player_added(id, false)
+		network_player_added(id)
 	deferred_playerconnections.clear()
 	updateplayerlist()
 		
@@ -127,22 +125,14 @@ func updateplayerlist():
 func network_player_connected(id):
 	print("NNnetwork_player_connected ", id, "  Lid ", LocalPlayer.get_node("PlayerFrame").networkID)
 
-	# tests here to work out if connections are being made before all the channels are completely ready!
-	var Dpeer = get_tree().get_multiplayer().multiplayer_peer
-	if Dpeer is WebRTCMultiplayerPeer:
-		var DDpeer = Dpeer.get_peer(id)
-		print("DDpeer ", DDpeer)
-		for channel in DDpeer["channels"]:
-			print("channel readystate ", channel, " ", channel.get_ready_state())
-		#print(Dpeer.get_connection_state())
 		
 	if LocalPlayer.get_node("PlayerFrame").networkID == -1:
 		deferred_playerconnections.push_back(id)
 		connectionlog("_add playerid %d (defer)\n" % id)
 	else:
-		network_player_added(id, false)
+		network_player_added(id)
 
-func network_player_added(id, via_server_relay):
+func network_player_added(id):
 	connectionlog("_add playerid %d\n" % id)
 	assert (LocalPlayer.get_node("PlayerFrame").networkID >= 1)
 	assert (not remote_players_idstonodenames.has(id))
@@ -153,24 +143,15 @@ func network_player_added(id, via_server_relay):
 	avatardata["networkid"] = LocalPlayer.get_node("PlayerFrame").networkID
 	avatardata["framedata0"] = LocalPlayer.get_node("PlayerFrame").framedata0.duplicate()
 	avatardata["framedata0"].erase(NCONSTANTS.CFI_TIMESTAMP_F0)
-	print("calling spawnintoremoteplayer at ", id, " (from ", LocalPlayer.get_node("PlayerFrame").networkID, ")", (" via serverrelay" if via_server_relay else ""))
+	print("calling spawnintoremoteplayer at ", id, " (from ", LocalPlayer.get_node("PlayerFrame").networkID, ")")
 	#yield(get_tree().create_timer(1.0), "timeout")   # allow for webrtc to complete connection
-	if not via_server_relay:
-		rpc_id(id, "spawnintoremoteplayer", avatardata)
-	else:
-		rpc_id(1, "spawnintoremoteplayer_relay", id, avatardata)
-	if webrtc_server_relay:
-		for fid in remote_players_idstonodenames:
-			if fid != id:
-				print(" sending between-link serverrelay_network_player_added ", id, " ", fid)
-				rpc_id(fid, "serverrelay_network_player_added", id)				
-				rpc_id(id, "serverrelay_network_player_added", fid)
+	rpc_id(id, "spawnintoremoteplayer", avatardata)
 
 
 func network_player_disconnected(id):
-	network_player_removed(id, false)
+	network_player_removed(id)
 				
-func network_player_removed(id, via_server_relay):
+func network_player_removed(id):
 	connectionlog("_remove playerid %d\n" % id)
 	assert (remote_players_idstonodenames.has(id))
 	var remoteplayernodename = remote_players_idstonodenames[id]
@@ -179,19 +160,7 @@ func network_player_removed(id, via_server_relay):
 		removeremoteplayer(remoteplayernodename)
 	print("players_connected_list: ", remote_players_idstonodenames)
 	updateplayerlist()
-	if webrtc_server_relay:
-		assert (not via_server_relay)
-		for fid in remote_players_idstonodenames:
-			rpc_id(fid, "serverrelay_network_player_disconnected", id)
 			
-@rpc("any_peer") func serverrelay_network_player_added(id):
-	print("serverrelay_network_player_added ", id)
-	assert (id != get_tree().get_multiplayer().get_unique_id())
-	network_player_added(id, true)
-
-@rpc("any_peer") func serverrelay_network_player_disconnected(id):
-	assert (id != get_tree().get_multiplayer().get_unique_id())
-	network_player_removed(id, true)
 
 func _on_Doppelganger_toggled(button_pressed):
 	var DoppelgangerPanel = get_node("../DoppelgangerPanel")
@@ -221,15 +190,11 @@ func _on_Doppelganger_toggled(button_pressed):
 		removeremoteplayer("Doppelganger")
 	updateplayerlist()
 
-@rpc("any_peer") func spawnintoremoteplayer_relay(rpcid, avatardata):
-	assert (get_tree().get_multiplayer().is_server())
-	assert (get_tree().get_multiplayer().get_unique_id() == 1)
-	rpc_id(rpcid, "spawnintoremoteplayer", avatardata)
 
 @rpc("any_peer") func spawnintoremoteplayer(avatardata):
 	var senderid = avatardata["networkid"]
 	var rpcsenderid = get_tree().get_multiplayer().get_remote_sender_id()
-	print("rec spawnintoremoteplayer from ", senderid, (" (server_relayed)" if senderid != rpcsenderid else ""))
+	print("rec spawnintoremoteplayer from ", senderid)
 	connectionlog("spawn playerid %d\n" % senderid)
 	var remoteplayer = newremoteplayer(avatardata)
 	assert (senderid == avatardata["networkid"])
@@ -247,10 +212,6 @@ func _on_Doppelganger_toggled(button_pressed):
 			get_node("../TimelineVisualizer/SubViewport/TimelineDiagram").marknetworkdataat(vd, remoteplayer.get_name())
 	else:
 		print("networkedavatarthinnedframedataPC called before spawning")
-	if webrtc_server_relay:
-		for fid in remote_players_idstonodenames:
-			if fid != rpcsenderid:
-				rpc_id(fid, "networkedavatarthinnedframedataPC", vd)
 	
 func newremoteplayer(avatardata):
 	print(avatardata)
@@ -375,11 +336,6 @@ func _on_MicRecord_button_up():
 @rpc("any_peer") func remotesetmicrecord(lmicrecordingdata):
 	micrecordingdata = lmicrecordingdata
 	$MicRecord/RecordSize.text = "r-"+str(len(micrecordingdata.get("opusEncoded", micrecordingdata.get("pcmData"))))
-	if webrtc_server_relay:
-		var rpcsenderid = get_tree().get_multiplayer().get_remote_sender_id()
-		for fid in remote_players_idstonodenames:
-			if fid != rpcsenderid:
-				rpc_id(fid, "remotesetmicrecord", lmicrecordingdata)
 	
 
 func _on_SendRecord_pressed():

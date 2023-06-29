@@ -43,7 +43,7 @@ func client_packet_received(v):
 
 		var networkedmultiplayerclient = WebRTCMultiplayerPeer.new()
 		networkedmultiplayerclient.create_client(clientsignalling.wclientid)
-		print("Errr4A ", peer.get_connection_state())
+		print("Errr4A ", peer.get_connection_state(), "  ", networkedmultiplayerclient.is_server_relay_supported())
 		print("Errr4 ", peer.get_connection_state())
 		var E = networkedmultiplayerclient.add_peer(peer, 1)
 		if E != 0:	print("Errrr3 ", E)
