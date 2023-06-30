@@ -56,8 +56,9 @@ func connectionlog(txt):
 func SetNetworkedMultiplayerPeer(peer):
 	assert (peer != null)
 	multiplayer.multiplayer_peer = peer
+	assert (not multiplayer.is_server())
 	if multiplayer.is_server():
-		networkplayer_connected_to_server(true)
+		networkplayer_connected_to_server()
 	else:
 		LocalPlayer.get_node("PlayerFrame").networkID = -1
 	assert (get_tree().multiplayer_poll)
@@ -90,14 +91,15 @@ func networkplayer_server_disconnected(serverisself):
 		
 
 func clientplayer_connected_to_server():
-	networkplayer_connected_to_server(false)
+	networkplayer_connected_to_server()
 	
 func force_server_disconnect():
 	if not (multiplayer.multiplayer_peer is OfflineMultiplayerPeer):
 		var serverisself = multiplayer.is_server()
 		networkplayer_server_disconnected(serverisself)
 
-func networkplayer_connected_to_server(serverisself):
+func networkplayer_connected_to_server():
+	var serverisself = multiplayer.is_server()
 	connectionlog("_server(self) connect\n" if serverisself else "_server connect\n")
 	LocalPlayer.get_node("PlayerFrame").networkID = multiplayer.get_unique_id()
 	assert (LocalPlayer.get_node("PlayerFrame").networkID >= 1)
