@@ -5,8 +5,10 @@ var websocketserver = null
 const websocketprotocol = "webrtc-signalling"
 var clientsconnected = [ ]
 
-func _process(delta):
-	websocketserver.poll()
+# This could all be done by re-implementing the 
+# Websocket player lists and networking, but a 
+# second shadow time with a local multiplayer_peer for just these nodes.
+# Wacky, eh?
 
 signal mqttsig_client_connected(id)
 signal mqttsig_client_disconnected(id)
@@ -49,7 +51,28 @@ func wss_client_disconnected(id: int, was_clean_close: bool):
 	
 
 func startwebsocketsignalserver():
+		var portnumber = int(NetworkGateway.get_node("NetworkOptions/portnumber").text)
+		var multiplayerpeer = WebSocketMultiplayerPeer.new()
+		var E = multiplayerpeer.create_server(portnumber)
+		if E != OK:
+			$StartWebSocketmultiplayer.button_pressed = false
+			print("Failed code: [", error_string(E))
+			print("networkedmultiplayer createserver Error: ", E)
+			print("*** is there a server running on this port already? ", portnumber)
+			NetworkGateway.selectandtrigger_networkoption(NetworkGateway.NETWORK_OPTIONS.NETWORK_OFF)
+
+		get_tree().set_multiplayer(multiplayerpeer, NodePath("."))
+		print("multiplayer_peer ", multiplayer.multiplayer_peer)
+		assert (multiplayer.server_relay)
+		assert (multiplayer.get_unique_id() == 1)
+		assert (get_tree().multiplayer_poll)
+		#PlayerConnections.networkplayer_connected_to_server()
+
+func Dstartwebsocketsignalserver():
 	assert (websocketserver == null)
+	
+	
+	
 	websocketserver = WebSocketMultiplayerPeer.new()
 	var portnumber = int(NetworkGateway.get_node("NetworkOptions/portnumber").text)
 	websocketserver.connect("client_close_request", Callable(self, "wss_client_close_request"))
@@ -85,3 +108,4 @@ func stopwebsocketsignalserver():
 	$ClientsList.add_item("none", 0)
 	$WebRTCmultiplayerserver/StartWebRTCmultiplayer.button_pressed = false
 
+	

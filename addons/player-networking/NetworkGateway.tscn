@@ -60,9 +60,9 @@ popup/item_0/text = "ENet"
 popup/item_0/id = 0
 popup/item_1/text = "WebSocket"
 popup/item_1/id = 1
+popup/item_1/disabled = true
 popup/item_2/text = "WebRTC (websocket signal)"
 popup/item_2/id = 2
-popup/item_2/disabled = true
 popup/item_3/text = "WebRTC (mqtt signal)"
 popup/item_3/id = 3
 
@@ -461,6 +461,7 @@ button_pressed = true
 text = "autoconnect"
 
 [node name="MQTTsignalling" type="ColorRect" parent="."]
+visible = false
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -648,88 +649,81 @@ offset_bottom = 250.0
 color = Color(0.0156863, 0.0313726, 0.392157, 1)
 script = ExtResource("4")
 
-[node name="Label" type="Label" parent="PlayerConnections"]
+[node name="HBoxMain" type="HSplitContainer" parent="PlayerConnections"]
 layout_mode = 0
-offset_left = 6.36398
-offset_top = 2.82843
-offset_right = 56.364
-offset_bottom = 16.8284
+offset_right = 613.0
+offset_bottom = 96.0
+
+[node name="VBoxContainer" type="VBoxContainer" parent="PlayerConnections/HBoxMain"]
+layout_mode = 2
+
+[node name="HBox_players" type="HBoxContainer" parent="PlayerConnections/HBoxMain/VBoxContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="PlayerConnections/HBoxMain/VBoxContainer/HBox_players"]
+layout_mode = 2
 text = "Players:"
 
-[node name="PlayerList" type="OptionButton" parent="PlayerConnections"]
-layout_mode = 0
-offset_left = 102.0
-offset_top = 2.0
-offset_right = 328.0
-offset_bottom = 22.0
+[node name="PlayerList" type="OptionButton" parent="PlayerConnections/HBoxMain/VBoxContainer/HBox_players"]
+layout_mode = 2
+size_flags_horizontal = 10
 item_count = 1
 selected = 0
 popup/item_0/text = "me"
 popup/item_0/id = 0
 
-[node name="RecordingFeature" type="HBoxContainer" parent="PlayerConnections"]
-layout_mode = 0
-offset_left = 1.0
-offset_top = 36.0
-offset_right = 347.0
-offset_bottom = 67.0
+[node name="RecordingFeature" type="HBoxContainer" parent="PlayerConnections/HBoxMain/VBoxContainer"]
+layout_mode = 2
 script = ExtResource("16_hf3ik")
 
-[node name="MicRecord" type="Button" parent="PlayerConnections/RecordingFeature"]
+[node name="MicRecord" type="Button" parent="PlayerConnections/HBoxMain/VBoxContainer/RecordingFeature"]
 layout_mode = 2
 text = "MicRecord"
 
-[node name="AudioStreamRecorder" type="AudioStreamPlayer" parent="PlayerConnections/RecordingFeature/MicRecord"]
+[node name="AudioStreamRecorder" type="AudioStreamPlayer" parent="PlayerConnections/HBoxMain/VBoxContainer/RecordingFeature/MicRecord"]
 stream = SubResource("2")
 autoplay = true
 bus = &"Recorder"
 
-[node name="RecordSize" type="Label" parent="PlayerConnections/RecordingFeature"]
+[node name="RecordSize" type="Label" parent="PlayerConnections/HBoxMain/VBoxContainer/RecordingFeature"]
 layout_mode = 2
 size_flags_horizontal = 6
 text = "none"
 
-[node name="SendRecord" type="Button" parent="PlayerConnections/RecordingFeature"]
+[node name="SendRecord" type="Button" parent="PlayerConnections/HBoxMain/VBoxContainer/RecordingFeature"]
 layout_mode = 2
 text = "Send"
 
-[node name="PlayRecord" type="Button" parent="PlayerConnections/RecordingFeature"]
+[node name="PlayRecord" type="Button" parent="PlayerConnections/HBoxMain/VBoxContainer/RecordingFeature"]
 layout_mode = 2
 text = "Play"
 
-[node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="PlayerConnections/RecordingFeature/PlayRecord"]
+[node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="PlayerConnections/HBoxMain/VBoxContainer/RecordingFeature/PlayRecord"]
 autoplay = true
 
-[node name="Doppelganger" type="Label" parent="PlayerConnections"]
-layout_mode = 0
-offset_left = 36.0
-offset_top = 59.0
-offset_right = 154.0
-offset_bottom = 85.0
+[node name="HBoxLag" type="HBoxContainer" parent="PlayerConnections/HBoxMain/VBoxContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="PlayerConnections/HBoxMain/VBoxContainer/HBoxLag"]
+layout_mode = 2
 text = "Lag latency:"
 
-[node name="ConnectionLog" type="TextEdit" parent="PlayerConnections"]
-layout_mode = 0
-offset_left = 360.0
-offset_top = 6.0
-offset_right = 594.0
-offset_bottom = 80.0
-
-[node name="PlayerLagSlider" type="HSlider" parent="PlayerConnections"]
-layout_mode = 0
-offset_left = 176.0
-offset_top = 64.0
-offset_right = 337.0
-offset_bottom = 80.0
+[node name="PlayerLagSlider" type="HSlider" parent="PlayerConnections/HBoxMain/VBoxContainer/HBoxLag"]
+custom_minimum_size = Vector2(100, 0)
+layout_mode = 2
+size_flags_horizontal = 6
 max_value = 5.0
 step = 0.0
+
+[node name="ConnectionLog" type="TextEdit" parent="PlayerConnections/HBoxMain"]
+layout_mode = 2
 
 [node name="DoppelgangerPanel" type="ColorRect" parent="."]
 layout_mode = 0
 offset_left = 6.0
 offset_top = 258.0
 offset_right = 648.0
-offset_bottom = 310.0
+offset_bottom = 324.0
 color = Color(0.235294, 0.101961, 0.101961, 1)
 script = ExtResource("16_i8v6k")
 
@@ -882,10 +876,10 @@ offset_bottom = 40.0
 [connection signal="toggled" from="MQTTsignalling/Servermode/WebRTCmultiplayerserver/StartWebRTCmultiplayer" to="MQTTsignalling/Servermode/WebRTCmultiplayerserver" method="_on_StartWebRTCmultiplayer_toggled"]
 [connection signal="toggled" from="MQTTsignalling/Clientmode/WebRTCmultiplayerclient/StartWebRTCmultiplayer" to="MQTTsignalling/Clientmode/WebRTCmultiplayerclient" method="_on_StartWebRTCmultiplayer_toggled"]
 [connection signal="toggled" from="MQTTsignalling/StartMQTT" to="MQTTsignalling/Servermode" method="_on_StartServer_toggled"]
-[connection signal="item_selected" from="PlayerConnections/PlayerList" to="PlayerConnections" method="_on_PlayerList_item_selected"]
-[connection signal="button_down" from="PlayerConnections/RecordingFeature/MicRecord" to="PlayerConnections/RecordingFeature" method="_on_MicRecord_button_down"]
-[connection signal="button_up" from="PlayerConnections/RecordingFeature/MicRecord" to="PlayerConnections/RecordingFeature" method="_on_MicRecord_button_up"]
-[connection signal="pressed" from="PlayerConnections/RecordingFeature/SendRecord" to="PlayerConnections/RecordingFeature" method="_on_SendRecord_pressed"]
-[connection signal="pressed" from="PlayerConnections/RecordingFeature/PlayRecord" to="PlayerConnections/RecordingFeature" method="_on_PlayRecord_pressed"]
-[connection signal="value_changed" from="PlayerConnections/PlayerLagSlider" to="PlayerConnections" method="_on_PlayerLagSlider_value_changed"]
+[connection signal="item_selected" from="PlayerConnections/HBoxMain/VBoxContainer/HBox_players/PlayerList" to="PlayerConnections" method="_on_PlayerList_item_selected"]
+[connection signal="button_down" from="PlayerConnections/HBoxMain/VBoxContainer/RecordingFeature/MicRecord" to="PlayerConnections/HBoxMain/VBoxContainer/RecordingFeature" method="_on_MicRecord_button_down"]
+[connection signal="button_up" from="PlayerConnections/HBoxMain/VBoxContainer/RecordingFeature/MicRecord" to="PlayerConnections/HBoxMain/VBoxContainer/RecordingFeature" method="_on_MicRecord_button_up"]
+[connection signal="pressed" from="PlayerConnections/HBoxMain/VBoxContainer/RecordingFeature/SendRecord" to="PlayerConnections/HBoxMain/VBoxContainer/RecordingFeature" method="_on_SendRecord_pressed"]
+[connection signal="pressed" from="PlayerConnections/HBoxMain/VBoxContainer/RecordingFeature/PlayRecord" to="PlayerConnections/HBoxMain/VBoxContainer/RecordingFeature" method="_on_PlayRecord_pressed"]
+[connection signal="value_changed" from="PlayerConnections/HBoxMain/VBoxContainer/HBoxLag/PlayerLagSlider" to="PlayerConnections" method="_on_PlayerLagSlider_value_changed"]
 [connection signal="toggled" from="DoppelgangerPanel/hbox/VBox_enable/DoppelgangerEnable" to="PlayerConnections" method="_on_Doppelganger_toggled"]

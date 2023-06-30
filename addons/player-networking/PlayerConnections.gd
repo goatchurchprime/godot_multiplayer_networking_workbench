@@ -1,9 +1,5 @@
 extends ColorRect
 
-# command for running locally on the unix partition
-# /mnt/c/Users/henry/godot/Godot_v3.2.3-stable_linux_server.64 --main-pack /mnt/c/Users/henry/godot/games/OQ_Networking_Demo/releases/OQ_Networking_Demo.pck
-
-
 @onready var playerframelocalgdscriptfile = get_parent().scene_file_path.get_base_dir() + "/PlayerFrameLocal.gd"
 @onready var playerframeremotegdscriptfile = get_parent().scene_file_path.get_base_dir() + "/PlayerFrameRemote.gd"
 
@@ -16,6 +12,7 @@ var remote_players_idstonodenames = { }
 @onready var NetworkGateway = get_node("..")
 @onready var PlayersNode = get_node(NetworkGateway.playersnodepath)
 
+@onready var PlayerList = $HBoxMain/VBoxContainer/HBox_players/PlayerList
 
 func _ready():
 	if PlayersNode.get_child_count() == 1 and NetworkGateway.localplayerscene:
@@ -48,9 +45,12 @@ func _ready():
 
 
 func connectionlog(txt):
-	$ConnectionLog.text += txt
-	var cl = $ConnectionLog.get_line_count()
-	$ConnectionLog.set_caret_line(cl)
+	$HBoxMain/ConnectionLog.text += txt
+	var cl = $HBoxMain/ConnectionLog.get_line_count()
+	$HBoxMain/ConnectionLog.set_caret_line(cl)
+
+func clearconnectionlog():
+	$HBoxMain/ConnectionLog.text = ""
 
 func network_player_notyetconnected():
 	assert (not multiplayer.is_server())
@@ -110,13 +110,13 @@ func clientplayer_connection_failed():
 	NetworkGateway.setnetworkoff()
 	
 func updateplayerlist():
-	var plp = $PlayerList.get_item_text($PlayerList.selected).split(" ")[0].replace("*", "")
-	$PlayerList.clear()
-	$PlayerList.selected = 0
+	var plp = PlayerList.get_item_text(PlayerList.selected).split(" ")[0].replace("*", "")
+	PlayerList.clear()
+	PlayerList.selected = 0
 	for player in PlayersNode.get_children():
-		$PlayerList.add_item(("*" if player == LocalPlayer else "") + (player.playername() if player.has_method("playername") else player.get_name()))
+		PlayerList.add_item(("*" if player == LocalPlayer else "") + (player.playername() if player.has_method("playername") else player.get_name()))
 		if plp == player.get_name():
-			$PlayerList.selected = $PlayerList.get_item_count() - 1
+			PlayerList.selected = PlayerList.get_item_count() - 1
 
 
 func network_player_connected(id):
@@ -246,13 +246,12 @@ func removeremoteplayer(playernodename):
 		print("** remoteplayer already removed: ", playernodename)
 	
 
-
 func _on_PlayerList_item_selected(index):
 	var player = PlayersNode.get_child(index)
-	$PlayerLagSlider.value = 0.0 if player == LocalPlayer else player.get_node("PlayerFrame").laglatency
+	$HBoxMain/VBoxContainer/HBoxLag/PlayerLagSlider.value = 0.0 if player == LocalPlayer else player.get_node("PlayerFrame").laglatency
 	
 func _on_PlayerLagSlider_value_changed(value):
-	var player = PlayersNode.get_child($PlayerList.selected)
+	var player = PlayersNode.get_child(PlayerList.selected)
 	if player != LocalPlayer:
 		player.get_node("PlayerFrame").laglatency = value
 

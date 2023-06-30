@@ -103,7 +103,7 @@ func _on_NetworkOptions_item_selected(ns):
 	print("_on_OptionButton_item_selected_on_OptionButton_item_selected_on_OptionButton_item_selected ", ns)
 	var selectasoff = (ns == NETWORK_OPTIONS.NETWORK_OFF)
 	if not selectasoff:
-		$PlayerConnections/ConnectionLog.text = ""
+		$PlayerConnections.clearconnectionlog()
 
 	if $PlayerConnections.LocalPlayer.get_node("PlayerFrame").networkID != 0:
 		if not (multiplayer.multiplayer_peer is OfflineMultiplayerPeer):
@@ -186,7 +186,7 @@ func _on_NetworkOptionsMQTTWebRTC_item_selected(ns):
 	assert ($ProtocolOptions.selected == NETWORK_PROTOCOL.WEBRTC_MQTTSIGNAL)
 	var selectasoff = (ns == NETWORK_OPTIONS.NETWORK_OFF)
 	if not selectasoff:
-		$PlayerConnections/ConnectionLog.text = ""
+		$PlayerConnections.clearconnectionlog()
 	$MQTTsignalling/StartMQTT.button_pressed = false
 	await get_tree().process_frame
 	if $MQTTsignalling/StartMQTT.is_connected("toggled", Callable($MQTTsignalling/Servermode, "_on_StartServer_toggled")):
