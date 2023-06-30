@@ -97,9 +97,9 @@ func on_broker_connect():
 		
 func _on_StartServer_toggled(button_pressed):
 	if button_pressed:
-		MQTT.connect("received_message", Callable(self, "received_mqtt"))
-		MQTT.connect("broker_connected", Callable(self, "on_broker_connect"))
-		MQTT.connect("broker_disconnected", Callable(self, "on_broker_disconnect"))
+		MQTT.received_message.connect(received_mqtt)
+		MQTT.broker_connected.connect(on_broker_connect)
+		MQTT.broker_disconnected.connect(on_broker_disconnect)
 		roomname = SetupMQTTsignal.get_node("roomname").text
 		StartMQTTstatuslabel.text = "on"
 		randomize()
@@ -113,9 +113,9 @@ func _on_StartServer_toggled(button_pressed):
 
 	else:
 		print("Disconnecting MQTT")
-		MQTT.disconnect("received_message", Callable(self, "received_mqtt"))
-		MQTT.disconnect("broker_connected", Callable(self, "on_broker_connect"))
-		MQTT.disconnect("broker_disconnected", Callable(self, "on_broker_disconnect"))
+		MQTT.received_message.disconnect(received_mqtt)
+		MQTT.broker_connected.disconnect(on_broker_connect)
+		MQTT.broker_disconnected.disconnect(on_broker_disconnect)
 		MQTT.disconnect_from_server()
 		StartMQTTstatuslabel.text = "off"
 		SetupMQTTsignal.get_node("client_id").text = ""

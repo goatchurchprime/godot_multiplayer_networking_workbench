@@ -167,15 +167,14 @@ func _on_Doppelganger_toggled(button_pressed):
 	var DoppelgangerPanel = get_node("../DoppelgangerPanel")
 	if button_pressed:
 		#DoppelgangerPanel.visible = true
-		DoppelgangerPanel.get_node("netoffset").editable = false
-		DoppelgangerPanel.get_node("netdelaymin").editable = false
+		DoppelgangerPanel.seteditable(false)
 		var avatardata = LocalPlayer.PAV_avatarinitdata()
 		avatardata["playernodename"] = "Doppelganger"
 		avatardata["networkid"] = LocalPlayer.get_node("PlayerFrame").networkID
 		var fd = LocalPlayer.get_node("PlayerFrame").framedata0.duplicate()
 		fd[NCONSTANTS.CFI_TIMESTAMP] = fd[NCONSTANTS.CFI_TIMESTAMP_F0]
 		fd.erase(NCONSTANTS.CFI_TIMESTAMP_F0)
-		var doppelnetoffset = float(get_node("../DoppelgangerPanel/netoffset").text)*0.001
+		var doppelnetoffset = get_node("../DoppelgangerPanel").getnetoffset()
 		LocalPlayer.PAV_changethinnedframedatafordoppelganger(fd, doppelnetoffset, true)
 		avatardata["framedata0"] = fd
 		var doppelgangerdelay = get_node("..").getrandomdoppelgangerdelay(true)
@@ -183,9 +182,7 @@ func _on_Doppelganger_toggled(button_pressed):
 		LocalPlayer.get_node("PlayerFrame").doppelgangernode = newremoteplayer(avatardata)
 		LocalPlayer.get_node("PlayerFrame").NetworkGatewayForDoppelganger = get_node("..")
 	else:
-		#DoppelgangerPanel.visible = false
-		DoppelgangerPanel.get_node("netoffset").editable = true
-		DoppelgangerPanel.get_node("netdelaymin").editable = true
+		DoppelgangerPanel.seteditable(true)
 		LocalPlayer.get_node("PlayerFrame").doppelgangernode = null
 		LocalPlayer.get_node("PlayerFrame").NetworkGatewayForDoppelganger = null
 		removeremoteplayer("Doppelganger")

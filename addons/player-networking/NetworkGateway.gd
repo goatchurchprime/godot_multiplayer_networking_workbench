@@ -48,6 +48,7 @@ func _ready():
 		$ProtocolOptions.set_item_disabled(NETWORK_PROTOCOL.ENET, true)
 		$ProtocolOptions.selected = max(NETWORK_PROTOCOL.WEBSOCKET, $ProtocolOptions.selected)
 	rng.randomize()
+	_on_ProtocolOptions_item_selected($ProtocolOptions.selected)
 
 func initialstatenormal(protocol, networkoption):
 	assert (protocol >= NETWORK_PROTOCOL.ENET and protocol <= NETWORK_PROTOCOL.WEBRTC_WEBSOCKETSIGNAL)
@@ -236,22 +237,21 @@ func _input(event):   # this can be supporessed by set_process_input(false)
 			$TimelineVisualizer/TimeTracking.button_pressed = false
 			var relclick = relposition/$TimelineVisualizer.size
 			$TimelineVisualizer/SubViewport/TimelineDiagram.zoomtimeline(relclick, s)
-		elif $DoppelgangerPanel.get_rect().has_point(event.position):
-			var swnode = get_viewport().gui_get_focus_owner()
-			if swnode == $DoppelgangerPanel/netdelaymin and swnode.editable:
-				swnode.text = str(max(10, int(swnode.text)+5*s))
-			elif swnode == $DoppelgangerPanel/netoffset and swnode.editable:
-				swnode.text = str(int(swnode.text)+1000*s)
-			elif swnode == $DoppelgangerPanel/netdelayadd:
-				swnode.text = str(max(0, int(swnode.text)+5*s))
-			elif swnode == $DoppelgangerPanel/netdroppc:
-				swnode.text = str(max(0.0, float(swnode.text)+0.1*s))
+		#elif $DoppelgangerPanel.get_rect().has_point(event.position):
+		#	var swnode = get_viewport().gui_get_focus_owner()
+		#	if swnode == $DoppelgangerPanel/netdelaymin and swnode.editable:
+		#		swnode.text = str(max(10, int(swnode.text)+5*s))
+		#	elif swnode == $DoppelgangerPanel/netoffset and swnode.editable:
+		#		swnode.text = str(int(swnode.text)+1000*s)
+		#	elif swnode == $DoppelgangerPanel/netdelayadd:
+		#	elif swnode == $DoppelgangerPanel/netdroppc:
+		#		swnode.text = str(max(0.0, float(swnode.text)+0.1*s))
 
 func getrandomdoppelgangerdelay(disabledropout=false):
-	if not disabledropout and rng.randf_range(0, 100) < float(get_node("DoppelgangerPanel/netdroppc").text):
+	if not disabledropout and rng.randf_range(0, 100) < float($DoppelgangerPanel/hbox/VBox_netdrop/netdroppc.text):
 		return -1.0
-	var netdelayadd = float(get_node("DoppelgangerPanel/netdelayadd").text)
-	var doppelgangerdelay = int(get_node("DoppelgangerPanel/netdelaymin").text) + max(0.0, rng.randfn(netdelayadd, netdelayadd*0.4))
+	var netdelayadd = float($DoppelgangerPanel/hbox/VBox_netdelay/netdelayadd.text)
+	var doppelgangerdelay = int($DoppelgangerPanel/hbox/VBox_delaymin/netdelaymin.text) + max(0.0, rng.randfn(netdelayadd, netdelayadd*0.4))
 	return doppelgangerdelay
 	
 func setnetworkoff():	

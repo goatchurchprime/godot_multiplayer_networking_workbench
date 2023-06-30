@@ -90,7 +90,7 @@ func _process(delta):
 		PlayerConnections.rpc("networkedavatarthinnedframedataPC", vd)
 		
 	if doppelgangernode != null:
-		var doppelnetoffset = float(NetworkGatewayForDoppelganger.get_node("DoppelgangerPanel/netoffset").text)*0.001
+		var doppelnetoffset = NetworkGatewayForDoppelganger.get_node("DoppelgangerPanel").getnetoffset()
 		get_parent().PAV_changethinnedframedatafordoppelganger(vd, doppelnetoffset, false)
 		var doppelgangerdelay = NetworkGatewayForDoppelganger.getrandomdoppelgangerdelay()
 		if doppelgangerdelay != -1.0:
