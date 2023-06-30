@@ -16,11 +16,10 @@
 [ext_resource type="Script" path="res://addons/player-networking/WebRTCmultiplayerclient.gd" id="14"]
 [ext_resource type="Script" path="res://addons/player-networking/ClientmodeMQTTsignal.gd" id="15"]
 [ext_resource type="Script" path="res://addons/player-networking/MQTT.gd" id="16"]
+[ext_resource type="Script" path="res://addons/player-networking/RecordingFeature.gd" id="16_hf3ik"]
 [ext_resource type="Script" path="res://addons/player-networking/DoppelgangerPanel_ui.gd" id="16_i8v6k"]
 
 [sub_resource type="AudioStreamMicrophone" id="2"]
-
-[sub_resource type="FontVariation" id="FontVariation_n5qwr"]
 
 [sub_resource type="FontVariation" id="FontVariation_pmwxj"]
 spacing_top = -5
@@ -668,52 +667,46 @@ selected = 0
 popup/item_0/text = "me"
 popup/item_0/id = 0
 
-[node name="MicRecord" type="Button" parent="PlayerConnections"]
+[node name="RecordingFeature" type="HBoxContainer" parent="PlayerConnections"]
 layout_mode = 0
-offset_left = 13.2929
-offset_top = 27.1213
-offset_right = 92.2929
-offset_bottom = 47.1213
+offset_left = 1.0
+offset_top = 36.0
+offset_right = 347.0
+offset_bottom = 67.0
+script = ExtResource("16_hf3ik")
+
+[node name="MicRecord" type="Button" parent="PlayerConnections/RecordingFeature"]
+layout_mode = 2
 text = "MicRecord"
 
-[node name="SendRecord" type="Button" parent="PlayerConnections/MicRecord"]
-layout_mode = 0
-offset_left = 85.3071
-offset_right = 128.307
-offset_bottom = 20.0
-text = "Send"
-
-[node name="RecordSize" type="Label" parent="PlayerConnections/MicRecord"]
-layout_mode = 0
-offset_left = 136.154
-offset_top = 2.00226
-offset_right = 176.154
-offset_bottom = 16.0023
-text = "none"
-
-[node name="PlayRecord" type="Button" parent="PlayerConnections/MicRecord"]
-layout_mode = 0
-offset_left = 262.707
-offset_top = -1.12131
-offset_right = 311.707
-offset_bottom = 29.8787
-text = "Play"
-
-[node name="AudioStreamRecorder" type="AudioStreamPlayer" parent="PlayerConnections/MicRecord"]
+[node name="AudioStreamRecorder" type="AudioStreamPlayer" parent="PlayerConnections/RecordingFeature/MicRecord"]
 stream = SubResource("2")
 autoplay = true
 bus = &"Recorder"
 
-[node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="PlayerConnections/MicRecord"]
+[node name="RecordSize" type="Label" parent="PlayerConnections/RecordingFeature"]
+layout_mode = 2
+size_flags_horizontal = 6
+text = "none"
+
+[node name="SendRecord" type="Button" parent="PlayerConnections/RecordingFeature"]
+layout_mode = 2
+text = "Send"
+
+[node name="PlayRecord" type="Button" parent="PlayerConnections/RecordingFeature"]
+layout_mode = 2
+text = "Play"
+
+[node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="PlayerConnections/RecordingFeature/PlayRecord"]
 autoplay = true
 
-[node name="Doppelganger" type="CheckBox" parent="PlayerConnections"]
+[node name="Doppelganger" type="Label" parent="PlayerConnections"]
 layout_mode = 0
-offset_left = 2.32806
-offset_top = 50.6674
-offset_right = 120.328
-offset_bottom = 74.6674
-text = "doppelganger"
+offset_left = 36.0
+offset_top = 59.0
+offset_right = 154.0
+offset_bottom = 85.0
+text = "Lag latency:"
 
 [node name="ConnectionLog" type="TextEdit" parent="PlayerConnections"]
 layout_mode = 0
@@ -751,16 +744,18 @@ offset_bottom = 26.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="Label_title" type="Label" parent="DoppelgangerPanel/hbox"]
+[node name="VBox_enable" type="VBoxContainer" parent="DoppelgangerPanel/hbox"]
 layout_mode = 2
-theme_override_fonts/font = SubResource("FontVariation_n5qwr")
-theme_override_font_sizes/font_size = 15
-text = "Doppelganger network
-traffic parameters (ms)"
+size_flags_horizontal = 0
+
+[node name="DoppelgangerEnable" type="CheckBox" parent="DoppelgangerPanel/hbox/VBox_enable"]
+layout_mode = 2
+size_flags_horizontal = 4
+text = "Doppelganger"
 
 [node name="VSeparator" type="VSeparator" parent="DoppelgangerPanel/hbox"]
 layout_mode = 2
-size_flags_horizontal = 10
+size_flags_horizontal = 0
 
 [node name="VBox_offset" type="VBoxContainer" parent="DoppelgangerPanel/hbox"]
 layout_mode = 2
@@ -888,9 +883,9 @@ offset_bottom = 40.0
 [connection signal="toggled" from="MQTTsignalling/Clientmode/WebRTCmultiplayerclient/StartWebRTCmultiplayer" to="MQTTsignalling/Clientmode/WebRTCmultiplayerclient" method="_on_StartWebRTCmultiplayer_toggled"]
 [connection signal="toggled" from="MQTTsignalling/StartMQTT" to="MQTTsignalling/Servermode" method="_on_StartServer_toggled"]
 [connection signal="item_selected" from="PlayerConnections/PlayerList" to="PlayerConnections" method="_on_PlayerList_item_selected"]
-[connection signal="button_down" from="PlayerConnections/MicRecord" to="PlayerConnections" method="_on_MicRecord_button_down"]
-[connection signal="button_up" from="PlayerConnections/MicRecord" to="PlayerConnections" method="_on_MicRecord_button_up"]
-[connection signal="pressed" from="PlayerConnections/MicRecord/SendRecord" to="PlayerConnections" method="_on_SendRecord_pressed"]
-[connection signal="pressed" from="PlayerConnections/MicRecord/PlayRecord" to="PlayerConnections" method="_on_PlayRecord_pressed"]
-[connection signal="toggled" from="PlayerConnections/Doppelganger" to="PlayerConnections" method="_on_Doppelganger_toggled"]
+[connection signal="button_down" from="PlayerConnections/RecordingFeature/MicRecord" to="PlayerConnections/RecordingFeature" method="_on_MicRecord_button_down"]
+[connection signal="button_up" from="PlayerConnections/RecordingFeature/MicRecord" to="PlayerConnections/RecordingFeature" method="_on_MicRecord_button_up"]
+[connection signal="pressed" from="PlayerConnections/RecordingFeature/SendRecord" to="PlayerConnections/RecordingFeature" method="_on_SendRecord_pressed"]
+[connection signal="pressed" from="PlayerConnections/RecordingFeature/PlayRecord" to="PlayerConnections/RecordingFeature" method="_on_PlayRecord_pressed"]
 [connection signal="value_changed" from="PlayerConnections/PlayerLagSlider" to="PlayerConnections" method="_on_PlayerLagSlider_value_changed"]
+[connection signal="toggled" from="DoppelgangerPanel/hbox/VBox_enable/DoppelgangerEnable" to="PlayerConnections" method="_on_Doppelganger_toggled"]

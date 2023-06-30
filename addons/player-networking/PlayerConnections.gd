@@ -36,17 +36,16 @@ func _ready():
 
 	LocalPlayer.PAV_initavatarlocal()
 
-	multiplayer.connect("peer_connected", Callable(self, "network_player_connected"))
-	multiplayer.connect("peer_disconnected", Callable(self, "network_player_disconnected"))
+	multiplayer.peer_connected.connect(network_player_connected)
+	multiplayer.peer_disconnected.connect(network_player_disconnected)
 
-	multiplayer.connect("connected_to_server", Callable(self, "clientplayer_connected_to_server"))
-	multiplayer.connect("connection_failed", Callable(self, "clientplayer_connection_failed"))
-	multiplayer.connect("server_disconnected", Callable(self, "clientplayer_server_disconnected"))
+	multiplayer.connected_to_server.connect(clientplayer_connected_to_server)
+	multiplayer.connection_failed.connect(clientplayer_connection_failed)
+	multiplayer.server_disconnected.connect(clientplayer_server_disconnected)
 
 	LocalPlayer.get_node("PlayerFrame").networkID = 0
 	LocalPlayer.set_name("R%d" % LocalPlayer.get_node("PlayerFrame").networkID) 
 
-	micaudioinit()
 
 func connectionlog(txt):
 	$ConnectionLog.text += txt
@@ -257,105 +256,4 @@ func _on_PlayerLagSlider_value_changed(value):
 	if player != LocalPlayer:
 		player.get_node("PlayerFrame").laglatency = value
 
-
-
-var micrecordingdata = null
-const max_recording_seconds = 5.0
-var recordingnumberC = 1
-var recordingeffect = null
-var capturingeffect = null
-func micaudioinit():
-	var recordbus_idx = AudioServer.get_bus_index("Recorder")
-	assert ($MicRecord/AudioStreamRecorder.bus == "Recorder")
-	assert ($MicRecord/AudioStreamRecorder.stream.is_class("AudioStreamMicrophone"))
-	assert (AudioServer.is_bus_mute(recordbus_idx) == true)
-	recordingeffect = AudioServer.get_bus_effect(recordbus_idx, 0)
-	assert (recordingeffect.is_class("AudioEffectRecord"))
-
-	# we can use this capturing object ring buffer to collect and batch up chunks
-	# see godot-voip demo.  Also how to use AudioStreamGeneratorPlayback etc
-	#capturingeffect = AudioServer.get_bus_effect(recordbus_idx, 1)
-	#assert (capturingeffect.is_class("AudioEffectCapture"))
-	var enablesound = true
-	if ResourceLoader.exists("res://addons/opus/OpusEncoderNode.gdns"):
-		var OpusEncoderNode = load("res://addons/opus/OpusEncoderNode.gdns")
-		if enablesound and OpusEncoderNode != null:
-			var OpusEncoder = OpusEncoderNode.new()
-			OpusEncoder.name = "OpusEncoder"
-			$MicRecord.add_child(OpusEncoder)
-		else:
-			print("Missing Opus plugin library")
-		var OpusDecoderNode = load("res://addons/opus/OpusDecoderNode.gdns")
-		if enablesound and OpusDecoderNode != null:
-			var OpusDecoder = OpusDecoderNode.new()
-			OpusDecoder.name = "OpusDecoder"
-			$MicRecord.add_child(OpusDecoder)
-
-	if $MicRecord.has_node("OpusDecoder"):
-		var fname = "res://addons/player-networking/welcomespeech.res"
-		if FileAccess.file_exists(fname):
-			var fin = FileAccess.open(fname, FileAccess.READ)
-			micrecordingdata = fin.get_var()
-			fin.close()
-			$MicRecord/RecordSize.text = "w-"+str(len(micrecordingdata.get("opusEncoded", micrecordingdata.get("pcmData"))))
-
-func _on_MicRecord_button_down():
-	if not recordingeffect.is_recording_active():
-		recordingnumberC += 1
-		micrecordingdata = null
-		await get_tree().create_timer(0.1).timeout
-		var lrecordingnumberC = recordingnumberC
-		recordingeffect.set_recording_active(true)
-		await get_tree().create_timer(max_recording_seconds).timeout
-		if micrecordingdata != null and lrecordingnumberC == recordingnumberC:
-			_on_MicRecord_button_up()
-		if OS.get_name() == "X11":
-			print("Warning mic doesn't work on Linux (godot issue 33184)")
-		
-func _on_MicRecord_button_up():
-	if recordingeffect.is_recording_active():
-		recordingeffect.set_recording_active(false)
-		var recording = recordingeffect.get_recording()
-		var pcmData = recording.get_data()
-		micrecordingdata = { "format":recording.get_format(), 
-							"mix_rate":recording.get_mix_rate(),
-							"is_stereo":recording.is_stereo() }
-		if $MicRecord.has_node("OpusEncoder"):
-			micrecordingdata["opusEncoded"] = $MicRecord/OpusEncoder.encode(pcmData)
-		else:
-			micrecordingdata["pcmData"] = pcmData
-		print(" created data bytes ", len(var_to_bytes(micrecordingdata)), "  ", len(pcmData))
-		$MicRecord/RecordSize.text = "l-"+str(len(micrecordingdata.get("opusEncoded", micrecordingdata.get("pcmData"))))
-
-@rpc("any_peer") func remotesetmicrecord(lmicrecordingdata):
-	micrecordingdata = lmicrecordingdata
-	$MicRecord/RecordSize.text = "r-"+str(len(micrecordingdata.get("opusEncoded", micrecordingdata.get("pcmData"))))
-	
-
-func _on_SendRecord_pressed():
-	rpc("remotesetmicrecord", micrecordingdata)
-	#var fout = File.new()
-	#var fname = "user://welcomespeech.dat"
-	#print("saving ", ProjectSettings.globalize_path(fname))
-	#fout.open(fname, File.WRITE)
-	#fout.store_var(micrecordingdata)
-	#fout.close()
-
-func _on_PlayRecord_pressed():
-	print("_on_PlayRecord_pressed")
-	if micrecordingdata != null:
-		var audioStream = AudioStreamWAV.new()
-		audioStream.set_format(micrecordingdata["format"])
-		audioStream.set_mix_rate(micrecordingdata["mix_rate"])
-		audioStream.set_stereo(micrecordingdata["is_stereo"])
-		if micrecordingdata.has("opusEncoded") and $MicRecord.has_node("OpusDecoder"):
-			audioStream.data = $MicRecord/OpusDecoder.decode(micrecordingdata["opusEncoded"])
-			print("audio playing bytes ", len(audioStream.data))
-		elif micrecordingdata.has("pcmData"):
-			audioStream.data = micrecordingdata["pcmData"]
-			print("audio playing bytes ", len(audioStream.data))
-		else:
-			print("No decodable audio data here")
-		$MicRecord/AudioStreamPlayer.stream = audioStream
-		$MicRecord/AudioStreamPlayer.play()
 
