@@ -8,12 +8,18 @@ func _on_StartENetmultiplayer_toggled(button_pressed):
 		var portnumber = int(NetworkGateway.get_node("NetworkOptions/portnumber").text)
 		var ns = NetworkGateway.get_node("NetworkOptions").selected
 		var serverIPnumber = NetworkGateway.get_node("NetworkOptions").get_item_text(ns).split(" ", 1)[0]
-		var networkedmultiplayerclient = ENetMultiplayerPeer.new()
-		var clienterror = networkedmultiplayerclient.create_client(serverIPnumber, portnumber, 0, 0)
-		if clienterror == 0:
-			PlayerConnections.SetNetworkedMultiplayerPeer(networkedmultiplayerclient)
+
+		var multiplayerpeer = ENetMultiplayerPeer.new()
+		var E = multiplayerpeer.create_client(serverIPnumber, portnumber, 0, 0)
+		if E != OK:
+			print("Error ", E)
+			return
+		
+		multiplayer.multiplayer_peer = multiplayerpeer
+		PlayerConnections.network_player_notyetconnected()
+		assert (get_tree().multiplayer_poll)
+
 
 	else:
-		if not (multiplayer.multiplayer_peer is OfflineMultiplayerPeer):
-			PlayerConnections.force_server_disconnect()
+		PlayerConnections.force_server_disconnect()
 		

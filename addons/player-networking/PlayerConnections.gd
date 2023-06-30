@@ -53,15 +53,9 @@ func connectionlog(txt):
 	var cl = $ConnectionLog.get_line_count()
 	$ConnectionLog.set_caret_line(cl)
 
-func SetNetworkedMultiplayerPeer(peer):
-	assert (peer != null)
-	multiplayer.multiplayer_peer = peer
+func network_player_notyetconnected():
 	assert (not multiplayer.is_server())
-	if multiplayer.is_server():
-		networkplayer_connected_to_server()
-	else:
-		LocalPlayer.get_node("PlayerFrame").networkID = -1
-	assert (get_tree().multiplayer_poll)
+	LocalPlayer.get_node("PlayerFrame").networkID = -1
 
 func clientplayer_server_disconnected():
 	networkplayer_server_disconnected(false)
@@ -125,10 +119,9 @@ func updateplayerlist():
 		if plp == player.get_name():
 			$PlayerList.selected = $PlayerList.get_item_count() - 1
 
+
 func network_player_connected(id):
 	print("NNnetwork_player_connected ", id, "  Lid ", LocalPlayer.get_node("PlayerFrame").networkID)
-
-		
 	if LocalPlayer.get_node("PlayerFrame").networkID == -1:
 		deferred_playerconnections.push_back(id)
 		connectionlog("_add playerid %d (defer)\n" % id)

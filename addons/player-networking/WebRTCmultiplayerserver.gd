@@ -27,8 +27,7 @@ func _on_StartWebRTCmultiplayer_toggled(button_pressed):
 		serversignalling.mqttsig_client_connected.disconnect(server_client_connected) 
 		serversignalling.mqttsig_client_disconnected.disconnect(server_client_disconnected) 
 		serversignalling.mqttsig_packet_received.disconnect(server_packet_received) 
-		if not (multiplayer.multiplayer_peer is OfflineMultiplayerPeer):
-			PlayerConnections.force_server_disconnect()
+		PlayerConnections.force_server_disconnect()
 
 
 func server_ice_candidate_created(mid_name, index_name, sdp_name, id):
@@ -55,19 +54,17 @@ func server_packet_received(id, v):
 	#print("server packet_received ", id, v["subject"])
 	if v["subject"] == "request_offer":
 		var peerconnection = WebRTCPeerConnection.new()
-		peerconnection.initialize({"iceServers": [ { "urls": ["stun:stun.l.google.com:19302"] } ] })
 		peerconnection.session_description_created.connect(server_session_description_created.bind(id))
+		peerconnection.ice_candidate_created.connect(server_ice_candidate_created.bind(id))
+		peerconnection.data_channel_received.connect(Ddata_channel_created)
 
-		peerconnection.connect("ice_candidate_created", Callable(self, "server_ice_candidate_created").bind(id))
+		peerconnection.initialize({"iceServers": [ { "urls": ["stun:stun.l.google.com:19302"] } ] })
 		print("serverpacket peer.get_connection_state() ", peerconnection.get_connection_state())
-		peerconnection.connect("data_channel_received", Callable(self, "Ddata_channel_created"))
 		multiplayer.multiplayer_peer.add_peer(peerconnection, id)
 		var webrtcpeererror = peerconnection.create_offer()
 		print("peer create offer ", peerconnection, "id ", id, " Error:", webrtcpeererror, " connstate")
-		#multiplayer.multiplayer_peer = networkedmultiplayerserver
 		$statuslabel.text = "create offer"
 
-		
 	elif v["subject"] == "answer":
 		print("Check equal multiplayer ", multiplayer, " vs ", multiplayer)
 		assert (multiplayer.multiplayer_peer.is_class("WebRTCMultiplayerPeer"))
