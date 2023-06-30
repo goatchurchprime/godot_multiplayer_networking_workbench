@@ -90,7 +90,10 @@ func on_broker_connect():
 	statustopic = "%s/%s/server" % [roomname, MQTT.client_id]
 	MQTT.publish(statustopic, JSON.new().stringify({"subject":"serveropen", "nconnections":len(clientidtowclientid)}), true)
 	StartMQTTstatuslabel.text = "connected"
-	$ClientsList.set_item_text(0, MQTT.client_id)
+	$ClientsList.clear()
+	$ClientsList.add_item(MQTT.client_id, 1)
+	$ClientsList.selected = 0
+	
 	$WebRTCmultiplayerserver/StartWebRTCmultiplayer.disabled = false
 	if SetupMQTTsignal.get_node("autoconnect").button_pressed:
 		$WebRTCmultiplayerserver/StartWebRTCmultiplayer.button_pressed = true
@@ -122,7 +125,6 @@ func _on_StartServer_toggled(button_pressed):
 		for s in clientidtowclientid:
 			emit_signal("mqttsig_client_disconnected", clientidtowclientid[s])
 		$ClientsList.clear()
-		$ClientsList.add_item("none", 0)
 		clientidtowclientid.clear()
 		wclientidtoclientid.clear()
 		

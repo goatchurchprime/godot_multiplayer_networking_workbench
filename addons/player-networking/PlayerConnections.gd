@@ -282,18 +282,19 @@ func micaudioinit():
 	#capturingeffect = AudioServer.get_bus_effect(recordbus_idx, 1)
 	#assert (capturingeffect.is_class("AudioEffectCapture"))
 	var enablesound = true
-	var OpusEncoderNode = load("res://addons/opus/OpusEncoderNode.gdns")
-	if enablesound and OpusEncoderNode != null:
-		var OpusEncoder = OpusEncoderNode.new()
-		OpusEncoder.name = "OpusEncoder"
-		$MicRecord.add_child(OpusEncoder)
-	else:
-		print("Missing Opus plugin library")
-	var OpusDecoderNode = load("res://addons/opus/OpusDecoderNode.gdns")
-	if enablesound and OpusDecoderNode != null:
-		var OpusDecoder = OpusDecoderNode.new()
-		OpusDecoder.name = "OpusDecoder"
-		$MicRecord.add_child(OpusDecoder)
+	if ResourceLoader.exists("res://addons/opus/OpusEncoderNode.gdns"):
+		var OpusEncoderNode = load("res://addons/opus/OpusEncoderNode.gdns")
+		if enablesound and OpusEncoderNode != null:
+			var OpusEncoder = OpusEncoderNode.new()
+			OpusEncoder.name = "OpusEncoder"
+			$MicRecord.add_child(OpusEncoder)
+		else:
+			print("Missing Opus plugin library")
+		var OpusDecoderNode = load("res://addons/opus/OpusDecoderNode.gdns")
+		if enablesound and OpusDecoderNode != null:
+			var OpusDecoder = OpusDecoderNode.new()
+			OpusDecoder.name = "OpusDecoder"
+			$MicRecord.add_child(OpusDecoder)
 
 	if $MicRecord.has_node("OpusDecoder"):
 		var fname = "res://addons/player-networking/welcomespeech.res"

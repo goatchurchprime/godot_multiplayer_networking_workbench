@@ -63,6 +63,7 @@ popup/item_1/text = "WebSocket"
 popup/item_1/id = 1
 popup/item_2/text = "WebRTC (websocket signal)"
 popup/item_2/id = 2
+popup/item_2/disabled = true
 popup/item_3/text = "WebRTC (mqtt signal)"
 popup/item_3/id = 3
 
@@ -337,7 +338,6 @@ button_pressed = true
 text = "autoconnect"
 
 [node name="WebSocketsignalling" type="ColorRect" parent="."]
-visible = false
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -454,10 +454,11 @@ text = "websocket clientid:"
 
 [node name="autoconnect" type="CheckBox" parent="WebSocketsignalling"]
 layout_mode = 0
-offset_left = 305.0
-offset_top = 28.0
-offset_right = 430.0
-offset_bottom = 59.0
+offset_left = 150.0
+offset_top = 38.0
+offset_right = 346.0
+offset_bottom = 69.0
+button_pressed = true
 text = "autoconnect"
 
 [node name="MQTTsignalling" type="ColorRect" parent="."]

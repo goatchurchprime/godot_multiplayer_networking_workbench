@@ -59,16 +59,16 @@ func client_packet_received(v):
 
 func _on_StartWebRTCmultiplayer_toggled(button_pressed):
 	if button_pressed:
-		clientsignalling.connect("mqttsig_connection_established", Callable(self, "client_connection_established")) 
-		clientsignalling.connect("mqttsig_connection_closed", Callable(self, "client_connection_closed")) 
-		clientsignalling.connect("mqttsig_packet_received", Callable(self, "client_packet_received")) 
+		clientsignalling.mqttsig_connection_established.connect(client_connection_established) 
+		clientsignalling.mqttsig_connection_closed.connect(client_connection_closed) 
+		clientsignalling.mqttsig_packet_received.connect(client_packet_received) 
 		if clientsignalling.isconnectedtosignalserver():
 			clientsignalling.sendpacket_toserver({"subject":"request_offer"})
 		$statuslabel.text = "request_offer"
 		
 	else:
-		clientsignalling.disconnect("mqttsig_connection_established", Callable(self, "client_connection_established")) 
-		clientsignalling.disconnect("mqttsig_connection_closed", Callable(self, "client_connection_closed")) 
-		clientsignalling.disconnect("mqttsig_packet_received", Callable(self, "client_packet_received")) 
+		clientsignalling.mqttsig_connection_established.disconnect(client_connection_established) 
+		clientsignalling.mqttsig_connection_closed.disconnect(client_connection_closed) 
+		clientsignalling.mqttsig_packet_received.disconnect(client_packet_received) 
 		if not (multiplayer.multiplayer_peer is OfflineMultiplayerPeer):
 			PlayerConnections.force_server_disconnect()

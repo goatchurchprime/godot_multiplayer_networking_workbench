@@ -60,22 +60,23 @@ func server_packet_received(id, v):
 func _on_StartWebRTCmultiplayer_toggled(button_pressed):
 	if button_pressed:
 		networkedmultiplayerserver = WebRTCMultiplayerPeer.new()
-		#var servererror = networkedmultiplayerserver.initialize(1, true)
-		#assert (servererror == 0)
-		networkedmultiplayerserver.create_server()
+		var E = networkedmultiplayerserver.create_server()
+		if E != OK:
+			$StartWebRTCmultiplayer.button_pressed = false
+			print("Failed ", error_string(E))
 		assert(networkedmultiplayerserver.is_server_relay_supported())
-
 		PlayerConnections.SetNetworkedMultiplayerPeer(networkedmultiplayerserver)
 		assert(multiplayer.server_relay)
 		assert (multiplayer.get_unique_id() == 1)
-		serversignalling.connect("mqttsig_client_connected", Callable(self, "server_client_connected")) 
-		serversignalling.connect("mqttsig_client_disconnected", Callable(self, "server_client_disconnected")) 
-		serversignalling.connect("mqttsig_packet_received", Callable(self, "server_packet_received")) 
+
+		serversignalling.mqttsig_client_connected.connect(server_client_connected) 
+		serversignalling.mqttsig_client_disconnected.connect(server_client_disconnected) 
+		serversignalling.mqttsig_packet_received.connect(server_packet_received) 
 			
 	else:
-		serversignalling.disconnect("mqttsig_client_connected", Callable(self, "server_client_connected")) 
-		serversignalling.disconnect("mqttsig_client_disconnected", Callable(self, "server_client_disconnected")) 
-		serversignalling.disconnect("mqttsig_packet_received", Callable(self, "server_packet_received")) 
+		serversignalling.mqttsig_client_connected.disconnect(server_client_connected) 
+		serversignalling.mqttsig_client_disconnected.disconnect(server_client_disconnected) 
+		serversignalling.mqttsig_packet_received.disconnect(server_packet_received) 
 		if not (multiplayer.multiplayer_peer is OfflineMultiplayerPeer):
 			PlayerConnections.force_server_disconnect()
 
