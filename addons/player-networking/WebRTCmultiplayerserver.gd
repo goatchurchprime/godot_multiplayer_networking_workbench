@@ -1,15 +1,43 @@
 extends Control
 
-onready var serversignalling = get_parent()
-onready var PlayerConnections = get_node("../../../PlayerConnections")
+@onready var serversignalling = get_parent()
+@onready var PlayerConnections = get_node("../../../PlayerConnections")
+
+
+func _on_StartWebRTCmultiplayer_toggled(button_pressed):
+	if button_pressed:
+		var multiplayerpeer = WebRTCMultiplayerPeer.new()
+		var E = multiplayerpeer.create_server()
+		if E != OK:
+			$StartWebRTCmultiplayer.button_pressed = false
+			print("Failed ", error_string(E))
+			return
+		multiplayer.multiplayer_peer = multiplayerpeer
+		assert(multiplayer.multiplayer_peer.is_server_relay_supported())
+		assert (multiplayer.server_relay)
+		assert (multiplayer.get_unique_id() == 1)
+		assert (get_tree().multiplayer_poll)
+		PlayerConnections.networkplayer_connected_to_server()
+
+		serversignalling.mqttsig_client_connected.connect(server_client_connected) 
+		serversignalling.mqttsig_client_disconnected.connect(server_client_disconnected) 
+		serversignalling.mqttsig_packet_received.connect(server_packet_received) 
+			
+	else:
+		serversignalling.mqttsig_client_connected.disconnect(server_client_connected) 
+		serversignalling.mqttsig_client_disconnected.disconnect(server_client_disconnected) 
+		serversignalling.mqttsig_packet_received.disconnect(server_packet_received) 
+		PlayerConnections.force_server_disconnect()
+
 
 func server_ice_candidate_created(mid_name, index_name, sdp_name, id):
 	serversignalling.sendpacket_toclient(id, {"subject":"ice_candidate", "mid_name":mid_name, "index_name":index_name, "sdp_name":sdp_name})
 
 func server_session_description_created(type, data, id):
+	print("we got server_session_description_created ", type)
 	assert (type == "offer")
-	var peer = get_tree().network_peer.get_peer(id)
-	peer["connection"].set_local_description(type, data)
+	var peerconnection = multiplayer.multiplayer_peer.get_peer(id)
+	peerconnection["connection"].set_local_description(type, data)
 	serversignalling.sendpacket_toclient(id, {"subject":"offer", "data":data})
 	$statuslabel.text = "offer"
 		
@@ -25,48 +53,29 @@ func Ddata_channel_created(channel):
 func server_packet_received(id, v):
 	#print("server packet_received ", id, v["subject"])
 	if v["subject"] == "request_offer":
-		var peer = WebRTCPeerConnection.new()
-		peer.initialize({"iceServers": [ { "urls": ["stun:stun.l.google.com:19302"] } ] })
-		peer.connect("session_description_created", self, "server_session_description_created", [id])
-		peer.connect("ice_candidate_created", self, "server_ice_candidate_created", [id])
-		print("serverpacket peer.get_connection_state() ", peer.get_connection_state())
-		peer.connect("data_channel_received", self, "Ddata_channel_created")
-		get_tree().network_peer.add_peer(peer, id)
-		var webrtcpeererror = peer.create_offer()
-		print("peer create offer ", peer, "Error:", webrtcpeererror)
+		var peerconnection = WebRTCPeerConnection.new()
+		peerconnection.session_description_created.connect(server_session_description_created.bind(id))
+		peerconnection.ice_candidate_created.connect(server_ice_candidate_created.bind(id))
+		peerconnection.data_channel_received.connect(Ddata_channel_created)
+
+		peerconnection.initialize({"iceServers": [ { "urls": ["stun:stun.l.google.com:19302"] } ] })
+		print("serverpacket peer.get_connection_state() ", peerconnection.get_connection_state())
+		multiplayer.multiplayer_peer.add_peer(peerconnection, id)
+		var webrtcpeererror = peerconnection.create_offer()
+		print("peer create offer ", peerconnection, "id ", id, " Error:", webrtcpeererror, " connstate")
 		$statuslabel.text = "create offer"
-				
+
 	elif v["subject"] == "answer":
-		assert (get_tree().network_peer.is_class("WebRTCMultiplayer"))
-		var peer = get_tree().network_peer.get_peer(id)
-		peer["connection"].set_remote_description("answer", v["data"])
+		print("Check equal multiplayer ", multiplayer, " vs ", multiplayer)
+		assert (multiplayer.multiplayer_peer.is_class("WebRTCMultiplayerPeer"))
+		var peerconnection = multiplayer.multiplayer_peer.get_peer(id)
+		peerconnection["connection"].set_remote_description("answer", v["data"])
 		$statuslabel.text = "answer"
 
 	elif v["subject"] == "ice_candidate":
-		var peer = get_tree().network_peer.get_peer(id)
-		peer["connection"].add_ice_candidate(v["mid_name"], v["index_name"], v["sdp_name"])
+		var peerconnection = multiplayer.multiplayer_peer.get_peer(id)
+		peerconnection["connection"].add_ice_candidate(v["mid_name"], v["index_name"], v["sdp_name"])
 		$statuslabel.text = "ice_candidate"
 
-
-func _on_StartWebRTCmultiplayer_toggled(button_pressed):
-	if button_pressed:
-		var networkedmultiplayerserver = WebRTCMultiplayer.new()
-		var servererror = networkedmultiplayerserver.initialize(1, true)
-		assert (servererror == 0)
-		PlayerConnections.webrtc_server_relay = true
-		PlayerConnections.SetNetworkedMultiplayerPeer(networkedmultiplayerserver)
-		
-		assert (get_tree().get_network_unique_id() == 1)
-		serversignalling.connect("mqttsig_client_connected", self, "server_client_connected") 
-		serversignalling.connect("mqttsig_client_disconnected", self, "server_client_disconnected") 
-		serversignalling.connect("mqttsig_packet_received", self, "server_packet_received") 
-			
-	else:
-		serversignalling.disconnect("mqttsig_client_connected", self, "server_client_connected") 
-		serversignalling.disconnect("mqttsig_client_disconnected", self, "server_client_disconnected") 
-		serversignalling.disconnect("mqttsig_packet_received", self, "server_packet_received") 
-		PlayerConnections.webrtc_server_relay = false
-		if get_tree().get_network_peer() != null:
-			PlayerConnections.force_server_disconnect()
 
 

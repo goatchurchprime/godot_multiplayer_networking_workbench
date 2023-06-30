@@ -19,7 +19,7 @@ func startUDPbroadcasting():
 	get_node("../udpenabled").disabled = true
 	print("IP.get_local_interfaces...")
 	for localinterfaces in IP.get_local_interfaces():
-		print(localinterfaces["name"], " ", localinterfaces["friendly"], " ", localinterfaces["addresses"])
+		print("ii", localinterfaces["name"], " ", localinterfaces["friendly"], " ", localinterfaces["addresses"])
 	var likelyserveraddresses = [ ]
 	for a in IP.get_local_addresses():
 		var la = a.split(".")
@@ -27,7 +27,7 @@ func startUDPbroadcasting():
 			if int(la[0]) == 10 or int(la[0]) == 192:
 				likelyserveraddresses.push_back(a)
 	print("likelyserveraddresses ", likelyserveraddresses)
-	broadcastservermsg = broadcastserverheader + " @" + PoolStringArray(likelyserveraddresses).join(",")
+	broadcastservermsg = broadcastserverheader + " @" + ",".join(PackedStringArray(likelyserveraddresses))
 	print("UDP broadcast message: ", broadcastservermsg)
 	set_process(true)
 
@@ -43,7 +43,7 @@ func _process(delta):
 		var udpdiscoverybroadcaster = PacketPeerUDP.new()
 		udpdiscoverybroadcaster.set_broadcast_enabled(true)
 		var err0 = udpdiscoverybroadcaster.set_dest_address(broadcastudpipnum, udpdiscoveryport)
-		var err1 = udpdiscoverybroadcaster.put_packet(broadcastservermsg.to_utf8())
+		var err1 = udpdiscoverybroadcaster.put_packet(broadcastservermsg.to_utf8_buffer())
 		if err0 != 0 or err1 != 0:
 			print("udpdiscoverybroadcaster error ", err0, " ", err1)
 		udpdiscoverybroadcasterperiodtimer = udpdiscoverybroadcasterperiod

@@ -7,7 +7,7 @@ extends Node
 # mosquitto_sub -h test.mosquitto.org -v -t "metest/#"
 # mosquitto_pub -h test.mosquitto.org -t "metest/retain" -m "retained message" -r
 
-export var client_id = ""
+@export var client_id = ""
 	
 var socket = null
 var sslsocket = null
@@ -56,7 +56,7 @@ signal received_message(topic, message)
 signal broker_connected()
 signal broker_disconnected()
 
-var receivedbuffer : PoolByteArray = PoolByteArray()
+var receivedbuffer : PackedByteArray = PackedByteArray()
 
 func senddata(data):
 	var E = 0
@@ -70,7 +70,7 @@ func senddata(data):
 		print("bad senddata packet E=", E)
 	
 func receiveintobuffer():
-	if socket != null and socket.is_connected_to_host():
+	if socket != null and socket.get_status() == StreamPeerTCP.STATUS_CONNECTED:
 		var n = socket.get_available_bytes()
 		if n != 0:
 			var sv = socket.get_data(n)
@@ -78,7 +78,7 @@ func receiveintobuffer():
 			receivedbuffer.append_array(sv[1])
 			
 	elif sslsocket != null:
-		if sslsocket.status == StreamPeerSSL.STATUS_CONNECTED or sslsocket.status == StreamPeerSSL.STATUS_HANDSHAKING:
+		if sslsocket.status == StreamPeerTLS.STATUS_CONNECTED or sslsocket.status == StreamPeerTLS.STATUS_HANDSHAKING:
 			sslsocket.poll()
 			var n = sslsocket.get_available_bytes()
 			if n != 0:
@@ -103,14 +103,15 @@ func _process(delta):
 			brokerconnectmode = BCM_WAITING_CONNMESSAGE
 			
 	elif brokerconnectmode == BCM_WAITING_SOCKET_CONNECTION:
-		if socket.is_connected_to_host():
-			if socket.get_status() == StreamPeerTCP.STATUS_CONNECTED:
-				brokerconnectmode = BCM_WAITING_CONNMESSAGE
+		socket.poll()
+		if socket.get_status() == StreamPeerTCP.STATUS_CONNECTED:
+			brokerconnectmode = BCM_WAITING_CONNMESSAGE
 
 	elif brokerconnectmode == BCM_WAITING_SSL_SOCKET_CONNECTION:
-		if socket.is_connected_to_host():
+		socket.poll()
+		if socket.get_status() == StreamPeerTCP.STATUS_CONNECTED:
 			if sslsocket == null:
-				sslsocket = StreamPeerSSL.new()
+				sslsocket = StreamPeerTLS.new()
 				print("calling sslsocket.connect_to_stream()...")
 				var E3 = sslsocket.connect_to_stream(socket)
 				print("finish calling sslsocket.connect_to_stream()")
@@ -118,9 +119,9 @@ func _process(delta):
 					print("bad sslsocket.connect_to_stream E=", E3)
 					brokerconnectmode = BCM_FAILED_CONNECTION
 					sslsocket = null
-			if sslsocket != null and sslsocket.get_status() == StreamPeerSSL.STATUS_CONNECTED:
+			if sslsocket != null and sslsocket.get_status() == StreamPeerTLS.STATUS_CONNECTED:
 				print("CCSS ", sslsocket.get_status())
-				if sslsocket.get_status() == StreamPeerSSL.STATUS_CONNECTED:
+				if sslsocket.get_status() == StreamPeerTLS.STATUS_CONNECTED:
 					brokerconnectmode = BCM_WAITING_CONNMESSAGE
 				
 	elif brokerconnectmode == BCM_WAITING_CONNMESSAGE:
@@ -130,9 +131,9 @@ func _process(delta):
 	elif brokerconnectmode == BCM_WAITING_CONNACK or brokerconnectmode == BCM_CONNECTED:
 		receiveintobuffer()
 		wait_msg()
-		if brokerconnectmode == BCM_CONNECTED and pingticksnext0 < OS.get_ticks_msec():
-			senddata(PoolByteArray([CP_PINGREQ, 0x00]))
-			pingticksnext0 = OS.get_ticks_msec() + pinginterval*1000
+		if brokerconnectmode == BCM_CONNECTED and pingticksnext0 < Time.get_ticks_msec():
+			senddata(PackedByteArray([CP_PINGREQ, 0x00]))
+			pingticksnext0 = Time.get_ticks_msec() + pinginterval*1000
 
 	elif brokerconnectmode == BCM_FAILED_CONNECTION:
 		cleanupsockets()
@@ -147,19 +148,19 @@ func _ready():
 func set_last_will(topic, msg, retain=false, qos=0):
 	assert((0 <= qos) and (qos <= 2))
 	assert(topic)
-	self.lw_topic = topic.to_ascii()
-	self.lw_msg = msg if binarymessages else msg.to_ascii()
+	self.lw_topic = topic.to_ascii_buffer()
+	self.lw_msg = msg if binarymessages else msg.to_ascii_buffer()
 	self.lw_qos = qos
 	self.lw_retain = retain
 
 func firstmessagetoserver():
 	var clean_session = true
-	var msg = PoolByteArray()
+	var msg = PackedByteArray()
 	msg.append(CP_CONNECT);
 	msg.append(0x00);
 	msg.append(0x00);
 	msg.append(0x04);
-	msg.append_array("MQTT".to_ascii());
+	msg.append_array("MQTT".to_ascii_buffer());
 	msg.append(0x04);
 	msg.append(0x02);
 	msg.append(0x00);
@@ -181,7 +182,7 @@ func firstmessagetoserver():
 
 	msg.append(len(self.client_id) >> 8)
 	msg.append(self.client_id.length() & 0xFF)
-	msg.append_array(self.client_id.to_ascii())
+	msg.append_array(self.client_id.to_ascii_buffer())
 	if self.lw_topic:
 		msg.append(len(self.lw_topic) >> 8)
 		msg.append(len(self.lw_topic) & 0xFF)
@@ -192,10 +193,10 @@ func firstmessagetoserver():
 	if self.user != null:
 		msg.append(self.user.length() >> 8)
 		msg.append(self.user.length() & 0xFF)
-		msg.append_array(self.user.to_ascii())
+		msg.append_array(self.user.to_ascii_buffer())
 		msg.append(self.pswd.length() >> 8)
 		msg.append(self.pswd.length() & 0xFF)
-		msg.append_array(self.pswd.to_ascii())
+		msg.append_array(self.pswd.to_ascii_buffer())
 	return msg
 
 func cleanupsockets(retval=false):
@@ -236,11 +237,11 @@ func connect_to_broker(brokerurl):
 	
 	var Dcount = 0
 	if iswebsocket:
-		websocketclient = WebSocketClient.new()
+		websocketclient = WebSocketPeer.new()
 		websocketclient.verify_ssl = isssl
 		var websocketurl = ("wss://" if isssl else "ws://") + brokerserver + ":" + str(brokerport) + brokerpath
 		print("Connecting to websocketurl: ", websocketurl)
-		var E = websocketclient.connect_to_url(websocketurl, PoolStringArray(["mqttv3.1"]))
+		var E = websocketclient.connect_to_url(websocketurl, PackedStringArray(["mqttv3.1"]))
 		if E != 0:
 			print("websocketclient.connect_to_url Err: ", E)
 			return cleanupsockets(false)
@@ -250,7 +251,10 @@ func connect_to_broker(brokerurl):
 	else:
 		socket = StreamPeerTCP.new()
 		print("Connecting to %s:%s" % [brokerserver, brokerport])
-		socket.connect_to_host(brokerserver, brokerport)
+		var E = socket.connect_to_host(brokerserver, brokerport)
+		if E != 0:
+			print("socketclient.connect_to_url Err: ", E)
+			return cleanupsockets(false)
 		brokerconnectmode = BCM_WAITING_SSL_SOCKET_CONNECTION if isssl else BCM_WAITING_SOCKET_CONNECTION
 		
 	return true
@@ -258,17 +262,17 @@ func connect_to_broker(brokerurl):
 
 func disconnect_from_server():
 	if brokerconnectmode == BCM_CONNECTED:
-		senddata(PoolByteArray([0xE0, 0x00]))
+		senddata(PackedByteArray([0xE0, 0x00]))
 		emit_signal("broker_disconnected")
 	cleanupsockets()
 	
 func publish(topic, msg, retain=false, qos=0):
 	if not binarymessages:
-		msg = msg.to_ascii()
-	topic = topic.to_ascii()
+		msg = msg.to_ascii_buffer()
+	topic = topic.to_ascii_buffer()
 	
 	if socket != null:
-		if not socket.is_connected_to_host():
+		if not socket.get_status() == StreamPeerTCP.STATUS_CONNECTED:
 			return
 	elif websocket != null:
 		if not websocket.is_connected_to_host():
@@ -276,7 +280,7 @@ func publish(topic, msg, retain=false, qos=0):
 	else:
 		return
 
-	var pkt = PoolByteArray()
+	var pkt = PackedByteArray()
 	pkt.append(CP_PUBLISH);
 	pkt.append(0x00);
 		
@@ -308,9 +312,9 @@ func publish(topic, msg, retain=false, qos=0):
 
 func subscribe(topic, qos=0):
 	self.pid += 1
-	topic = topic.to_ascii()
+	topic = topic.to_ascii_buffer()
 	var length = 2 + 2 + len(topic) + 1
-	var msg = PoolByteArray()
+	var msg = PackedByteArray()
 	msg.append(CP_SUBSCRIBE);
 	msg.append(length)
 	msg.append(self.pid >> 8)
@@ -346,20 +350,20 @@ func wait_msg():
 	elif op & 0xf0 == 0x30:
 		var topic_len = (receivedbuffer[i]<<8) + receivedbuffer[i+1]
 		var im = i + 2
-		var topic = receivedbuffer.subarray(im, im + topic_len - 1).get_string_from_ascii()
+		var topic = receivedbuffer.slice(im, im + topic_len).get_string_from_ascii()
 		im += topic_len
 		var pid1 = 0
 		if op & 6:
 			pid1 = (receivedbuffer[im]<<8) + receivedbuffer[im+1]
 			im += 2
-		var data = receivedbuffer.subarray(im, i + sz - 1)
+		var data = receivedbuffer.slice(im, i + sz)
 		var msg = data if binarymessages else data.get_string_from_ascii()
 		
 		print("received topic=", topic, " msg=", msg)
 		emit_signal("received_message", topic, msg)
 		
 		if op & 6 == 2:
-			senddata(PoolByteArray([0x40, 0x02, (pid1 >> 8), (pid1 & 0xFF)]))
+			senddata(PackedByteArray([0x40, 0x02, (pid1 >> 8), (pid1 & 0xFF)]))
 		elif op & 6 == 4:
 			assert(0)
 
@@ -392,7 +396,7 @@ func wait_msg():
 
 func trimreceivedbuffer(n):
 	if n == receivedbuffer.size():
-		 receivedbuffer = PoolByteArray()
+		receivedbuffer = PackedByteArray()
 	else:
 		assert (n <= receivedbuffer.size())
-		receivedbuffer = receivedbuffer.subarray(n, -1)
+		receivedbuffer = receivedbuffer.slice(n)

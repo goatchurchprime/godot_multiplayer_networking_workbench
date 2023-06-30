@@ -12,4 +12,4 @@ enum {  CFI_TIMESTAMP 		= -1,
 		
 		CFI_RECT_POSITION = 10,
 		CFI_FIRE_KEY = 30
-	 }
+	}

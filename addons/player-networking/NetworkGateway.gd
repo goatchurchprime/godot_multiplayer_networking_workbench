@@ -10,32 +10,32 @@ extends Panel
 # make this system operate in VR gaming (using the OQ_network thing)
 # Insert by symlink to help with development of code
 
-export var remoteservers = [ "127.0.0.1" ]
-export var playersnodepath : NodePath = "/root/Main/Players"
-export var localplayerscene : String = "" # "res://controlplayer.tscn"
+@export var remoteservers = [ "127.0.0.1" ]
+@export var playersnodepath : NodePath = "/root/Main/Players"
+@export var localplayerscene : String = "" # "res://controlplayer.tscn"
 
 enum NETWORK_PROTOCOL { ENET = 0, 
 						WEBSOCKET = 1,
-						WEBRTC_WEBSOCKETSIGNAL = 2
+						WEBRTC_WEBSOCKETSIGNAL = 2,
 						WEBRTC_MQTTSIGNAL = 3
-					  }
-enum NETWORK_OPTIONS { NETWORK_OFF = 0
-					   AS_SERVER = 1,
-					   LOCAL_NETWORK = 2,
-					   FIXED_URL = 3
-					 }
+					}
+enum NETWORK_OPTIONS { NETWORK_OFF = 0,
+						AS_SERVER = 1,
+						LOCAL_NETWORK = 2,
+						FIXED_URL = 3
+					}
 
 enum NETWORK_OPTIONS_MQTT_WEBRTC { 
-					   NETWORK_OFF = 0
-					   AS_SERVER = 1,
-					   AS_CLIENT = 2,
-					   AS_NECESSARY = 3
-					 }
+						NETWORK_OFF = 0,
+						AS_SERVER = 1,
+						AS_CLIENT = 2,
+						AS_NECESSARY = 3
+					}
 
 
 const errordecodes = { ERR_ALREADY_IN_USE:"ERR_ALREADY_IN_USE", 
-					   ERR_CANT_CREATE:"ERR_CANT_CREATE"
-					 }
+						ERR_CANT_CREATE:"ERR_CANT_CREATE"
+					}
 var rng = RandomNumberGenerator.new()
 
 
@@ -48,6 +48,7 @@ func _ready():
 		$ProtocolOptions.set_item_disabled(NETWORK_PROTOCOL.ENET, true)
 		$ProtocolOptions.selected = max(NETWORK_PROTOCOL.WEBSOCKET, $ProtocolOptions.selected)
 	rng.randomize()
+	_on_ProtocolOptions_item_selected($ProtocolOptions.selected)
 
 func initialstatenormal(protocol, networkoption):
 	assert (protocol >= NETWORK_PROTOCOL.ENET and protocol <= NETWORK_PROTOCOL.WEBRTC_WEBSOCKETSIGNAL)
@@ -102,21 +103,21 @@ func _on_NetworkOptions_item_selected(ns):
 	print("_on_OptionButton_item_selected_on_OptionButton_item_selected_on_OptionButton_item_selected ", ns)
 	var selectasoff = (ns == NETWORK_OPTIONS.NETWORK_OFF)
 	if not selectasoff:
-		$PlayerConnections/ConnectionLog.text = ""
+		$PlayerConnections.clearconnectionlog()
 
 	if $PlayerConnections.LocalPlayer.get_node("PlayerFrame").networkID != 0:
-		if get_tree().get_network_peer() != null:
-			print("closing connection ", $PlayerConnections.LocalPlayer.get_node("PlayerFrame").networkID, get_tree().get_network_peer())
+		if not (multiplayer.multiplayer_peer is OfflineMultiplayerPeer):
+			print("closing connection ", $PlayerConnections.LocalPlayer.get_node("PlayerFrame").networkID, multiplayer.multiplayer_peer)
 		$PlayerConnections.force_server_disconnect()
 	assert ($PlayerConnections.LocalPlayer.get_node("PlayerFrame").networkID == 0)
 	if $UDPipdiscovery/Servermode.is_processing():
 		$UDPipdiscovery/Servermode.stopUDPbroadcasting()
 	if $UDPipdiscovery/Clientmode.is_processing():
 		$UDPipdiscovery/Clientmode.stopUDPreceiving()
-	$ENetMultiplayer/Servermode/StartENetmultiplayer.pressed = false
-	$ENetMultiplayer/Clientmode/StartENetmultiplayer.pressed = false
-	$WebSocketMultiplayer/Servermode/StartWebSocketmultiplayer.pressed = false
-	$WebSocketMultiplayer/Clientmode/StartWebSocketmultiplayer.pressed = false
+	$ENetMultiplayer/Servermode/StartENetmultiplayer.button_pressed = false
+	$ENetMultiplayer/Clientmode/StartENetmultiplayer.button_pressed = false
+	$WebSocketMultiplayer/Servermode/StartWebSocketmultiplayer.button_pressed = false
+	$WebSocketMultiplayer/Clientmode/StartWebSocketmultiplayer.button_pressed = false
 	if $WebSocketsignalling/Servermode.websocketserver != null:
 		$WebSocketsignalling/Servermode.stopwebsocketsignalserver()
 	if $WebSocketsignalling/Clientmode.websocketclient != null:
@@ -140,7 +141,7 @@ func _on_NetworkOptions_item_selected(ns):
 	assert (not $MQTTsignalling.visible)
 	$ProtocolOptions.disabled = not selectasoff
 	$UDPipdiscovery/Servermode.visible = selectasserver
-	if selectUDPipdiscoveryserver and $UDPipdiscovery/udpenabled.pressed:
+	if selectUDPipdiscoveryserver and $UDPipdiscovery/udpenabled.button_pressed:
 		$UDPipdiscovery/Servermode.startUDPbroadcasting()
 	if selectassearchingclient:
 		$UDPipdiscovery/Clientmode.startUDPreceiving()
@@ -149,28 +150,28 @@ func _on_NetworkOptions_item_selected(ns):
 		$ENetMultiplayer/Servermode.visible = selectasserver
 		$ENetMultiplayer/Clientmode.visible = selectasclient or selectassearchingclient
 		$ENetMultiplayer/Clientmode/StartENetmultiplayer.disabled = selectassearchingclient
-		if $ENetMultiplayer/autoconnect.pressed:
+		if $ENetMultiplayer/autoconnect.button_pressed:
 			if selectasserver:
-				$ENetMultiplayer/Servermode/StartENetmultiplayer.pressed = true
+				$ENetMultiplayer/Servermode/StartENetmultiplayer.button_pressed = true
 			if selectasclient:
-				$ENetMultiplayer/Clientmode/StartENetmultiplayer.pressed = true
+				$ENetMultiplayer/Clientmode/StartENetmultiplayer.button_pressed = true
 
 	if selectaswebsocket:
 		$WebSocketMultiplayer/Servermode.visible = selectasserver
 		$WebSocketMultiplayer/Clientmode.visible = selectasclient or selectassearchingclient
 		$WebSocketMultiplayer/Clientmode/StartWebSocketmultiplayer.disabled = selectassearchingclient
-		if $WebSocketMultiplayer/autoconnect.pressed:
+		if $WebSocketMultiplayer/autoconnect.button_pressed:
 			if selectasserver:
-				$WebSocketMultiplayer/Servermode/StartWebSocketmultiplayer.pressed = true
+				$WebSocketMultiplayer/Servermode/StartWebSocketmultiplayer.button_pressed = true
 			if selectasclient:
-				$WebSocketMultiplayer/Clientmode/StartWebSocketmultiplayer.pressed = true
+				$WebSocketMultiplayer/Clientmode/StartWebSocketmultiplayer.button_pressed = true
 
 	if selectaswebrtcwebsocket:
 		$WebSocketsignalling/Servermode.visible = selectasserver
 		$WebSocketsignalling/Clientmode.visible = selectasclient or selectassearchingclient
-		$WebSocketsignalling/Servermode/WebRTCmultiplayerserver/StartWebRTCmultiplayer.pressed = false
+		$WebSocketsignalling/Servermode/WebRTCmultiplayerserver/StartWebRTCmultiplayer.button_pressed = false
 		$WebSocketsignalling/Servermode/WebRTCmultiplayerserver/StartWebRTCmultiplayer.disabled = true
-		$WebSocketsignalling/Clientmode/WebRTCmultiplayerclient/StartWebRTCmultiplayer.pressed = false
+		$WebSocketsignalling/Clientmode/WebRTCmultiplayerclient/StartWebRTCmultiplayer.button_pressed = false
 		$WebSocketsignalling/Clientmode/WebRTCmultiplayerclient/StartWebRTCmultiplayer.disabled = true
 		if selectasserver:
 			$WebSocketsignalling/Servermode.startwebsocketsignalserver()
@@ -185,13 +186,13 @@ func _on_NetworkOptionsMQTTWebRTC_item_selected(ns):
 	assert ($ProtocolOptions.selected == NETWORK_PROTOCOL.WEBRTC_MQTTSIGNAL)
 	var selectasoff = (ns == NETWORK_OPTIONS.NETWORK_OFF)
 	if not selectasoff:
-		$PlayerConnections/ConnectionLog.text = ""
-	$MQTTsignalling/StartMQTT.pressed = false
-	yield(get_tree(), "idle_frame")
-	if $MQTTsignalling/StartMQTT.is_connected("toggled", $MQTTsignalling/Servermode, "_on_StartServer_toggled"):
-		$MQTTsignalling/StartMQTT.disconnect("toggled", $MQTTsignalling/Servermode, "_on_StartServer_toggled")
-	if $MQTTsignalling/StartMQTT.is_connected("toggled", $MQTTsignalling/Clientmode, "_on_StartClient_toggled"):
-		$MQTTsignalling/StartMQTT.disconnect("toggled", $MQTTsignalling/Clientmode, "_on_StartClient_toggled")
+		$PlayerConnections.clearconnectionlog()
+	$MQTTsignalling/StartMQTT.button_pressed = false
+	await get_tree().process_frame
+	if $MQTTsignalling/StartMQTT.is_connected("toggled", Callable($MQTTsignalling/Servermode, "_on_StartServer_toggled")):
+		$MQTTsignalling/StartMQTT.disconnect("toggled", Callable($MQTTsignalling/Servermode, "_on_StartServer_toggled"))
+	if $MQTTsignalling/StartMQTT.is_connected("toggled", Callable($MQTTsignalling/Clientmode, "_on_StartClient_toggled")):
+		$MQTTsignalling/StartMQTT.disconnect("toggled", Callable($MQTTsignalling/Clientmode, "_on_StartClient_toggled"))
 
 	var selectasserver = (ns == NETWORK_OPTIONS_MQTT_WEBRTC.AS_SERVER)
 	var selectasclient = (ns == NETWORK_OPTIONS_MQTT_WEBRTC.AS_CLIENT)
@@ -200,58 +201,57 @@ func _on_NetworkOptionsMQTTWebRTC_item_selected(ns):
 	$MQTTsignalling/Clientmode.visible = selectasclient
 	$ProtocolOptions.disabled = not selectasoff
 	if selectasserver:
-		$MQTTsignalling/StartMQTT.connect("toggled", $MQTTsignalling/Servermode, "_on_StartServer_toggled")
-		if $MQTTsignalling/mqttautoconnect.pressed:
-			$MQTTsignalling/StartMQTT.pressed = true
+		$MQTTsignalling/StartMQTT.connect("toggled", Callable($MQTTsignalling/Servermode, "_on_StartServer_toggled"))
+		if $MQTTsignalling/mqttautoconnect.button_pressed:
+			$MQTTsignalling/StartMQTT.button_pressed = true
 	if selectasclient or selectasnecessary:
-		$MQTTsignalling/StartMQTT.connect("toggled", $MQTTsignalling/Clientmode, "_on_StartClient_toggled")
-		if $MQTTsignalling/mqttautoconnect.pressed:
-			$MQTTsignalling/StartMQTT.pressed = true
-#	if $MQTTsignalling/mqttautoconnect.pressed:
-#		$MQTTsignalling/StartMQTT.pressed = selectasclient or selectasnecessary
-	$MQTTsignalling/Servermode/WebRTCmultiplayerserver/StartWebRTCmultiplayer.pressed = false
+		$MQTTsignalling/StartMQTT.connect("toggled", Callable($MQTTsignalling/Clientmode, "_on_StartClient_toggled"))
+		if $MQTTsignalling/mqttautoconnect.button_pressed:
+			$MQTTsignalling/StartMQTT.button_pressed = true
+#	if $MQTTsignalling/mqttautoconnect.button_pressed:
+#		$MQTTsignalling/StartMQTT.button_pressed = selectasclient or selectasnecessary
+	$MQTTsignalling/Servermode/WebRTCmultiplayerserver/StartWebRTCmultiplayer.button_pressed = false
 	$MQTTsignalling/Servermode/WebRTCmultiplayerserver/StartWebRTCmultiplayer.disabled = true
-	$MQTTsignalling/Clientmode/WebRTCmultiplayerclient/StartWebRTCmultiplayer.pressed = false
+	$MQTTsignalling/Clientmode/WebRTCmultiplayerclient/StartWebRTCmultiplayer.button_pressed = false
 	$MQTTsignalling/Clientmode/WebRTCmultiplayerclient/StartWebRTCmultiplayer.disabled = true
 
 func _input(event):   # this can be supporessed by set_process_input(false)
 	if event is InputEventKey and event.pressed:
 		var bsel = -1
-		if (event.scancode == KEY_0):	bsel = 0
-		elif (event.scancode == KEY_1):	bsel = 1
-		elif (event.scancode == KEY_2):	bsel = 2
-		elif (event.scancode == KEY_3):	bsel = 3
-		elif (event.scancode == KEY_4):	bsel = 4
+		if (event.keycode == KEY_0):	bsel = 0
+		elif (event.keycode == KEY_1):	bsel = 1
+		elif (event.keycode == KEY_2):	bsel = 2
+		elif (event.keycode == KEY_3):	bsel = 3
+		elif (event.keycode == KEY_4):	bsel = 4
 
 		if bsel != -1:
 			selectandtrigger_networkoption(bsel)
 
-		elif (event.scancode == KEY_G):
-			$PlayerConnections/Doppelganger.pressed = not $PlayerConnections/Doppelganger.pressed
+		elif (event.keycode == KEY_G):
+			$PlayerConnections/Doppelganger.button_pressed = not $PlayerConnections/Doppelganger.button_pressed
 
-	elif event is InputEventMouseButton and event.is_pressed() and $TimelineVisualizer.visible and (event.button_index == BUTTON_WHEEL_UP or event.button_index == BUTTON_WHEEL_DOWN):
-		var s = 1 if event.button_index == BUTTON_WHEEL_UP else -1
-		var relposition = event.position - $TimelineVisualizer.rect_global_position
-		if relposition >= Vector2(0,0) and relposition <= $TimelineVisualizer.rect_size:
-			$TimelineVisualizer/TimeTracking.pressed = false
-			var relclick = relposition/$TimelineVisualizer.rect_size
-			$TimelineVisualizer/Viewport/TimelineDiagram.zoomtimeline(relclick, s)
-		elif $DoppelgangerPanel.get_rect().has_point(event.position):
-			var swnode = get_focus_owner()
-			if swnode == $DoppelgangerPanel/netdelaymin and swnode.editable:
-				swnode.text = String(max(10, int(swnode.text)+5*s))
-			elif swnode == $DoppelgangerPanel/netoffset and swnode.editable:
-				swnode.text = String(int(swnode.text)+1000*s)
-			elif swnode == $DoppelgangerPanel/netdelayadd:
-				swnode.text = String(max(0, int(swnode.text)+5*s))
-			elif swnode == $DoppelgangerPanel/netdroppc:
-				swnode.text = String(max(0.0, float(swnode.text)+0.1*s))
+	elif event is InputEventMouseButton and event.is_pressed() and $TimelineVisualizer.visible and (event.button_index == MOUSE_BUTTON_WHEEL_UP or event.button_index == MOUSE_BUTTON_WHEEL_DOWN):
+		var s = 1 if event.button_index == MOUSE_BUTTON_WHEEL_UP else -1
+		var relposition = event.position - $TimelineVisualizer.global_position
+		if relposition >= Vector2(0,0) and relposition <= $TimelineVisualizer.size:
+			$TimelineVisualizer/TimeTracking.button_pressed = false
+			var relclick = relposition/$TimelineVisualizer.size
+			$TimelineVisualizer/SubViewport/TimelineDiagram.zoomtimeline(relclick, s)
+		#elif $DoppelgangerPanel.get_rect().has_point(event.position):
+		#	var swnode = get_viewport().gui_get_focus_owner()
+		#	if swnode == $DoppelgangerPanel/netdelaymin and swnode.editable:
+		#		swnode.text = str(max(10, int(swnode.text)+5*s))
+		#	elif swnode == $DoppelgangerPanel/netoffset and swnode.editable:
+		#		swnode.text = str(int(swnode.text)+1000*s)
+		#	elif swnode == $DoppelgangerPanel/netdelayadd:
+		#	elif swnode == $DoppelgangerPanel/netdroppc:
+		#		swnode.text = str(max(0.0, float(swnode.text)+0.1*s))
 
 func getrandomdoppelgangerdelay(disabledropout=false):
-	if not disabledropout and rng.randf_range(0, 100) < float(get_node("DoppelgangerPanel/netdroppc").text):
+	if not disabledropout and rng.randf_range(0, 100) < float($DoppelgangerPanel/hbox/VBox_netdrop/netdroppc.text):
 		return -1.0
-	var netdelayadd = float(get_node("DoppelgangerPanel/netdelayadd").text)
-	var doppelgangerdelay = int(get_node("DoppelgangerPanel/netdelaymin").text) + max(0.0, rng.randfn(netdelayadd, netdelayadd*0.4))
+	var netdelayadd = float($DoppelgangerPanel/hbox/VBox_netdelay/netdelayadd.text)
+	var doppelgangerdelay = int($DoppelgangerPanel/hbox/VBox_delaymin/netdelaymin.text) + max(0.0, rng.randfn(netdelayadd, netdelayadd*0.4))
 	return doppelgangerdelay
 	
 func setnetworkoff():	

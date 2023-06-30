@@ -12,7 +12,7 @@ var networkID = 0   # 0:unconnected, 1:server, -1:connecting, >1:connected to cl
 		# we could make this tolerate out of order values
 func networkedavatarthinnedframedata(vd):
 	assert (not vd.has(NCONSTANTS.CFI_TIMESTAMP_F0))
-	vd[NCONSTANTS.CFI_TIMESTAMP_RECIEVED] = OS.get_ticks_msec()*0.001
+	vd[NCONSTANTS.CFI_TIMESTAMP_RECIEVED] = Time.get_ticks_msec()*0.001
 	var timestampoffset = vd[NCONSTANTS.CFI_TIMESTAMP_RECIEVED] - vd[NCONSTANTS.CFI_TIMESTAMP]
 	if initialframestate == 0 or timestampoffset < mintimestampoffset:
 		mintimestampoffset = timestampoffset
@@ -37,7 +37,7 @@ func _process(delta):
 		else:
 			Dmaxarrivaldelay = max(Dmaxarrivaldelay, framestack[0][NCONSTANTS.CFI_ARRIVALDELAY])
 			
-	var t = OS.get_ticks_msec()*0.001 - mintimestampoffset - laglatency
+	var t = Time.get_ticks_msec()*0.001 - mintimestampoffset - laglatency
 	var completedframeL = { }
 	while len(framestack) > 0 and t > framestack[0][NCONSTANTS.CFI_TIMESTAMP]:
 		var fd = framestack.pop_front()
@@ -60,7 +60,7 @@ func _process(delta):
 					continue # v = v0  (filled in by completedframeL)
 				elif ty == TYPE_INT:
 					continue # v = v0  (filled in by completedframeL)
-				elif ty == TYPE_QUAT:
+				elif ty == TYPE_QUATERNION:
 					v = v0.slerp(v1, lam)
 				else:
 					v = lerp(v0, v1, lam)

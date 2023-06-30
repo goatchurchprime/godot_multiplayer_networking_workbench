@@ -1,10 +1,10 @@
 extends Control
 
 
-onready var SetupMQTTsignal = get_parent()
-onready var MQTT = SetupMQTTsignal.get_node("MQTT")
-onready var StartMQTT = SetupMQTTsignal.get_node("StartMQTT")
-onready var StartMQTTstatuslabel = SetupMQTTsignal.get_node("StartMQTT/statuslabel")
+@onready var SetupMQTTsignal = get_parent()
+@onready var MQTT = SetupMQTTsignal.get_node("MQTT")
+@onready var StartMQTT = SetupMQTTsignal.get_node("StartMQTT")
+@onready var StartMQTTstatuslabel = SetupMQTTsignal.get_node("StartMQTT/statuslabel")
 
 var roomname = ""
 	
@@ -24,12 +24,14 @@ signal mqttsig_packet_received(id, v)
 
 func sendpacket_toclient(wclientid, v):
 	var t = "%s/%s/packet/%s" % [roomname, MQTT.client_id, wclientidtoclientid[wclientid]]
-	MQTT.publish(t, to_json(v))
+	MQTT.publish(t, JSON.new().stringify(v))
 	
 func received_mqtt(topic, msg):
 	if msg == "":  return
 	var stopic = topic.split("/")
-	var v = parse_json(msg)
+	var test_json_conv = JSON.new()
+	test_json_conv.parse(msg)
+	var v = test_json_conv.get_data()
 	if v != null and v.has("subject"):
 		if len(stopic) >= 3 and stopic[0] == roomname:
 			var sendingclientid = stopic[1]
@@ -45,8 +47,8 @@ func received_mqtt(topic, msg):
 					if not clearlostretainedclients:
 						MQTT.subscribe("%s/%s/client" % [roomname, sendingclientid])
 					var t = "%s/%s/packet/%s" % [roomname, MQTT.client_id, sendingclientid]
-					MQTT.publish(t, to_json({"subject":"connection_established", "wclientid":wclientid}))
-					MQTT.publish(statustopic, to_json({"subject":"serveropen", "nconnections":len(clientidtowclientid)}), true)
+					MQTT.publish(t, JSON.new().stringify({"subject":"connection_established", "wclientid":wclientid}))
+					MQTT.publish(statustopic, JSON.new().stringify({"subject":"serveropen", "nconnections":len(clientidtowclientid)}), true)
 					emit_signal("mqttsig_client_connected", wclientid)
 					$ClientsList.add_item(sendingclientid, int(sendingclientid))
 					$ClientsList.selected = $ClientsList.get_item_count()-1
@@ -63,7 +65,7 @@ func received_mqtt(topic, msg):
 						var idx = $ClientsList.get_item_index(int(sendingclientid))
 						print(idx)
 						$ClientsList.remove_item(idx)
-						MQTT.publish(statustopic, to_json({"subject":"serveropen", "nconnections":len(clientidtowclientid)}), true)
+						MQTT.publish(statustopic, JSON.new().stringify({"subject":"serveropen", "nconnections":len(clientidtowclientid)}), true)
 					else:
 						if clearlostretainedclients:
 							MQTT.publish(topic, "", true)
@@ -77,7 +79,7 @@ func received_mqtt(topic, msg):
 				print("Unrecognized topic ", topic)
 
 func on_broker_disconnect():
-	StartMQTT.pressed = false
+	StartMQTT.button_pressed = false
 	
 func on_broker_connect():
 	MQTT.subscribe("%s/+/packet/%s" % [roomname, MQTT.client_id])
@@ -86,41 +88,43 @@ func on_broker_connect():
 	if clearlostretainedclients:
 		MQTT.subscribe("%s/+/client" % roomname)
 	statustopic = "%s/%s/server" % [roomname, MQTT.client_id]
-	MQTT.publish(statustopic, to_json({"subject":"serveropen", "nconnections":len(clientidtowclientid)}), true)
+	MQTT.publish(statustopic, JSON.new().stringify({"subject":"serveropen", "nconnections":len(clientidtowclientid)}), true)
 	StartMQTTstatuslabel.text = "connected"
-	$ClientsList.set_item_text(0, MQTT.client_id)
+	$ClientsList.clear()
+	$ClientsList.add_item(MQTT.client_id, 1)
+	$ClientsList.selected = 0
+	
 	$WebRTCmultiplayerserver/StartWebRTCmultiplayer.disabled = false
-	if SetupMQTTsignal.get_node("autoconnect").pressed:
-		$WebRTCmultiplayerserver/StartWebRTCmultiplayer.pressed = true
+	if SetupMQTTsignal.get_node("autoconnect").button_pressed:
+		$WebRTCmultiplayerserver/StartWebRTCmultiplayer.button_pressed = true
 		
 func _on_StartServer_toggled(button_pressed):
 	if button_pressed:
-		MQTT.connect("received_message", self, "received_mqtt")
-		MQTT.connect("broker_connected", self, "on_broker_connect")
-		MQTT.connect("broker_disconnected", self, "on_broker_disconnect")
+		MQTT.received_message.connect(received_mqtt)
+		MQTT.broker_connected.connect(on_broker_connect)
+		MQTT.broker_disconnected.connect(on_broker_disconnect)
 		roomname = SetupMQTTsignal.get_node("roomname").text
 		StartMQTTstatuslabel.text = "on"
 		randomize()
 		MQTT.client_id = "s%d" % randi()
 		SetupMQTTsignal.get_node("client_id").text = MQTT.client_id
 		statustopic = "%s/%s/server" % [roomname, MQTT.client_id]
-		MQTT.set_last_will(statustopic, to_json({"subject":"dead"}), true)
+		MQTT.set_last_will(statustopic, JSON.new().stringify({"subject":"dead"}), true)
 		StartMQTTstatuslabel.text = "connecting"
 		var brokerurl = SetupMQTTsignal.get_node("brokeraddress").text
 		MQTT.connect_to_broker(brokerurl)
 
 	else:
 		print("Disconnecting MQTT")
-		MQTT.disconnect("received_message", self, "received_mqtt")
-		MQTT.disconnect("broker_connected", self, "on_broker_connect")
-		MQTT.disconnect("broker_disconnected", self, "on_broker_disconnect")
+		MQTT.received_message.disconnect(received_mqtt)
+		MQTT.broker_connected.disconnect(on_broker_connect)
+		MQTT.broker_disconnected.disconnect(on_broker_disconnect)
 		MQTT.disconnect_from_server()
 		StartMQTTstatuslabel.text = "off"
 		SetupMQTTsignal.get_node("client_id").text = ""
 		for s in clientidtowclientid:
 			emit_signal("mqttsig_client_disconnected", clientidtowclientid[s])
 		$ClientsList.clear()
-		$ClientsList.add_item("none", 0)
 		clientidtowclientid.clear()
 		wclientidtoclientid.clear()
 		

@@ -8,8 +8,8 @@ var Dinitializewebrtcmode = false
 
 func _ready():
 	get_node("../Players").set_mouse_filter(Control.MOUSE_FILTER_IGNORE)
-	connect("mouse_exited", self, "_gui_input", [null])
-	get_node("/root").connect("size_changed", self, "window_size_changed")
+	connect("mouse_exited", Callable(self, "_gui_input").bind(null))
+	get_node("/root").connect("size_changed", Callable(self, "window_size_changed"))
 	var NetworkGateway = get_node("../NetworkGateway")
 
 	if Dinitializewebrtcmode:
@@ -22,7 +22,7 @@ func _ready():
 
 
 	if OS.has_feature("Server"):
-		yield(get_tree().create_timer(1.5), "timeout")
+		await get_tree().create_timer(1.5).timeout
 		NetworkGateway.selectandtrigger_networkoption(NetworkGateway.NETWORK_OPTIONS.AS_SERVER)
 
 func _gui_input(event):
@@ -32,7 +32,7 @@ func _gui_input(event):
 	elif event is InputEventScreenDrag or event is InputEventScreenTouch:
 		return
 	elif event is InputEventMouseButton:
-		if event.button_index == BUTTON_LEFT:
+		if event.button_index == MOUSE_BUTTON_LEFT:
 			if event.pressed:
 				mouseposition = event.position
 				mousebuttondown = true
@@ -42,8 +42,8 @@ func _gui_input(event):
 		mouseposition = event.position
 		
 	if mouseposition != null:
-		mousecommandvelocity = Vector2((-1 if mouseposition.x < rect_size.x/3 else 0) + (1 if mouseposition.x > 2*rect_size.x/3 else 0), 
-									   (-1 if mouseposition.y < rect_size.y/3 else 0) + (1 if mouseposition.y > 2*rect_size.y/3 else 0))
+		mousecommandvelocity = Vector2((-1 if mouseposition.x < size.x/3 else 0) + (1 if mouseposition.x > 2*size.x/3 else 0), 
+										(-1 if mouseposition.y < size.y/3 else 0) + (1 if mouseposition.y > 2*size.y/3 else 0))
 	else:
 		mousecommandvelocity = Vector2(0, 0)
 

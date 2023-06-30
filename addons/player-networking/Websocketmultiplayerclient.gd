@@ -1,17 +1,8 @@
 extends Control
 
-onready var NetworkGateway = get_node("../..")
-onready var PlayerConnections = NetworkGateway.get_node("PlayerConnections")
-var websocketclient = null
+@onready var NetworkGateway = get_node("../..")
+@onready var PlayerConnections = NetworkGateway.get_node("PlayerConnections")
 
-func _ready():
-	set_process(false)
-func _process(delta):
-	websocketclient.poll()
-func websocketshutdown(was_clean_close):
-	set_process(false)
-	websocketclient = null
-	
 func _on_StartWebSocketmultiplayer_toggled(button_pressed):
 	if button_pressed:
 		var portnumber = int(NetworkGateway.get_node("NetworkOptions/portnumber").text)
@@ -19,21 +10,18 @@ func _on_StartWebSocketmultiplayer_toggled(button_pressed):
 		var serverIPnumber = NetworkGateway.get_node("NetworkOptions").get_item_text(ns).split(" ", 1)[0]
 		var url = "ws://%s:%d" % [serverIPnumber, portnumber]
 		print("Websocketclient connect to: ", url)
-		var lwebsocketclient = WebSocketClient.new();
-		var clienterror = lwebsocketclient.connect_to_url(url, PoolStringArray(), true)
-		if clienterror == 0:
-			PlayerConnections.SetNetworkedMultiplayerPeer(lwebsocketclient)
-			websocketclient = lwebsocketclient
-			websocketclient.connect("connection_closed", self, "websocketshutdown")
-			set_process(true)
-		else:
+		var multiplayerpeer = WebSocketMultiplayerPeer.new();
+		var E = multiplayerpeer.create_client(url)
+		if E != OK:
 			print("Bad start websocket")
 			NetworkGateway.selectandtrigger_networkoption(NetworkGateway.NETWORK_OPTIONS.NETWORK_OFF)
+			return
+
+		multiplayer.multiplayer_peer = multiplayerpeer
+		PlayerConnections.network_player_notyetconnected()
+		assert (get_tree().multiplayer_poll)
 			
 	else:
-		if get_tree().get_network_peer() != null:
-			PlayerConnections.force_server_disconnect()
-		if websocketclient != null:
-			websocketclient.disconnect_from_host()
+		PlayerConnections.force_server_disconnect()
 
 

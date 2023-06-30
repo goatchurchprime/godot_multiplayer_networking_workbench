@@ -1,22 +1,27 @@
 extends Control
 
-onready var NetworkGateway = get_node("../..")
-onready var PlayerConnections = NetworkGateway.get_node("PlayerConnections")
+@onready var NetworkGateway = get_node("../..")
+@onready var PlayerConnections = NetworkGateway.get_node("PlayerConnections")
 
 func _on_StartENetmultiplayer_toggled(button_pressed):
 	if button_pressed:
 		var portnumber = int(NetworkGateway.get_node("NetworkOptions/portnumber").text)
-		var networkedmultiplayerserver = NetworkedMultiplayerENet.new()
-		var servererror = networkedmultiplayerserver.create_server(portnumber)
-		if servererror == 0:
-			PlayerConnections.SetNetworkedMultiplayerPeer(networkedmultiplayerserver)
-		else:
-			PlayerConnections.connectionlog("Server error: %d\n" % servererror)
-			print("networkedmultiplayer createserver Error: ", servererror)
+		var multiplayerpeer = ENetMultiplayerPeer.new()
+		var E = multiplayerpeer.create_server(portnumber)
+		if E != OK:
+			$StartENetmultiplayer.button_pressed = false
+			print("Failed ", error_string(E))
+			PlayerConnections.connectionlog("Server error: %d\n" % E)
+			print("networkedmultiplayer createserver Error: ", E)
 			print("*** is there a server running on this port already? ", portnumber)
 			NetworkGateway.selectandtrigger_networkoption(NetworkGateway.NETWORK_OPTIONS.NETWORK_OFF)
-
+			return
+		multiplayer.multiplayer_peer = multiplayerpeer
+		assert (multiplayer.server_relay)
+		assert (multiplayer.get_unique_id() == 1)
+		assert (get_tree().multiplayer_poll)
+		PlayerConnections.networkplayer_connected_to_server()
+		
 	else:
-		if get_tree().get_network_peer() != null:
-			PlayerConnections.force_server_disconnect()
+		PlayerConnections.force_server_disconnect()
 		
