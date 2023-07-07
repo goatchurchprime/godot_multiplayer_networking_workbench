@@ -23,7 +23,8 @@ func client_connection_established(lwclientid):
 func client_connection_closed():
 	if not (multiplayer.multiplayer_peer is OfflineMultiplayerPeer):
 		var peer = multiplayer.multiplayer_peer.get_peer(1)
-		peer["connection"].close()
+		if peer:
+			peer["connection"].close()
 	print("server client_disconnected ")
 
 func client_packet_received(v):
