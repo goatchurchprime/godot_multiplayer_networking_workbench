@@ -863,6 +863,8 @@ layout_mode = 0
 offset_right = 40.0
 offset_bottom = 40.0
 
+[node name="AudioStreamPlayer3D" type="AudioStreamPlayer3D" parent="Control"]
+
 [connection signal="item_selected" from="ProtocolOptions" to="." method="_on_ProtocolOptions_item_selected"]
 [connection signal="item_selected" from="NetworkOptions" to="." method="_on_NetworkOptions_item_selected"]
 [connection signal="item_selected" from="NetworkOptionsMQTTWebRTC" to="." method="_on_NetworkOptionsMQTTWebRTC_item_selected"]
