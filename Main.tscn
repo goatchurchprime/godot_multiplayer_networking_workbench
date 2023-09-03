@@ -1,10 +1,12 @@
-[gd_scene load_steps=9 format=3 uid="uid://denbhipr26x6c"]
+[gd_scene load_steps=11 format=3 uid="uid://denbhipr26x6c"]
 
 [ext_resource type="Script" path="res://addons/player-networking/PlayerFrameLocal.gd" id="1"]
 [ext_resource type="PackedScene" uid="uid://dhd8tliyhvtiw" path="res://controlplayer.tscn" id="2"]
 [ext_resource type="PackedScene" uid="uid://cfmoahalri06d" path="res://addons/player-networking/NetworkGateway.tscn" id="3"]
 [ext_resource type="Script" path="res://JoystickControls.gd" id="4"]
 [ext_resource type="Script" path="res://PingPongBall.gd" id="5"]
+
+[sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_is50g"]
 
 [sub_resource type="SphereMesh" id="1"]
 radius = 10.0
@@ -14,6 +16,8 @@ height = 20.0
 
 [sub_resource type="RectangleShape2D" id="3"]
 size = Vector2(39, 355)
+
+[sub_resource type="ImageTexture" id="ImageTexture_72257"]
 
 [node name="Main" type="Control"]
 layout_mode = 3
@@ -35,6 +39,7 @@ offset_bottom = 430.0
 localplayerscene = "res://controlplayer.tscn"
 
 [node name="JoystickControls" type="ColorRect" parent="."]
+material = SubResource("CanvasItemMaterial_is50g")
 layout_mode = 0
 offset_left = 11.0
 offset_top = 383.0
@@ -66,6 +71,15 @@ position = Vector2(555, 175)
 [node name="CollisionShape2D" type="CollisionShape2D" parent="JoystickControls/StaticBody2D2"]
 position = Vector2(66.5, -5.5)
 shape = SubResource("3")
+
+[node name="TextureRect" type="TextureRect" parent="JoystickControls"]
+visible = false
+layout_mode = 0
+offset_left = 135.0
+offset_top = -72.0
+offset_right = 552.0
+offset_bottom = 364.0
+texture = SubResource("ImageTexture_72257")
 
 [node name="Players" type="Control" parent="."]
 anchors_preset = 0

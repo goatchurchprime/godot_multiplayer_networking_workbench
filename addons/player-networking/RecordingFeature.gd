@@ -9,6 +9,7 @@ var recordingeffect = null
 var capturingeffect = null
 
 func _ready():
+	#return
 	var recordbus_idx = AudioServer.get_bus_index("Recorder")
 	assert ($MicRecord/AudioStreamRecorder.bus == "Recorder")
 	assert ($MicRecord/AudioStreamRecorder.stream.is_class("AudioStreamMicrophone"))
@@ -21,26 +22,24 @@ func _ready():
 	#capturingeffect = AudioServer.get_bus_effect(recordbus_idx, 1)
 	#assert (capturingeffect.is_class("AudioEffectCapture"))
 	var enablesound = true
-	if ResourceLoader.exists("res://addons/opus/OpusEncoderNode.gdns"):
-		var OpusEncoderNode = load("res://addons/opus/OpusEncoderNode.gdns")
-		if enablesound and OpusEncoderNode != null:
-			var OpusEncoder = OpusEncoderNode.new()
+	if enablesound and ClassDB.class_exists("OpusEncoderNode"):
+		if enablesound:
+			var OpusEncoder = ClassDB.instantiate("OpusEncoderNode")
 			OpusEncoder.name = "OpusEncoder"
 			$MicRecord.add_child(OpusEncoder)
 		else:
 			print("Missing Opus plugin library")
 		var OpusDecoderNode = load("res://addons/opus/OpusDecoderNode.gdns")
-		if enablesound and OpusDecoderNode != null:
-			var OpusDecoder = OpusDecoderNode.new()
+		if enablesound and ClassDB.class_exists("OpusDecoderNode"):
+			var OpusDecoder = ClassDB.instantiate("OpusDecoderNode")
 			OpusDecoder.name = "OpusDecoder"
 			$MicRecord.add_child(OpusDecoder)
 
 	if $MicRecord.has_node("OpusDecoder"):
-		var fname = "res://addons/player-networking/welcomespeech.res"
+		var fname = "res://addons/player-networking/welcomespeech.opusbin"
 		if FileAccess.file_exists(fname):
-			var fin = FileAccess.open(fname, FileAccess.READ)
-			micrecordingdata = fin.get_var()
-			fin.close()
+			micrecordingdata = { "format":1, "mix_rate":44100, "is_stereo":true }
+			micrecordingdata["opusEncoded"] = FileAccess.get_file_as_bytes(fname)
 			$RecordSize.text = "w-"+str(len(micrecordingdata.get("opusEncoded", micrecordingdata.get("pcmData"))))
 
 func _on_MicRecord_button_down():
