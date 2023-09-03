@@ -13,8 +13,8 @@
 [ext_resource type="Script" path="res://addons/player-networking/Websocketmultiplayerclient.gd" id="12"]
 [ext_resource type="Script" path="res://addons/player-networking/ClientmodeWebSocketsignal.gd" id="13"]
 [ext_resource type="Script" path="res://addons/player-networking/WebRTCmultiplayerclient.gd" id="14"]
+[ext_resource type="PackedScene" uid="uid://ktm7k0co2o7l" path="res://addons/mqtt/mqtt.tscn" id="14_c5n2c"]
 [ext_resource type="Script" path="res://addons/player-networking/ClientmodeMQTTsignal.gd" id="15"]
-[ext_resource type="Script" path="res://addons/player-networking/MQTT.gd" id="16"]
 [ext_resource type="Script" path="res://addons/player-networking/RecordingFeature.gd" id="16_hf3ik"]
 [ext_resource type="Script" path="res://addons/player-networking/DoppelgangerPanel_ui.gd" id="16_i8v6k"]
 
@@ -553,9 +553,6 @@ offset_right = 50.4729
 offset_bottom = 59.5227
 text = "null"
 
-[node name="MQTT" type="Node" parent="MQTTsignalling"]
-script = ExtResource("16")
-
 [node name="brokeraddress" type="LineEdit" parent="MQTTsignalling"]
 layout_mode = 0
 offset_left = 5.0
@@ -638,6 +635,8 @@ offset_top = 3.10048
 offset_right = 151.19
 offset_bottom = 29.1005
 text = "Off"
+
+[node name="MQTT" parent="MQTTsignalling" instance=ExtResource("14_c5n2c")]
 
 [node name="PlayerConnections" type="ColorRect" parent="."]
 layout_mode = 0
