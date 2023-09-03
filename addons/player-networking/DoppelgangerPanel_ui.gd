@@ -6,3 +6,4 @@ func getnetoffset():
 func seteditable(b):
 	$hbox/VBox_offset/netoffset.editable = b
 	$hbox/VBox_delaymin/netdelaymin.editable = b
+

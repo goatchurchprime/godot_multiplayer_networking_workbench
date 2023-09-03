@@ -1,7 +1,6 @@
-[gd_scene load_steps=25 format=3 uid="uid://cfmoahalri06d"]
+[gd_scene load_steps=24 format=3 uid="uid://cfmoahalri06d"]
 
 [ext_resource type="Script" path="res://addons/player-networking/NetworkGateway.gd" id="1"]
-[ext_resource type="PackedScene" uid="uid://d1f0xvynw2ph6" path="res://addons/player-networking/TimelineDiagram.tscn" id="2"]
 [ext_resource type="Script" path="res://addons/player-networking/Enetmultiplayerserver.gd" id="3"]
 [ext_resource type="Script" path="res://addons/player-networking/PlayerConnections.gd" id="4"]
 [ext_resource type="Script" path="res://addons/player-networking/UDPdiscoveryserver.gd" id="5"]
@@ -824,11 +823,6 @@ offset_right = 554.0
 offset_bottom = 368.436
 texture = SubResource("1")
 flip_v = true
-
-[node name="SubViewport" type="SubViewport" parent="TimelineVisualizer"]
-size = Vector2i(550, 100)
-
-[node name="TimelineDiagram" parent="TimelineVisualizer/SubViewport" instance=ExtResource("2")]
 
 [node name="TimeScalebar" type="Line2D" parent="TimelineVisualizer"]
 position = Vector2(102.364, 89.1906)

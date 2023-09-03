@@ -25,16 +25,6 @@ func _ready():
 		await get_tree().create_timer(1.5).timeout
 		NetworkGateway.selectandtrigger_networkoption(NetworkGateway.NETWORK_OPTIONS.AS_SERVER)
 
-	print($TextureRect.texture)
-	var image1 = Image.load_from_file("res://texture1.png")
-	var image2 = Image.load_from_file("res://texture2.png")
-	image2.shrink_x2()
-	image1.blit_rect(image2, Rect2i(100,100,150,300), Vector2i(50,50))
-	$TextureRect.texture.set_image(image1)
-	#var texture = ImageTexture.create_from_image(image1)
-	#$TextureRect.texture = texture
-
-
 
 func _gui_input(event):
 	var mouseposition = null

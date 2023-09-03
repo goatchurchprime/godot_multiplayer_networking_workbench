@@ -10,6 +10,7 @@ var broadcastservermsg = ""
 func _ready():
 	set_process(false)
 
+
 func startUDPbroadcasting():
 	udpdiscoveryport = int(get_node("../broadcastport").text)
 	get_node("../broadcastport").editable = false

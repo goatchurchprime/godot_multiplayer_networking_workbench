@@ -38,7 +38,7 @@ const errordecodes = { ERR_ALREADY_IN_USE:"ERR_ALREADY_IN_USE",
 					}
 var rng = RandomNumberGenerator.new()
 
-
+	
 func _ready():
 	for rs in remoteservers:
 		$NetworkOptions.add_item(rs)
