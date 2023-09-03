@@ -75,7 +75,8 @@ func _on_MicRecord_button_up():
 	
 
 func _on_SendRecord_pressed():
-	rpc("remotesetmicrecord", micrecordingdata)
+	if micrecordingdata != null:
+		rpc("remotesetmicrecord", micrecordingdata)
 	#var fout = File.new()
 	#var fname = "user://welcomespeech.dat"
 	#print("saving ", ProjectSettings.globalize_path(fname))

@@ -115,7 +115,7 @@ func _on_StartClient_toggled(button_pressed):
 		roomname = SetupMQTTsignal.get_node("roomname").text
 		StartMQTTstatuslabel.text = "on"
 		randomize()
-		MQTT.client_id = "c%d" % randi()
+		MQTT.client_id = "c%d" % (2 + (randi()%0x7ffffff8))
 		SetupMQTTsignal.get_node("client_id").text = MQTT.client_id
 		statustopic = "%s/%s/client" % [roomname, MQTT.client_id]
 		MQTT.set_last_will(statustopic, JSON.new().stringify({"subject":"dead"}), true)
