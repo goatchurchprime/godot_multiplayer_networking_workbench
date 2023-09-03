@@ -54,14 +54,13 @@ offset_top = 8.0
 offset_right = 287.0
 offset_bottom = 39.0
 item_count = 4
-selected = 3
+selected = 2
 popup/item_0/text = "ENet"
 popup/item_0/id = 0
 popup/item_1/text = "WebSocket"
 popup/item_1/id = 1
 popup/item_2/text = "WebRTC (websocket signal)"
 popup/item_2/id = 2
-popup/item_2/disabled = true
 popup/item_3/text = "WebRTC (mqtt signal)"
 popup/item_3/id = 3
 
