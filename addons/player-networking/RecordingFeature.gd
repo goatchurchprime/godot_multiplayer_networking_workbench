@@ -29,7 +29,6 @@ func _ready():
 			$MicRecord.add_child(OpusEncoder)
 		else:
 			print("Missing Opus plugin library")
-		var OpusDecoderNode = load("res://addons/opus/OpusDecoderNode.gdns")
 		if enablesound and ClassDB.class_exists("OpusDecoderNode"):
 			var OpusDecoder = ClassDB.instantiate("OpusDecoderNode")
 			OpusDecoder.name = "OpusDecoder"
