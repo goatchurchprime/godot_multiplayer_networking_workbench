@@ -54,7 +54,7 @@ offset_top = 8.0
 offset_right = 287.0
 offset_bottom = 39.0
 item_count = 4
-selected = 2
+selected = 3
 popup/item_0/text = "ENet"
 popup/item_0/id = 0
 popup/item_1/text = "WebSocket"
@@ -636,6 +636,7 @@ offset_bottom = 29.1005
 text = "Off"
 
 [node name="MQTT" parent="MQTTsignalling" instance=ExtResource("14_c5n2c")]
+verbose_level = 0
 
 [node name="PlayerConnections" type="ColorRect" parent="."]
 layout_mode = 0

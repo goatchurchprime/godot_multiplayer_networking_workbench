@@ -13,6 +13,7 @@ var clientidtowclientid = { }
 var wclientidtoclientid = { }
 var clearlostretainedclients = true
 var clearlostretainedservers = true
+var Dclearlostdanglingservers = true
 var statustopic = ""
 
 signal mqttsig_client_connected(id)
@@ -27,7 +28,8 @@ func sendpacket_toclient(wclientid, v):
 	MQTT.publish(t, JSON.new().stringify(v))
 	
 func received_mqtt(topic, msg):
-	if msg == "":  return
+	if msg == "":
+		return
 	var stopic = topic.split("/")
 	var test_json_conv = JSON.new()
 	test_json_conv.parse(msg)
@@ -56,7 +58,7 @@ func received_mqtt(topic, msg):
 			elif len(stopic) == 3 and stopic[2] == "client":
 				if v["subject"] == "dead":
 					if clientidtowclientid.has(sendingclientid):
-						#MQTT.unsubscribe("%s/%s/client" % [roomname, sendingclientid])
+						MQTT.unsubscribe("%s/%s/client" % [roomname, sendingclientid])
 						var wclientid = clientidtowclientid[sendingclientid]
 						emit_signal("mqttsig_client_disconnected", wclientid)
 						clientidtowclientid.erase(sendingclientid)
@@ -74,6 +76,14 @@ func received_mqtt(topic, msg):
 				if v["subject"] == "dead":
 					if clearlostretainedservers:
 						MQTT.publish(topic, "", true)
+				if v["subject"] == "serveropen":
+					if stopic[1] == MQTT.client_id:
+						print("found openserver myself: ", stopic[1])
+					else:
+						print("found openserver not myself: ", stopic[1])
+						if Dclearlostdanglingservers:
+							print("  clearing")
+							MQTT.publish(topic, "", true)
 
 			else:
 				print("Unrecognized topic ", topic)
@@ -83,6 +93,7 @@ func on_broker_disconnect():
 	
 func on_broker_connect():
 	MQTT.subscribe("%s/+/packet/%s" % [roomname, MQTT.client_id])
+	print(" subscribing to ", "%s/+/packet/%s" % [roomname, MQTT.client_id])
 	if clearlostretainedservers:
 		MQTT.subscribe("%s/+/server" % roomname)
 	if clearlostretainedclients:
@@ -109,7 +120,7 @@ func _on_StartServer_toggled(button_pressed):
 		MQTT.client_id = "s%d" % randi()
 		SetupMQTTsignal.get_node("client_id").text = MQTT.client_id
 		statustopic = "%s/%s/server" % [roomname, MQTT.client_id]
-		MQTT.set_last_will(statustopic, JSON.new().stringify({"subject":"dead"}), true)
+		MQTT.set_last_will(statustopic, JSON.new().stringify({"subject":"dead", "comment":"by_will"}), true)
 		StartMQTTstatuslabel.text = "connecting"
 		var brokerurl = SetupMQTTsignal.get_node("brokeraddress").text
 		MQTT.connect_to_broker(brokerurl)
@@ -119,6 +130,7 @@ func _on_StartServer_toggled(button_pressed):
 		MQTT.received_message.disconnect(received_mqtt)
 		MQTT.broker_connected.disconnect(on_broker_connect)
 		MQTT.broker_disconnected.disconnect(on_broker_disconnect)
+		MQTT.publish(statustopic, JSON.new().stringify({"subject":"dead"}), true)
 		MQTT.disconnect_from_server()
 		StartMQTTstatuslabel.text = "off"
 		SetupMQTTsignal.get_node("client_id").text = ""

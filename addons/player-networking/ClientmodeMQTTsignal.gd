@@ -118,7 +118,7 @@ func _on_StartClient_toggled(button_pressed):
 		MQTT.client_id = "c%d" % (2 + (randi()%0x7ffffff8))
 		SetupMQTTsignal.get_node("client_id").text = MQTT.client_id
 		statustopic = "%s/%s/client" % [roomname, MQTT.client_id]
-		MQTT.set_last_will(statustopic, JSON.new().stringify({"subject":"dead"}), true)
+		MQTT.set_last_will(statustopic, JSON.new().stringify({"subject":"dead", "comment":"by_will"}), true)
 		StartMQTTstatuslabel.text = "connecting"
 		var brokerurl = SetupMQTTsignal.get_node("brokeraddress").text
 		MQTT.connect_to_broker(brokerurl)
@@ -146,6 +146,7 @@ func _on_StartClient_toggled(button_pressed):
 		MQTT.received_message.disconnect(received_mqtt)
 		MQTT.broker_connected.disconnect(on_broker_connect)
 		MQTT.broker_disconnected.disconnect(on_broker_disconnect)
+		MQTT.publish(statustopic, JSON.new().stringify({"subject":"dead"}), true)
 		MQTT.disconnect_from_server()
 		statustopic = ""
 		selectedserver = ""
