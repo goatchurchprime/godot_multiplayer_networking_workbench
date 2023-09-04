@@ -7,6 +7,8 @@ extends Control
 @onready var StartMQTT = SetupMQTTsignal.get_node("StartMQTT")
 @onready var StartMQTTstatuslabel = SetupMQTTsignal.get_node("StartMQTT/statuslabel")
 
+@onready var NetworkGateway = get_node("../..")
+
 var roomname = ""
 var wclientid = 0
 
@@ -22,9 +24,6 @@ var selectedserver = ""
 var serverconnected = false
 var statustopic = ""
 
-var waitingforserverstoshow = false
-var waittimeforservertoshow = 1.2
-
 # Messages: topic: room/clientid/[packet|server|client]/[clientid-to|]
 # 			payload: {"subject":type, ...}
 
@@ -37,16 +36,19 @@ func isconnectedtosignalserver():
 
 var Nmaxnconnectionstoserver = 3
 func choosefromopenservers():
-	selectedserver = null
+	var lselectedserver = null
 	for ss in openserversconnections:
 		if openserversconnections[ss] < Nmaxnconnectionstoserver:
-			if selectedserver == null or openserversconnections[ss] > openserversconnections[selectedserver]:
-				selectedserver = ss
-	if selectedserver != null:
+			if lselectedserver == null or openserversconnections[ss] > openserversconnections[selectedserver]:
+				lselectedserver = ss
+	if lselectedserver != null:
+		selectedserver = lselectedserver
 		MQTT.subscribe("%s/%s/packet/%s" % [roomname, selectedserver, MQTT.client_id])
 		var t = "%s/%s/packet/%s" % [roomname, MQTT.client_id, selectedserver]
 		MQTT.publish(t, JSON.new().stringify({"subject":"request_connection"}))
-
+		return true
+	return false
+	
 func received_mqtt(topic, msg):
 	if msg == "":  return
 	var stopic = topic.split("/")
@@ -58,12 +60,13 @@ func received_mqtt(topic, msg):
 			var sendingserverid = stopic[1]
 
 			if len(stopic) == 3 and stopic[2] == "server":
-				if v["subject"] == "serveropen" and not openserversconnections.has(sendingserverid):
-					openserversconnections[sendingserverid] = v.get("nconnections", 0)
-					if StartMQTT.button_pressed and selectedserver == "":
-						if not waitingforserverstoshow:
-							choosefromopenservers()
-							
+				var chooseaserver = false
+				if stopic[1] == "caboose":
+					if v.get("clientid", "") == MQTT.client_id:
+						print("caboose reached, select server")
+						openserverconnectionsUpToDate = true
+						chooseaserver = true
+						
 				if v["subject"] == "dead" and openserversconnections.has(sendingserverid):
 					openserversconnections.erase(sendingserverid)
 					if selectedserver == sendingserverid:
@@ -73,10 +76,28 @@ func received_mqtt(topic, msg):
 							wclientid = 0
 							serverconnected = false
 							$WebRTCmultiplayerclient/StartWebRTCmultiplayer.disabled = true
-						#MQTT.unsubscribe("%s/%s/server" % [roomname, selectedserver])
+						MQTT.unsubscribe("%s/%s/server" % [roomname, selectedserver])
 						selectedserver = ""
 						MQTT.publish(statustopic, JSON.new().stringify({"subject":"unconnected"}))
+
+				if v["subject"] == "serveropen":
+					openserversconnections[sendingserverid] = v.get("nconnections", 0)
+					chooseaserver = (selectedserver == "") and openserverconnectionsUpToDate
+					
+				if chooseaserver:
+					if StartMQTT.button_pressed:
+						assert (selectedserver == "")
+						var serverfound = choosefromopenservers()
+						var selectasnecessary = (NetworkGateway.get_node("NetworkOptionsMQTTWebRTC").selected == NetworkGateway.NETWORK_OPTIONS_MQTT_WEBRTC.AS_NECESSARY)
+						if selectasnecessary:
+							if serverfound:
+								NetworkGateway.get_node("NetworkOptionsMQTTWebRTC").selected = NetworkGateway.NETWORK_OPTIONS_MQTT_WEBRTC.AS_CLIENT
+							else:
+								NetworkGateway.selectandtrigger_networkoption(NetworkGateway.NETWORK_OPTIONS_MQTT_WEBRTC.AS_SERVER)
+
 							
+
+
 			elif len(stopic) == 4 and sendingserverid == selectedserver and stopic[2] == "packet" and stopic[3] == MQTT.client_id:
 				if not serverconnected:
 					if v["subject"] == "connection_established":
@@ -95,10 +116,14 @@ func received_mqtt(topic, msg):
 			else:
 				print("Unrecognized topic ", topic)
 
+var openserverconnectionsUpToDate = false
 func on_broker_connect():
 	MQTT.subscribe("%s/+/server" % roomname)
 	MQTT.publish(statustopic, JSON.new().stringify({"subject":"unconnected"}))
+	MQTT.publish("%s/caboose/server" % roomname, JSON.new().stringify({"subject":"caboose", "clientid":MQTT.client_id}))
 	StartMQTTstatuslabel.text = "pending"
+	assert (len(openserversconnections) == 0)
+	openserverconnectionsUpToDate = false
 
 func on_broker_disconnect():
 	print("MQTT broker disconnected")
@@ -106,9 +131,6 @@ func on_broker_disconnect():
 
 func _on_StartClient_toggled(button_pressed):
 	if button_pressed:
-		var NetworkGateway = get_node("../..")
-		var selectasnecessary = (NetworkGateway.get_node("NetworkOptionsMQTTWebRTC").selected == NetworkGateway.NETWORK_OPTIONS_MQTT_WEBRTC.AS_NECESSARY)
-		var selectasclient = (NetworkGateway.get_node("NetworkOptionsMQTTWebRTC").selected == NetworkGateway.NETWORK_OPTIONS_MQTT_WEBRTC.AS_CLIENT)
 		MQTT.received_message.connect(received_mqtt)
 		MQTT.broker_connected.connect(on_broker_connect)
 		MQTT.broker_disconnected.connect(on_broker_disconnect)
@@ -122,24 +144,6 @@ func _on_StartClient_toggled(button_pressed):
 		StartMQTTstatuslabel.text = "connecting"
 		var brokerurl = SetupMQTTsignal.get_node("brokeraddress").text
 		MQTT.connect_to_broker(brokerurl)
-		
-		if selectasnecessary or selectasclient:
-			waitingforserverstoshow = true
-			await get_tree().create_timer(waittimeforservertoshow).timeout
-			waitingforserverstoshow = false
-			
-		if StartMQTT.button_pressed:
-			var converttoservertype = selectasnecessary
-			for ss in openserversconnections:
-				if openserversconnections[ss] < Nmaxnconnectionstoserver:
-					converttoservertype = false
-			if converttoservertype:
-				NetworkGateway.selectandtrigger_networkoption(NetworkGateway.NETWORK_OPTIONS_MQTT_WEBRTC.AS_SERVER)
-			else:
-				NetworkGateway.get_node("NetworkOptionsMQTTWebRTC").selected = NetworkGateway.NETWORK_OPTIONS_MQTT_WEBRTC.AS_CLIENT
-				visible = true
-				assert (selectedserver == "")
-				choosefromopenservers()
 				
 	else:
 		print("Disconnecting MQTT")
