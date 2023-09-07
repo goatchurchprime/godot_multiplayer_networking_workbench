@@ -3,6 +3,8 @@
 This utility exposes the workings of the three highlevel multiplayer networking protocols (ENet, Websockets, and WebRTC) 
 and has hooks to enable VR players to compress, transmit, unpack and interpolate their avatar movements across the network.
 
+![image](https://github.com/goatchurchprime/godot_multiplayer_networking_workbench/assets/677254/b49e2b09-b5cd-46a7-9a75-16d3dd5cf8d9)
+
 ## Installation
 
 https://docs.godotengine.org/en/stable/classes/class_networkedmultiplayerpeer.html#class-networkedmultiplayerpeer
