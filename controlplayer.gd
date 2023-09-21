@@ -2,7 +2,7 @@ extends Node2D
 
 var localavatarvelocity = Vector2()
 var batvelocity = 200
-
+var PAV_clientawaitingspawnpoint = 0  # 1 awaiting, -1 next frame is first
 
 func PAV_processlocalavatarposition(delta):
 	var vec = Vector2((-1 if Input.is_action_pressed("ui_left") else 0) + (1 if Input.is_action_pressed("ui_right") else 0), 
@@ -16,13 +16,16 @@ func processlocalavatarpositionVec(vec, delta):
 						clamp(position.y + vec.y*batvelocity*delta, 7, 339))
 		
 func PAV_avatartoframedata():
-	var fd = { NCONSTANTS.CFI_RECT_POSITION: position }
+	var fd = { NCONSTANTS.CFI_RECT_POSITION: position, 
+				NCONSTANTS.CFI_VISIBLE: visible }
 	fd[NCONSTANTS.CFI_FIRE_KEY] = Input.is_key_pressed(KEY_SPACE)
 	return fd
 
 func PAV_framedatatoavatar(fd):
 	if fd.has(NCONSTANTS.CFI_RECT_POSITION):
 		position = fd[NCONSTANTS.CFI_RECT_POSITION]
+	if fd.has(NCONSTANTS.CFI_VISIBLE):
+		visible = fd[NCONSTANTS.CFI_VISIBLE]
 
 var possibleusernames = ["Alice", "Beth", "Cath", "Dan", "Earl", "Fred", "George", "Harry", "Ivan", "John", "Kevin", "Larry", "Martin", "Oliver", "Peter", "Quentin", "Robert", "Samuel", "Thomas", "Ulrik", "Victor", "Wayne", "Xavier", "Youngs", "Zephir"]
 func PAV_initavatarlocal():
@@ -49,3 +52,12 @@ static func PAV_changethinnedframedatafordoppelganger(fd, doppelnetoffset, isfra
 	if fd.has(NCONSTANTS.CFI_RECT_POSITION):
 		#fd[NCONSTANTS.CFI_RECT_POSITION].x = 500 - fd[NCONSTANTS.CFI_RECT_POSITION].x
 		fd[NCONSTANTS.CFI_RECT_POSITION].y = 339 - fd[NCONSTANTS.CFI_RECT_POSITION].y
+
+func PAV_createspawnpoint():
+	var sfd = { NCONSTANTS.CFI_RECT_POSITION: position }
+	sfd[NCONSTANTS.CFI_RECT_POSITION].y += 20
+	return sfd
+	
+func PAV_avatarspawndata(sfd):
+	PAV_framedatatoavatar(sfd)
+	PAV_clientawaitingspawnpoint = -1

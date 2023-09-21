@@ -55,6 +55,8 @@ var minframeseconds = 0.1
 
 var framedata0 = { NCONSTANTS.CFI_TIMESTAMP:0.0, NCONSTANTS.CFI_TIMESTAMP_F0:0.0 }
 func _process(delta):
+	if get_parent().PAV_clientawaitingspawnpoint == 1:
+		return
 	get_parent().PAV_processlocalavatarposition(delta)
 
 	var tstamp = Time.get_ticks_msec()*0.001
@@ -65,7 +67,11 @@ func _process(delta):
 	framedata0[NCONSTANTS.CFI_TIMESTAMP_F0] = tstamp
 
 	var fd = get_parent().PAV_avatartoframedata()
-	var vd = thinframedata_updatef0(framedata0, fd, (dft >= heartbeatfullframeseconds))
+	var bnothinning = (dft >= heartbeatfullframeseconds)
+	if get_parent().PAV_clientawaitingspawnpoint == -1:
+		get_parent().PAV_clientawaitingspawnpoint = 0
+		bnothinning = true
+	var vd = thinframedata_updatef0(framedata0, fd, bnothinning)
 	if len(vd) == 0:
 		return
 	framedata0[NCONSTANTS.CFI_TIMESTAMP] = tstamp
@@ -99,6 +105,7 @@ func _process(delta):
 				doppelgangernode.get_node("PlayerFrame").networkedavatarthinnedframedata(vd)
 				if PlayerConnections.get_node("../TimelineVisualizer").visible:
 					PlayerConnections.get_node("../TimelineVisualizer/SubViewport/TimelineDiagram").marknetworkdataat(vd, doppelgangernode.get_name())
+
 
 
 

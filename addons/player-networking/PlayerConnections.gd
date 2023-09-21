@@ -93,6 +93,7 @@ func force_server_disconnect():
 
 func networkplayer_connected_to_server():
 	var serverisself = multiplayer.is_server()
+	LocalPlayer.PAV_clientawaitingspawnpoint = (1 if not serverisself else 0)
 	connectionlog("_server(self) connect\n" if serverisself else "_server connect\n")
 	LocalPlayer.get_node("PlayerFrame").networkID = multiplayer.get_unique_id()
 	assert (LocalPlayer.get_node("PlayerFrame").networkID >= 1)
@@ -103,7 +104,6 @@ func networkplayer_connected_to_server():
 		network_player_added(id)
 	deferred_playerconnections.clear()
 	updateplayerlist()
-		
 
 func clientplayer_connection_failed():
 	connectionlog("_connection failed\n")
@@ -129,6 +129,7 @@ func network_player_connected(id):
 
 func network_player_added(id):
 	connectionlog("_add playerid %d\n" % id)
+	var serverisself = multiplayer.is_server()
 	assert (LocalPlayer.get_node("PlayerFrame").networkID >= 1)
 	assert (not remote_players_idstonodenames.has(id))
 	remote_players_idstonodenames[id] = null
@@ -136,12 +137,14 @@ func network_player_added(id):
 	var avatardata = LocalPlayer.PAV_avatarinitdata()
 	avatardata["playernodename"] = LocalPlayer.get_name()
 	avatardata["networkid"] = LocalPlayer.get_node("PlayerFrame").networkID
-	avatardata["framedata0"] = LocalPlayer.get_node("PlayerFrame").framedata0.duplicate()
-	avatardata["framedata0"].erase(NCONSTANTS.CFI_TIMESTAMP_F0)
-	print("calling spawnintoremoteplayer at ", id, " (from ", LocalPlayer.get_node("PlayerFrame").networkID, ")")
-	#yield(get_tree().create_timer(1.0), "timeout")   # allow for webrtc to complete connection
+	if LocalPlayer.PAV_clientawaitingspawnpoint == 0:
+		avatardata["framedata0"] = LocalPlayer.get_node("PlayerFrame").framedata0.duplicate()
+		avatardata["framedata0"].erase(NCONSTANTS.CFI_TIMESTAMP_F0)
+	if serverisself:
+		avatardata["spawnframedata"] = LocalPlayer.PAV_createspawnpoint()
+	print("calling spawnintoremoteplayer at ", id, " (from ", LocalPlayer.get_node("PlayerFrame").networkID, ") ", ("with spawndata" if serverisself else ""))
 	rpc_id(id, "spawnintoremoteplayer", avatardata)
-
+	
 
 func network_player_disconnected(id):
 	network_player_removed(id)
@@ -220,11 +223,16 @@ func newremoteplayer(avatardata):
 		remoteplayer.set_name(avatardata["playernodename"])
 		remoteplayer.get_node("PlayerFrame").networkID = avatardata["networkid"]
 		remoteplayer.PAV_initavatarremote(avatardata)
+		remoteplayer.visible = false
 		PlayersNode.add_child(remoteplayer)
 		if remoteplayer.get_node("PlayerFrame").networkID == 1:
 			ServerPlayer = remoteplayer
 		if "framedata0" in avatardata:
 			remoteplayer.get_node("PlayerFrame").networkedavatarthinnedframedata(avatardata["framedata0"])
+			remoteplayer.visible = true
+		if "spawnframedata" in avatardata:
+			LocalPlayer.PAV_avatarspawndata(avatardata["spawnframedata"])
+			
 		print("Adding remoteplayer: ", avatardata["playernodename"])
 		if get_node("../TimelineVisualizer").visible:
 			get_node("../TimelineVisualizer/SubViewport/TimelineDiagram").newtimelineremoteplayer(avatardata)
