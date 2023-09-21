@@ -3,6 +3,7 @@ extends Node2D
 var localavatarvelocity = Vector2()
 var batvelocity = 200
 
+
 func PAV_processlocalavatarposition(delta):
 	var vec = Vector2((-1 if Input.is_action_pressed("ui_left") else 0) + (1 if Input.is_action_pressed("ui_right") else 0), 
 						(-1 if Input.is_action_pressed("ui_up") else 0) + (1 if Input.is_action_pressed("ui_down") else 0))

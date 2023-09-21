@@ -2,7 +2,7 @@ extends ColorRect
 
 var mousecommandvelocity = Vector2(0, 0)
 var mousebuttondown = false
-
+var hithere=100
 
 var Dinitializewebrtcmode = false
 

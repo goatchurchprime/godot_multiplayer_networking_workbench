@@ -215,37 +215,15 @@ func _on_NetworkOptionsMQTTWebRTC_item_selected(ns):
 	$MQTTsignalling/Clientmode/WebRTCmultiplayerclient/StartWebRTCmultiplayer.button_pressed = false
 	$MQTTsignalling/Clientmode/WebRTCmultiplayerclient/StartWebRTCmultiplayer.disabled = true
 
-func _input(event):   # this can be supporessed by set_process_input(false)
-	if event is InputEventKey and event.pressed:
-		var bsel = -1
-		if (event.keycode == KEY_0):	bsel = 0
-		elif (event.keycode == KEY_1):	bsel = 1
-		elif (event.keycode == KEY_2):	bsel = 2
-		elif (event.keycode == KEY_3):	bsel = 3
-		elif (event.keycode == KEY_4):	bsel = 4
 
-		if bsel != -1:
-			selectandtrigger_networkoption(bsel)
-
-		elif (event.keycode == KEY_G):
-			$PlayerConnections/Doppelganger.button_pressed = not $PlayerConnections/Doppelganger.button_pressed
-
-	elif event is InputEventMouseButton and event.is_pressed() and $TimelineVisualizer.visible and (event.button_index == MOUSE_BUTTON_WHEEL_UP or event.button_index == MOUSE_BUTTON_WHEEL_DOWN):
+func _input(event):   # this can be supporessed by set_process_input(false)\
+	if event is InputEventMouseButton and event.is_pressed() and $TimelineVisualizer.visible and (event.button_index == MOUSE_BUTTON_WHEEL_UP or event.button_index == MOUSE_BUTTON_WHEEL_DOWN):
 		var s = 1 if event.button_index == MOUSE_BUTTON_WHEEL_UP else -1
 		var relposition = event.position - $TimelineVisualizer.global_position
 		if relposition >= Vector2(0,0) and relposition <= $TimelineVisualizer.size:
 			$TimelineVisualizer/TimeTracking.button_pressed = false
 			var relclick = relposition/$TimelineVisualizer.size
 			$TimelineVisualizer/SubViewport/TimelineDiagram.zoomtimeline(relclick, s)
-		#elif $DoppelgangerPanel.get_rect().has_point(event.position):
-		#	var swnode = get_viewport().gui_get_focus_owner()
-		#	if swnode == $DoppelgangerPanel/netdelaymin and swnode.editable:
-		#		swnode.text = str(max(10, int(swnode.text)+5*s))
-		#	elif swnode == $DoppelgangerPanel/netoffset and swnode.editable:
-		#		swnode.text = str(int(swnode.text)+1000*s)
-		#	elif swnode == $DoppelgangerPanel/netdelayadd:
-		#	elif swnode == $DoppelgangerPanel/netdroppc:
-		#		swnode.text = str(max(0.0, float(swnode.text)+0.1*s))
 
 func getrandomdoppelgangerdelay(disabledropout=false):
 	if not disabledropout and rng.randf_range(0, 100) < float($DoppelgangerPanel/hbox/VBox_netdrop/netdroppc.text):
