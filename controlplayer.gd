@@ -55,9 +55,16 @@ static func PAV_changethinnedframedatafordoppelganger(fd, doppelnetoffset, isfra
 
 func PAV_createspawnpoint():
 	var sfd = { NCONSTANTS.CFI_RECT_POSITION: position }
-	sfd[NCONSTANTS.CFI_RECT_POSITION].y += 20
+	sfd[NCONSTANTS.CFI_RECT_POSITION].y -= 20
+	while true:
+		for player in get_parent().get_children():
+			if player != self:
+				if abs(player.position.y - sfd[NCONSTANTS.CFI_RECT_POSITION].y) < 10 and abs(player.position.x - sfd[NCONSTANTS.CFI_RECT_POSITION].x) < 500:
+					sfd[NCONSTANTS.CFI_RECT_POSITION].y = player.position.y - 20
+					continue
+		break
 	return sfd
 	
-func PAV_avatarspawndata(sfd):
+func PAV_receivespawnpoint(sfd):
 	PAV_framedatatoavatar(sfd)
 	PAV_clientawaitingspawnpoint = -1

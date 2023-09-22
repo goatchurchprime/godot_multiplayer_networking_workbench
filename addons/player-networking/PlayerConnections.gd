@@ -231,7 +231,7 @@ func newremoteplayer(avatardata):
 			remoteplayer.get_node("PlayerFrame").networkedavatarthinnedframedata(avatardata["framedata0"])
 			remoteplayer.visible = true
 		if "spawnframedata" in avatardata:
-			LocalPlayer.PAV_avatarspawndata(avatardata["spawnframedata"])
+			LocalPlayer.PAV_receivespawnpoint(avatardata["spawnframedata"])
 			
 		print("Adding remoteplayer: ", avatardata["playernodename"])
 		if get_node("../TimelineVisualizer").visible:

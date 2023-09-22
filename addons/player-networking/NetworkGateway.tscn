@@ -559,7 +559,7 @@ offset_top = 7.0
 offset_right = 236.0
 offset_bottom = 38.0
 tooltip_text = "MQTT broker URL"
-text = "mosquitto.doesliverpool.xyz"
+text = "test.mosquitto.org"
 
 [node name="roomname" type="LineEdit" parent="MQTTsignalling"]
 layout_mode = 0
