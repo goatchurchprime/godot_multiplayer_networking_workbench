@@ -216,14 +216,6 @@ func _on_NetworkOptionsMQTTWebRTC_item_selected(ns):
 	$MQTTsignalling/Clientmode/WebRTCmultiplayerclient/StartWebRTCmultiplayer.disabled = true
 
 
-func _input(event):   # this can be supporessed by set_process_input(false)\
-	if event is InputEventMouseButton and event.is_pressed() and $TimelineVisualizer.visible and (event.button_index == MOUSE_BUTTON_WHEEL_UP or event.button_index == MOUSE_BUTTON_WHEEL_DOWN):
-		var s = 1 if event.button_index == MOUSE_BUTTON_WHEEL_UP else -1
-		var relposition = event.position - $TimelineVisualizer.global_position
-		if relposition >= Vector2(0,0) and relposition <= $TimelineVisualizer.size:
-			$TimelineVisualizer/TimeTracking.button_pressed = false
-			var relclick = relposition/$TimelineVisualizer.size
-			$TimelineVisualizer/SubViewport/TimelineDiagram.zoomtimeline(relclick, s)
 
 func getrandomdoppelgangerdelay(disabledropout=false):
 	if not disabledropout and rng.randf_range(0, 100) < float($DoppelgangerPanel/hbox/VBox_netdrop/netdroppc.text):

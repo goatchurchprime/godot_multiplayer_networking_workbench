@@ -88,9 +88,6 @@ func _process(delta):
 		Dcumulativebytes= 0
 		DframereportCount = 0
 
-	if PlayerConnections.get_node("../TimelineVisualizer").visible:
-		PlayerConnections.get_node("../TimelineVisualizer/SubViewport/TimelineDiagram").marknetworkdataat(vd, "LocalPlayer")
-	
 	if networkID >= 1:
 		vd[NCONSTANTS.CFI_PLAYER_NODENAME] = get_parent().get_name()
 		PlayerConnections.rpc("networkedavatarthinnedframedataPC", vd)
@@ -103,8 +100,6 @@ func _process(delta):
 			await get_tree().create_timer(doppelgangerdelay*0.001).timeout
 			if doppelgangernode != null:
 				doppelgangernode.get_node("PlayerFrame").networkedavatarthinnedframedata(vd)
-				if PlayerConnections.get_node("../TimelineVisualizer").visible:
-					PlayerConnections.get_node("../TimelineVisualizer/SubViewport/TimelineDiagram").marknetworkdataat(vd, doppelgangernode.get_name())
 
 
 

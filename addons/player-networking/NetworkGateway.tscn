@@ -1,4 +1,4 @@
-[gd_scene load_steps=24 format=3 uid="uid://cfmoahalri06d"]
+[gd_scene load_steps=23 format=3 uid="uid://cfmoahalri06d"]
 
 [ext_resource type="Script" path="res://addons/player-networking/NetworkGateway.gd" id="1"]
 [ext_resource type="Script" path="res://addons/player-networking/Enetmultiplayerserver.gd" id="3"]
@@ -35,10 +35,6 @@ spacing_bottom = -6
 [sub_resource type="FontVariation" id="FontVariation_8pqve"]
 spacing_top = -6
 spacing_bottom = -3
-
-[sub_resource type="ViewportTexture" id="1"]
-resource_local_to_scene = false
-viewport_path = NodePath("TimelineVisualizer/SubViewport")
 
 [node name="NetworkGateway" type="Panel"]
 self_modulate = Color(0.32549, 0.317647, 0.317647, 1)
@@ -636,6 +632,7 @@ offset_bottom = 29.1005
 text = "Off"
 
 [node name="MQTT" parent="MQTTsignalling" instance=ExtResource("14_c5n2c")]
+verbose_level = 0
 
 [node name="PlayerConnections" type="ColorRect" parent="."]
 layout_mode = 0
@@ -811,38 +808,6 @@ text = "drop out%:"
 layout_mode = 2
 theme_override_fonts/font = SubResource("FontVariation_8pqve")
 text = "0.1"
-
-[node name="TimelineVisualizer" type="TextureRect" parent="."]
-visible = false
-layout_mode = 0
-offset_left = 4.0
-offset_top = 268.436
-offset_right = 554.0
-offset_bottom = 368.436
-texture = SubResource("1")
-flip_v = true
-
-[node name="TimeScalebar" type="Line2D" parent="TimelineVisualizer"]
-position = Vector2(102.364, 89.1906)
-points = PackedVector2Array(0, 0, 100, 0)
-width = 5.0
-default_color = Color(0.917647, 0.929412, 0.968627, 1)
-
-[node name="Label" type="Label" parent="TimelineVisualizer/TimeScalebar"]
-offset_left = -44.0006
-offset_top = -7.72986
-offset_right = -4.00065
-offset_bottom = 6.27014
-text = "1 sec"
-
-[node name="TimeTracking" type="Button" parent="TimelineVisualizer"]
-layout_mode = 0
-offset_left = 9.0
-offset_top = 77.0
-offset_right = 54.0
-offset_bottom = 97.0
-toggle_mode = true
-text = "Track"
 
 [node name="Control" type="Control" parent="."]
 layout_mode = 1

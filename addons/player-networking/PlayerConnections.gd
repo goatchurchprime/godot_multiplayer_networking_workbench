@@ -203,8 +203,6 @@ func _on_Doppelganger_toggled(button_pressed):
 	var remoteplayer = PlayersNode.get_node_or_null(String(vd[NCONSTANTS.CFI_PLAYER_NODENAME]))
 	if remoteplayer != null:
 		remoteplayer.get_node("PlayerFrame").networkedavatarthinnedframedata(vd)
-		if get_node("../TimelineVisualizer").visible:
-			get_node("../TimelineVisualizer/SubViewport/TimelineDiagram").marknetworkdataat(vd, remoteplayer.get_name())
 	else:
 		print("networkedavatarthinnedframedataPC called before spawning")
 	
@@ -234,8 +232,6 @@ func newremoteplayer(avatardata):
 			LocalPlayer.PAV_receivespawnpoint(avatardata["spawnframedata"])
 			
 		print("Adding remoteplayer: ", avatardata["playernodename"])
-		if get_node("../TimelineVisualizer").visible:
-			get_node("../TimelineVisualizer/SubViewport/TimelineDiagram").newtimelineremoteplayer(avatardata)
 	else:
 		print("** remoteplayer already exists: ", avatardata["playernodename"])
 	return remoteplayer
