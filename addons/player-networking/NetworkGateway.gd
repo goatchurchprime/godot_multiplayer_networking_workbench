@@ -6,9 +6,7 @@ extends Panel
 # make sure you download the webrtc libraries from here: https://github.com/godotengine/webrtc-native/releases
 
 # check UDP works on phone or network
-# Timeline visualizer able to disable
-# make this system operate in VR gaming (using the OQ_network thing)
-# Insert by symlink to help with development of code
+# make a new timeline visualizer that shows the jitter of the recent incoming packets
 
 @export var remoteservers = [ "127.0.0.1" ]
 @export var playersnodepath : NodePath = "/root/Main/Players"

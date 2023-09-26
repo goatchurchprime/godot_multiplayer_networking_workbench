@@ -12,14 +12,14 @@ func client_session_description_created(type, data):
 	var peer = multiplayer.multiplayer_peer.get_peer(1)
 	peer["connection"].set_local_description("answer", data)
 	clientsignalling.sendpacket_toserver({"subject":"answer", "data":data})
-	$statuslabel.text = "answer"
+	PlayerConnections.connectionlog("answer")
 		
 func client_connection_established(lwclientid):
 	print("server client connected ", lwclientid)
 	if $StartWebRTCmultiplayer.pressed:
 		clientsignalling.sendpacket_toserver({"subject":"request_offer"})
-		$statuslabel.text = "request_offer"
-
+		PlayerConnections.connectionlog("request_offer")
+		
 func client_connection_closed():
 	if not (multiplayer.multiplayer_peer is OfflineMultiplayerPeer):
 		var peer = multiplayer.multiplayer_peer.get_peer(1)
@@ -40,12 +40,12 @@ func client_packet_received(v):
 		E = peerconnection.set_remote_description("offer", v["data"])
 		if E != 0:	print("Errrr ", E)
 		assert (multiplayer.get_unique_id() == clientsignalling.wclientid)
-		$statuslabel.text = "receive offer"
+		PlayerConnections.connectionlog("receive offer")
 
 	elif v["subject"] == "ice_candidate":
 		var peer = multiplayer.multiplayer_peer.get_peer(1)
 		peer["connection"].add_ice_candidate(v["mid_name"], v["index_name"], v["sdp_name"])
-		$statuslabel.text = "rec ice_candidate"
+		PlayerConnections.connectionlog("receive ice_candidate")
 
 func _on_StartWebRTCmultiplayer_toggled(button_pressed):
 	if button_pressed:
@@ -62,7 +62,7 @@ func _on_StartWebRTCmultiplayer_toggled(button_pressed):
 		clientsignalling.mqttsig_packet_received.connect(client_packet_received) 
 		if clientsignalling.isconnectedtosignalserver():
 			clientsignalling.sendpacket_toserver({"subject":"request_offer"})
-		$statuslabel.text = "request_offer"
+		PlayerConnections.connectionlog("request offer")
 		
 	else:
 		clientsignalling.mqttsig_connection_established.disconnect(client_connection_established) 

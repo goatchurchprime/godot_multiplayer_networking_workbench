@@ -39,8 +39,8 @@ func server_session_description_created(type, data, id):
 	var peerconnection = multiplayer.multiplayer_peer.get_peer(id)
 	peerconnection["connection"].set_local_description(type, data)
 	serversignalling.sendpacket_toclient(id, {"subject":"offer", "data":data})
-	$statuslabel.text = "offer"
-		
+	PlayerConnections.connectionlog("send offer %s" %id)
+
 func server_client_connected(id):
 	print("server client connected ", id)
 
@@ -63,19 +63,19 @@ func server_packet_received(id, v):
 		multiplayer.multiplayer_peer.add_peer(peerconnection, id)
 		var webrtcpeererror = peerconnection.create_offer()
 		print("peer create offer ", peerconnection, "id ", id, " Error:", webrtcpeererror, " connstate")
-		$statuslabel.text = "create offer"
+		PlayerConnections.connectionlog("create offer %s" %id)
 
 	elif v["subject"] == "answer":
 		print("Check equal multiplayer ", multiplayer, " vs ", multiplayer)
 		assert (multiplayer.multiplayer_peer.is_class("WebRTCMultiplayerPeer"))
 		var peerconnection = multiplayer.multiplayer_peer.get_peer(id)
 		peerconnection["connection"].set_remote_description("answer", v["data"])
-		$statuslabel.text = "answer"
+		PlayerConnections.connectionlog("receive answer %s" %id)
 
 	elif v["subject"] == "ice_candidate":
 		var peerconnection = multiplayer.multiplayer_peer.get_peer(id)
 		peerconnection["connection"].add_ice_candidate(v["mid_name"], v["index_name"], v["sdp_name"])
-		$statuslabel.text = "ice_candidate"
+		PlayerConnections.connectionlog("receive ice_candidate %s" %id)
 
 
 

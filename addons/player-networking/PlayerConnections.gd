@@ -1,12 +1,23 @@
 extends ColorRect
 
+
+## Networking tool
+##
+## This script adds climbing support to any [StaticBody3D].
+##
+## For climbing to work, the player must have an [XRToolsMovementClimb] node
+## configured appropriately.
+
 @onready var playerframelocalgdscriptfile = get_parent().scene_file_path.get_base_dir() + "/PlayerFrameLocal.gd"
 @onready var playerframeremotegdscriptfile = get_parent().scene_file_path.get_base_dir() + "/PlayerFrameRemote.gd"
 
 var LocalPlayer = null
 var ServerPlayer = null
 
+# This handles 
 var deferred_playerconnections = [ ]
+
+
 var remote_players_idstonodenames = { }
 
 @onready var NetworkGateway = get_node("..")
@@ -44,13 +55,25 @@ func _ready():
 	LocalPlayer.set_name("R%d" % LocalPlayer.get_node("PlayerFrame").networkID) 
 
 
-func connectionlog(txt):
-	$HBoxMain/ConnectionLog.text += txt
-	var cl = $HBoxMain/ConnectionLog.get_line_count()
-	$HBoxMain/ConnectionLog.set_caret_line(cl)
-
+var prevtxt = ""
 func clearconnectionlog():
 	$HBoxMain/ConnectionLog.text = ""
+	prevtxt = ""
+
+func connectionlog(txt):
+	if not txt.ends_with("\n"):
+		if txt == prevtxt:
+			$HBoxMain/ConnectionLog.text += "."
+		else:
+			if prevtxt != "":
+				$HBoxMain/ConnectionLog.text += "\n"
+			$HBoxMain/ConnectionLog.text += txt
+			prevtxt = txt
+	else:
+		$HBoxMain/ConnectionLog.text += txt
+		prevtxt = ""
+	var cl = $HBoxMain/ConnectionLog.get_line_count()
+	$HBoxMain/ConnectionLog.set_caret_line(cl)
 
 func network_player_notyetconnected():
 	assert (not multiplayer.is_server())
@@ -244,8 +267,6 @@ func removeremoteplayer(playernodename):
 		PlayersNode.remove_child(remoteplayer)
 		remoteplayer.queue_free()
 		print("Removing remoteplayer: ", playernodename)
-		if get_node("../TimelineVisualizer").visible:
-			get_node("../TimelineVisualizer/SubViewport/TimelineDiagram").removetimelineremoteplayer(playernodename)
 	else:
 		print("** remoteplayer already removed: ", playernodename)
 	
