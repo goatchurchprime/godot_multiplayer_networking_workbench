@@ -21,5 +21,5 @@ func _on_StartENetmultiplayer_toggled(button_pressed):
 
 
 	else:
-		PlayerConnections.force_server_disconnect()
+		PlayerConnections._server_disconnected()
 		

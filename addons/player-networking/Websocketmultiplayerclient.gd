@@ -22,6 +22,6 @@ func _on_StartWebSocketmultiplayer_toggled(button_pressed):
 		assert (get_tree().multiplayer_poll)
 			
 	else:
-		PlayerConnections.force_server_disconnect()
+		PlayerConnections._server_disconnected()
 
 

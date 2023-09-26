@@ -17,7 +17,7 @@ func _on_StartWebRTCmultiplayer_toggled(button_pressed):
 		assert (multiplayer.server_relay)
 		assert (multiplayer.get_unique_id() == 1)
 		assert (get_tree().multiplayer_poll)
-		PlayerConnections.networkplayer_connected_to_server()
+		PlayerConnections._connected_to_server()
 
 		serversignalling.mqttsig_client_connected.connect(server_client_connected) 
 		serversignalling.mqttsig_client_disconnected.connect(server_client_disconnected) 
@@ -27,7 +27,7 @@ func _on_StartWebRTCmultiplayer_toggled(button_pressed):
 		serversignalling.mqttsig_client_connected.disconnect(server_client_connected) 
 		serversignalling.mqttsig_client_disconnected.disconnect(server_client_disconnected) 
 		serversignalling.mqttsig_packet_received.disconnect(server_packet_received) 
-		PlayerConnections.force_server_disconnect()
+		PlayerConnections._server_disconnected()
 
 
 func server_ice_candidate_created(mid_name, index_name, sdp_name, id):

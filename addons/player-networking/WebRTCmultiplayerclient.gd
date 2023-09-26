@@ -68,4 +68,4 @@ func _on_StartWebRTCmultiplayer_toggled(button_pressed):
 		clientsignalling.mqttsig_connection_established.disconnect(client_connection_established) 
 		clientsignalling.mqttsig_connection_closed.disconnect(client_connection_closed) 
 		clientsignalling.mqttsig_packet_received.disconnect(client_packet_received) 
-		PlayerConnections.force_server_disconnect()
+		PlayerConnections._server_disconnected()

@@ -106,7 +106,7 @@ func _on_NetworkOptions_item_selected(ns):
 	if $PlayerConnections.LocalPlayer.get_node("PlayerFrame").networkID != 0:
 		if not (multiplayer.multiplayer_peer is OfflineMultiplayerPeer):
 			print("closing connection ", $PlayerConnections.LocalPlayer.get_node("PlayerFrame").networkID, multiplayer.multiplayer_peer)
-		$PlayerConnections.force_server_disconnect()
+		$PlayerConnections._server_disconnected()
 	assert ($PlayerConnections.LocalPlayer.get_node("PlayerFrame").networkID == 0)
 	if $UDPipdiscovery/Servermode.is_processing():
 		$UDPipdiscovery/Servermode.stopUDPbroadcasting()

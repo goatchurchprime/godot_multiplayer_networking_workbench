@@ -1,12 +1,9 @@
 extends ColorRect
 
 
-## Networking tool
+## PlayerConnections 
 ##
-## This script adds climbing support to any [StaticBody3D].
-##
-## For climbing to work, the player must have an [XRToolsMovementClimb] node
-## configured appropriately.
+## This object receives and manages all the multiplayer connections and disconnections
 
 @onready var playerframelocalgdscriptfile = get_parent().scene_file_path.get_base_dir() + "/PlayerFrameLocal.gd"
 @onready var playerframeremotegdscriptfile = get_parent().scene_file_path.get_base_dir() + "/PlayerFrameRemote.gd"
@@ -14,15 +11,15 @@ extends ColorRect
 var LocalPlayer = null
 var ServerPlayer = null
 
-# This handles 
+# Temporary list of _peer_connected signals received (out of order) before the 
+# _connected_to_server signal (can only happen on a client)
 var deferred_playerconnections = [ ]
 
-
+# Mapping required by the _peer_disconnected function so it can remove the correct node
 var remote_players_idstonodenames = { }
 
 @onready var NetworkGateway = get_node("..")
 @onready var PlayersNode = get_node(NetworkGateway.playersnodepath)
-
 @onready var PlayerList = $HBoxMain/VBoxContainer/HBox_players/PlayerList
 
 func _ready():
@@ -44,12 +41,14 @@ func _ready():
 
 	LocalPlayer.PAV_initavatarlocal()
 
-	multiplayer.peer_connected.connect(network_player_connected)
-	multiplayer.peer_disconnected.connect(network_player_disconnected)
+	# Signals received on behalf of any other player in the network, including the server
+	multiplayer.peer_connected.connect(_peer_connected)
+	multiplayer.peer_disconnected.connect(_peer_disconnected)
 
-	multiplayer.connected_to_server.connect(clientplayer_connected_to_server)
-	multiplayer.connection_failed.connect(clientplayer_connection_failed)
-	multiplayer.server_disconnected.connect(clientplayer_server_disconnected)
+	# signals generated only in the client, but are called in the server to simplify the code
+	multiplayer.connected_to_server.connect(_connected_to_server)
+	multiplayer.connection_failed.connect(_connection_failed)
+	multiplayer.server_disconnected.connect(_server_disconnected)
 
 	LocalPlayer.get_node("PlayerFrame").networkID = 0
 	LocalPlayer.set_name("R%d" % LocalPlayer.get_node("PlayerFrame").networkID) 
@@ -79,10 +78,10 @@ func network_player_notyetconnected():
 	assert (not multiplayer.is_server())
 	LocalPlayer.get_node("PlayerFrame").networkID = -1
 
-func clientplayer_server_disconnected():
-	networkplayer_server_disconnected(false)
-	
-func networkplayer_server_disconnected(serverisself):
+func _server_disconnected():
+	if (multiplayer.multiplayer_peer is OfflineMultiplayerPeer):
+		return
+	var serverisself = multiplayer.is_server()
 	connectionlog("_server(self) disconnect\n" if serverisself else "_server disconnect\n")
 	var ns = NetworkGateway.get_node("NetworkOptions").selected
 	print("(networkplayer_server_disconnected ", serverisself)
@@ -92,7 +91,7 @@ func networkplayer_server_disconnected(serverisself):
 	LocalPlayer.set_name("R%d" % LocalPlayer.get_node("PlayerFrame").networkID) 
 	deferred_playerconnections.clear()
 	for id in remote_players_idstonodenames.duplicate():
-		network_player_disconnected(id)
+		_peer_disconnected(id)
 	print("*** _server_disconnected ", LocalPlayer.get_node("PlayerFrame").networkID)
 	updateplayerlist()
 	if NetworkGateway.get_node("ProtocolOptions").selected == NetworkGateway.NETWORK_PROTOCOL.ENET:
@@ -106,15 +105,8 @@ func networkplayer_server_disconnected(serverisself):
 		NetworkGateway.get_node("NetworkOptions").selected = NetworkGateway.NETWORK_OPTIONS.NETWORK_OFF
 		
 
-func clientplayer_connected_to_server():
-	networkplayer_connected_to_server()
-	
-func force_server_disconnect():
-	if not (multiplayer.multiplayer_peer is OfflineMultiplayerPeer):
-		var serverisself = multiplayer.is_server()
-		networkplayer_server_disconnected(serverisself)
 
-func networkplayer_connected_to_server():
+func _connected_to_server():
 	var serverisself = multiplayer.is_server()
 	LocalPlayer.PAV_clientawaitingspawnpoint = (1 if not serverisself else 0)
 	connectionlog("_server(self) connect\n" if serverisself else "_server connect\n")
@@ -128,7 +120,7 @@ func networkplayer_connected_to_server():
 	deferred_playerconnections.clear()
 	updateplayerlist()
 
-func clientplayer_connection_failed():
+func _connection_failed():
 	connectionlog("_connection failed\n")
 	NetworkGateway.setnetworkoff()
 	
@@ -142,8 +134,7 @@ func updateplayerlist():
 			PlayerList.selected = PlayerList.get_item_count() - 1
 
 
-func network_player_connected(id):
-	print("NNnetwork_player_connected ", id, "  Lid ", LocalPlayer.get_node("PlayerFrame").networkID)
+func _peer_connected(id):
 	if LocalPlayer.get_node("PlayerFrame").networkID == -1:
 		deferred_playerconnections.push_back(id)
 		connectionlog("_add playerid %d (defer)\n" % id)
@@ -167,12 +158,8 @@ func network_player_added(id):
 		avatardata["spawnframedata"] = LocalPlayer.PAV_createspawnpoint()
 	print("calling spawnintoremoteplayer at ", id, " (from ", LocalPlayer.get_node("PlayerFrame").networkID, ") ", ("with spawndata" if serverisself else ""))
 	rpc_id(id, "spawnintoremoteplayer", avatardata)
-	
 
-func network_player_disconnected(id):
-	network_player_removed(id)
-				
-func network_player_removed(id):
+func _peer_disconnected(id):
 	connectionlog("_remove playerid %d\n" % id)
 	assert (remote_players_idstonodenames.has(id))
 	var remoteplayernodename = remote_players_idstonodenames[id]

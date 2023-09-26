@@ -20,10 +20,10 @@ func _on_StartWebSocketmultiplayer_toggled(button_pressed):
 		assert (multiplayer.server_relay)
 		assert (multiplayer.get_unique_id() == 1)
 		assert (get_tree().multiplayer_poll)
-		PlayerConnections.networkplayer_connected_to_server()
+		PlayerConnections._connected_to_server()
 
 	else:
-		PlayerConnections.force_server_disconnect()
+		PlayerConnections._server_disconnected()
 		
 
 
