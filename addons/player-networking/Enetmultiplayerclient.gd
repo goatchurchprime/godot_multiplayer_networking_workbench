@@ -16,7 +16,7 @@ func _on_StartENetmultiplayer_toggled(button_pressed):
 			return
 		
 		multiplayer.multiplayer_peer = multiplayerpeer
-		PlayerConnections.network_player_notyetconnected()
+		PlayerConnections.deferred_playerconnections = [ ]
 		assert (get_tree().multiplayer_poll)
 
 

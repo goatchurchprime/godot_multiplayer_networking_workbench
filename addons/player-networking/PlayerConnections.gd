@@ -13,7 +13,7 @@ var ServerPlayer = null
 
 # Temporary list of _peer_connected signals received (out of order) before the 
 # _connected_to_server signal (can only happen on a client)
-var deferred_playerconnections = [ ]
+var deferred_playerconnections = null
 
 # Mapping required by the _peer_disconnected function so it can remove the correct node
 var remote_players_idstonodenames = { }
@@ -74,11 +74,9 @@ func connectionlog(txt):
 	var cl = $HBoxMain/ConnectionLog.get_line_count()
 	$HBoxMain/ConnectionLog.set_caret_line(cl)
 
-func network_player_notyetconnected():
-	assert (not multiplayer.is_server())
-	LocalPlayer.get_node("PlayerFrame").networkID = -1
 
 func _server_disconnected():
+	deferred_playerconnections = null
 	if (multiplayer.multiplayer_peer is OfflineMultiplayerPeer):
 		return
 	var serverisself = multiplayer.is_server()
@@ -89,7 +87,6 @@ func _server_disconnected():
 	print("setnetworkpeer OfflineMultiplayerPeer")
 	LocalPlayer.get_node("PlayerFrame").networkID = 0
 	LocalPlayer.set_name("R%d" % LocalPlayer.get_node("PlayerFrame").networkID) 
-	deferred_playerconnections.clear()
 	for id in remote_players_idstonodenames.duplicate():
 		_peer_disconnected(id)
 	print("*** _server_disconnected ", LocalPlayer.get_node("PlayerFrame").networkID)
@@ -115,9 +112,11 @@ func _connected_to_server():
 	LocalPlayer.set_name("R%d" % LocalPlayer.get_node("PlayerFrame").networkID)
 	connectionlog("_my networkid=%d\n" % LocalPlayer.get_node("PlayerFrame").networkID)
 	print("my playerid=", LocalPlayer.get_node("PlayerFrame").networkID)
-	for id in deferred_playerconnections:
-		network_player_added(id)
-	deferred_playerconnections.clear()
+	if deferred_playerconnections != null:
+		var ldeferred_playerconnections = deferred_playerconnections
+		deferred_playerconnections = null
+		for id in ldeferred_playerconnections:
+			_peer_connected(id)
 	updateplayerlist()
 
 func _connection_failed():
@@ -135,13 +134,10 @@ func updateplayerlist():
 
 
 func _peer_connected(id):
-	if LocalPlayer.get_node("PlayerFrame").networkID == -1:
+	if deferred_playerconnections != null:
 		deferred_playerconnections.push_back(id)
 		connectionlog("_add playerid %d (defer)\n" % id)
-	else:
-		network_player_added(id)
-
-func network_player_added(id):
+		return
 	connectionlog("_add playerid %d\n" % id)
 	var serverisself = multiplayer.is_server()
 	assert (LocalPlayer.get_node("PlayerFrame").networkID >= 1)
