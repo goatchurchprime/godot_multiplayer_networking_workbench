@@ -32,8 +32,8 @@ enum NETWORK_OPTIONS_MQTT_WEBRTC {
 
 
 const errordecodes = { ERR_ALREADY_IN_USE:"ERR_ALREADY_IN_USE", 
-						ERR_CANT_CREATE:"ERR_CANT_CREATE"
-					}
+					   ERR_CANT_CREATE:"ERR_CANT_CREATE"
+					 }
 var rng = RandomNumberGenerator.new()
 
 	

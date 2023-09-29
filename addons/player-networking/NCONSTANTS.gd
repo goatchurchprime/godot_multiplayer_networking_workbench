@@ -7,6 +7,7 @@ enum {  CFI_TIMESTAMP 		= -1,
 		CFI_TIMESTAMP_F0 	= -4,
 		CFI_TIMESTAMP_RECIEVED = -5, 
 		CFI_ARRIVALDELAY = -6, 
+		CFI_NOTHINFRAME = -8, 
 		
 		CFI_ZERO = 0,
 		
