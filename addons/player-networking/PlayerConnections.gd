@@ -174,7 +174,7 @@ func _on_Doppelganger_toggled(button_pressed):
 	if button_pressed:
 		#DoppelgangerPanel.visible = true
 		DoppelgangerPanel.seteditable(false)
-		var avatardata = LocalPlayer.PF_avatarinitialdata()
+		var avatardata = LocalPlayer.PF_datafornewconnectedplayer()
 		avatardata["playernodename"] = "Doppelganger"
 		avatardata["networkid"] = LocalPlayer.get_node("PlayerFrame").networkID
 		var fd = LocalPlayer.get_node("PlayerFrame").framedata0.duplicate()
