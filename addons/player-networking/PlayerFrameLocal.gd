@@ -55,7 +55,8 @@ var minframeseconds = 0.1
 
 var framedata0 = { NCONSTANTS.CFI_TIMESTAMP:0.0, NCONSTANTS.CFI_TIMESTAMP_F0:0.0 }
 func _process(delta):
-	get_parent().PAV_processlocalavatarposition(delta)
+	if not get_parent().PF_processlocalavatarposition(delta):
+		return
 
 	var tstamp = Time.get_ticks_msec()*0.001
 	var dft = tstamp - framedata0[NCONSTANTS.CFI_TIMESTAMP]
@@ -64,8 +65,9 @@ func _process(delta):
 	framedata0[NCONSTANTS.CFI_TIMESTAMPPREV] = framedata0[NCONSTANTS.CFI_TIMESTAMP_F0]
 	framedata0[NCONSTANTS.CFI_TIMESTAMP_F0] = tstamp
 
-	var fd = get_parent().PAV_avatartoframedata()
-	var vd = thinframedata_updatef0(framedata0, fd, (dft >= heartbeatfullframeseconds))
+	var fd = get_parent().PF_avatartoframedata()
+	var bnothinning = (dft >= heartbeatfullframeseconds) or (fd.get(NCONSTANTS.CFI_NOTHINFRAME) == 1)
+	var vd = thinframedata_updatef0(framedata0, fd, bnothinning)
 	if len(vd) == 0:
 		return
 	framedata0[NCONSTANTS.CFI_TIMESTAMP] = tstamp
@@ -82,23 +84,19 @@ func _process(delta):
 		Dcumulativebytes= 0
 		DframereportCount = 0
 
-	if PlayerConnections.get_node("../TimelineVisualizer").visible:
-		PlayerConnections.get_node("../TimelineVisualizer/SubViewport/TimelineDiagram").marknetworkdataat(vd, "LocalPlayer")
-	
 	if networkID >= 1:
 		vd[NCONSTANTS.CFI_PLAYER_NODENAME] = get_parent().get_name()
-		PlayerConnections.rpc("networkedavatarthinnedframedataPC", vd)
+		PlayerConnections.rpc("RPCnetworkedavatarthinnedframedataPC", vd)
 		
 	if doppelgangernode != null:
 		var doppelnetoffset = NetworkGatewayForDoppelganger.get_node("DoppelgangerPanel").getnetoffset()
-		get_parent().PAV_changethinnedframedatafordoppelganger(vd, doppelnetoffset, false)
+		get_parent().PF_changethinnedframedatafordoppelganger(vd, doppelnetoffset, false)
 		var doppelgangerdelay = NetworkGatewayForDoppelganger.getrandomdoppelgangerdelay()
 		if doppelgangerdelay != -1.0:
 			await get_tree().create_timer(doppelgangerdelay*0.001).timeout
 			if doppelgangernode != null:
 				doppelgangernode.get_node("PlayerFrame").networkedavatarthinnedframedata(vd)
-				if PlayerConnections.get_node("../TimelineVisualizer").visible:
-					PlayerConnections.get_node("../TimelineVisualizer/SubViewport/TimelineDiagram").marknetworkdataat(vd, doppelgangernode.get_name())
+
 
 
 

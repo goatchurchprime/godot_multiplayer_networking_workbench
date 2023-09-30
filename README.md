@@ -1,25 +1,17 @@
 # Godot Multiplayer networking workbench
 
-This utility exposes the workings of the three highlevel multiplayer networking protocols (ENet, Websockets, and WebRTC) 
+This utility exposes the workings of the three [highlevel multiplayer](https://docs.godotengine.org/en/stable/tutorials/networking/high_level_multiplayer.html)
+networking protocols (ENet, Websockets, and WebRTC) 
 and has hooks to enable VR players to compress, transmit, unpack and interpolate their avatar movements across the network.
+
+This is aimed at Godot4, and more specifically 4.2.
 
 ![image](https://github.com/goatchurchprime/godot_multiplayer_networking_workbench/assets/677254/b49e2b09-b5cd-46a7-9a75-16d3dd5cf8d9)
 
 ## Installation
 
-https://docs.godotengine.org/en/stable/classes/class_networkedmultiplayerpeer.html#class-networkedmultiplayerpeer
-
-download the webrtc libraries from here an put into webrtc directory:
-https://github.com/godotengine/webrtc-native/releases
-
-If having difficulties on linux, don't forget to try:
-> sudo apt-get install libatomic1
-
-If you are on Nixos, it needs patchelf to fix it:
-> https://github.com/godotengine/webrtc-native/issues/44#issuecomment-922550575
-
-You can optionally install Godot-Opus from the AssetLib to enable audio compression.  
-Don't forget to enable audio input in your project settings and any export permissions.
+Download the WebRTC libraries from [godotengine/webrtc-native](https://github.com/godotengine/webrtc-native/releases) 
+and set as the toplevel webrtc directory in your project.
 
 ## Operation
 
@@ -32,16 +24,16 @@ the players spawning and removal.
 
 ### Network connecting
 
-The toy example included is an ineffective pong game with the network provisioning code in the JoystickControls.gd script.
+The toy example included is an ineffective pong game with the network provisioning code in the `JoystickControls.gd` script.
 We connect using WebRTC at startup so it works out of the box.  This is done with the call to `NetworkGateway.initialstatemqttwebrtc()`
 
-Signalling is all done through the the public broker connected to [HiveMQ](http://www.mqtt-dashboard.com/) and you can sniff 
+Signalling is all done through the the public broker connected to [test.mosquitto.org](http://test.mosquitto.org/) and you can sniff 
 out all the signals if you run the command:
 
-> mosquitto_sub -h mqtt.dynamicdevices.co.uk -t "lettuce/#" -v
+> mosquitto_sub -h test.mosquitto.org -t "lettuce/#" -v
 
 This dumps everything in the room `lettuce` to the command line.  You can choose other rooms, so that connection 
-can be like jit.si.  
+can be like meet.jit.si.  
 
 The use of a public MQTT broker to initiate the connections means we can set the connection to "As necessary", which means 
 that if there's live server on the channel it starts out as a server, otherwise it starts as a client and connects to it.
@@ -69,19 +61,24 @@ instances in the game, are able to work.
 
 The script attached to the Player (the node containing the PlayerFrame that visualizes the avatar) must have the following functions:
 
-* func initavatarlocal(): Called at startup on the LocalPlayer
+* func PAV_initavatarlocal(): Called at startup on the LocalPlayer
 
-* func initavatarremote(avatardata): Called when a new RemotePlayer is created in the Players node
+* func PAV_initavatarremote(avatardata): Called when a new RemotePlayer is created in the Players node
 
-* func avatarinitdata() -> avatardata: The dict of data called on the LocalPlayer and sent to the function above
+* func PAV_avatarinitdata() -> avatardata: The dict of data called on the LocalPlayer and sent to the function above
 
 * func playername(): Used in the Networking UI to list the players
 
-* func processlocalavatarposition(delta):  Called directly from the PlayerFrameLocal \_process() function before it reads the position
+* func PAV_processlocalavatarposition(delta):  Called directly from the PlayerFrameLocal \_process() function before it reads the position
 
-* func avatartoframedata() -> fd: dict of local player position state generated at each frame
+* func PAV_avatartoframedata() -> fd: dict of local player position state generated at each frame
 
-* func framedatatoavatar(fd):  The unpacking of the remote player position state from the frame data.
+* func PAV_framedatatoavatar(fd):  The unpacking of the remote player position state from the frame data.
+
+* func PAV_createspawnpoint():  The server generates a span point for each client
+
+* func PAV_receivespawnpoint(sfd): The spawn point as received from the server after connection
+
 
 * static func changethinnedframedatafordoppelganger(fd, doppelnetoffset): A function used to distort the set of frame data so it can be used as a player doppelganger 
 to see how the motions would look on the other side of a network in real time.
