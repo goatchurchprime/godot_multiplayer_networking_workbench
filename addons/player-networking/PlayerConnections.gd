@@ -176,6 +176,7 @@ func _on_Doppelganger_toggled(button_pressed):
 		DoppelgangerPanel.seteditable(false)
 		var avatardata = LocalPlayer.PF_datafornewconnectedplayer()
 		avatardata["playernodename"] = "Doppelganger"
+		avatardata.erase("spawnframedata")
 		avatardata["networkid"] = LocalPlayer.get_node("PlayerFrame").networkID
 		var fd = LocalPlayer.get_node("PlayerFrame").framedata0.duplicate()
 		fd[NCONSTANTS.CFI_TIMESTAMP] = fd[NCONSTANTS.CFI_TIMESTAMP_F0]
@@ -206,7 +207,7 @@ func _on_Doppelganger_toggled(button_pressed):
 	remote_players_idstonodenames[senderid] = remoteplayer.get_name()
 	updateplayerlist()
 
-@rpc("any_peer") func networkedavatarthinnedframedataPC(vd):
+@rpc("any_peer") func RPCnetworkedavatarthinnedframedataPC(vd):
 	var rpcsenderid = multiplayer.get_remote_sender_id()
 	var remoteplayer = PlayersNode.get_node_or_null(String(vd[NCONSTANTS.CFI_PLAYER_NODENAME]))
 	if remoteplayer != null:

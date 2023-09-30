@@ -92,6 +92,7 @@ func PF_avatartoframedata():
 	fd[NCONSTANTS.CFI_FIRE_KEY] = Input.is_key_pressed(KEY_SPACE)
 	if nextframeisfirst:
 		fd[NCONSTANTS.CFI_NOTHINFRAME] = 1
+		nextframeisfirst = false
 	return fd
 
 func PF_framedatatoavatar(fd):

@@ -86,7 +86,7 @@ func _process(delta):
 
 	if networkID >= 1:
 		vd[NCONSTANTS.CFI_PLAYER_NODENAME] = get_parent().get_name()
-		PlayerConnections.rpc("networkedavatarthinnedframedataPC", vd)
+		PlayerConnections.rpc("RPCnetworkedavatarthinnedframedataPC", vd)
 		
 	if doppelgangernode != null:
 		var doppelnetoffset = NetworkGatewayForDoppelganger.get_node("DoppelgangerPanel").getnetoffset()
