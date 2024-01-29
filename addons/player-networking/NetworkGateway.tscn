@@ -69,6 +69,7 @@ offset_bottom = 29.0
 text = "Protocol:"
 
 [node name="NetworkOptions" type="OptionButton" parent="."]
+visible = false
 layout_mode = 0
 offset_left = 458.0
 offset_top = 10.0
@@ -134,6 +135,7 @@ pivot_offset = Vector2(103.791, -1.38985)
 text = "Connection:"
 
 [node name="UDPipdiscovery" type="ColorRect" parent="."]
+visible = false
 layout_mode = 0
 offset_left = 11.0
 offset_top = 48.0
@@ -270,6 +272,7 @@ button_pressed = true
 text = "autoconnect"
 
 [node name="WebSocketMultiplayer" type="ColorRect" parent="."]
+visible = false
 layout_mode = 0
 offset_left = 13.0
 offset_top = 95.0
@@ -331,6 +334,7 @@ button_pressed = true
 text = "autoconnect"
 
 [node name="WebSocketsignalling" type="ColorRect" parent="."]
+visible = false
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -489,10 +493,10 @@ script = ExtResource("10")
 
 [node name="StartWebRTCmultiplayer" type="Button" parent="MQTTsignalling/Servermode/WebRTCmultiplayerserver"]
 layout_mode = 0
-offset_left = 38.1438
-offset_top = -0.522704
-offset_right = 192.144
-offset_bottom = 30.4773
+offset_left = 37.1438
+offset_top = 13.4773
+offset_right = 191.144
+offset_bottom = 44.4773
 toggle_mode = true
 text = "StartWebrtc server"
 
@@ -506,10 +510,10 @@ text = "null"
 
 [node name="ClientsList" type="OptionButton" parent="MQTTsignalling/Servermode"]
 layout_mode = 0
-offset_left = 45.0
-offset_top = 24.0
-offset_right = 182.999
-offset_bottom = 44.0
+offset_left = 43.0
+offset_top = 40.0
+offset_right = 180.999
+offset_bottom = 60.0
 
 [node name="Clientmode" type="Control" parent="MQTTsignalling"]
 visible = false
@@ -547,14 +551,18 @@ offset_right = 50.4729
 offset_bottom = 59.5227
 text = "null"
 
-[node name="brokeraddress" type="LineEdit" parent="MQTTsignalling"]
+[node name="brokeraddress" type="OptionButton" parent="MQTTsignalling"]
 layout_mode = 0
 offset_left = 5.0
-offset_top = 7.0
-offset_right = 236.0
-offset_bottom = 38.0
-tooltip_text = "MQTT broker URL"
-text = "test.mosquitto.org"
+offset_top = 6.0
+offset_right = 269.0
+offset_bottom = 37.0
+item_count = 2
+selected = 0
+popup/item_0/text = "mosquitto.doesliverpool.xyz"
+popup/item_0/id = 0
+popup/item_1/text = "test.mosquitto.org"
+popup/item_1/id = 1
 
 [node name="roomname" type="LineEdit" parent="MQTTsignalling"]
 layout_mode = 0
@@ -606,19 +614,19 @@ text = "mqtt clientid:"
 
 [node name="autoconnect" type="CheckBox" parent="MQTTsignalling"]
 layout_mode = 0
-offset_left = 427.0
-offset_top = 3.0
-offset_right = 552.0
-offset_bottom = 34.0
+offset_left = 429.0
+offset_top = 16.0
+offset_right = 554.0
+offset_bottom = 47.0
 button_pressed = true
 text = "autoconnect"
 
 [node name="StartMQTT" type="Button" parent="MQTTsignalling"]
 layout_mode = 0
-offset_left = 242.0
-offset_top = 7.0
-offset_right = 330.0
-offset_bottom = 38.0
+offset_left = 285.0
+offset_top = 6.0
+offset_right = 373.0
+offset_bottom = 37.0
 toggle_mode = true
 text = "Start mqtt"
 
@@ -738,7 +746,7 @@ size_flags_horizontal = 0
 [node name="DoppelgangerEnable" type="CheckBox" parent="DoppelgangerPanel/hbox/VBox_enable"]
 layout_mode = 2
 size_flags_horizontal = 4
-text = "Doppelganger"
+text = "DoppelgangerDD"
 
 [node name="VSeparator" type="VSeparator" parent="DoppelgangerPanel/hbox"]
 layout_mode = 2
