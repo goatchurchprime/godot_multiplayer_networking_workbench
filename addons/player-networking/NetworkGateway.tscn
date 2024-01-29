@@ -598,18 +598,18 @@ text = "mqtt autoconnect"
 
 [node name="client_id" type="LineEdit" parent="MQTTsignalling"]
 layout_mode = 0
-offset_left = 152.0
-offset_top = 72.0
-offset_right = 259.0
-offset_bottom = 103.0
+offset_left = 218.0
+offset_top = 71.0
+offset_right = 325.0
+offset_bottom = 102.0
 editable = false
 
 [node name="Label" type="Label" parent="MQTTsignalling/client_id"]
 layout_mode = 0
 offset_left = -124.0
-offset_top = 2.0
+offset_top = 10.0
 offset_right = -20.0
-offset_bottom = 28.0
+offset_bottom = 36.0
 text = "mqtt clientid:"
 
 [node name="autoconnect" type="CheckBox" parent="MQTTsignalling"]
@@ -623,10 +623,10 @@ text = "autoconnect"
 
 [node name="StartMQTT" type="Button" parent="MQTTsignalling"]
 layout_mode = 0
-offset_left = 285.0
-offset_top = 6.0
-offset_right = 373.0
-offset_bottom = 37.0
+offset_left = 297.0
+offset_top = 9.0
+offset_right = 385.0
+offset_bottom = 40.0
 toggle_mode = true
 text = "Start mqtt"
 

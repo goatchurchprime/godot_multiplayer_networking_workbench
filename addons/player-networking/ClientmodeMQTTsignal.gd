@@ -135,6 +135,7 @@ func _on_StartClient_toggled(button_pressed):
 		MQTT.broker_connected.connect(on_broker_connect)
 		MQTT.broker_disconnected.connect(on_broker_disconnect)
 		roomname = SetupMQTTsignal.get_node("roomname").text
+		SetupMQTTsignal.get_node("roomname").editable = false
 		StartMQTTstatuslabel.text = "on"
 		randomize()
 		MQTT.client_id = "c%d" % (2 + (randi()%0x7ffffff8))
@@ -157,6 +158,8 @@ func _on_StartClient_toggled(button_pressed):
 		serverconnected = false
 		openserversconnections.clear()
 		StartMQTTstatuslabel.text = "off"
+		roomname = ""
+		SetupMQTTsignal.get_node("roomname").editable = true
 		SetupMQTTsignal.get_node("client_id").text = ""
 		emit_signal("mqttsig_connection_closed")
 		wclientid = 0
