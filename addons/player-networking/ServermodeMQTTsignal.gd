@@ -115,6 +115,7 @@ func _on_StartServer_toggled(button_pressed):
 		MQTT.broker_connected.connect(on_broker_connect)
 		MQTT.broker_disconnected.connect(on_broker_disconnect)
 		roomname = SetupMQTTsignal.get_node("roomname").text
+		SetupMQTTsignal.get_node("roomname").editable = false
 		StartMQTTstatuslabel.text = "on"
 		randomize()
 		MQTT.client_id = "s%d" % randi()
@@ -133,6 +134,8 @@ func _on_StartServer_toggled(button_pressed):
 		MQTT.publish(statustopic, JSON.new().stringify({"subject":"dead"}), true)
 		MQTT.disconnect_from_server()
 		StartMQTTstatuslabel.text = "off"
+		roomname = ""
+		SetupMQTTsignal.get_node("roomname").editable = true
 		SetupMQTTsignal.get_node("client_id").text = ""
 		for s in clientidtowclientid:
 			emit_signal("mqttsig_client_disconnected", clientidtowclientid[s])
