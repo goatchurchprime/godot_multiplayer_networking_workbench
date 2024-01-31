@@ -13,7 +13,7 @@ var clientidtowclientid = { }
 var wclientidtoclientid = { }
 var clearlostretainedclients = true
 var clearlostretainedservers = true
-var Dclearlostdanglingservers = true
+var Dclearlostdanglingservers = false
 var statustopic = ""
 
 signal mqttsig_client_connected(id)
@@ -124,6 +124,7 @@ func _on_StartServer_toggled(button_pressed):
 		MQTT.set_last_will(statustopic, JSON.new().stringify({"subject":"dead", "comment":"by_will"}), true)
 		StartMQTTstatuslabel.text = "connecting"
 		var brokerurl = SetupMQTTsignal.get_node("brokeraddress").text
+		SetupMQTTsignal.get_node("brokeraddress").disabled = true
 		MQTT.connect_to_broker(brokerurl)
 
 	else:
@@ -137,6 +138,7 @@ func _on_StartServer_toggled(button_pressed):
 		roomname = ""
 		SetupMQTTsignal.get_node("roomname").editable = true
 		SetupMQTTsignal.get_node("client_id").text = ""
+		SetupMQTTsignal.get_node("brokeraddress").disabled = false
 		for s in clientidtowclientid:
 			emit_signal("mqttsig_client_disconnected", clientidtowclientid[s])
 		$ClientsList.clear()

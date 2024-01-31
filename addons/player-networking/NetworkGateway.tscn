@@ -594,6 +594,7 @@ offset_top = 37.0
 offset_right = 366.0
 offset_bottom = 68.0
 button_pressed = true
+action_mode = 0
 text = "mqtt autoconnect"
 
 [node name="client_id" type="LineEdit" parent="MQTTsignalling"]
@@ -841,6 +842,9 @@ offset_bottom = 40.0
 [connection signal="toggled" from="WebSocketsignalling/Clientmode/WebRTCmultiplayerclient/StartWebRTCmultiplayer" to="WebSocketsignalling/Clientmode/WebRTCmultiplayerclient" method="_on_StartWebRTCmultiplayer_toggled"]
 [connection signal="toggled" from="MQTTsignalling/Servermode/WebRTCmultiplayerserver/StartWebRTCmultiplayer" to="MQTTsignalling/Servermode/WebRTCmultiplayerserver" method="_on_StartWebRTCmultiplayer_toggled"]
 [connection signal="toggled" from="MQTTsignalling/Clientmode/WebRTCmultiplayerclient/StartWebRTCmultiplayer" to="MQTTsignalling/Clientmode/WebRTCmultiplayerclient" method="_on_StartWebRTCmultiplayer_toggled"]
+[connection signal="gui_input" from="MQTTsignalling/mqttautoconnect" to="." method="_on_mqttautoconnect_gui_input"]
+[connection signal="mouse_entered" from="MQTTsignalling/mqttautoconnect" to="." method="_on_mqttautoconnect_mouse_entered"]
+[connection signal="pressed" from="MQTTsignalling/mqttautoconnect" to="." method="_on_mqttautoconnect_pressed"]
 [connection signal="toggled" from="MQTTsignalling/StartMQTT" to="MQTTsignalling/Servermode" method="_on_StartServer_toggled"]
 [connection signal="item_selected" from="PlayerConnections/HBoxMain/VBoxContainer/HBox_players/PlayerList" to="PlayerConnections" method="_on_PlayerList_item_selected"]
 [connection signal="button_down" from="PlayerConnections/HBoxMain/VBoxContainer/RecordingFeature/MicRecord" to="PlayerConnections/HBoxMain/VBoxContainer/RecordingFeature" method="_on_MicRecord_button_down"]

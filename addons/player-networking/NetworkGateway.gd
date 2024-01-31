@@ -234,3 +234,21 @@ func _data_channel_received(channel: Object):
 
 
 
+
+
+
+
+# The button press signal isn't getting through from mouse click
+# Although mouse down is sent to the Viewport, a mouse move is received
+# works okay in VR though
+
+func _on_mqttautoconnect_pressed():
+	pass # print("---- _on_mqttautoconnect_pressedx")
+
+
+func _on_mqttautoconnect_mouse_entered():
+	pass # print("---- _on_mqttautoconnect_mouse_eneeeetered")
+
+
+func _on_mqttautoconnect_gui_input(event):
+	pass #print("input evengt ", event)
