@@ -1,10 +1,12 @@
-# Godot Multiplayer networking workbench
+# Godot4 Multiplayer networking workbench
 
-This utility exposes the workings of the three [highlevel multiplayer](https://docs.godotengine.org/en/stable/tutorials/networking/high_level_multiplayer.html)
-networking protocols (ENet, Websockets, and WebRTC) 
+This utility wraps the workings of the three [highlevel multiplayer](https://docs.godotengine.org/en/stable/tutorials/networking/high_level_multiplayer.html)
+networking protocols (**ENet**, **Websockets**, and **WebRTC**) 
 and has hooks to enable VR players to compress, transmit, unpack and interpolate their avatar movements across the network.
 
-This is aimed at Godot4, and more specifically 4.2.
+**WebRTC** is the most interesting because it enables peer to peer networking across the internet without a server.  
+The signalling (the exchange of a small amount of text data between the peers necessary to up the WebRTC connection) 
+is done using a light-weight MQTT server, of which public versions are available.
 
 ![image](https://github.com/goatchurchprime/godot_multiplayer_networking_workbench/assets/677254/b49e2b09-b5cd-46a7-9a75-16d3dd5cf8d9)
 
