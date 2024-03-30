@@ -50,7 +50,6 @@ offset_top = 8.0
 offset_right = 287.0
 offset_bottom = 39.0
 item_count = 4
-selected = 3
 popup/item_0/text = "ENet"
 popup/item_0/id = 0
 popup/item_1/text = "WebSocket"
@@ -76,7 +75,6 @@ offset_top = 10.0
 offset_right = 636.0
 offset_bottom = 41.0
 item_count = 3
-selected = 0
 popup/item_0/text = "Network off"
 popup/item_0/id = 0
 popup/item_1/text = "As server"
@@ -557,12 +555,16 @@ offset_left = 5.0
 offset_top = 6.0
 offset_right = 269.0
 offset_bottom = 37.0
-item_count = 2
-selected = 0
+item_count = 4
+selected = 3
 popup/item_0/text = "mosquitto.doesliverpool.xyz"
 popup/item_0/id = 0
 popup/item_1/text = "test.mosquitto.org"
 popup/item_1/id = 1
+popup/item_2/text = "broker.hivemq.com"
+popup/item_2/id = 2
+popup/item_3/text = "5.161.75.32"
+popup/item_3/id = 3
 
 [node name="roomname" type="LineEdit" parent="MQTTsignalling"]
 layout_mode = 0
@@ -670,7 +672,6 @@ text = "Players:"
 layout_mode = 2
 size_flags_horizontal = 10
 item_count = 1
-selected = 0
 popup/item_0/text = "me"
 popup/item_0/id = 0
 
@@ -685,7 +686,7 @@ text = "MicRecord"
 [node name="AudioStreamRecorder" type="AudioStreamPlayer" parent="PlayerConnections/HBoxMain/VBoxContainer/RecordingFeature/MicRecord"]
 stream = SubResource("2")
 autoplay = true
-bus = &"Recorder"
+bus = &"Mic"
 
 [node name="RecordSize" type="Label" parent="PlayerConnections/HBoxMain/VBoxContainer/RecordingFeature"]
 layout_mode = 2
@@ -830,6 +831,7 @@ offset_bottom = 40.0
 
 [node name="AudioStreamPlayer3D" type="AudioStreamPlayer3D" parent="Control"]
 
+[connection signal="gui_input" from="." to="." method="_on_gui_input"]
 [connection signal="item_selected" from="ProtocolOptions" to="." method="_on_ProtocolOptions_item_selected"]
 [connection signal="item_selected" from="NetworkOptions" to="." method="_on_NetworkOptions_item_selected"]
 [connection signal="item_selected" from="NetworkOptionsMQTTWebRTC" to="." method="_on_NetworkOptionsMQTTWebRTC_item_selected"]
@@ -842,6 +844,7 @@ offset_bottom = 40.0
 [connection signal="toggled" from="WebSocketsignalling/Clientmode/WebRTCmultiplayerclient/StartWebRTCmultiplayer" to="WebSocketsignalling/Clientmode/WebRTCmultiplayerclient" method="_on_StartWebRTCmultiplayer_toggled"]
 [connection signal="toggled" from="MQTTsignalling/Servermode/WebRTCmultiplayerserver/StartWebRTCmultiplayer" to="MQTTsignalling/Servermode/WebRTCmultiplayerserver" method="_on_StartWebRTCmultiplayer_toggled"]
 [connection signal="toggled" from="MQTTsignalling/Clientmode/WebRTCmultiplayerclient/StartWebRTCmultiplayer" to="MQTTsignalling/Clientmode/WebRTCmultiplayerclient" method="_on_StartWebRTCmultiplayer_toggled"]
+[connection signal="button_down" from="MQTTsignalling/brokeraddress" to="." method="_on_brokeraddress_button_down"]
 [connection signal="gui_input" from="MQTTsignalling/mqttautoconnect" to="." method="_on_mqttautoconnect_gui_input"]
 [connection signal="mouse_entered" from="MQTTsignalling/mqttautoconnect" to="." method="_on_mqttautoconnect_mouse_entered"]
 [connection signal="pressed" from="MQTTsignalling/mqttautoconnect" to="." method="_on_mqttautoconnect_pressed"]

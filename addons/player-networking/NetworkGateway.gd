@@ -48,6 +48,9 @@ func _ready():
 	rng.randomize()
 	_on_ProtocolOptions_item_selected($ProtocolOptions.selected)
 
+
+
+
 func initialstatenormal(protocol, networkoption):
 	assert (protocol >= NETWORK_PROTOCOL.ENET and protocol <= NETWORK_PROTOCOL.WEBRTC_WEBSOCKETSIGNAL)
 	$ProtocolOptions.selected = protocol
@@ -75,7 +78,8 @@ func selectandtrigger_networkoption(networkoption):
 			_on_NetworkOptions_item_selected(networkoption)
 
 func _on_ProtocolOptions_item_selected(np):
-	assert ($NetworkOptions.selected == NETWORK_OPTIONS.NETWORK_OFF and $NetworkOptionsMQTTWebRTC.selected == NETWORK_OPTIONS_MQTT_WEBRTC.NETWORK_OFF)
+	assert ($NetworkOptions.selected == NETWORK_OPTIONS.NETWORK_OFF or $NetworkOptions.selected == -1)
+	assert ($NetworkOptionsMQTTWebRTC.selected == NETWORK_OPTIONS_MQTT_WEBRTC.NETWORK_OFF or $NetworkOptionsMQTTWebRTC.selected == -1)
 	var selectasmqttwebrtc = (np == NETWORK_PROTOCOL.WEBRTC_MQTTSIGNAL)
 	var selectaswebrtcwebsocket = (np == NETWORK_PROTOCOL.WEBRTC_WEBSOCKETSIGNAL)
 	var selectasenet = (np == NETWORK_PROTOCOL.ENET)
@@ -235,9 +239,6 @@ func _data_channel_received(channel: Object):
 
 
 
-
-
-
 # The button press signal isn't getting through from mouse click
 # Although mouse down is sent to the Viewport, a mouse move is received
 # works okay in VR though
@@ -252,3 +253,13 @@ func _on_mqttautoconnect_mouse_entered():
 
 func _on_mqttautoconnect_gui_input(event):
 	pass #print("input evengt ", event)
+
+
+func _on_brokeraddress_button_down():
+	pass # Replace with function body.
+
+
+func _on_gui_input(event):
+	if event is InputEventMouseButton:
+		print("_on_gui_input ", event)
+	
