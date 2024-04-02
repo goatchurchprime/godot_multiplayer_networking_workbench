@@ -107,12 +107,14 @@ func _ready():
 
 	# upgrade to OneVoip system if addon from https://github.com/RevoluPowered/one-voip-godot-4/ detected
 	# The VOIPInputCapture taps off the stream leaving it the same, but feeds it to the Recorder
-	if ClassDB.class_exists("VOIPInputCapture"):
+	print("dd ", ClassDB.can_instantiate("VOIPInputCapture"))
+	print("dd ", ClassDB.can_instantiate("VOIPInputCapturasdasdae"))
+	if ClassDB.can_instantiate("VOIPInputCapture"):
 		var voipbusidx = AudioServer.get_bus_count()
 		AudioServer.add_bus()
 		assert (AudioServer.get_bus_name(voipbusidx).begins_with("New Bus"))
 		AudioServer.set_bus_name(voipbusidx, "voiprecorder")
-		voipinputcapture = VOIPInputCapture.new()
+		voipinputcapture = ClassDB.instantiate("VOIPInputCapture")
 		voipinputcapture.set_buffer_length(0.1)   # In the inhereted AudioEffectCapture 
 		AudioServer.add_bus_effect(voipbusidx, voipinputcapture)
 		AudioServer.set_bus_send(voipbusidx, "Recorder")
@@ -155,7 +157,7 @@ func _on_PlayRecord_pressed():
 		audioStream.set_mix_rate(micrecordingdata["mix_rate"])		
 		audioStream.set_stereo(micrecordingdata["is_stereo"])
 		audioStream.data = micrecordingdata["pcmData"]
-	elif micrecordingdata != null and micrecordingdata.has("voipcapturepackets") and ClassDB.class_exists("AudioStreamVOIP"):
+	elif micrecordingdata != null and micrecordingdata.has("voipcapturepackets") and ClassDB.can_instantiate("AudioStreamVOIP"):
 		audioStream = ClassDB.instantiate("AudioStreamVOIP")
 		voipcapturepacketsplayback = micrecordingdata["voipcapturepackets"]
 		voipcapturepacketsplaybackIndex = 0
