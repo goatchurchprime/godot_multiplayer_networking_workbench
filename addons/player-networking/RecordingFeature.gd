@@ -12,13 +12,21 @@ var voipcapturepackets = null
 var voipcapturesize = 0
 var voipinputcapture = null  # class VOIPInputCapture
 
+var packetgaps = [ ]
+var packettime = 0
 func _packet_ready(packet): #New packet from mic to send
 	voipcapturepackets.append(packet)
 	voipcapturesize += len(packet)
-
+	var Npackettime = Time.get_ticks_usec()
+	packetgaps.append(Npackettime - packettime)
+	packettime = Npackettime
+	
+var D = 0
 func _process(delta):
 	if voipinputcapture:
-		voipinputcapture.send_test_packets()
+		D += 1
+		if (D%10) == 0:
+			voipinputcapture.send_test_packets()
 	
 func _ready():
 	set_process(false)  
@@ -71,6 +79,7 @@ func _on_MicRecord_button_down():
 		if voipinputcapture != null:
 			voipcapturepackets = [ ]
 			voipcapturesize = 0
+			packetgaps = [ ]
 			set_process(true)
 
 		await get_tree().create_timer(0.1).timeout
@@ -93,7 +102,7 @@ func _on_MicRecord_button_up():
 		if voipinputcapture != null:
 			micrecordingdata["voipcapturepackets"] = voipcapturepackets
 			set_process(false)
-			print("voipcapturesize ", voipcapturesize, " in ", len(voipcapturepackets), " packets")
+			print("voipcapturesize ", voipcapturesize, " avg size ", voipcapturesize/len(voipcapturepackets))
 		elif $MicRecord.has_node("OpusEncoder"):
 			micrecordingdata["opusEncoded"] = $MicRecord/OpusEncoder.encode(pcmData)
 		else:
@@ -127,9 +136,10 @@ func _on_PlayRecord_pressed():
 		audioStream.set_stereo(micrecordingdata["is_stereo"])
 		var voipcapturepackets = [ ]
 		if micrecordingdata.has("voipcapturepackets") and ClassDB.class_exists("AudioStreamVOIP"):
-			audioStream = AudioStreamVOIP.new()
+			audioStream = ClassDB.instantiate("AudioStreamVOIP")
 			voipcapturepackets = micrecordingdata["voipcapturepackets"]
 			print("num packets ", len(voipcapturepackets), " in duration ", micrecordingdata["duration_ms"])
+			print("milliseconds per packet ", micrecordingdata["duration_ms"]/len(voipcapturepackets))
 			print("audio playing voip ")
 		elif micrecordingdata.has("opusEncoded") and $MicRecord.has_node("OpusDecoder"):
 			audioStream.data = $MicRecord/OpusDecoder.decode(micrecordingdata["opusEncoded"])
@@ -147,7 +157,7 @@ func _on_PlayRecord_pressed():
 			var playstart = Time.get_ticks_msec()
 			for i in range(len(voipcapturepackets)):
 				audioStream.push_packet(voipcapturepackets[i])
-				if (i%2) == 1:
+				if (i%5) == 1:
 					await get_tree().process_frame
 			var pushduration = Time.get_ticks_msec() - playstart
 			await get_tree().create_timer((micrecordingdata["duration_ms"] - pushduration)/1000).timeout

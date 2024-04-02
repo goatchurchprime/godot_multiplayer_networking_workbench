@@ -1,4 +1,4 @@
-[gd_scene load_steps=23 format=3 uid="uid://cfmoahalri06d"]
+[gd_scene load_steps=24 format=3 uid="uid://cfmoahalri06d"]
 
 [ext_resource type="Script" path="res://addons/player-networking/NetworkGateway.gd" id="1"]
 [ext_resource type="Script" path="res://addons/player-networking/Enetmultiplayerserver.gd" id="3"]
@@ -19,6 +19,9 @@
 [ext_resource type="Script" path="res://addons/player-networking/DoppelgangerPanel_ui.gd" id="16_i8v6k"]
 
 [sub_resource type="AudioStreamMicrophone" id="2"]
+
+[sub_resource type="AudioStreamVOIP" id="AudioStreamVOIP_x4gm8"]
+resource_local_to_scene = true
 
 [sub_resource type="FontVariation" id="FontVariation_pmwxj"]
 spacing_top = -5
@@ -702,6 +705,7 @@ layout_mode = 2
 text = "Play"
 
 [node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="PlayerConnections/HBoxMain/VBoxContainer/RecordingFeature/PlayRecord"]
+stream = SubResource("AudioStreamVOIP_x4gm8")
 autoplay = true
 
 [node name="HBoxLag" type="HBoxContainer" parent="PlayerConnections/HBoxMain/VBoxContainer"]
