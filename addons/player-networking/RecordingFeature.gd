@@ -24,7 +24,6 @@ func voip_packet_ready(packet): #New packet from mic to send
 		var Npackettime = Time.get_ticks_usec()
 		packetgaps.append(Npackettime - packettime)
 		packettime = Npackettime
-	
 
 var recordingstart_msticks = 0
 var currentlyrecording = false
@@ -35,11 +34,9 @@ var voipcapturepacketsplaybackstart_msticks = 0
 var voipcapturepacketsplayback_msduration = 1
 
 func _process(delta):
+	if voipinputcapture:   # keep flushing it through
+		voipinputcapture.send_test_packets()
 	if currentlyrecording:
-		if voipinputcapture:
-			voipinputcapture.send_test_packets()
-		else:
-			pass # assert (recordingeffect.is_recording_active())
 		if (Time.get_ticks_msec() - recordingstart_msticks)/1000 > max_recording_seconds:
 			stop_recording()
 
@@ -51,8 +48,7 @@ func _process(delta):
 			$PlayRecord/AudioStreamPlayer.stream.push_packet(voipcapturepacketsplayback[voipcapturepacketsplaybackIndex])
 			voipcapturepacketsplaybackIndex += 1
 
-		
-		if currentplaybackduration > voipcapturepacketsplayback_msduration + 300:
+		if currentplaybackduration > voipcapturepacketsplayback_msduration + 500:
 			voipcapturepacketsplayback = null
 			$PlayRecord/AudioStreamPlayer.stop()
 			$PlayRecord/AudioStreamPlayer.stream = null
@@ -81,11 +77,12 @@ func stop_recording():
 							"duration":recording_duration, 
 							"pcmData":pcmData }
 		underlyingbytessize = len(pcmData)
-	elif voipinputcapture:
+	elif voipcapturepackets:
 		micrecordingdata = { "voipcapturepackets":voipcapturepackets, 
 							 "duration":recording_duration }
 		underlyingbytessize = voipcapturesize
 		voipcapturepackets = null
+		print(packetgaps)
 	print("created data bytes ", len(var_to_bytes(micrecordingdata)), " underlying ", underlyingbytessize)
 	$RecordSize.text = "l-"+str(underlyingbytessize)
 
@@ -116,7 +113,7 @@ func _ready():
 		assert (AudioServer.get_bus_name(voipbusidx).begins_with("New Bus"))
 		AudioServer.set_bus_name(voipbusidx, "voiprecorder")
 		voipinputcapture = VOIPInputCapture.new()
-		voipinputcapture.set_buffer_length(0.5)   # In the inhereted AudioEffectCapture 
+		voipinputcapture.set_buffer_length(0.1)   # In the inhereted AudioEffectCapture 
 		AudioServer.add_bus_effect(voipbusidx, voipinputcapture)
 		AudioServer.set_bus_send(voipbusidx, "Recorder")
 		$MicRecord/AudioStreamRecorder.bus = "voiprecorder"
@@ -133,6 +130,7 @@ func _on_MicRecord_button_down():
 
 func _on_MicRecord_button_up():
 	if currentlyrecording:
+		await get_tree().create_timer(0.25).timeout  # the mic lags so there's always a cutout
 		stop_recording()
 
 @rpc("any_peer") func remotesetmicrecord(lmicrecordingdata):
