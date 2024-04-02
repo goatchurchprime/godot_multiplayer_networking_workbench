@@ -1,4 +1,4 @@
-[gd_scene load_steps=24 format=3 uid="uid://cfmoahalri06d"]
+[gd_scene load_steps=23 format=3 uid="uid://cfmoahalri06d"]
 
 [ext_resource type="Script" path="res://addons/player-networking/NetworkGateway.gd" id="1"]
 [ext_resource type="Script" path="res://addons/player-networking/Enetmultiplayerserver.gd" id="3"]
@@ -19,9 +19,6 @@
 [ext_resource type="Script" path="res://addons/player-networking/DoppelgangerPanel_ui.gd" id="16_i8v6k"]
 
 [sub_resource type="AudioStreamMicrophone" id="2"]
-
-[sub_resource type="AudioStreamVOIP" id="AudioStreamVOIP_x4gm8"]
-resource_local_to_scene = true
 
 [sub_resource type="FontVariation" id="FontVariation_pmwxj"]
 spacing_top = -5
@@ -689,7 +686,12 @@ text = "MicRecord"
 [node name="AudioStreamRecorder" type="AudioStreamPlayer" parent="PlayerConnections/HBoxMain/VBoxContainer/RecordingFeature/MicRecord"]
 stream = SubResource("2")
 autoplay = true
-bus = &"Mic"
+bus = &"Recorder"
+
+[node name="VoipMode" type="Button" parent="PlayerConnections/HBoxMain/VBoxContainer/RecordingFeature"]
+layout_mode = 2
+toggle_mode = true
+text = "Voip"
 
 [node name="RecordSize" type="Label" parent="PlayerConnections/HBoxMain/VBoxContainer/RecordingFeature"]
 layout_mode = 2
@@ -705,8 +707,6 @@ layout_mode = 2
 text = "Play"
 
 [node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="PlayerConnections/HBoxMain/VBoxContainer/RecordingFeature/PlayRecord"]
-stream = SubResource("AudioStreamVOIP_x4gm8")
-autoplay = true
 
 [node name="HBoxLag" type="HBoxContainer" parent="PlayerConnections/HBoxMain/VBoxContainer"]
 layout_mode = 2
@@ -856,6 +856,7 @@ offset_bottom = 40.0
 [connection signal="item_selected" from="PlayerConnections/HBoxMain/VBoxContainer/HBox_players/PlayerList" to="PlayerConnections" method="_on_PlayerList_item_selected"]
 [connection signal="button_down" from="PlayerConnections/HBoxMain/VBoxContainer/RecordingFeature/MicRecord" to="PlayerConnections/HBoxMain/VBoxContainer/RecordingFeature" method="_on_MicRecord_button_down"]
 [connection signal="button_up" from="PlayerConnections/HBoxMain/VBoxContainer/RecordingFeature/MicRecord" to="PlayerConnections/HBoxMain/VBoxContainer/RecordingFeature" method="_on_MicRecord_button_up"]
+[connection signal="pressed" from="PlayerConnections/HBoxMain/VBoxContainer/RecordingFeature/VoipMode" to="PlayerConnections/HBoxMain/VBoxContainer/RecordingFeature" method="_on_SendRecord_pressed"]
 [connection signal="pressed" from="PlayerConnections/HBoxMain/VBoxContainer/RecordingFeature/SendRecord" to="PlayerConnections/HBoxMain/VBoxContainer/RecordingFeature" method="_on_SendRecord_pressed"]
 [connection signal="pressed" from="PlayerConnections/HBoxMain/VBoxContainer/RecordingFeature/PlayRecord" to="PlayerConnections/HBoxMain/VBoxContainer/RecordingFeature" method="_on_PlayRecord_pressed"]
 [connection signal="value_changed" from="PlayerConnections/HBoxMain/VBoxContainer/HBoxLag/PlayerLagSlider" to="PlayerConnections" method="_on_PlayerLagSlider_value_changed"]
