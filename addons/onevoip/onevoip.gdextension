@@ -5,4 +5,5 @@ compatibility_minimum = 4.2
 
 [libraries]
 
-linux.x86_64="res://addons/onevoip/libonevoip.linux.template_debug.x86_64.so"
+windows.debug.x86_64="res://addons/onevoip/libonevoip.windows.template_debug.x86_64.dll"
+linux.debug.x86_64="res://addons/onevoip/libonevoip.linux.template_debug.x86_64.so"

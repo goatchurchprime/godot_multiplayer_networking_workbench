@@ -1,7 +1,10 @@
-[gd_resource type="AudioBusLayout" load_steps=2 format=3 uid="uid://cooamuiwiiho"]
+[gd_resource type="AudioBusLayout" load_steps=3 format=3 uid="uid://cooamuiwiiho"]
 
 [sub_resource type="AudioEffectRecord" id="1"]
 resource_name = "Record"
+
+[sub_resource type="AudioEffectSpectrumAnalyzer" id="AudioEffectSpectrumAnalyzer_icoam"]
+resource_name = "SpectrumAnalyzer"
 
 [resource]
 bus/1/name = &"Recorder"
@@ -12,3 +15,5 @@ bus/1/volume_db = 0.0
 bus/1/send = &"Master"
 bus/1/effect/0/effect = SubResource("1")
 bus/1/effect/0/enabled = true
+bus/1/effect/1/effect = SubResource("AudioEffectSpectrumAnalyzer_icoam")
+bus/1/effect/1/enabled = true

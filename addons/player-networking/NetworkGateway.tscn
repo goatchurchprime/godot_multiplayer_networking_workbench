@@ -685,7 +685,6 @@ text = "MicRecord"
 
 [node name="AudioStreamRecorder" type="AudioStreamPlayer" parent="PlayerConnections/HBoxMain/VBoxContainer/RecordingFeature/MicRecord"]
 stream = SubResource("2")
-autoplay = true
 bus = &"Recorder"
 
 [node name="VoipMode" type="Button" parent="PlayerConnections/HBoxMain/VBoxContainer/RecordingFeature"]
