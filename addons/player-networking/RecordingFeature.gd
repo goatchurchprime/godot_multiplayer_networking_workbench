@@ -70,7 +70,8 @@ func _process(delta):
 		if true and voipinputcapture.has_method("_sample_buf_to_packet"):
 			while voipinputcapture.get_frames_available() >= 441:
 				var samples = voipinputcapture.get_buffer(441)
-				var packet = voipinputcapture._sample_buf_to_packet(samples)
+				#var packet = voipinputcapture._sample_buf_to_packet(samples)
+				var packet = handyopusnodeencoder.encode_opus_packet(samples)
 				voip_packet_ready(packet)
 			testpacketnumber += 1
 		else:
@@ -85,7 +86,9 @@ func _process(delta):
 	if voipcapturepacketsplayback != null:
 		if playbackthing:
 			while playbackthing.get_frames_available() > 441 and voipcapturepacketsplaybackIndex < len(voipcapturepacketsplayback):
-				var frames = staticvoipaudiostream.spush_packet(voipcapturepacketsplayback[voipcapturepacketsplaybackIndex])
+				#var frames = staticvoipaudiostream.spush_packet(voipcapturepacketsplayback[voipcapturepacketsplaybackIndex])
+				var frames = handyopusnode.decode_opus_packet(voipcapturepacketsplayback[voipcapturepacketsplaybackIndex])
+
 				playbackthing.push_buffer(frames)
 				voipcapturepacketsplaybackIndex += 1
 				print(" playbackthing ", len(frames))
@@ -146,7 +149,16 @@ func stop_recording():
 		
 
 var audiostreamrecorder = null
+
+var handyopusnode = null
+var handyopusnodeencoder = null
+
 func _ready():
+	if ClassDB.can_instantiate("HandyOpusNode"):
+		handyopusnode = ClassDB.instantiate("HandyOpusNode")#
+		handyopusnodeencoder = ClassDB.instantiate("HandyOpusNode")#
+		print("Instantiated ", handyopusnode, handyopusnode.has_method("decode_opus_packet"))
+
 	if Ddisablevoip:
 		set_process(false)  
 		$MicRecord.disabled = true
@@ -264,5 +276,5 @@ func _on_PlayRecord_pressed():
 	if audioStream != null:
 		$PlayRecord/AudioStreamPlayer.stream = audioStream
 		$PlayRecord/AudioStreamPlayer.play()
-		if staticvoipaudiostream != null:
+		if staticvoipaudiostream != null and audioStream.is_class("AudioStreamGenerator"):
 			playbackthing = $PlayRecord/AudioStreamPlayer.get_stream_playback()
