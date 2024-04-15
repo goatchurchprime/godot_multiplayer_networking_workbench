@@ -55,7 +55,6 @@ func _physics_process(delta):
 	#	print(spectrumanalyzereffect.get_magnitude_for_frequency_range(100,200))
 
 var playbackthing = null
-var staticvoipaudiostream = null
 # steal the viseme code from https://github.com/Malcolmnixon/godot-lip-sync/blob/main/addons/godot-lip-sync/lip_sync.gd
 
 var Dcaptureeffectinsteadofrecording = true
@@ -301,19 +300,11 @@ func _on_PlayRecord_pressed():
 		
 
 	elif micrecordingdata != null and micrecordingdata.has("voipcapturepackets") and ClassDB.can_instantiate("AudioStreamVOIP"):
-		audioStream = ClassDB.instantiate("AudioStreamVOIP")
-		if audioStream.has_method("spush_packet"):
-			staticvoipaudiostream = audioStream
-			print("Using spush_packet")
-			audioStream = ClassDB.instantiate("AudioStreamGenerator")
-			voipcapturepacketsplayback = micrecordingdata["voipcapturepackets"]
-			voipcapturepacketsplaybackIndex = 0
-		else:
-			voipcapturepacketsplayback = micrecordingdata["voipcapturepackets"]
-			voipcapturepacketsplaybackIndex = 0
-			voipcapturepacketsplaybackstart_msticks = Time.get_ticks_msec()
-			voipcapturepacketsplayback_msduration = micrecordingdata["duration"]*1000
-
+		audioStream = ClassDB.instantiate("AudioStreamGenerator")
+		voipcapturepacketsplayback = micrecordingdata["voipcapturepackets"]
+		voipcapturepacketsplaybackIndex = 0
+		voipcapturepacketsplaybackstart_msticks = Time.get_ticks_msec()
+		voipcapturepacketsplayback_msduration = micrecordingdata["duration"]*1000
 
 	elif micrecordingdata != null:
 		print("Can't deal with micrecordingdata ", micrecordingdata.keys(), " (no AudioStreamVOIP class)")
