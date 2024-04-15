@@ -9,6 +9,7 @@ const max_recording_seconds = 5.0
 
 var recordingnumberC = 1
 var recordingeffect = null
+var audiocaptureeffect = null
 
 var spectrumanalyzereffect = null
 
@@ -43,6 +44,10 @@ var voipcapturepacketsplaybackIndex = 0
 var voipcapturepacketsplaybackstart_msticks = 0
 var voipcapturepacketsplayback_msduration = 1
 
+var captureeffectpacketsplayback = null
+var captureeffectpacketsplaybackIndex = 0
+
+
 var Donceaudio = true
 func _physics_process(delta):
 	if not audiostreamrecorder.playing and Donceaudio:
@@ -62,6 +67,9 @@ var playbackthing = null
 var staticvoipaudiostream = null
 # steal the viseme code from https://github.com/Malcolmnixon/godot-lip-sync/blob/main/addons/godot-lip-sync/lip_sync.gd
 
+var Dcaptureeffectinsteadofrecording = true
+var captureeffectpackets = null
+
 func _process(delta):
 	if not audiostreamrecorder.playing and Donceaudio:
 		print("s-- Rec not playing")
@@ -70,18 +78,29 @@ func _process(delta):
 		if true and voipinputcapture.has_method("_sample_buf_to_packet"):
 			while voipinputcapture.get_frames_available() >= 441:
 				var samples = voipinputcapture.get_buffer(441)
-				#var packet = voipinputcapture._sample_buf_to_packet(samples)
-				var packet = handyopusnodeencoder.encode_opus_packet(samples)
+				var packet = voipinputcapture._sample_buf_to_packet(samples)
+				#var packet = handyopusnodeencoder.encode_opus_packet(samples)
 				voip_packet_ready(packet)
 			testpacketnumber += 1
 		else:
 			voipinputcapture.send_test_packets()
 			testpacketnumber += 1
 
+	if Dcaptureeffectinsteadofrecording:
+		if captureeffectpackets != null:
+			while audiocaptureeffect.get_frames_available() >= 441:
+				var samples = audiocaptureeffect.get_buffer(441)
+				captureeffectpackets.append(samples)
 		
 	if currentlyrecording:
 		if (Time.get_ticks_msec() - recordingstart_msticks)/1000 > max_recording_seconds:
 			stop_recording()
+
+	if captureeffectpacketsplayback != null:
+		while playbackthing.get_frames_available() > 441 and captureeffectpacketsplaybackIndex < len(captureeffectpacketsplayback):
+			playbackthing.push_buffer(captureeffectpacketsplayback[captureeffectpacketsplaybackIndex])
+			captureeffectpacketsplaybackIndex += 1
+			print(" cplaybackthing ", captureeffectpacketsplaybackIndex, " ", playbackthing.get_frames_available())
 
 	if voipcapturepacketsplayback != null:
 		if playbackthing:
@@ -117,6 +136,8 @@ func start_recording():
 		voipcapturesize = 0
 		packetgaps = [ ]
 		testpacketnumber = 0
+	elif Dcaptureeffectinsteadofrecording:
+		captureeffectpackets = [ ]
 	else:
 		recordingeffect.set_recording_active(true)  # begins storing the bytes from a recording
 
@@ -135,7 +156,13 @@ func stop_recording():
 							"duration":recording_duration, 
 							"pcmData":pcmData }
 		underlyingbytessize = len(pcmData)
-	elif voipcapturepackets:
+	elif captureeffectpackets != null:
+		micrecordingdata = { "captureeffectpackets":captureeffectpackets, 
+							 "duration":recording_duration }
+		underlyingbytessize = len(captureeffectpackets)*len(captureeffectpackets[0])
+		captureeffectpackets = null
+		
+	elif voipcapturepackets != null:
 		micrecordingdata = { "voipcapturepackets":voipcapturepackets, 
 							 "duration":recording_duration }
 		underlyingbytessize = voipcapturesize
@@ -191,6 +218,8 @@ func _ready():
 	assert (recordingeffect.is_class("AudioEffectRecord"))
 	spectrumanalyzereffect = AudioServer.get_bus_effect_instance(recordbus_idx, 1)
 	print(spectrumanalyzereffect)
+	audiocaptureeffect = AudioServer.get_bus_effect(recordbus_idx, 2)
+	assert (audiocaptureeffect.is_class("AudioEffectCapture"))
 
 	# upgrade to OneVoip system if addon from https://github.com/RevoluPowered/one-voip-godot-4/ detected
 	# The VOIPInputCapture taps off the stream leaving it the same, but feeds it to the Recorder
@@ -229,7 +258,13 @@ func _on_MicRecord_button_up():
 
 @rpc("any_peer") func remotesetmicrecord(lmicrecordingdata):
 	micrecordingdata = lmicrecordingdata
-	$RecordSize.text = "r-"+str(len(micrecordingdata.get("voipcapturepackets", micrecordingdata.get("pcmData"))))
+	var r = micrecordingdata.get("voipcapturepackets", 0)
+	if micrecordingdata.has("pcmData"):
+		r = micrecordingdata["pcmData"]
+	if micrecordingdata.has("captureeffectpackets"):
+		r = micrecordingdata["captureeffectpackets"]
+	$RecordSize.text = "r-"+str(r)
+	
 
 func _on_SendRecord_pressed():
 	if micrecordingdata != null:
@@ -254,6 +289,12 @@ func _on_PlayRecord_pressed():
 		audioStream.data = micrecordingdata["pcmData"]
 		print("audioslice ", audioStream.data.slice(int(len(audioStream.data)/2), int(len(audioStream.data)/2)+50))
 
+	elif micrecordingdata != null and micrecordingdata.has("captureeffectpackets"):
+		audioStream = ClassDB.instantiate("AudioStreamGenerator")
+		captureeffectpacketsplayback = micrecordingdata["captureeffectpackets"]
+		captureeffectpacketsplaybackIndex = 0
+		
+
 	elif micrecordingdata != null and micrecordingdata.has("voipcapturepackets") and ClassDB.can_instantiate("AudioStreamVOIP"):
 		audioStream = ClassDB.instantiate("AudioStreamVOIP")
 		if audioStream.has_method("spush_packet"):
@@ -262,9 +303,7 @@ func _on_PlayRecord_pressed():
 			audioStream = ClassDB.instantiate("AudioStreamGenerator")
 			voipcapturepacketsplayback = micrecordingdata["voipcapturepackets"]
 			voipcapturepacketsplaybackIndex = 0
-
 		else:
-
 			voipcapturepacketsplayback = micrecordingdata["voipcapturepackets"]
 			voipcapturepacketsplaybackIndex = 0
 			voipcapturepacketsplaybackstart_msticks = Time.get_ticks_msec()
@@ -276,5 +315,5 @@ func _on_PlayRecord_pressed():
 	if audioStream != null:
 		$PlayRecord/AudioStreamPlayer.stream = audioStream
 		$PlayRecord/AudioStreamPlayer.play()
-		if staticvoipaudiostream != null and audioStream.is_class("AudioStreamGenerator"):
+		if audioStream.is_class("AudioStreamGenerator"):
 			playbackthing = $PlayRecord/AudioStreamPlayer.get_stream_playback()
