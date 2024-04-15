@@ -15,7 +15,7 @@ var spectrumanalyzereffect = null
 
 var voipcapturepackets = null
 var voipcapturesize = 0
-var voipinputcapture = null  # class VOIPInputCapture
+
 
 #GODOT_SAMPLE_RATE = 44100;
 #OPUS_FRAME_SIZE = 480;  10ms
@@ -26,15 +26,6 @@ var voipinputcapture = null  # class VOIPInputCapture
 var packetgaps = [ ]
 var testpacketnumber = 0
 var packettime = 0
-func voip_packet_ready(packet): #New packet from mic to send
-	if voipcapturepackets != null:
-		voipcapturepackets.append(packet)
-		voipcapturesize += len(packet)
-		var Npackettime = Time.get_ticks_usec()
-		#packetgaps.append(Npackettime - packettime)
-		packetgaps.append(testpacketnumber)
-		packettime = Npackettime
-		print("voip_packet_ready ", testpacketnumber)		
 
 var recordingstart_msticks = 0
 var currentlyrecording = false
@@ -74,21 +65,23 @@ func _process(delta):
 	if not audiostreamrecorder.playing and Donceaudio:
 		print("s-- Rec not playing")
 		Donceaudio = false
-	if voipinputcapture:   # keep flushing it through
-			while audiocaptureeffect.get_frames_available() >= 441:
-				var samples = audiocaptureeffect.get_buffer(441)
-				#var packet = voipinputcapture.encode_opus_packet(samples)
-				var packet = handyopusnodeencoder.encode_opus_packet(samples)
-				voip_packet_ready(packet)
-				if captureeffectpackets != null:
-					captureeffectpackets.append(samples)
-			testpacketnumber += 1
+		
+	while audiocaptureeffect.get_frames_available() >= 441:
+		var samples = audiocaptureeffect.get_buffer(441)
+		if handyopusnodeencoder:   # keep flushing it through
+			var packet = handyopusnodeencoder.encode_opus_packet(samples)
+			if voipcapturepackets != null:
+				voipcapturepackets.append(packet)
+				voipcapturesize += len(packet)
+				var Npackettime = Time.get_ticks_usec()
+				#packetgaps.append(Npackettime - packettime)
+				packetgaps.append(testpacketnumber)
+				packettime = Npackettime
+				print("lvoip_packet_ready ", testpacketnumber)		
 
-	if Dcaptureeffectinsteadofrecording:
 		if captureeffectpackets != null:
-			while audiocaptureeffect.get_frames_available() >= 441:
-				var samples = audiocaptureeffect.get_buffer(441)
-				captureeffectpackets.append(samples)
+			captureeffectpackets.append(samples)
+		testpacketnumber += 1
 		
 	if currentlyrecording:
 		if (Time.get_ticks_msec() - recordingstart_msticks)/1000 > max_recording_seconds:
@@ -119,7 +112,7 @@ func _process(delta):
 
 			if currentplaybackduration > voipcapturepacketsplayback_msduration + 500:
 				voipcapturepacketsplayback = null
-				$PlayRecord/AudioStreamPlayer.stop()
+				$PlayRecord/AudioStreamPlayer.stovoipinputcapturep()
 				$PlayRecord/AudioStreamPlayer.stream = null
 
 func start_recording():
@@ -224,20 +217,7 @@ func _ready():
 
 	# upgrade to OneVoip system if addon from https://github.com/RevoluPowered/one-voip-godot-4/ detected
 	# The VOIPInputCapture taps off the stream leaving it the same, but feeds it to the Recorder
-	if true and ClassDB.can_instantiate("VOIPInputCapture"):
-		if not ProjectSettings.get_setting("audio/driver/enable_input"):
-			printerr("Need ProjectSettings audio/driver/enable_input to be True for the mic to work!")
-		var voipbusidx = AudioServer.get_bus_count()
-		AudioServer.add_bus()
-		assert (AudioServer.get_bus_name(voipbusidx).begins_with("New Bus"))
-		AudioServer.set_bus_name(voipbusidx, "voiprecorder")
-		voipinputcapture = ClassDB.instantiate("VOIPInputCapture")
-		voipinputcapture.set_buffer_length(0.5)   # In the inhereted AudioEffectCapture 
-		AudioServer.add_bus_effect(voipbusidx, voipinputcapture)
-		AudioServer.set_bus_send(voipbusidx, "Recorder")
-		audiostreamrecorder.bus = "voiprecorder"
-		print("audiostreamrecorder bus ", audiostreamrecorder.bus)
-		voipinputcapture.packet_ready.connect(voip_packet_ready)
+	if true:
 		$VoipMode.button_pressed = true
 	else:
 		$VoipMode.disabled = true
