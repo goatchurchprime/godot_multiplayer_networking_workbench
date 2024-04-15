@@ -8,7 +8,6 @@ var micrecordingdata = null
 const max_recording_seconds = 5.0
 
 var recordingnumberC = 1
-var recordingeffect = null
 var audiocaptureeffect = null
 
 var spectrumanalyzereffect = null
@@ -126,27 +125,15 @@ func start_recording():
 		voipcapturesize = 0
 		packetgaps = [ ]
 		testpacketnumber = 0
-	elif Dcaptureeffectinsteadofrecording:
-		captureeffectpackets = [ ]
 	else:
-		recordingeffect.set_recording_active(true)  # begins storing the bytes from a recording
+		captureeffectpackets = [ ]
 
 func stop_recording():
 	print("stop_recording")
 	currentlyrecording = false
 	var recording_duration = (Time.get_ticks_msec() - recordingstart_msticks)/1000.0 + 0.01
 	var underlyingbytessize = 0
-	if recordingeffect.is_recording_active():
-		recordingeffect.set_recording_active(false)
-		var recording = recordingeffect.get_recording()
-		var pcmData = recording.get_data() if recording else PackedByteArray()
-		micrecordingdata = { "format":recording.get_format(), 
-							"mix_rate":recording.get_mix_rate(),
-							"is_stereo":recording.is_stereo(),
-							"duration":recording_duration, 
-							"pcmData":pcmData }
-		underlyingbytessize = len(pcmData)
-	elif captureeffectpackets != null:
+	if captureeffectpackets != null:
 		micrecordingdata = { "captureeffectpackets":captureeffectpackets, 
 							 "duration":recording_duration }
 		underlyingbytessize = len(captureeffectpackets)*len(captureeffectpackets[0])
@@ -207,8 +194,6 @@ func _ready():
 	
 	var recordbus_idx = AudioServer.get_bus_index("Recorder")
 	#assert (AudioServer.is_bus_mute(recordbus_idx) == true)
-	recordingeffect = AudioServer.get_bus_effect(recordbus_idx, 0)
-	assert (recordingeffect.is_class("AudioEffectRecord"))
 	spectrumanalyzereffect = AudioServer.get_bus_effect_instance(recordbus_idx, 1)
 	print(spectrumanalyzereffect)
 	audiocaptureeffect = AudioServer.get_bus_effect(recordbus_idx, 2)
@@ -239,8 +224,6 @@ func _on_MicRecord_button_up():
 @rpc("any_peer") func remotesetmicrecord(lmicrecordingdata):
 	micrecordingdata = lmicrecordingdata
 	var r = micrecordingdata.get("voipcapturepackets", 0)
-	if micrecordingdata.has("pcmData"):
-		r = micrecordingdata["pcmData"]
 	if micrecordingdata.has("captureeffectpackets"):
 		r = micrecordingdata["captureeffectpackets"]
 	$RecordSize.text = "r-"+str(r)
@@ -283,24 +266,13 @@ func _on_SendRecord_pressed():
 
 func _on_PlayRecord_pressed():
 	print("_on_PlayRecord_pressed")
-	var audioStream = null
+	assert ($PlayRecord/AudioStreamPlayer.stream != null and $PlayRecord/AudioStreamPlayer.stream.is_class("AudioStreamGenerator"))
 
-	if micrecordingdata != null and micrecordingdata.has("pcmData"):
-		audioStream = AudioStreamWAV.new()
-		audioStream.set_format(micrecordingdata["format"])
-		audioStream.set_mix_rate(micrecordingdata["mix_rate"])		
-		audioStream.set_stereo(micrecordingdata["is_stereo"])
-		audioStream.data = micrecordingdata["pcmData"]
-		print("audioslice ", audioStream.data.slice(int(len(audioStream.data)/2), int(len(audioStream.data)/2)+50))
-
-	elif micrecordingdata != null and micrecordingdata.has("captureeffectpackets"):
-		audioStream = ClassDB.instantiate("AudioStreamGenerator")
+	if micrecordingdata != null and micrecordingdata.has("captureeffectpackets"):
 		captureeffectpacketsplayback = micrecordingdata["captureeffectpackets"]
 		captureeffectpacketsplaybackIndex = 0
-		
 
-	elif micrecordingdata != null and micrecordingdata.has("voipcapturepackets") and ClassDB.can_instantiate("AudioStreamVOIP"):
-		audioStream = ClassDB.instantiate("AudioStreamGenerator")
+	elif micrecordingdata != null and micrecordingdata.has("voipcapturepackets") and handyopusnode != null:
 		voipcapturepacketsplayback = micrecordingdata["voipcapturepackets"]
 		voipcapturepacketsplaybackIndex = 0
 		voipcapturepacketsplaybackstart_msticks = Time.get_ticks_msec()
@@ -308,8 +280,6 @@ func _on_PlayRecord_pressed():
 
 	elif micrecordingdata != null:
 		print("Can't deal with micrecordingdata ", micrecordingdata.keys(), " (no AudioStreamVOIP class)")
-	if audioStream != null:
-		$PlayRecord/AudioStreamPlayer.stream = audioStream
-		$PlayRecord/AudioStreamPlayer.play()
-		if audioStream.is_class("AudioStreamGenerator"):
-			playbackthing = $PlayRecord/AudioStreamPlayer.get_stream_playback()
+
+	$PlayRecord/AudioStreamPlayer.play()
+	playbackthing = $PlayRecord/AudioStreamPlayer.get_stream_playback()
