@@ -49,8 +49,6 @@ func _ready():
 	_on_ProtocolOptions_item_selected($ProtocolOptions.selected)
 
 
-
-
 func initialstatenormal(protocol, networkoption):
 	assert (protocol >= NETWORK_PROTOCOL.ENET and protocol <= NETWORK_PROTOCOL.WEBRTC_WEBSOCKETSIGNAL)
 	$ProtocolOptions.selected = protocol

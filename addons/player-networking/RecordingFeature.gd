@@ -75,15 +75,13 @@ func _process(delta):
 		print("s-- Rec not playing")
 		Donceaudio = false
 	if voipinputcapture:   # keep flushing it through
-		if true and voipinputcapture.has_method("_sample_buf_to_packet"):
-			while voipinputcapture.get_frames_available() >= 441:
-				var samples = voipinputcapture.get_buffer(441)
-				var packet = voipinputcapture._sample_buf_to_packet(samples)
-				#var packet = handyopusnodeencoder.encode_opus_packet(samples)
+			while audiocaptureeffect.get_frames_available() >= 441:
+				var samples = audiocaptureeffect.get_buffer(441)
+				#var packet = voipinputcapture.encode_opus_packet(samples)
+				var packet = handyopusnodeencoder.encode_opus_packet(samples)
 				voip_packet_ready(packet)
-			testpacketnumber += 1
-		else:
-			voipinputcapture.send_test_packets()
+				if captureeffectpackets != null:
+					captureeffectpackets.append(samples)
 			testpacketnumber += 1
 
 	if Dcaptureeffectinsteadofrecording:
@@ -131,7 +129,7 @@ func start_recording():
 	if not audiostreamrecorder.playing:
 		print("MicRecord/AudioStreamRecorder not playing (autoplay setting failed), trying to set now")
 		audiostreamrecorder.playing = true
-	if $VoipMode.button_pressed and voipinputcapture:
+	if $VoipMode.button_pressed:
 		voipcapturepackets = [ ]
 		voipcapturesize = 0
 		packetgaps = [ ]
@@ -179,11 +177,14 @@ var audiostreamrecorder = null
 
 var handyopusnode = null
 var handyopusnodeencoder = null
+var handyopusnodeencoder2 = null
 
 func _ready():
 	if ClassDB.can_instantiate("HandyOpusNode"):
 		handyopusnode = ClassDB.instantiate("HandyOpusNode")#
-		handyopusnodeencoder = ClassDB.instantiate("HandyOpusNode")#
+		handyopusnodeencoder = ClassDB.instantiate("HandyOpusNode")
+		#handyopusnodeencoder2 = ClassDB.instantiate("HandyOpusNode") 
+		handyopusnodeencoder2 = ClassDB.instantiate("HandyOpusNode")
 		print("Instantiated ", handyopusnode, handyopusnode.has_method("decode_opus_packet"))
 
 	if Ddisablevoip:
@@ -266,9 +267,33 @@ func _on_MicRecord_button_up():
 	$RecordSize.text = "r-"+str(r)
 	
 
+func Dtoggleopuspackets():
+	if micrecordingdata.has("captureeffectpackets"):
+		micrecordingdata["voipcapturepackets"] = [ ]
+		var l = 0
+		for samples in micrecordingdata["captureeffectpackets"]:
+			#var packet = handyopusnodeencoder2.encode_opus_packet(samples)
+			#var packet = voipinputcapture.encode_opus_packet(samples)
+			var packet = handyopusnodeencoder2.encode_opus_packet(samples)
+			l += len(packet)
+			micrecordingdata["voipcapturepackets"].append(packet)
+		micrecordingdata.erase("captureeffectpackets")
+		print("Converted to opus ", l)
+	elif micrecordingdata.has("voipcapturepackets"):
+		micrecordingdata["captureeffectpackets"] = [ ]
+		var l = 0
+		for packet in micrecordingdata["voipcapturepackets"]:
+			var samples = handyopusnode.decode_opus_packet(packet)
+			l += len(samples)
+			micrecordingdata["captureeffectpackets"].append(samples)
+		micrecordingdata.erase("voipcapturepackets")
+		print("decoded from opus ", l)
+		
+		
 func _on_SendRecord_pressed():
 	if micrecordingdata != null:
-		rpc("remotesetmicrecord", micrecordingdata)
+		Dtoggleopuspackets()
+		#rpc("remotesetmicrecord", micrecordingdata)
 	if Dstorespeechfilename:
 		print("saving ", ProjectSettings.globalize_path(Dstorespeechfilename))
 		var fout = FileAccess.open(Dstorespeechfilename, FileAccess.WRITE)
