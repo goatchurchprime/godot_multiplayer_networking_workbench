@@ -674,13 +674,20 @@ popup/item_0/text = "me"
 layout_mode = 2
 script = ExtResource("16_hf3ik")
 
+[node name="AudioStreamPlayerMicrophone" type="AudioStreamPlayer" parent="PlayerConnections/HBoxMain/VBoxContainer/RecordingFeature"]
+stream = SubResource("2")
+autoplay = true
+bus = &"MicrophoneBus"
+
 [node name="MicRecord" type="Button" parent="PlayerConnections/HBoxMain/VBoxContainer/RecordingFeature"]
 layout_mode = 2
-text = "MicRecord"
+text = "PTT"
 
-[node name="AudioStreamRecorder" type="AudioStreamPlayer" parent="PlayerConnections/HBoxMain/VBoxContainer/RecordingFeature/MicRecord"]
-stream = SubResource("2")
-bus = &"Recorder"
+[node name="ColorRectWitness" type="ColorRect" parent="PlayerConnections/HBoxMain/VBoxContainer/RecordingFeature"]
+custom_minimum_size = Vector2(3, 0)
+layout_mode = 2
+size_flags_vertical = 8
+color = Color(1, 1, 0.0823529, 1)
 
 [node name="VoipMode" type="Button" parent="PlayerConnections/HBoxMain/VBoxContainer/RecordingFeature"]
 layout_mode = 2

@@ -1,4 +1,4 @@
-[gd_resource type="AudioBusLayout" load_steps=4 format=3 uid="uid://cooamuiwiiho"]
+[gd_resource type="AudioBusLayout" load_steps=5 format=3 uid="uid://cooamuiwiiho"]
 
 [sub_resource type="AudioEffectRecord" id="1"]
 resource_name = "Record"
@@ -10,16 +10,21 @@ resource_name = "SpectrumAnalyzer"
 resource_name = "Capture"
 buffer_length = 0.2
 
+[sub_resource type="AudioEffectOpusChunked" id="AudioEffectOpusChunked_ph1mf"]
+resource_name = "OpusChunked"
+
 [resource]
-bus/1/name = &"Recorder"
+bus/1/name = &"MicrophoneBus"
 bus/1/solo = false
 bus/1/mute = true
 bus/1/bypass_fx = false
 bus/1/volume_db = 0.0
 bus/1/send = &"Master"
 bus/1/effect/0/effect = SubResource("1")
-bus/1/effect/0/enabled = true
+bus/1/effect/0/enabled = false
 bus/1/effect/1/effect = SubResource("AudioEffectSpectrumAnalyzer_icoam")
-bus/1/effect/1/enabled = true
+bus/1/effect/1/enabled = false
 bus/1/effect/2/effect = SubResource("AudioEffectCapture_i7bvk")
-bus/1/effect/2/enabled = true
+bus/1/effect/2/enabled = false
+bus/1/effect/3/effect = SubResource("AudioEffectOpusChunked_ph1mf")
+bus/1/effect/3/enabled = true

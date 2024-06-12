@@ -10,7 +10,6 @@ const max_recording_seconds = 5.0
 var recordingnumberC = 1
 var audiocaptureeffect = null
 
-var spectrumanalyzereffect = null
 
 var voipcapturepackets = null
 var voipcapturesize = 0
@@ -38,22 +37,6 @@ var captureeffectpacketsplayback = null
 var captureeffectpacketsplaybackIndex = 0
 
 
-var Donceaudio = true
-func _physics_process(delta):
-	#print(spectrumanalyzereffect.get_magnitude_for_frequency_range(20, 500))
-	pass	
-#	if not audiostreamrecorder.playing and Donceaudio:
-#		print("-- Rec notEEEE playiEEEEEEEEEEEEEEEEE1ng ", Time.get_ticks_msec()/1000.0)
-#		Donceaudio = false
-#	elif audiostreamrecorder.playing and not Donceaudio:
-#		print("-- Rec back to true ")
-#		Donceaudio = true
-		#var p = audiostreamrecorder.get_parent()
-		#p.remove_child(audiostreamrecorder)
-		#p.add_child(audiostreamrecorder)
-	
-	#if audiostreamrecorder.playing and spectrumanalyzereffect:
-	#	print(spectrumanalyzereffect.get_magnitude_for_frequency_range(100,200))
 
 var playbackthing = null
 # steal the viseme code from https://github.com/Malcolmnixon/godot-lip-sync/blob/main/addons/godot-lip-sync/lip_sync.gd
@@ -61,27 +44,17 @@ var playbackthing = null
 var Dcaptureeffectinsteadofrecording = true
 var captureeffectpackets = null
 
+var chunkprefix : PackedByteArray = PackedByteArray([0]) 
+var transmitting = false
 func _process(delta):
-#	if not audiostreamrecorder.playing and Donceaudio:
-#		print("s-- Rec not playing")
-#		Donceaudio = false
-		
-	while audiocaptureeffect.get_frames_available() >= 441:
-		var samples = audiocaptureeffect.get_buffer(441)
-		if handyopusnodeencoder:   # keep flushing it through
-			var packet = [] # handyopusnodeencoder.encode_opus_packet(samples)
-			if voipcapturepackets != null:
-				voipcapturepackets.append(packet)
-				voipcapturesize += len(packet)
-				var Npackettime = Time.get_ticks_usec()
-				#packetgaps.append(Npackettime - packettime)
-				packetgaps.append(testpacketnumber)
-				packettime = Npackettime
-				print("lvoip_packet_ready ", testpacketnumber)		
-
-		if captureeffectpackets != null:
-			captureeffectpackets.append(samples)
-		testpacketnumber += 1
+	while audioopuschunkedeffect.chunk_available():
+		var chunkmax = audioopuschunkedeffect.chunk_max()
+		$ColorRectWitness.size.y = min(size.y, chunkmax*10)
+		if transmitting:
+			chunkprefix.set(0, chunkprefix[0]+1)
+			var opuspacket = audioopuschunkedeffect.pop_opus_packet(chunkprefix)
+		else:
+			audioopuschunkedeffect.drop_chunk()
 		
 	if currentlyrecording:
 		if (Time.get_ticks_msec() - recordingstart_msticks)/1000 > max_recording_seconds:
@@ -119,9 +92,6 @@ func start_recording():
 	print("start_recording")
 	currentlyrecording = true
 	recordingstart_msticks = Time.get_ticks_msec()
-	if not audiostreamrecorder.playing:
-		print("MicRecord/AudioStreamRecorder not playing (autoplay setting failed), trying to set now")
-		audiostreamrecorder.playing = true
 	if $VoipMode.button_pressed:
 		voipcapturepackets = [ ]
 		voipcapturesize = 0
@@ -154,63 +124,29 @@ func stop_recording():
 
 		
 
-var audiostreamrecorder = null
 
 var handyopusnode = null
 var handyopusnodeencoder = null
 var handyopusnodeencoder2 = null
+var audioopuschunkedeffect : AudioEffect = null
 
 func _ready():
-	if false and ClassDB.can_instantiate("HandyOpusNode"):
-		handyopusnode = ClassDB.instantiate("HandyOpusNode")#
-		handyopusnodeencoder = ClassDB.instantiate("HandyOpusNode")
-		#handyopusnodeencoder2 = ClassDB.instantiate("HandyOpusNode") 
-		handyopusnodeencoder2 = ClassDB.instantiate("HandyOpusNode")
-		print("Instantiated ", handyopusnode, handyopusnode.has_method("decode_opus_packet"))
-
-	if Ddisablevoip:
-		set_process(false)  
-		$MicRecord.disabled = true
-		return
-
-	var fin = FileAccess.open(welcomespeechfilename, FileAccess.READ)
-	if fin:
-		micrecordingdata = fin.get_var()
-		fin.close()
-
-	# Build the AudioStreamMicrophone in top level in case there's a problem putting it in a Viewport
-	audiostreamrecorder = get_node_or_null("/root/Main/AudioStreamRecorder")
-#	if audiostreamrecorder == null:
-#		audiostreamrecorder = get_node_or_null("MicRecord/AudioStreamRecorder")
-#	if audiostreamrecorder == null:
-#		audiostreamrecorder = AudioStreamPlayer.new()
-#		audiostreamrecorder.set_name("AudioStreamRecorder")
-#		#audiostreamrecorder.autoplay = true   # delay due to bad buffer linking if done on startup
-#		audiostreamrecorder.stream = AudioStreamMicrophone.new()
-#		audiostreamrecorder.bus = "Recorder"
-#		get_node("/root").add_child.call_deferred(audiostreamrecorder)
-#	else:
-#		assert (audiostreamrecorder.stream.is_class("AudioStreamMicrophone"))
-#		assert (audiostreamrecorder.bus == "Recorder")
-#		print("AudioStreamRecord playing: ", audiostreamrecorder.playing)
+	assert ($AudioStreamPlayerMicrophone.bus == "MicrophoneBus")
+	assert ($AudioStreamPlayerMicrophone.stream.is_class("AudioStreamMicrophone"))
+	var microphonebusidx = AudioServer.get_bus_index($AudioStreamPlayerMicrophone.bus)
+	for i in range(AudioServer.get_bus_effect_count(microphonebusidx)):
+		if AudioServer.get_bus_effect(microphonebusidx, i).is_class("AudioEffectOpusChunked"):
+			audioopuschunkedeffect = AudioServer.get_bus_effect(microphonebusidx, i)
+	if audioopuschunkedeffect == null and ClassDB.can_instantiate("AudioEffectOpusChunked"):
+		audioopuschunkedeffect = AudioEffectOpusChunked.new()
+		AudioServer.add_bus_effect(microphonebusidx, audioopuschunkedeffect)
+	print("audioopuschunkedeffect ", audioopuschunkedeffect)
 	
-	var recordbus_idx = AudioServer.get_bus_index("Recorder")
-	#assert (AudioServer.is_bus_mute(recordbus_idx) == true)
-	spectrumanalyzereffect = AudioServer.get_bus_effect_instance(recordbus_idx, 1)
-	print(spectrumanalyzereffect)
-	audiocaptureeffect = AudioServer.get_bus_effect(recordbus_idx, 2)
-	assert (audiocaptureeffect.is_class("AudioEffectCapture"))
-
-	# upgrade to OneVoip system if addon from https://github.com/RevoluPowered/one-voip-godot-4/ detected
-	# The VOIPInputCapture taps off the stream leaving it the same, but feeds it to the Recorder
 	if true:
 		$VoipMode.button_pressed = true
 	else:
 		$VoipMode.disabled = true
 
-	#await get_tree().create_timer(5.5).timeout
-	#print("Setting audiostreamrecorder to playing now")
-	#audiostreamrecorder.playing = true
 
 func _on_MicRecord_button_down():
 	print("_on_MicRecord_button_down")
