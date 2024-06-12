@@ -99,5 +99,4 @@ script = ExtResource("1")
 [node name="AudioStreamRecorder" type="AudioStreamPlayer" parent="."]
 stream = SubResource("AudioStreamMicrophone_bn2dr")
 autoplay = true
-stream_paused = true
 bus = &"Recorder"

@@ -40,12 +40,14 @@ var captureeffectpacketsplaybackIndex = 0
 
 var Donceaudio = true
 func _physics_process(delta):
-	if not audiostreamrecorder.playing and Donceaudio:
-		print("-- Rec notEEEE playiEEEEEEEEEEEEEEEEE1ng ", Time.get_ticks_msec()/1000.0)
-		Donceaudio = false
-	elif audiostreamrecorder.playing and not Donceaudio:
-		print("-- Rec back to true ")
-		Donceaudio = true
+	#print(spectrumanalyzereffect.get_magnitude_for_frequency_range(20, 500))
+	pass	
+#	if not audiostreamrecorder.playing and Donceaudio:
+#		print("-- Rec notEEEE playiEEEEEEEEEEEEEEEEE1ng ", Time.get_ticks_msec()/1000.0)
+#		Donceaudio = false
+#	elif audiostreamrecorder.playing and not Donceaudio:
+#		print("-- Rec back to true ")
+#		Donceaudio = true
 		#var p = audiostreamrecorder.get_parent()
 		#p.remove_child(audiostreamrecorder)
 		#p.add_child(audiostreamrecorder)
@@ -60,14 +62,14 @@ var Dcaptureeffectinsteadofrecording = true
 var captureeffectpackets = null
 
 func _process(delta):
-	if not audiostreamrecorder.playing and Donceaudio:
-		print("s-- Rec not playing")
-		Donceaudio = false
+#	if not audiostreamrecorder.playing and Donceaudio:
+#		print("s-- Rec not playing")
+#		Donceaudio = false
 		
 	while audiocaptureeffect.get_frames_available() >= 441:
 		var samples = audiocaptureeffect.get_buffer(441)
 		if handyopusnodeencoder:   # keep flushing it through
-			var packet = handyopusnodeencoder.encode_opus_packet(samples)
+			var packet = [] # handyopusnodeencoder.encode_opus_packet(samples)
 			if voipcapturepackets != null:
 				voipcapturepackets.append(packet)
 				voipcapturesize += len(packet)
@@ -95,7 +97,7 @@ func _process(delta):
 		if playbackthing:
 			while playbackthing.get_frames_available() > 441 and voipcapturepacketsplaybackIndex < len(voipcapturepacketsplayback):
 				#var frames = staticvoipaudiostream.spush_packet(voipcapturepacketsplayback[voipcapturepacketsplaybackIndex])
-				var frames = handyopusnode.decode_opus_packet(voipcapturepacketsplayback[voipcapturepacketsplaybackIndex])
+				var frames = [] # handyopusnode.decode_opus_packet(voipcapturepacketsplayback[voipcapturepacketsplaybackIndex])
 
 				playbackthing.push_buffer(frames)
 				voipcapturepacketsplaybackIndex += 1
@@ -159,7 +161,7 @@ var handyopusnodeencoder = null
 var handyopusnodeencoder2 = null
 
 func _ready():
-	if ClassDB.can_instantiate("HandyOpusNode"):
+	if false and ClassDB.can_instantiate("HandyOpusNode"):
 		handyopusnode = ClassDB.instantiate("HandyOpusNode")#
 		handyopusnodeencoder = ClassDB.instantiate("HandyOpusNode")
 		#handyopusnodeencoder2 = ClassDB.instantiate("HandyOpusNode") 
@@ -178,19 +180,19 @@ func _ready():
 
 	# Build the AudioStreamMicrophone in top level in case there's a problem putting it in a Viewport
 	audiostreamrecorder = get_node_or_null("/root/Main/AudioStreamRecorder")
-	if audiostreamrecorder == null:
-		audiostreamrecorder = get_node_or_null("MicRecord/AudioStreamRecorder")
-	if audiostreamrecorder == null:
-		audiostreamrecorder = AudioStreamPlayer.new()
-		audiostreamrecorder.set_name("AudioStreamRecorder")
-		#audiostreamrecorder.autoplay = true   # delay due to bad buffer linking if done on startup
-		audiostreamrecorder.stream = AudioStreamMicrophone.new()
-		audiostreamrecorder.bus = "Recorder"
-		get_node("/root").add_child.call_deferred(audiostreamrecorder)
-	else:
-		assert (audiostreamrecorder.stream.is_class("AudioStreamMicrophone"))
-		assert (audiostreamrecorder.bus == "Recorder")
-		print("AudioStreamRecord playing: ", audiostreamrecorder.playing)
+#	if audiostreamrecorder == null:
+#		audiostreamrecorder = get_node_or_null("MicRecord/AudioStreamRecorder")
+#	if audiostreamrecorder == null:
+#		audiostreamrecorder = AudioStreamPlayer.new()
+#		audiostreamrecorder.set_name("AudioStreamRecorder")
+#		#audiostreamrecorder.autoplay = true   # delay due to bad buffer linking if done on startup
+#		audiostreamrecorder.stream = AudioStreamMicrophone.new()
+#		audiostreamrecorder.bus = "Recorder"
+#		get_node("/root").add_child.call_deferred(audiostreamrecorder)
+#	else:
+#		assert (audiostreamrecorder.stream.is_class("AudioStreamMicrophone"))
+#		assert (audiostreamrecorder.bus == "Recorder")
+#		print("AudioStreamRecord playing: ", audiostreamrecorder.playing)
 	
 	var recordbus_idx = AudioServer.get_bus_index("Recorder")
 	#assert (AudioServer.is_bus_mute(recordbus_idx) == true)
@@ -245,7 +247,7 @@ func Dtoggleopuspackets():
 		micrecordingdata["captureeffectpackets"] = [ ]
 		var l = 0
 		for packet in micrecordingdata["voipcapturepackets"]:
-			var samples = handyopusnode.decode_opus_packet(packet)
+			var samples = [ ] # handyopusnode.decode_opus_packet(packet)
 			l += len(samples)
 			micrecordingdata["captureeffectpackets"].append(samples)
 		micrecordingdata.erase("voipcapturepackets")
