@@ -40,6 +40,10 @@ var rng = RandomNumberGenerator.new()
 func _ready():
 	for rs in remoteservers:
 		$NetworkOptions.add_item(rs)
+	if $NetworkOptions.selected == -1:  $NetworkOptions.selected = 0
+	if $ProtocolOptions.selected == -1:  $ProtocolOptions.selected = 0
+	if $NetworkOptionsMQTTWebRTC.selected == -1:  $NetworkOptionsMQTTWebRTC.selected = 0
+	if $MQTTsignalling/brokeraddress.selected == -1:  $MQTTsignalling/brokeraddress.selected = 0
 	if OS.has_feature("HTML5"):
 		$NetworkOptions.set_item_disabled(NETWORK_OPTIONS.LOCAL_NETWORK,  true)
 		$NetworkOptions.set_item_disabled(NETWORK_OPTIONS.AS_SERVER,  true)
@@ -219,6 +223,7 @@ func _on_NetworkOptionsMQTTWebRTC_item_selected(ns):
 
 func getrandomdoppelgangerdelay(disabledropout=false):
 	if not disabledropout and rng.randf_range(0, 100) < float($DoppelgangerPanel/hbox/VBox_netdrop/netdroppc.text):
+		print("Dropped")
 		return -1.0
 	var netdelayadd = float($DoppelgangerPanel/hbox/VBox_netdelay/netdelayadd.text)
 	var doppelgangerdelay = int($DoppelgangerPanel/hbox/VBox_delaymin/netdelaymin.text) + max(0.0, rng.randfn(netdelayadd, netdelayadd*0.4))

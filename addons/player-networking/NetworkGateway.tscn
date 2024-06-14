@@ -679,14 +679,15 @@ stream = SubResource("2")
 autoplay = true
 bus = &"MicrophoneBus"
 
-[node name="MicRecord" type="Button" parent="PlayerConnections/HBoxMain/VBoxContainer/RecordingFeature"]
+[node name="PTT" type="Button" parent="PlayerConnections/HBoxMain/VBoxContainer/RecordingFeature"]
 layout_mode = 2
+theme_override_colors/font_pressed_color = Color(0.992157, 0.984314, 0.00392157, 1)
 text = "PTT"
 
 [node name="ColorRectWitness" type="ColorRect" parent="PlayerConnections/HBoxMain/VBoxContainer/RecordingFeature"]
 custom_minimum_size = Vector2(3, 0)
 layout_mode = 2
-size_flags_vertical = 8
+size_flags_vertical = 0
 color = Color(1, 1, 0.0823529, 1)
 
 [node name="VoipMode" type="Button" parent="PlayerConnections/HBoxMain/VBoxContainer/RecordingFeature"]
@@ -856,10 +857,6 @@ offset_bottom = 40.0
 [connection signal="pressed" from="MQTTsignalling/mqttautoconnect" to="." method="_on_mqttautoconnect_pressed"]
 [connection signal="toggled" from="MQTTsignalling/StartMQTT" to="MQTTsignalling/Servermode" method="_on_StartServer_toggled"]
 [connection signal="item_selected" from="PlayerConnections/HBoxMain/VBoxContainer/HBox_players/PlayerList" to="PlayerConnections" method="_on_PlayerList_item_selected"]
-[connection signal="button_down" from="PlayerConnections/HBoxMain/VBoxContainer/RecordingFeature/MicRecord" to="PlayerConnections/HBoxMain/VBoxContainer/RecordingFeature" method="_on_MicRecord_button_down"]
-[connection signal="button_up" from="PlayerConnections/HBoxMain/VBoxContainer/RecordingFeature/MicRecord" to="PlayerConnections/HBoxMain/VBoxContainer/RecordingFeature" method="_on_MicRecord_button_up"]
 [connection signal="pressed" from="PlayerConnections/HBoxMain/VBoxContainer/RecordingFeature/VoipMode" to="PlayerConnections/HBoxMain/VBoxContainer/RecordingFeature" method="_on_SendRecord_pressed"]
-[connection signal="pressed" from="PlayerConnections/HBoxMain/VBoxContainer/RecordingFeature/SendRecord" to="PlayerConnections/HBoxMain/VBoxContainer/RecordingFeature" method="_on_SendRecord_pressed"]
-[connection signal="pressed" from="PlayerConnections/HBoxMain/VBoxContainer/RecordingFeature/PlayRecord" to="PlayerConnections/HBoxMain/VBoxContainer/RecordingFeature" method="_on_PlayRecord_pressed"]
 [connection signal="value_changed" from="PlayerConnections/HBoxMain/VBoxContainer/HBoxLag/PlayerLagSlider" to="PlayerConnections" method="_on_PlayerLagSlider_value_changed"]
 [connection signal="toggled" from="DoppelgangerPanel/hbox/VBox_enable/DoppelgangerEnable" to="PlayerConnections" method="_on_Doppelganger_toggled"]

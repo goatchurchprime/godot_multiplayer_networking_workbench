@@ -112,4 +112,4 @@ static func PF_changethinnedframedatafordoppelganger(fd, doppelnetoffset, isfram
 	if fd.has(NCONSTANTS.CFI_RECT_POSITION):
 		#fd[NCONSTANTS.CFI_RECT_POSITION].x = 500 - fd[NCONSTANTS.CFI_RECT_POSITION].x
 		fd[NCONSTANTS.CFI_RECT_POSITION].y = 339 - fd[NCONSTANTS.CFI_RECT_POSITION].y
-
+	

@@ -195,7 +195,8 @@ func _on_Doppelganger_toggled(button_pressed):
 		removeremoteplayer("Doppelganger")
 	updateplayerlist()
 
-@rpc("any_peer") func RPCspawnintoremoteplayer(avatardata):
+@rpc("any_peer", "call_remote", "reliable", 0)
+func RPCspawnintoremoteplayer(avatardata):
 	var senderid = avatardata["networkid"]
 	var rpcsenderid = multiplayer.get_remote_sender_id()
 	print("rec spawnintoremoteplayer from ", senderid)
@@ -207,13 +208,22 @@ func _on_Doppelganger_toggled(button_pressed):
 	remote_players_idstonodenames[senderid] = remoteplayer.get_name()
 	updateplayerlist()
 
-@rpc("any_peer") func RPCnetworkedavatarthinnedframedataPC(vd):
+@rpc("any_peer", "call_remote", "reliable", 0)
+func RPCnetworkedavatarthinnedframedataPC(vd):
 	var rpcsenderid = multiplayer.get_remote_sender_id()
 	var remoteplayer = PlayersNode.get_node_or_null(String(vd[NCONSTANTS.CFI_PLAYER_NODENAME]))
 	if remoteplayer != null:
 		remoteplayer.get_node("PlayerFrame").networkedavatarthinnedframedata(vd)
 	else:
 		print("networkedavatarthinnedframedataPC called before spawning")
+
+@rpc("any_peer", "call_remote", "unreliable", 1) 
+func RPCincomingaudiopacket(packet):
+	var rpcsenderid = multiplayer.get_remote_sender_id()
+	var remoteplayernodename = remote_players_idstonodenames[rpcsenderid]
+	var remoteplayer = PlayersNode.get_node_or_null(remoteplayernodename)
+	if remoteplayer != null:
+		remoteplayer.get_node("PlayerFrame").incomingaudiopacket(packet)
 	
 func newremoteplayer(avatardata):
 	print(avatardata)
@@ -258,5 +268,3 @@ func _on_PlayerLagSlider_value_changed(value):
 	var player = PlayersNode.get_child(PlayerList.selected)
 	if player != LocalPlayer:
 		player.get_node("PlayerFrame").laglatency = value
-
-
