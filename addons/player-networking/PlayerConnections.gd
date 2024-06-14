@@ -25,6 +25,9 @@ var remote_players_idstonodenames = { }
 @onready var PlayerList = $HBoxMain/VBoxContainer/HBox_players/PlayerList
 
 func _ready():
+	assert ($HBoxMain/VBoxContainer/HBox_players/PlayerList.item_count == 1)
+	if $HBoxMain/VBoxContainer/HBox_players/PlayerList.selected == -1:  $HBoxMain/VBoxContainer/HBox_players/PlayerList.selected = 0
+
 	# Overwrite the localplayer node if the local player scene is defined
 	if PlayersNode.get_child_count() == 1 and NetworkGateway.localplayerscene:
 		PlayersNode.get_child(0).free()
@@ -217,11 +220,11 @@ func RPCnetworkedavatarthinnedframedataPC(vd):
 	else:
 		print("networkedavatarthinnedframedataPC called before spawning")
 
-@rpc("any_peer", "call_remote", "unreliable", 1) 
+@rpc("any_peer", "call_remote", "unreliable", 0) 
 func RPCincomingaudiopacket(packet):
 	var rpcsenderid = multiplayer.get_remote_sender_id()
 	var remoteplayernodename = remote_players_idstonodenames[rpcsenderid]
-	var remoteplayer = PlayersNode.get_node_or_null(remoteplayernodename)
+	var remoteplayer = PlayersNode.get_node_or_null(String(remoteplayernodename))
 	if remoteplayer != null:
 		remoteplayer.get_node("PlayerFrame").incomingaudiopacket(packet)
 	
