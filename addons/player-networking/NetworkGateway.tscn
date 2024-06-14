@@ -1,4 +1,4 @@
-[gd_scene load_steps=24 format=3 uid="uid://cfmoahalri06d"]
+[gd_scene load_steps=25 format=3 uid="uid://cfmoahalri06d"]
 
 [ext_resource type="Script" path="res://addons/player-networking/NetworkGateway.gd" id="1"]
 [ext_resource type="Script" path="res://addons/player-networking/Enetmultiplayerserver.gd" id="3"]
@@ -20,7 +20,39 @@
 
 [sub_resource type="AudioStreamMicrophone" id="2"]
 
-[sub_resource type="AudioStreamGenerator" id="AudioStreamGenerator_cebbo"]
+[sub_resource type="Shader" id="Shader_fh7cl"]
+code = "shader_type canvas_item;
+
+uniform vec4 backgroundcolor : source_color = vec4(0.1, 0.2, 0.8, 1.0);
+uniform vec4 voxthresholdcolor : source_color = vec4(0.4, 0.5, 0.6, 1.0);
+uniform vec4 voxchunkmaxcolor : source_color = vec4(0.8, 0.8, 0.0, 0.1);
+uniform vec4 voxwavecolor : source_color = vec4(0.8,0.8,0.9,1.0);
+
+uniform float voxthreshhold = 0.2;
+uniform float chunkmax = 0.0;
+uniform float chunkmaxpersist = 0.0;
+uniform sampler2D voice : repeat_enable;
+
+void fragment() {
+  COLOR = (UV.x < voxthreshhold ? voxthresholdcolor : backgroundcolor);
+  if (UV.x < chunkmaxpersist)
+    COLOR.rgb = mix(COLOR.rgb, voxchunkmaxcolor.rgb, voxchunkmaxcolor.a);
+  vec4 v = texture(voice, UV);
+  float d = UV.y*2.0 - v.r*4.0 - 1.0;
+  if (abs(d) < 0.1)
+    COLOR = voxwavecolor;
+}
+"
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_c0q00"]
+shader = SubResource("Shader_fh7cl")
+shader_parameter/backgroundcolor = Color(0.1, 0.2, 0.8, 1)
+shader_parameter/voxthresholdcolor = Color(0.4, 0.5, 0.6, 1)
+shader_parameter/voxchunkmaxcolor = Color(0.8, 0.8, 0, 0.1)
+shader_parameter/voxwavecolor = Color(0.8, 0.8, 0.9, 1)
+shader_parameter/voxthreshhold = 0.2
+shader_parameter/chunkmax = 0.0
+shader_parameter/chunkmaxpersist = 0.0
 
 [sub_resource type="FontVariation" id="FontVariation_pmwxj"]
 spacing_top = -5
@@ -690,26 +722,16 @@ layout_mode = 2
 size_flags_vertical = 0
 color = Color(1, 1, 0.0823529, 1)
 
-[node name="VoipMode" type="Button" parent="PlayerConnections/HBoxMain/VBoxContainer/RecordingFeature"]
+[node name="Vox" type="Button" parent="PlayerConnections/HBoxMain/VBoxContainer/RecordingFeature"]
 layout_mode = 2
 toggle_mode = true
-text = "Voip"
+text = "Vox"
 
-[node name="RecordSize" type="Label" parent="PlayerConnections/HBoxMain/VBoxContainer/RecordingFeature"]
+[node name="VoxThreshold" type="ColorRect" parent="PlayerConnections/HBoxMain/VBoxContainer/RecordingFeature"]
+material = SubResource("ShaderMaterial_c0q00")
 layout_mode = 2
-size_flags_horizontal = 6
-text = "none"
-
-[node name="SendRecord" type="Button" parent="PlayerConnections/HBoxMain/VBoxContainer/RecordingFeature"]
-layout_mode = 2
-text = "Send"
-
-[node name="PlayRecord" type="Button" parent="PlayerConnections/HBoxMain/VBoxContainer/RecordingFeature"]
-layout_mode = 2
-text = "Play"
-
-[node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="PlayerConnections/HBoxMain/VBoxContainer/RecordingFeature/PlayRecord"]
-stream = SubResource("AudioStreamGenerator_cebbo")
+size_flags_horizontal = 3
+color = Color(0.104768, 0.249346, 0.350987, 1)
 
 [node name="HBoxLag" type="HBoxContainer" parent="PlayerConnections/HBoxMain/VBoxContainer"]
 layout_mode = 2
@@ -857,6 +879,7 @@ offset_bottom = 40.0
 [connection signal="pressed" from="MQTTsignalling/mqttautoconnect" to="." method="_on_mqttautoconnect_pressed"]
 [connection signal="toggled" from="MQTTsignalling/StartMQTT" to="MQTTsignalling/Servermode" method="_on_StartServer_toggled"]
 [connection signal="item_selected" from="PlayerConnections/HBoxMain/VBoxContainer/HBox_players/PlayerList" to="PlayerConnections" method="_on_PlayerList_item_selected"]
-[connection signal="pressed" from="PlayerConnections/HBoxMain/VBoxContainer/RecordingFeature/VoipMode" to="PlayerConnections/HBoxMain/VBoxContainer/RecordingFeature" method="_on_SendRecord_pressed"]
+[connection signal="toggled" from="PlayerConnections/HBoxMain/VBoxContainer/RecordingFeature/Vox" to="PlayerConnections/HBoxMain/VBoxContainer/RecordingFeature" method="_on_vox_toggled"]
+[connection signal="gui_input" from="PlayerConnections/HBoxMain/VBoxContainer/RecordingFeature/VoxThreshold" to="PlayerConnections/HBoxMain/VBoxContainer/RecordingFeature" method="_on_vox_threshold_gui_input"]
 [connection signal="value_changed" from="PlayerConnections/HBoxMain/VBoxContainer/HBoxLag/PlayerLagSlider" to="PlayerConnections" method="_on_PlayerLagSlider_value_changed"]
 [connection signal="toggled" from="DoppelgangerPanel/hbox/VBox_enable/DoppelgangerEnable" to="PlayerConnections" method="_on_Doppelganger_toggled"]
