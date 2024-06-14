@@ -1,4 +1,4 @@
-[gd_scene load_steps=25 format=3 uid="uid://cfmoahalri06d"]
+[gd_scene load_steps=27 format=3 uid="uid://cfmoahalri06d"]
 
 [ext_resource type="Script" path="res://addons/player-networking/NetworkGateway.gd" id="1"]
 [ext_resource type="Script" path="res://addons/player-networking/Enetmultiplayerserver.gd" id="3"]
@@ -20,12 +20,18 @@
 
 [sub_resource type="AudioStreamMicrophone" id="2"]
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_3abk2"]
+bg_color = Color(0.724983, 0.581581, 0.136597, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_mpv2x"]
+bg_color = Color(0.171442, 0.57024, 0.941742, 1)
+
 [sub_resource type="Shader" id="Shader_fh7cl"]
 code = "shader_type canvas_item;
 
 uniform vec4 backgroundcolor : source_color = vec4(0.1, 0.2, 0.8, 1.0);
-uniform vec4 voxthresholdcolor : source_color = vec4(0.4, 0.5, 0.6, 1.0);
-uniform vec4 voxchunkmaxcolor : source_color = vec4(0.8, 0.8, 0.0, 0.1);
+uniform vec4 voxthresholdcolor : source_color = vec4(0.602, 0.43, 0.508, 1.0);
+uniform vec4 voxchunkmaxcolor : source_color = vec4(0.8, 0.8, 0.08, 0.2);
 uniform vec4 voxwavecolor : source_color = vec4(0.8,0.8,0.9,1.0);
 
 uniform float voxthreshhold = 0.2;
@@ -35,7 +41,7 @@ uniform sampler2D voice : repeat_enable;
 
 void fragment() {
   COLOR = (UV.x < voxthreshhold ? voxthresholdcolor : backgroundcolor);
-  if (UV.x < chunkmaxpersist)
+  if ((UV.x < chunkmaxpersist) && (UV.y > 0.1) && (UV.y < 0.9))
     COLOR.rgb = mix(COLOR.rgb, voxchunkmaxcolor.rgb, voxchunkmaxcolor.a);
   vec4 v = texture(voice, UV);
   float d = UV.y*2.0 - v.r*4.0 - 1.0;
@@ -47,8 +53,8 @@ void fragment() {
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_c0q00"]
 shader = SubResource("Shader_fh7cl")
 shader_parameter/backgroundcolor = Color(0.1, 0.2, 0.8, 1)
-shader_parameter/voxthresholdcolor = Color(0.4, 0.5, 0.6, 1)
-shader_parameter/voxchunkmaxcolor = Color(0.8, 0.8, 0, 0.1)
+shader_parameter/voxthresholdcolor = Color(0.602, 0.43, 0.508, 1)
+shader_parameter/voxchunkmaxcolor = Color(0.8, 0.8, 0.08, 0.2)
 shader_parameter/voxwavecolor = Color(0.8, 0.8, 0.9, 1)
 shader_parameter/voxthreshhold = 0.2
 shader_parameter/chunkmax = 0.0
@@ -714,6 +720,7 @@ bus = &"MicrophoneBus"
 [node name="PTT" type="Button" parent="PlayerConnections/HBoxMain/VBoxContainer/RecordingFeature"]
 layout_mode = 2
 theme_override_colors/font_pressed_color = Color(0.992157, 0.984314, 0.00392157, 1)
+theme_override_styles/pressed = SubResource("StyleBoxFlat_3abk2")
 text = "PTT"
 
 [node name="ColorRectWitness" type="ColorRect" parent="PlayerConnections/HBoxMain/VBoxContainer/RecordingFeature"]
@@ -724,6 +731,7 @@ color = Color(1, 1, 0.0823529, 1)
 
 [node name="Vox" type="Button" parent="PlayerConnections/HBoxMain/VBoxContainer/RecordingFeature"]
 layout_mode = 2
+theme_override_styles/pressed = SubResource("StyleBoxFlat_mpv2x")
 toggle_mode = true
 text = "Vox"
 

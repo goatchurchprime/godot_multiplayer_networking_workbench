@@ -75,8 +75,8 @@ func processvox():
 				$PTT.set_pressed(false)
 			chunkmaxpersist = 0.0
 			$VoxThreshold.material.set_shader_parameter("chunkmaxpersist", chunkmaxpersist)
-#$VoxThreshold.material.set_shader_parameter("voxthreshhold", voxthreshhold)
-	if true or $PTT.pressed:
+
+	if $PTT.pressed:
 		var audiosamples = audioopuschunkedeffect.read_chunk()
 		audiosampleframetextureimage.set_data(audioopuschunkedeffect.audiosamplesize, 1, false, Image.FORMAT_RGF, audiosamples.to_byte_array())
 		audiosampleframetexture.update(audiosampleframetextureimage)
