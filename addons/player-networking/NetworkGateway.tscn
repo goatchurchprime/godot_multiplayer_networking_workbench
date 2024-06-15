@@ -37,16 +37,27 @@ uniform vec4 voxwavecolor : source_color = vec4(0.8,0.8,0.9,1.0);
 uniform float voxthreshhold = 0.2;
 uniform float chunkmax = 0.0;
 uniform float chunkmaxpersist = 0.0;
-uniform sampler2D voice : repeat_enable;
+uniform bool chunktexenabled = false;
+uniform sampler2D chunktexture : repeat_enable;
 
 void fragment() {
-  COLOR = (UV.x < voxthreshhold ? voxthresholdcolor : backgroundcolor);
-  if ((UV.x < chunkmaxpersist) && (UV.y > 0.1) && (UV.y < 0.9))
-    COLOR.rgb = mix(COLOR.rgb, voxchunkmaxcolor.rgb, voxchunkmaxcolor.a);
-  vec4 v = texture(voice, UV);
-  float d = UV.y*2.0 - v.r*4.0 - 1.0;
-  if (abs(d) < 0.1)
-    COLOR = voxwavecolor;
+	if (UV.x > voxthreshhold)
+		COLOR = backgroundcolor;
+	else if ((chunkmax != 0.0) || chunktexenabled)
+		COLOR = voxthresholdcolor;
+		
+	if ((UV.x < chunkmaxpersist) && (UV.y > 0.1) && (UV.y < 0.9))
+		COLOR.rgb = mix(COLOR.rgb, voxchunkmaxcolor.rgb, voxchunkmaxcolor.a);
+	
+	float d;
+	if (chunktexenabled) {
+		vec4 v = texture(chunktexture, UV);
+		d = UV.y*2.0 - v.r*4.0 - 1.0;
+	} else {
+		d = (UV.x < chunkmax ? UV.y - 0.5 : 1.0);
+	}
+	if (abs(d) < 0.1)
+		COLOR = voxwavecolor;
 }
 "
 
@@ -59,6 +70,7 @@ shader_parameter/voxwavecolor = Color(0.8, 0.8, 0.9, 1)
 shader_parameter/voxthreshhold = 0.2
 shader_parameter/chunkmax = 0.0
 shader_parameter/chunkmaxpersist = 0.0
+shader_parameter/chunktexenabled = false
 
 [sub_resource type="FontVariation" id="FontVariation_pmwxj"]
 spacing_top = -5
@@ -722,12 +734,6 @@ layout_mode = 2
 theme_override_colors/font_pressed_color = Color(0.992157, 0.984314, 0.00392157, 1)
 theme_override_styles/pressed = SubResource("StyleBoxFlat_3abk2")
 text = "PTT"
-
-[node name="ColorRectWitness" type="ColorRect" parent="PlayerConnections/HBoxMain/VBoxContainer/RecordingFeature"]
-custom_minimum_size = Vector2(3, 0)
-layout_mode = 2
-size_flags_vertical = 0
-color = Color(1, 1, 0.0823529, 1)
 
 [node name="Vox" type="Button" parent="PlayerConnections/HBoxMain/VBoxContainer/RecordingFeature"]
 layout_mode = 2

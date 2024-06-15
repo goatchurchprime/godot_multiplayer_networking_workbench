@@ -16,7 +16,7 @@ func client_session_description_created(type, data):
 		
 func client_connection_established(lwclientid):
 	print("server client connected ", lwclientid)
-	if $StartWebRTCmultiplayer.pressed:
+	if $StartWebRTCmultiplayer.button_pressed:
 		clientsignalling.sendpacket_toserver({"subject":"request_offer"})
 		PlayerConnections.connectionlog("request_offer")
 		

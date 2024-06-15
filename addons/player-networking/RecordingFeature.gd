@@ -24,7 +24,7 @@ var opusframecount = 0
 var opusstreamcount = 0
 var voxthreshhold = 0.2
 var samplescountdown = 0
-var samplesrunon = 17
+var samplesrunon = 45
 var chunkmaxpersist = 0.0
 
 var audiosampleframetextureimage : Image
@@ -37,7 +37,7 @@ func setupaudioshader():
 		audiosampleframedata.set(j, Vector2(-0.5,0.9) if (j%10)<5 else Vector2(0.6,0.1))
 	audiosampleframetextureimage = Image.create_from_data(audioopuschunkedeffect.audiosamplesize, 1, false, Image.FORMAT_RGF, audiosampleframedata.to_byte_array())
 	audiosampleframetexture = ImageTexture.create_from_image(audiosampleframetextureimage)
-	$VoxThreshold.material.set_shader_parameter("voice", audiosampleframetexture)
+	$VoxThreshold.material.set_shader_parameter("chunktexture", audiosampleframetexture)
 
 func processtalkstreamends():
 	var talking = $PTT.button_pressed
@@ -58,8 +58,6 @@ func processtalkstreamends():
 
 func processvox():
 	var chunkmax = audioopuschunkedeffect.chunk_max()
-	$ColorRectWitness.visible = (chunkmax != 0)
-	$ColorRectWitness.size.y = min(size.y-2, chunkmax*30)+2
 	$VoxThreshold.material.set_shader_parameter("chunkmax", chunkmax)
 	if chunkmax >= voxthreshhold:
 		if $Vox.button_pressed and not $PTT.button_pressed:
@@ -71,15 +69,18 @@ func processvox():
 	elif samplescountdown > 0:
 		samplescountdown -= 1
 		if samplescountdown == 0:
-			if $Vox.pressed:
+			if $Vox.button_pressed:
 				$PTT.set_pressed(false)
 			chunkmaxpersist = 0.0
 			$VoxThreshold.material.set_shader_parameter("chunkmaxpersist", chunkmaxpersist)
 
-	if $PTT.pressed:
+	if $PTT.button_pressed:
+		$VoxThreshold.material.set_shader_parameter("chunktexenabled", true)
 		var audiosamples = audioopuschunkedeffect.read_chunk()
 		audiosampleframetextureimage.set_data(audioopuschunkedeffect.audiosamplesize, 1, false, Image.FORMAT_RGF, audiosamples.to_byte_array())
 		audiosampleframetexture.update(audiosampleframetextureimage)
+	else:
+		$VoxThreshold.material.set_shader_parameter("chunktexenabled", false)
 	
 func processsendopuschunk():
 	if currentlytalking:
