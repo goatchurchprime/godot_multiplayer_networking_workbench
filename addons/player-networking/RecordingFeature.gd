@@ -51,6 +51,9 @@ func processtalkstreamends():
 		transmitaudiopacket(JSON.stringify(audiopacketheader).to_ascii_buffer())
 		opusframecount = 0
 		currentlytalking = true
+		if $AudioStreamPlayerMicrophone.playing != true:
+			$AudioStreamPlayerMicrophone.playing = true
+			print("Set microphone playing again (switched off by system)")
 	elif not talking and currentlytalking:
 		currentlytalking = false
 		transmitaudiopacket(JSON.stringify({"opusframecount":opusframecount}).to_ascii_buffer())
