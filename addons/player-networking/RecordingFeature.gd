@@ -1,103 +1,122 @@
 extends HBoxContainer
 
+var audioopuschunkedeffect : AudioEffect = null
+var chunkprefix : PackedByteArray = PackedByteArray([0,0]) 
+
+func transmitaudiopacket(packet):
+	var PlayerConnections = get_node("../../..")
+	var PlayerFrame = PlayerConnections.LocalPlayer.get_node("PlayerFrame")
+	if PlayerFrame.networkID >= 1:
+		PlayerConnections.rpc("RPCincomingaudiopacket", packet)
+	if PlayerFrame.doppelgangernode != null:
+		var doppelnetoffset = PlayerFrame.NetworkGatewayForDoppelganger.get_node("DoppelgangerPanel").getnetoffset()
+		var doppelgangerdelay = PlayerFrame.NetworkGatewayForDoppelganger.getrandomdoppelgangerdelay()
+		if doppelgangerdelay != -1.0:
+			await get_tree().create_timer(doppelgangerdelay*0.001).timeout
+			if PlayerFrame.doppelgangernode != null:
+				PlayerFrame.doppelgangernode.get_node("PlayerFrame").incomingaudiopacket(packet)
+		else:
+			print("dropaudframe")
 
 
-var micrecordingdata = null
-const max_recording_seconds = 5.0
-var recordingnumberC = 1
-var recordingeffect = null
-var capturingeffect = null
+var currentlytalking = false
+var opusframecount = 0
+var opusstreamcount = 0
+var voxthreshhold = 0.2
+var samplescountdown = 0
+var samplesrunon = 17
+var chunkmaxpersist = 0.0
+
+var audiosampleframetextureimage : Image
+var audiosampleframetexture : ImageTexture
+
+func setupaudioshader():
+	var audiosampleframedata = PackedVector2Array()
+	audiosampleframedata.resize(audioopuschunkedeffect.audiosamplesize)
+	for j in range(audioopuschunkedeffect.audiosamplesize):
+		audiosampleframedata.set(j, Vector2(-0.5,0.9) if (j%10)<5 else Vector2(0.6,0.1))
+	audiosampleframetextureimage = Image.create_from_data(audioopuschunkedeffect.audiosamplesize, 1, false, Image.FORMAT_RGF, audiosampleframedata.to_byte_array())
+	audiosampleframetexture = ImageTexture.create_from_image(audiosampleframetextureimage)
+	$VoxThreshold.material.set_shader_parameter("voice", audiosampleframetexture)
+
+func processtalkstreamends():
+	var talking = $PTT.button_pressed
+	if talking and not currentlytalking:
+		var audiopacketheader = { "opusframesize":audioopuschunkedeffect.opusframesize, 
+								  "audiosamplesize":audioopuschunkedeffect.audiosamplesize, 
+								  "opussamplerate":audioopuschunkedeffect.opussamplerate, 
+								  "audiosamplerate":audioopuschunkedeffect.audiosamplerate, 
+								  "lenchunkprefix":len(chunkprefix), 
+								  "opusstreamcount":opusstreamcount }
+		transmitaudiopacket(JSON.stringify(audiopacketheader).to_ascii_buffer())
+		opusframecount = 0
+		currentlytalking = true
+	elif not talking and currentlytalking:
+		currentlytalking = false
+		transmitaudiopacket(JSON.stringify({"opusframecount":opusframecount}).to_ascii_buffer())
+		opusstreamcount += 1
+
+func processvox():
+	var chunkmax = audioopuschunkedeffect.chunk_max()
+	$ColorRectWitness.visible = (chunkmax != 0)
+	$ColorRectWitness.size.y = min(size.y-2, chunkmax*30)+2
+	$VoxThreshold.material.set_shader_parameter("chunkmax", chunkmax)
+	if chunkmax >= voxthreshhold:
+		if $Vox.button_pressed and not $PTT.button_pressed:
+			$PTT.set_pressed(true)
+		samplescountdown = samplesrunon
+		if chunkmax > chunkmaxpersist:
+			chunkmaxpersist = chunkmax
+			$VoxThreshold.material.set_shader_parameter("chunkmaxpersist", chunkmaxpersist)
+	elif samplescountdown > 0:
+		samplescountdown -= 1
+		if samplescountdown == 0:
+			if $Vox.pressed:
+				$PTT.set_pressed(false)
+			chunkmaxpersist = 0.0
+			$VoxThreshold.material.set_shader_parameter("chunkmaxpersist", chunkmaxpersist)
+
+	if $PTT.pressed:
+		var audiosamples = audioopuschunkedeffect.read_chunk()
+		audiosampleframetextureimage.set_data(audioopuschunkedeffect.audiosamplesize, 1, false, Image.FORMAT_RGF, audiosamples.to_byte_array())
+		audiosampleframetexture.update(audiosampleframetextureimage)
+	
+func processsendopuschunk():
+	if currentlytalking:
+		chunkprefix.set(0, (opusframecount%256))  # 32768 frames is 10 minutes
+		chunkprefix.set(1, (int(opusframecount/256)&127) + (opusstreamcount%2)*128)
+		opusframecount += 1
+		var opuspacket = audioopuschunkedeffect.pop_opus_packet(chunkprefix)
+		transmitaudiopacket(opuspacket)
+	else:
+		audioopuschunkedeffect.drop_chunk()
+
+func _process(delta):
+	if audioopuschunkedeffect != null:
+		processtalkstreamends()
+		while audioopuschunkedeffect.chunk_available():
+			processvox()
+			processsendopuschunk()
 
 func _ready():
-	#return
-	var recordbus_idx = AudioServer.get_bus_index("Recorder")
-	assert ($MicRecord/AudioStreamRecorder.bus == "Recorder")
-	assert ($MicRecord/AudioStreamRecorder.stream.is_class("AudioStreamMicrophone"))
-	assert (AudioServer.is_bus_mute(recordbus_idx) == true)
-	recordingeffect = AudioServer.get_bus_effect(recordbus_idx, 0)
-	assert (recordingeffect.is_class("AudioEffectRecord"))
-
-	# we can use this capturing object ring buffer to collect and batch up chunks
-	# see godot-voip demo.  Also how to use AudioStreamGeneratorPlayback etc
-	#capturingeffect = AudioServer.get_bus_effect(recordbus_idx, 1)
-	#assert (capturingeffect.is_class("AudioEffectCapture"))
-	var enablesound = true
-	if enablesound and ClassDB.class_exists("OpusEncoderNode"):
-		if enablesound:
-			var OpusEncoder = ClassDB.instantiate("OpusEncoderNode")
-			OpusEncoder.name = "OpusEncoder"
-			$MicRecord.add_child(OpusEncoder)
-		else:
-			print("Missing Opus plugin library")
-		if enablesound and ClassDB.class_exists("OpusDecoderNode"):
-			var OpusDecoder = ClassDB.instantiate("OpusDecoderNode")
-			OpusDecoder.name = "OpusDecoder"
-			$MicRecord.add_child(OpusDecoder)
-
-	if $MicRecord.has_node("OpusDecoder"):
-		var fname = "res://addons/player-networking/welcomespeech.opusbin"
-		if FileAccess.file_exists(fname):
-			micrecordingdata = { "format":1, "mix_rate":44100, "is_stereo":true }
-			micrecordingdata["opusEncoded"] = FileAccess.get_file_as_bytes(fname)
-			$RecordSize.text = "w-"+str(len(micrecordingdata.get("opusEncoded", micrecordingdata.get("pcmData"))))
-
-func _on_MicRecord_button_down():
-	if not recordingeffect.is_recording_active():
-		recordingnumberC += 1
-		micrecordingdata = null
-		await get_tree().create_timer(0.1).timeout
-		var lrecordingnumberC = recordingnumberC
-		recordingeffect.set_recording_active(true)
-		await get_tree().create_timer(max_recording_seconds).timeout
-		if micrecordingdata != null and lrecordingnumberC == recordingnumberC:
-			_on_MicRecord_button_up()
-		if OS.get_name() == "X11":
-			print("Warning mic doesn't work on Linux (godot issue 33184)")  # seems to work on my nix machine
-		
-func _on_MicRecord_button_up():
-	if recordingeffect.is_recording_active():
-		recordingeffect.set_recording_active(false)
-		var recording = recordingeffect.get_recording()
-		var pcmData = recording.get_data()
-		micrecordingdata = { "format":recording.get_format(), 
-							"mix_rate":recording.get_mix_rate(),
-							"is_stereo":recording.is_stereo() }
-		if $MicRecord.has_node("OpusEncoder"):
-			micrecordingdata["opusEncoded"] = $MicRecord/OpusEncoder.encode(pcmData)
-		else:
-			micrecordingdata["pcmData"] = pcmData
-		print(" created data bytes ", len(var_to_bytes(micrecordingdata)), "  ", len(pcmData))
-		$RecordSize.text = "l-"+str(len(micrecordingdata.get("opusEncoded", micrecordingdata.get("pcmData"))))
-
-@rpc("any_peer") func remotesetmicrecord(lmicrecordingdata):
-	micrecordingdata = lmicrecordingdata
-	$RecordSize.text = "r-"+str(len(micrecordingdata.get("opusEncoded", micrecordingdata.get("pcmData"))))
+	$VoxThreshold.material.set_shader_parameter("voxthreshhold", voxthreshhold)
+	assert ($AudioStreamPlayerMicrophone.bus == "MicrophoneBus")
+	assert ($AudioStreamPlayerMicrophone.stream.is_class("AudioStreamMicrophone"))
+	var microphonebusidx = AudioServer.get_bus_index($AudioStreamPlayerMicrophone.bus)
+	for i in range(AudioServer.get_bus_effect_count(microphonebusidx)):
+		if AudioServer.get_bus_effect(microphonebusidx, i).is_class("AudioEffectOpusChunked"):
+			audioopuschunkedeffect = AudioServer.get_bus_effect(microphonebusidx, i)
+	if audioopuschunkedeffect == null and ClassDB.can_instantiate("AudioEffectOpusChunked"):
+		audioopuschunkedeffect = AudioEffectOpusChunked.new()
+		AudioServer.add_bus_effect(microphonebusidx, audioopuschunkedeffect)
+	print("audioopuschunkedeffect ", audioopuschunkedeffect)
+	if audioopuschunkedeffect != null:
+		setupaudioshader()
 	
+func _on_vox_toggled(toggled_on):
+	$PTT.toggle_mode = toggled_on
 
-func _on_SendRecord_pressed():
-	if micrecordingdata != null:
-		rpc("remotesetmicrecord", micrecordingdata)
-	#var fout = File.new()
-	#var fname = "user://welcomespeech.dat"
-	#print("saving ", ProjectSettings.globalize_path(fname))
-	#fout.open(fname, File.WRITE)
-	#fout.store_var(micrecordingdata)
-	#fout.close()
-
-func _on_PlayRecord_pressed():
-	print("_on_PlayRecord_pressed")
-	if micrecordingdata != null:
-		var audioStream = AudioStreamWAV.new()
-		audioStream.set_format(micrecordingdata["format"])
-		audioStream.set_mix_rate(micrecordingdata["mix_rate"])
-		audioStream.set_stereo(micrecordingdata["is_stereo"])
-		if micrecordingdata.has("opusEncoded") and $MicRecord.has_node("OpusDecoder"):
-			audioStream.data = $MicRecord/OpusDecoder.decode(micrecordingdata["opusEncoded"])
-			print("audio playing bytes ", len(audioStream.data))
-		elif micrecordingdata.has("pcmData"):
-			audioStream.data = micrecordingdata["pcmData"]
-			print("audio playing bytes ", len(audioStream.data))
-		else:
-			print("No decodable audio data here")
-		$PlayRecord/AudioStreamPlayer.stream = audioStream
-		$PlayRecord/AudioStreamPlayer.play()
+func _on_vox_threshold_gui_input(event):
+	if event is InputEventMouseButton and event.pressed:
+		voxthreshhold = event.position.x/$VoxThreshold.size.x
+		$VoxThreshold.material.set_shader_parameter("voxthreshhold", voxthreshhold)

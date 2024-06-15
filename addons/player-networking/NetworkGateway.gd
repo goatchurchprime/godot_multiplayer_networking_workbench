@@ -40,6 +40,10 @@ var rng = RandomNumberGenerator.new()
 func _ready():
 	for rs in remoteservers:
 		$NetworkOptions.add_item(rs)
+	if $NetworkOptions.selected == -1:  $NetworkOptions.selected = 0
+	if $ProtocolOptions.selected == -1:  $ProtocolOptions.selected = 0
+	if $NetworkOptionsMQTTWebRTC.selected == -1:  $NetworkOptionsMQTTWebRTC.selected = 0
+	if $MQTTsignalling/brokeraddress.selected == -1:  $MQTTsignalling/brokeraddress.selected = 0
 	if OS.has_feature("HTML5"):
 		$NetworkOptions.set_item_disabled(NETWORK_OPTIONS.LOCAL_NETWORK,  true)
 		$NetworkOptions.set_item_disabled(NETWORK_OPTIONS.AS_SERVER,  true)
@@ -47,6 +51,7 @@ func _ready():
 		$ProtocolOptions.selected = max(NETWORK_PROTOCOL.WEBSOCKET, $ProtocolOptions.selected)
 	rng.randomize()
 	_on_ProtocolOptions_item_selected($ProtocolOptions.selected)
+
 
 func initialstatenormal(protocol, networkoption):
 	assert (protocol >= NETWORK_PROTOCOL.ENET and protocol <= NETWORK_PROTOCOL.WEBRTC_WEBSOCKETSIGNAL)
@@ -75,7 +80,8 @@ func selectandtrigger_networkoption(networkoption):
 			_on_NetworkOptions_item_selected(networkoption)
 
 func _on_ProtocolOptions_item_selected(np):
-	assert ($NetworkOptions.selected == NETWORK_OPTIONS.NETWORK_OFF and $NetworkOptionsMQTTWebRTC.selected == NETWORK_OPTIONS_MQTT_WEBRTC.NETWORK_OFF)
+	assert ($NetworkOptions.selected == NETWORK_OPTIONS.NETWORK_OFF or $NetworkOptions.selected == -1)
+	assert ($NetworkOptionsMQTTWebRTC.selected == NETWORK_OPTIONS_MQTT_WEBRTC.NETWORK_OFF or $NetworkOptionsMQTTWebRTC.selected == -1)
 	var selectasmqttwebrtc = (np == NETWORK_PROTOCOL.WEBRTC_MQTTSIGNAL)
 	var selectaswebrtcwebsocket = (np == NETWORK_PROTOCOL.WEBRTC_WEBSOCKETSIGNAL)
 	var selectasenet = (np == NETWORK_PROTOCOL.ENET)
@@ -217,6 +223,7 @@ func _on_NetworkOptionsMQTTWebRTC_item_selected(ns):
 
 func getrandomdoppelgangerdelay(disabledropout=false):
 	if not disabledropout and rng.randf_range(0, 100) < float($DoppelgangerPanel/hbox/VBox_netdrop/netdroppc.text):
+		print("Dropped")
 		return -1.0
 	var netdelayadd = float($DoppelgangerPanel/hbox/VBox_netdelay/netdelayadd.text)
 	var doppelgangerdelay = int($DoppelgangerPanel/hbox/VBox_delaymin/netdelaymin.text) + max(0.0, rng.randfn(netdelayadd, netdelayadd*0.4))
@@ -227,9 +234,6 @@ func setnetworkoff():
 					
 func _data_channel_received(channel: Object):
 	print("_data_channel_received ", channel)
-
-
-
 
 
 
@@ -252,3 +256,13 @@ func _on_mqttautoconnect_mouse_entered():
 
 func _on_mqttautoconnect_gui_input(event):
 	pass #print("input evengt ", event)
+
+
+func _on_brokeraddress_button_down():
+	pass # Replace with function body.
+
+
+func _on_gui_input(event):
+	if event is InputEventMouseButton:
+		print("_on_gui_input ", event)
+	

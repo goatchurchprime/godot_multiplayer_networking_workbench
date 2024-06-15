@@ -30,3 +30,5 @@ text = "Remoteplayer"
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="CharacterBody2D"]
 shape = SubResource("1")
+
+[node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="."]

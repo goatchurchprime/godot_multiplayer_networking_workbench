@@ -92,7 +92,8 @@ func _physics_process(delta):
 			var servertime = t1 + delta - ServerPlayerFrame.mintimestampoffset - ServerPlayerFrame.laglatency
 			rpc("clientpingpongballupdate", servertime, position, lvelocity)
 
-@rpc("any_peer") func serverpingpongballupdate(st1, sposition, svelocity, clientpongupdate):
+@rpc("authority", "call_remote", "reliable", 0)
+func serverpingpongballupdate(st1, sposition, svelocity, clientpongupdate):
 	assert (multiplayer.get_remote_sender_id() == 1)
 	if serverpongst1 == 0.0 or st1 <= serverpongst1:
 		serverpongst1 = st1
@@ -100,7 +101,8 @@ func _physics_process(delta):
 		serverpongvelocity = svelocity
 		Dserverclientpongupdate = clientpongupdate
 
-@rpc("any_peer") func clientpingpongballupdate(st1, sposition, svelocity):
+@rpc("any_peer", "call_remote", "reliable", 0)
+func clientpingpongballupdate(st1, sposition, svelocity):
 	#assert (not multiplayer.is_server())
 	if clientpongst1 == 0.0 or st1 >= clientpongst1:
 		clientpongst1 = st1
