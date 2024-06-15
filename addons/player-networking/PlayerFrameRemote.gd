@@ -96,6 +96,7 @@ var lenchunkprefix = 0
 var opusstreamcount = 0
 var opusframecount = 0
 var outoforderchunkqueue = [ null, null, null, null ]
+var Dbatchinginitialpackets = false
 func incomingaudiopacket(packet):
 	if audiostreamopuschunked == null:
 		return
@@ -115,9 +116,10 @@ func incomingaudiopacket(packet):
 					audiostreamopuschunked.audiosamplerate = h["audiosamplerate"]
 				lenchunkprefix = int(h["lenchunkprefix"])
 				opusstreamcount = int(h["opusstreamcount"])
-				opusframecount = 0
+				opusframecount = -1
+				Dbatchinginitialpackets = (opusframecount != 0)
 				outoforderchunkqueue = [ null, null, null, null ]
-
+				
 	elif packet[1]&128 == (opusstreamcount%2)*128:
 		var opusframecountI = packet[0] + (packet[1]&127)*256
 		var opusframecountR = opusframecountI - opusframecount
@@ -127,7 +129,10 @@ func incomingaudiopacket(packet):
 			opusframecountR = 0
 		if opusframecountR >= 0:
 			while opusframecountR >= len(outoforderchunkqueue):
-				print("shifting outoforderqueue ", opusframecountR, " ", ("null" if outoforderchunkqueue[0] == null else len(outoforderchunkqueue[0])))
+				if not Dbatchinginitialpackets:
+					print("shifting outoforderqueue ", opusframecountR, " ", ("null" if outoforderchunkqueue[0] == null else len(outoforderchunkqueue[0])))
+				else:
+					Dbatchinginitialpackets = false
 				if outoforderchunkqueue[0] != null:
 					audiostreamopuschunked.push_opus_packet(outoforderchunkqueue[0], lenchunkprefix, 0)
 				elif outoforderchunkqueue[1] != null:
