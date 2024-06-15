@@ -100,7 +100,8 @@ func PF_framedatatoavatar(fd):
 		position = fd[NCONSTANTS.CFI_RECT_POSITION]
 	if fd.has(NCONSTANTS.CFI_VISIBLE):
 		visible = fd[NCONSTANTS.CFI_VISIBLE]
-
+	if fd.has(NCONSTANTS.CFI_SPEAKING):
+		$SpeakingIcon.visible = fd[NCONSTANTS.CFI_SPEAKING]
 
 	
 func playername():

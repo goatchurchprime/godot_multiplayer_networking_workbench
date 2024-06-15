@@ -24,7 +24,6 @@ func networkedavatarthinnedframedata(vd):
 
 var Dframecount = 0
 var Dmaxarrivaldelay = 0
-
 func _process(delta):
 	if initialframestate == 1 and len(framestack) > 0:
 		get_parent().PF_framedatatoavatar(framestack[0])
@@ -70,8 +69,10 @@ func _process(delta):
 		for k in completedframeL:
 			ld[k] = completedframeL[k]
 			
+		ld[NCONSTANTS.CFI_SPEAKING] = audiostreamopuschunked != null and audiostreamopuschunked.queue_length_frames() > 0
+
 		get_parent().PF_framedatatoavatar(ld)
-	
+
 
 var audiostreamopuschunked : AudioStream = null
 func _ready():

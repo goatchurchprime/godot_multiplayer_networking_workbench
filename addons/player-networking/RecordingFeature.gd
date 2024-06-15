@@ -24,7 +24,7 @@ var opusframecount = 0
 var opusstreamcount = 0
 var voxthreshhold = 0.2
 var samplescountdown = 0
-var samplesrunon = 45
+var samplesrunon = 25
 var chunkmaxpersist = 0.0
 
 var audiosampleframetextureimage : Image
