@@ -81,7 +81,7 @@ func _ready():
 		audiostreamplayer.playing = true
 		audiostreamopuschunked = audiostreamplayer.stream
 		if audiostreamplayer.stream == null and ClassDB.can_instantiate("AudioStreamOpusChunked"):
-			audiostreamplayer.stream = AudioStreamOpusChunked.new()
+			audiostreamplayer.stream = ClassDB.instantiate("AudioStreamOpusChunked")
 		if audiostreamplayer.stream != null and audiostreamplayer.stream.is_class("AudioStreamOpusChunked"):
 			audiostreamopuschunked = audiostreamplayer.stream
 		elif audiostreamplayer.stream != null:

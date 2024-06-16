@@ -111,7 +111,7 @@ func _ready():
 		if AudioServer.get_bus_effect(microphonebusidx, i).is_class("AudioEffectOpusChunked"):
 			audioopuschunkedeffect = AudioServer.get_bus_effect(microphonebusidx, i)
 	if audioopuschunkedeffect == null and ClassDB.can_instantiate("AudioEffectOpusChunked"):
-		audioopuschunkedeffect = AudioEffectOpusChunked.new()
+		audioopuschunkedeffect = ClassDB.instantiate("AudioEffectOpusChunked")
 		AudioServer.add_bus_effect(microphonebusidx, audioopuschunkedeffect)
 	print("audioopuschunkedeffect ", audioopuschunkedeffect)
 	if audioopuschunkedeffect != null:

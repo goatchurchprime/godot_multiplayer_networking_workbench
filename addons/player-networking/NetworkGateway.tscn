@@ -45,10 +45,10 @@ void fragment() {
 		COLOR = backgroundcolor;
 	else if ((chunkmax != 0.0) || chunktexenabled)
 		COLOR = voxthresholdcolor;
-		
+
 	if ((UV.x < chunkmaxpersist) && (UV.y > 0.1) && (UV.y < 0.9))
 		COLOR.rgb = mix(COLOR.rgb, voxchunkmaxcolor.rgb, voxchunkmaxcolor.a);
-	
+
 	float d;
 	if (chunktexenabled) {
 		vec4 v = texture(chunktexture, UV);
