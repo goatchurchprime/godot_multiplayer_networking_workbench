@@ -4,7 +4,7 @@ This utility wraps the workings of the three [highlevel multiplayer](https://doc
 networking protocols (**ENet**, **Websockets**, and **WebRTC**) 
 and has hooks to enable VR players to compress, transmit, unpack and interpolate their avatar movements across the network.
 
-**WebRTC** is interesting because it enables peer to peer networking across the internet without a server.  
+**WebRTC** enables peer to peer networking across the internet without a server.  
 The signalling (the exchange of a small amount of network routing data between the peers) 
 is done using a light-weight MQTT server, of which public versions are available.
 
@@ -13,19 +13,21 @@ is done using a light-weight MQTT server, of which public versions are available
 ## Installation
 
 This should run in Godot 4.2 or higher.  The reusable component is in `addons/player-networking`  
-Its logic is embedded in a control panel that you can make invisible and operate externally with a 
-restricted set of options tuned to your application, or be made interactive for the purpose of debugging.
+The system logic is embedded in a control panel that you can make invisible and operate externally with a 
+restricted set of options tuned to your application, but it is exposed for the purpose of debugging.
 
-The **MQTT** addon is distributed with this application, since it is pure GDScript.
+The pure GDScript **MQTT** addon is distributed with this application.
 
 The **WebRTC** binaries are about 20Mb for each platform (except HTML5, which gets them for free) and are 
 not part of the Godot executable.  You need to download the version from [godotengine/webrtc-native](https://github.com/godotengine/webrtc-native/releases) 
 and unzip as a toplevel `webrtc` directory in your project.
 
-To enable **VoIP (Voice over IP)**, download the latest precompiled GDExtension from https://github.com/goatchurchprime/two-voip-godot-4/releases
-and set it as the directory `addons/twovoip`.  This plugin uses the standard [Opus Voice Compression codec](https://opus-codec.org/)
+Finally search for the **twovoip** addon in the AssetLib and install it.
+This precompiled plugin uses the standard [Opus Voice Compression codec](https://opus-codec.org/)
 and provides `AudioEffectOpusChunked` to do realtime compression from an Audio Bus, and `AudioStreamOpusChunked` to run the 
-decompressor directly into an Audio Player.  
+decompressor directly into an Audio Player.  If you have any problem with this VoIP system, 
+try the [two-voip-godot-4](https://github.com/goatchurchprime/two-voip-godot-4) demo project directly which 
+will test whether it's picking up the microphone and compressing and playing back audio properly.
 
 ## Operation
 
