@@ -18,16 +18,13 @@ restricted set of options tuned to your application, but it is exposed for the p
 
 The pure GDScript **MQTT** addon is distributed with this application.
 
-The **WebRTC** binaries are about 20Mb for each platform (except HTML5, which gets them for free) and are 
-not part of the Godot executable.  You need to download the version from [godotengine/webrtc-native](https://github.com/godotengine/webrtc-native/releases) 
-and unzip as a toplevel `webrtc` directory in your project.
+You can download and install the **WebRTC** and **twovoip** binary addons directly from the `AssetLib`.
 
-Finally search for the **twovoip** addon in the AssetLib and install it.
-This precompiled plugin uses the standard [Opus Voice Compression codec](https://opus-codec.org/)
-and provides `AudioEffectOpusChunked` to do realtime compression from an Audio Bus, and `AudioStreamOpusChunked` to run the 
-decompressor directly into an Audio Player.  If you have any problem with this VoIP system, 
+The **twovoip** provides the nodes `AudioEffectOpusChunked` and `AudioStreamOpusChunked` 
+to compress and decompress audio through the [Opus Voice Compression codec](https://opus-codec.org/).
+If you have any problem with this VoIP system, 
 try the [two-voip-godot-4](https://github.com/goatchurchprime/two-voip-godot-4) demo project directly which 
-will test whether it's picking up the microphone and compressing and playing back audio properly.
+will find out what the snags are.
 
 ## Operation
 
@@ -110,7 +107,5 @@ It's either operated by PTT (Push-to-talk) or VoX (Voice operated switch), so it
 
 The Remote Player needs a node called `AudioStreamPlayer` that the `PlayerFrameRemote` object pushes its audio packets to.  
 This can be type `AudioStreamPlayer3D` or `AudioStreamPlayer2D` (even though these don't inheret from the same type).
-
-
 
 
