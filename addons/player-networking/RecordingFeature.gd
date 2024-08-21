@@ -60,7 +60,7 @@ func processtalkstreamends():
 		opusstreamcount += 1
 
 func processvox():
-	var chunkmax = audioopuschunkedeffect.chunk_max()
+	var chunkmax = audioopuschunkedeffect.chunk_max(false, false)
 	$VoxThreshold.material.set_shader_parameter("chunkmax", chunkmax)
 	if chunkmax >= voxthreshhold:
 		if $Vox.button_pressed and not $PTT.button_pressed:
@@ -79,7 +79,7 @@ func processvox():
 
 	if $PTT.button_pressed:
 		$VoxThreshold.material.set_shader_parameter("chunktexenabled", true)
-		var audiosamples = audioopuschunkedeffect.read_chunk()
+		var audiosamples = audioopuschunkedeffect.read_chunk(false)
 		audiosampleframetextureimage.set_data(audioopuschunkedeffect.audiosamplesize, 1, false, Image.FORMAT_RGF, audiosamples.to_byte_array())
 		audiosampleframetexture.update(audiosampleframetextureimage)
 	else:
@@ -90,10 +90,10 @@ func processsendopuschunk():
 		chunkprefix.set(0, (opusframecount%256))  # 32768 frames is 10 minutes
 		chunkprefix.set(1, (int(opusframecount/256)&127) + (opusstreamcount%2)*128)
 		opusframecount += 1
-		var opuspacket = audioopuschunkedeffect.pop_opus_packet(chunkprefix)
+		audioopuschunkedeffect.denoise_resampled_chunk()
+		var opuspacket = audioopuschunkedeffect.read_opus_packet(chunkprefix)
 		transmitaudiopacket(opuspacket)
-	else:
-		audioopuschunkedeffect.drop_chunk()
+	audioopuschunkedeffect.drop_chunk()
 
 func _process(delta):
 	if audioopuschunkedeffect != null:
