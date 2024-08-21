@@ -1,10 +1,9 @@
 # Godot4 Multiplayer networking workbench
 
-hi there
-
 This utility wraps the workings of the three [highlevel multiplayer](https://docs.godotengine.org/en/stable/tutorials/networking/high_level_multiplayer.html)
-networking protocols (**ENet**, **Websockets**, and **WebRTC**) 
-and has hooks to enable VR players to compress, transmit, unpack and interpolate their avatar movements across the network.
+networking protocols (**ENet**, **Websockets**, and **WebRTC**) into a plugin 
+that can be dropped into any Godot project to enable it to be networked.
+There are hooks to enable VR players to compress, transmit, unpack and interpolate their avatar movements across the network.
 
 **WebRTC** enables peer to peer networking across the internet without a server.  
 The signalling (the exchange of a small amount of network routing data between the peers) 
@@ -16,17 +15,22 @@ is done using a light-weight MQTT server, of which public versions are available
 
 This should run in Godot 4.2 or higher.  The reusable component is in `addons/player-networking`  
 The system logic is embedded in a control panel that you can make invisible and operate externally with a 
-restricted set of options tuned to your application, but it is exposed for the purpose of debugging.
+restricted set of options tuned to your application, but it is exposed for the purpose of 
+experimentation and debugging.
 
-The pure GDScript **MQTT** addon is distributed with this application.
+The pure GDScript **MQTT** addon is distributed with this application.  
+A Godot project you can use to familiarize yourself with this protocol 
+can be found [here](https://github.com/goatchurchprime/godot-mqtt?tab=readme-ov-file#mqtt)
 
-You can download and install the **WebRTC** and **twovoip** binary addons directly from the `AssetLib`.
+If you want to use WebRTC you will need to use the \[AssetLib\] tab to install 
+the [WebRTC plugin - Godot 4.1+](https://godotengine.org/asset-library/asset/2103) into 
+the directory `addons/webrtc`.  (Although the WebRTC classes are in the core of GodotEngine, 
+the implementation is kept separate to save 20Mbs for all the people not using this feature.) 
 
-The **twovoip** provides the nodes `AudioEffectOpusChunked` and `AudioStreamOpusChunked` 
-to compress and decompress audio through the [Opus Voice Compression codec](https://opus-codec.org/).
-If you have any problem with this VoIP system, 
-try the [two-voip-godot-4](https://github.com/goatchurchprime/two-voip-godot-4) demo project directly which 
-will find out what the snags are.
+If you record and send opus-compressed voice packets over the net, you also need to 
+install the [TwoVoip v3.0+](https://godotengine.org/asset-library/asset/3169) addon.
+Try the [two-voip-godot-4](https://github.com/goatchurchprime/two-voip-godot-4) demo project directly 
+which if there are any snags.
 
 ## Operation
 

@@ -41,7 +41,7 @@ func _ready():
 	for rs in remoteservers:
 		$NetworkOptions.add_item(rs)
 	if $NetworkOptions.selected == -1:  $NetworkOptions.selected = 0
-	if $ProtocolOptions.selected == -1:  $ProtocolOptions.selected = 0
+	if $ProtocolOptions.selected == -1:  $ProtocolOptions.selected = 3
 	if $NetworkOptionsMQTTWebRTC.selected == -1:  $NetworkOptionsMQTTWebRTC.selected = 0
 	if $MQTTsignalling/brokeraddress.selected == -1:  $MQTTsignalling/brokeraddress.selected = 0
 	if OS.has_feature("HTML5"):
