@@ -761,15 +761,20 @@ size_flags_horizontal = 6
 max_value = 5.0
 step = 0.0
 
+[node name="LogRec" type="Button" parent="PlayerConnections/HBoxMain/VBoxContainer/HBoxLag"]
+layout_mode = 2
+text = "LogRec
+"
+
 [node name="ConnectionLog" type="TextEdit" parent="PlayerConnections/HBoxMain"]
 layout_mode = 2
 
 [node name="DoppelgangerPanel" type="ColorRect" parent="."]
 layout_mode = 0
 offset_left = 6.0
-offset_top = 258.0
+offset_top = 266.0
 offset_right = 648.0
-offset_bottom = 324.0
+offset_bottom = 336.0
 color = Color(0.235294, 0.101961, 0.101961, 1)
 script = ExtResource("16_i8v6k")
 
