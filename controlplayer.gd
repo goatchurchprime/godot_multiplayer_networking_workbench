@@ -80,8 +80,10 @@ func PF_processlocalavatarposition(delta):
 		return false
 	var vec = Vector2((-1 if Input.is_action_pressed("ui_left") else 0) + (1 if Input.is_action_pressed("ui_right") else 0), 
 						(-1 if Input.is_action_pressed("ui_up") else 0) + (1 if Input.is_action_pressed("ui_down") else 0))
-	var mousecommandvelocity = get_node("/root/Main/JoystickControls").mousecommandvelocity
+	var mousecommandvelocity = get_node("/root/Main/JoystickControls/MeshInstance2D").mousecommandvelocity
 	localavatarvelocity = vec + mousecommandvelocity
+	#if mousecommandvelocity.x != 0:  
+	#	print(mousecommandvelocity)
 	position = Vector2(clamp(position.x + localavatarvelocity.x*batvelocity*delta, 65, 500), 
 					   clamp(position.y + localavatarvelocity.y*batvelocity*delta, 7, 339))
 	return true

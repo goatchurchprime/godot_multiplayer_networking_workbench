@@ -69,7 +69,7 @@ func _physics_process(delta):
 		ballcollision = true
 		if i == 2:
 			print("bail out move_and_collides ", delta, lvelocity, k.get_normal())
-	var rs = get_parent().size
+	var rs = get_node("../MeshInstance2D").mesh.size
 	if position.y > rs.y:
 		position.y -= rs.y
 		sendballupdate = true

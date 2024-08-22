@@ -1,0 +1,35 @@
+[gd_scene load_steps=5 format=3 uid="uid://bngiijug5ydb4"]
+
+[ext_resource type="Script" path="res://mulitplayerspawntoy.gd" id="1_idxh0"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_5qp8h"]
+size = Vector2(40, 80)
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_sqhgx"]
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_t03b6"]
+width = 40
+height = 80
+noise = SubResource("FastNoiseLite_sqhgx")
+
+[node name="spawnedtoy" type="RigidBody2D"]
+input_pickable = true
+freeze = true
+script = ExtResource("1_idxh0")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("RectangleShape2D_5qp8h")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+modulate = Color(0.54902, 0.419608, 1, 1)
+texture = SubResource("NoiseTexture2D_t03b6")
+
+[node name="Label" type="Label" parent="."]
+offset_left = -11.0
+offset_top = -26.0
+offset_right = 29.0
+offset_bottom = 24.0
+theme_override_font_sizes/font_size = 36
+text = "A"
+
+[connection signal="input_event" from="." to="." method="_on_input_event"]

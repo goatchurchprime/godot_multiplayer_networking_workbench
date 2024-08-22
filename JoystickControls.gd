@@ -1,4 +1,4 @@
-extends ColorRect
+extends MeshInstance2D
 
 var mousecommandvelocity = Vector2(0, 0)
 var mousebuttondown = false
@@ -6,42 +6,31 @@ var hithere=100
 
 
 func _ready():
-	get_node("../Players").set_mouse_filter(Control.MOUSE_FILTER_IGNORE)
-	connect("mouse_exited", Callable(self, "_gui_input").bind(null))
-	get_node("/root").connect("size_changed", Callable(self, "window_size_changed"))
-	var NetworkGateway = get_node("../NetworkGateway")
-
-
+	var NetworkGateway = get_node("../../NetworkGateway")
 	if OS.has_feature("Server"):
 		await get_tree().create_timer(1.5).timeout
 		NetworkGateway.selectandtrigger_networkoption(NetworkGateway.NETWORK_OPTIONS.AS_SERVER)
 
 
-func _gui_input(event):
+func _input(event):
 	var mouseposition = null
 	if event == null:
 		pass
 	elif event is InputEventScreenDrag or event is InputEventScreenTouch:
-		return
+		return 
 	elif event is InputEventMouseButton:
 		if event.button_index == MOUSE_BUTTON_LEFT:
 			if event.pressed:
 				mouseposition = event.position
+				print(mouseposition, "tss")
 				mousebuttondown = true
 			else:
 				mousebuttondown = false
 	elif event is InputEventMouseMotion and mousebuttondown:
 		mouseposition = event.position
 		
-	if mouseposition != null:
-		mousecommandvelocity = Vector2((-1 if mouseposition.x < size.x/3 else 0) + (1 if mouseposition.x > 2*size.x/3 else 0), 
-										(-1 if mouseposition.y < size.y/3 else 0) + (1 if mouseposition.y > 2*size.y/3 else 0))
+	if mouseposition != null and mouseposition.y-400 > 0:
+		mousecommandvelocity = Vector2((-1 if mouseposition.x < mesh.size.x/3 else 0) + (1 if mouseposition.x > 2*mesh.size.x/3 else 0), 
+										(-1 if mouseposition.y-400 < mesh.size.y/3 else 0) + (1 if mouseposition.y-400 > 2*mesh.size.y/3 else 0))
 	else:
 		mousecommandvelocity = Vector2(0, 0)
-
-
-
-func window_size_changed():
-	get_node("../Players").set_mouse_filter(Control.MOUSE_FILTER_IGNORE)
-	var windowsize = get_node("/root").size
-	print("windowsize ", windowsize)
