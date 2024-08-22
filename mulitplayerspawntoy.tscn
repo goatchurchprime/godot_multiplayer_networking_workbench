@@ -1,6 +1,14 @@
-[gd_scene load_steps=5 format=3 uid="uid://bngiijug5ydb4"]
+[gd_scene load_steps=6 format=3 uid="uid://bngiijug5ydb4"]
 
 [ext_resource type="Script" path="res://mulitplayerspawntoy.gd" id="1_idxh0"]
+
+[sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_5t88t"]
+properties/0/path = NodePath(".:position")
+properties/0/spawn = true
+properties/0/replication_mode = 1
+properties/1/path = NodePath(".:z_index")
+properties/1/spawn = true
+properties/1/replication_mode = 1
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_5qp8h"]
 size = Vector2(40, 80)
@@ -17,6 +25,9 @@ input_pickable = true
 freeze = true
 script = ExtResource("1_idxh0")
 
+[node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="."]
+replication_config = SubResource("SceneReplicationConfig_5t88t")
+
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 shape = SubResource("RectangleShape2D_5qp8h")
 
@@ -32,4 +43,14 @@ offset_bottom = 24.0
 theme_override_font_sizes/font_size = 36
 text = "A"
 
-[connection signal="input_event" from="." to="." method="_on_input_event"]
+[node name="MouseIn" type="ColorRect" parent="."]
+visible = false
+offset_left = -4.0
+offset_top = 34.0
+offset_right = 3.0
+offset_bottom = 38.0
+mouse_filter = 2
+color = Color(1, 1, 0.027451, 1)
+
+[connection signal="mouse_entered" from="." to="." method="mouseentered"]
+[connection signal="mouse_exited" from="." to="." method="mouseexited"]

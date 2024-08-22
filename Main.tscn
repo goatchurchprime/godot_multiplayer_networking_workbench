@@ -1,4 +1,4 @@
-[gd_scene load_steps=15 format=3 uid="uid://denbhipr26x6c"]
+[gd_scene load_steps=14 format=3 uid="uid://denbhipr26x6c"]
 
 [ext_resource type="Script" path="res://addons/player-networking/PlayerFrameLocal.gd" id="1"]
 [ext_resource type="PackedScene" uid="uid://dhd8tliyhvtiw" path="res://controlplayer.tscn" id="2"]
@@ -6,7 +6,6 @@
 [ext_resource type="Script" path="res://JoystickControls.gd" id="4"]
 [ext_resource type="Script" path="res://PingPongBall.gd" id="5"]
 [ext_resource type="Script" path="res://syncobjects.gd" id="6_jvykx"]
-[ext_resource type="PackedScene" uid="uid://bngiijug5ydb4" path="res://mulitplayerspawntoy.tscn" id="7_at015"]
 
 [sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_is50g"]
 
@@ -26,9 +25,6 @@ size = Vector2(39, 355)
 size = Vector2(650, 45)
 
 [sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_h8pkk"]
-properties/0/path = NodePath("spawnedtoy:position")
-properties/0/spawn = true
-properties/0/replication_mode = 1
 
 [node name="Main" type="Control"]
 layout_mode = 3
@@ -108,15 +104,11 @@ script = ExtResource("6_jvykx")
 
 [node name="MultiplayerSpawner" type="MultiplayerSpawner" parent="SyncObjects"]
 _spawnable_scenes = PackedStringArray("res://mulitplayerspawntoy.tscn")
-spawn_path = NodePath("..")
+spawn_path = NodePath("../SpawnedObjects")
 
 [node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="SyncObjects"]
+root_path = NodePath("../SpawnedObjects")
 delta_interval = 3.0
 replication_config = SubResource("SceneReplicationConfig_h8pkk")
 
-[node name="spawnedtoy" parent="SyncObjects" instance=ExtResource("7_at015")]
-position = Vector2(108, 348)
-
 [node name="SpawnedObjects" type="Node2D" parent="SyncObjects"]
-
-[connection signal="mouse_entered" from="SyncObjects/spawnedtoy" to="SyncObjects" method="_on_spawnedtoy_mouse_entered"]
