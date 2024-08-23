@@ -234,8 +234,11 @@ func setnetworkoff():
 func _data_channel_received(channel: Object):
 	print("_data_channel_received ", channel)
 
-
-
+func set_vox_on():
+	$PlayerConnections/HBoxMain/VBoxContainer/RecordingFeature/Vox.button_pressed = true
+	var voxthreshold = 0.09
+	$PlayerConnections/HBoxMain/VBoxContainer/RecordingFeature.voxthreshhold = voxthreshold
+	$PlayerConnections/HBoxMain/VBoxContainer/RecordingFeature/VoxThreshold.material.set_shader_parameter("voxthreshhold", voxthreshold)
 
 
 
