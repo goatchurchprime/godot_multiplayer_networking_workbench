@@ -1,13 +1,29 @@
-[gd_scene load_steps=14 format=3 uid="uid://denbhipr26x6c"]
+[gd_scene load_steps=19 format=3 uid="uid://denbhipr26x6c"]
 
 [ext_resource type="Script" path="res://addons/player-networking/PlayerFrameLocal.gd" id="1"]
 [ext_resource type="PackedScene" uid="uid://dhd8tliyhvtiw" path="res://controlplayer.tscn" id="2"]
+[ext_resource type="Texture2D" uid="uid://cylf2rhw3gp0e" path="res://moonlow/_albedo.png" id="2_ycy4d"]
 [ext_resource type="PackedScene" uid="uid://cfmoahalri06d" path="res://addons/player-networking/NetworkGateway.tscn" id="3"]
+[ext_resource type="Texture2D" uid="uid://baeyk5co8xxrj" path="res://moonlow/_normal.png" id="3_1a6vp"]
 [ext_resource type="Script" path="res://JoystickControls.gd" id="4"]
 [ext_resource type="Script" path="res://PingPongBall.gd" id="5"]
 [ext_resource type="Script" path="res://syncobjects.gd" id="6_jvykx"]
 
 [sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_is50g"]
+
+[sub_resource type="CanvasTexture" id="CanvasTexture_t3x1q"]
+diffuse_texture = ExtResource("2_ycy4d")
+normal_texture = ExtResource("3_1a6vp")
+specular_shininess = 0.0
+
+[sub_resource type="Gradient" id="Gradient_y7cr2"]
+offsets = PackedFloat32Array(0, 0.68, 1)
+colors = PackedColorArray(1, 1, 1, 1, 0.177143, 0.177143, 0.177143, 1, 0, 0, 0, 1)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_oom8b"]
+gradient = SubResource("Gradient_y7cr2")
+fill = 1
+fill_from = Vector2(0.5, 0.5)
 
 [sub_resource type="QuadMesh" id="QuadMesh_kmsub"]
 size = Vector2(600, 350)
@@ -51,7 +67,25 @@ localplayerscene = "res://controlplayer.tscn"
 material = SubResource("CanvasItemMaterial_is50g")
 position = Vector2(0, 400)
 
+[node name="Sprite2D" type="Sprite2D" parent="JoystickControls"]
+modulate = Color(0.592157, 0.592157, 0.592157, 1)
+texture_repeat = 2
+position = Vector2(0, 200)
+texture = SubResource("CanvasTexture_t3x1q")
+offset = Vector2(330, 0)
+region_enabled = true
+region_rect = Rect2(0, 0, 600, 400)
+
+[node name="PointLight2D" type="PointLight2D" parent="JoystickControls"]
+position = Vector2(529, 219)
+scale = Vector2(2.14062, 2)
+color = Color(0.435294, 1, 1, 1)
+energy = 1.24
+texture = SubResource("GradientTexture2D_oom8b")
+texture_scale = 1.74
+
 [node name="MeshInstance2D" type="MeshInstance2D" parent="JoystickControls"]
+visible = false
 modulate = Color(0.0465795, 0.421923, 0.421454, 1)
 position = Vector2(330, 180)
 mesh = SubResource("QuadMesh_kmsub")

@@ -66,7 +66,7 @@ func spawnnexttoy(gpos):
 	xx += 1
 	h.global_position = gpos
 #	h.mouse_entered.connect(mouseenter.bind(h))
-	h.mouse_exited.connect(mouseexit.bind(h))
+#	h.mouse_exited.connect(mouseexit.bind(h))
 	return
 
 func _input(event):
