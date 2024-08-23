@@ -1,4 +1,4 @@
-[gd_scene load_steps=19 format=3 uid="uid://denbhipr26x6c"]
+[gd_scene load_steps=14 format=3 uid="uid://denbhipr26x6c"]
 
 [ext_resource type="Script" path="res://addons/player-networking/PlayerFrameLocal.gd" id="1"]
 [ext_resource type="Script" path="res://quickoptionsmenu.gd" id="1_8ecn3"]
@@ -6,7 +6,6 @@
 [ext_resource type="Texture2D" uid="uid://cylf2rhw3gp0e" path="res://moonlow/_albedo.png" id="2_ycy4d"]
 [ext_resource type="PackedScene" uid="uid://cfmoahalri06d" path="res://addons/player-networking/NetworkGateway.tscn" id="3"]
 [ext_resource type="Texture2D" uid="uid://baeyk5co8xxrj" path="res://moonlow/_normal.png" id="3_1a6vp"]
-[ext_resource type="Script" path="res://PingPongBall.gd" id="5"]
 [ext_resource type="Script" path="res://syncobjects.gd" id="6_jvykx"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_31q8f"]
@@ -28,18 +27,6 @@ gradient = SubResource("Gradient_y7cr2")
 fill = 1
 fill_from = Vector2(0.5, 0.5)
 
-[sub_resource type="SphereMesh" id="1"]
-radius = 10.0
-height = 20.0
-
-[sub_resource type="CircleShape2D" id="2"]
-
-[sub_resource type="RectangleShape2D" id="3"]
-size = Vector2(39, 355)
-
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_t1n4l"]
-size = Vector2(650, 45)
-
 [sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_h8pkk"]
 
 [node name="Main" type="Control"]
@@ -55,6 +42,7 @@ mouse_default_cursor_shape = 3
 metadata/_edit_use_anchors_ = true
 
 [node name="QuickOptions" type="HBoxContainer" parent="."]
+z_index = 1000
 layout_mode = 0
 offset_right = 40.0
 offset_bottom = 40.0
@@ -91,6 +79,7 @@ prefix = "playercount"
 
 [node name="NetworkGateway" parent="." instance=ExtResource("3")]
 visible = false
+z_index = 1000
 layout_mode = 0
 offset_left = 4.0
 offset_top = 44.0
@@ -104,12 +93,12 @@ position = Vector2(0, 400)
 
 [node name="Sprite2D" type="Sprite2D" parent="JoystickControls"]
 modulate = Color(0.592157, 0.592157, 0.592157, 1)
+z_index = -100
 texture_repeat = 2
-position = Vector2(0, 200)
 texture = SubResource("CanvasTexture_t3x1q")
 offset = Vector2(330, 0)
 region_enabled = true
-region_rect = Rect2(0, 0, 600, 400)
+region_rect = Rect2(-678.5, -457.143, 1799.36, 1518.75)
 
 [node name="PointLight2D" type="PointLight2D" parent="JoystickControls"]
 position = Vector2(529, 219)
@@ -118,37 +107,6 @@ color = Color(0.435294, 1, 1, 1)
 energy = 1.24
 texture = SubResource("GradientTexture2D_oom8b")
 texture_scale = 1.74
-
-[node name="PingPongBall" type="CharacterBody2D" parent="JoystickControls"]
-position = Vector2(100, 100)
-script = ExtResource("5")
-
-[node name="MeshInstance2D" type="MeshInstance2D" parent="JoystickControls/PingPongBall"]
-mesh = SubResource("1")
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="JoystickControls/PingPongBall"]
-shape = SubResource("2")
-
-[node name="StaticBody2D" type="StaticBody2D" parent="JoystickControls"]
-position = Vector2(0, 175)
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="JoystickControls/StaticBody2D"]
-position = Vector2(13, 0)
-shape = SubResource("3")
-
-[node name="StaticBody2D2" type="StaticBody2D" parent="JoystickControls"]
-position = Vector2(567, 184)
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="JoystickControls/StaticBody2D2"]
-position = Vector2(66.5, -5.5)
-shape = SubResource("3")
-
-[node name="StaticBody2D3" type="StaticBody2D" parent="JoystickControls"]
-position = Vector2(250, 360)
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="JoystickControls/StaticBody2D3"]
-position = Vector2(66.5, -5.5)
-shape = SubResource("RectangleShape2D_t1n4l")
 
 [node name="Players" type="Node2D" parent="."]
 position = Vector2(0, 400)
