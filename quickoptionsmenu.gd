@@ -4,6 +4,9 @@ extends HBoxContainer
 
 func _ready():
 	$ShowNetworkGateway.set_pressed_no_signal(NetworkGateway.visible)
+	if OS.has_feature("Server"):
+		await get_tree().create_timer(1.5).timeout
+		NetworkGateway.selectandtrigger_networkoption(NetworkGateway.NETWORK_OPTIONS.AS_SERVER)
 	
 func _on_show_network_gateway_toggled(toggled_on):
 	NetworkGateway.visible = toggled_on
