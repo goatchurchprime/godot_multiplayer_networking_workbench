@@ -1,6 +1,7 @@
-[gd_scene load_steps=19 format=3 uid="uid://denbhipr26x6c"]
+[gd_scene load_steps=21 format=3 uid="uid://denbhipr26x6c"]
 
 [ext_resource type="Script" path="res://addons/player-networking/PlayerFrameLocal.gd" id="1"]
+[ext_resource type="Script" path="res://quickoptionsmenu.gd" id="1_8ecn3"]
 [ext_resource type="PackedScene" uid="uid://dhd8tliyhvtiw" path="res://controlplayer.tscn" id="2"]
 [ext_resource type="Texture2D" uid="uid://cylf2rhw3gp0e" path="res://moonlow/_albedo.png" id="2_ycy4d"]
 [ext_resource type="PackedScene" uid="uid://cfmoahalri06d" path="res://addons/player-networking/NetworkGateway.tscn" id="3"]
@@ -8,6 +9,9 @@
 [ext_resource type="Script" path="res://JoystickControls.gd" id="4"]
 [ext_resource type="Script" path="res://PingPongBall.gd" id="5"]
 [ext_resource type="Script" path="res://syncobjects.gd" id="6_jvykx"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_31q8f"]
+bg_color = Color(0.6, 0.6, 0.0588235, 1)
 
 [sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_is50g"]
 
@@ -46,21 +50,55 @@ size = Vector2(650, 45)
 layout_mode = 3
 anchor_right = 0.761571
 anchor_bottom = 1.3
-offset_top = -49.0
 offset_right = 138.9
-offset_bottom = -236.0
+offset_bottom = -187.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 mouse_default_cursor_shape = 3
 metadata/_edit_use_anchors_ = true
 
+[node name="QuickOptions" type="HBoxContainer" parent="."]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+script = ExtResource("1_8ecn3")
+
+[node name="ShowNetworkGateway" type="Button" parent="QuickOptions"]
+layout_mode = 2
+toggle_mode = true
+text = "Show Networkgateway
+"
+
+[node name="VSeparator" type="VSeparator" parent="QuickOptions"]
+layout_mode = 2
+
+[node name="Connect" type="Button" parent="QuickOptions"]
+layout_mode = 2
+theme_override_styles/pressed = SubResource("StyleBoxFlat_31q8f")
+toggle_mode = true
+text = "Connect"
+
+[node name="VSeparator2" type="VSeparator" parent="QuickOptions"]
+layout_mode = 2
+
+[node name="Roomname" type="LineEdit" parent="QuickOptions"]
+layout_mode = 2
+text = "lettuce"
+
+[node name="VSeparator3" type="VSeparator" parent="QuickOptions"]
+layout_mode = 2
+
+[node name="PlayerCount" type="SpinBox" parent="QuickOptions"]
+layout_mode = 2
+prefix = "playercount"
+
 [node name="NetworkGateway" parent="." instance=ExtResource("3")]
 layout_mode = 0
 offset_left = 4.0
-offset_top = 51.0
+offset_top = 44.0
 offset_right = 663.0
-offset_bottom = 430.0
+offset_bottom = 423.0
 localplayerscene = "res://controlplayer.tscn"
 
 [node name="JoystickControls" type="Node2D" parent="."]
@@ -109,7 +147,7 @@ position = Vector2(13, 0)
 shape = SubResource("3")
 
 [node name="StaticBody2D2" type="StaticBody2D" parent="JoystickControls"]
-position = Vector2(555, 175)
+position = Vector2(567, 184)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="JoystickControls/StaticBody2D2"]
 position = Vector2(66.5, -5.5)
@@ -146,3 +184,6 @@ delta_interval = 3.0
 replication_config = SubResource("SceneReplicationConfig_h8pkk")
 
 [node name="SpawnedObjects" type="Node2D" parent="SyncObjects"]
+
+[connection signal="toggled" from="QuickOptions/ShowNetworkGateway" to="QuickOptions" method="_on_show_network_gateway_toggled"]
+[connection signal="toggled" from="QuickOptions/Connect" to="QuickOptions" method="_on_connect_toggled"]

@@ -866,19 +866,6 @@ layout_mode = 2
 theme_override_fonts/font = SubResource("FontVariation_8pqve")
 text = "0.1"
 
-[node name="Control" type="Control" parent="."]
-layout_mode = 1
-anchor_right = 0.089
-offset_right = -17.672
-offset_bottom = 40.0
-
-[node name="HBoxContainer" type="HBoxContainer" parent="Control"]
-layout_mode = 0
-offset_right = 40.0
-offset_bottom = 40.0
-
-[node name="AudioStreamPlayer3D" type="AudioStreamPlayer3D" parent="Control"]
-
 [connection signal="gui_input" from="." to="." method="_on_gui_input"]
 [connection signal="item_selected" from="ProtocolOptions" to="." method="_on_ProtocolOptions_item_selected"]
 [connection signal="item_selected" from="NetworkOptions" to="." method="_on_NetworkOptions_item_selected"]

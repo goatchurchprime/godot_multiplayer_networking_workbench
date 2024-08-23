@@ -76,6 +76,3 @@ func server_packet_received(id, v):
 		var peerconnection = multiplayer.multiplayer_peer.get_peer(id)
 		peerconnection["connection"].add_ice_candidate(v["mid_name"], v["index_name"], v["sdp_name"])
 		PlayerConnections.connectionlog("receive ice_candidate %s" %id)
-
-
-

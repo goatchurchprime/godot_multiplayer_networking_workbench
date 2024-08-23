@@ -35,7 +35,6 @@ const errordecodes = { ERR_ALREADY_IN_USE:"ERR_ALREADY_IN_USE",
 					   ERR_CANT_CREATE:"ERR_CANT_CREATE"
 					 }
 var rng = RandomNumberGenerator.new()
-
 	
 func _ready():
 	for rs in remoteservers:

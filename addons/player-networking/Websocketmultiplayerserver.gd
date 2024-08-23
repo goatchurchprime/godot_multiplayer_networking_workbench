@@ -25,5 +25,3 @@ func _on_StartWebSocketmultiplayer_toggled(button_pressed):
 	else:
 		PlayerConnections._server_disconnected()
 		
-
-
