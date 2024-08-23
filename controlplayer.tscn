@@ -1,40 +1,54 @@
-[gd_scene load_steps=4 format=3 uid="uid://dhd8tliyhvtiw"]
+[gd_scene load_steps=7 format=3 uid="uid://dhd8tliyhvtiw"]
 
 [ext_resource type="Script" path="res://controlplayer.gd" id="1"]
 [ext_resource type="Texture2D" uid="uid://b3ueu15i4oe2k" path="res://addons/player-networking/AudioStreamPlayer3D.svg" id="2_6jomj"]
 
-[sub_resource type="RectangleShape2D" id="1"]
-size = Vector2(130, 14)
+[sub_resource type="Gradient" id="Gradient_s8w0r"]
+interpolation_mode = 2
+offsets = PackedFloat32Array(0.0114286, 0.331429, 0.651429, 1)
+colors = PackedColorArray(0, 0, 0, 1, 0.902003, 0.902003, 0.902003, 1, 0.658823, 0.658823, 0.658823, 1, 0, 0, 0, 1)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_d3mp1"]
+gradient = SubResource("Gradient_s8w0r")
+fill = 2
+fill_from = Vector2(0.5, 0.5)
+
+[sub_resource type="Gradient" id="Gradient_y7cr2"]
+offsets = PackedFloat32Array(0, 0.645714, 1)
+colors = PackedColorArray(1, 1, 1, 1, 0.177143, 0.177143, 0.177143, 1, 0, 0, 0, 1)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_q2e3x"]
+gradient = SubResource("Gradient_y7cr2")
+fill = 1
+fill_from = Vector2(0.5, 0.5)
 
 [node name="RemotePlayer" type="Node2D"]
 script = ExtResource("1")
 
-[node name="ColorRect" type="ColorRect" parent="."]
-custom_minimum_size = Vector2(130, 14)
-offset_left = -65.0
-offset_top = -7.0
-offset_right = 65.0
-offset_bottom = 7.0
-color = Color(0.87451, 0.101961, 0.101961, 1)
+[node name="Sprite2D" type="Sprite2D" parent="."]
+modulate = Color(0.490196, 0.352941, 1, 1)
+scale = Vector2(0.2, 0.2)
+texture = SubResource("GradientTexture2D_d3mp1")
 
-[node name="Label" type="Label" parent="ColorRect"]
+[node name="Label" type="Label" parent="."]
 custom_minimum_size = Vector2(130, 14)
-layout_mode = 0
-offset_left = 3.0
-offset_top = -6.0
-offset_right = 133.0
-offset_bottom = 20.0
+offset_left = -62.0
+offset_top = -35.0
+offset_right = 68.0
+offset_bottom = -9.0
 theme_override_colors/font_color = Color(0.956863, 0.968627, 0.956863, 1)
 text = "Remoteplayer"
-
-[node name="CharacterBody2D" type="CharacterBody2D" parent="."]
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="CharacterBody2D"]
-shape = SubResource("1")
+horizontal_alignment = 1
 
 [node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="."]
 
 [node name="SpeakingIcon" type="Sprite2D" parent="."]
-visible = false
-position = Vector2(-57, -16)
+position = Vector2(1, 16)
 texture = ExtResource("2_6jomj")
+
+[node name="PointLight2D" type="PointLight2D" parent="."]
+scale = Vector2(1.2, 1.2)
+color = Color(0.435294, 1, 1, 1)
+energy = 1.24
+texture = SubResource("GradientTexture2D_q2e3x")
+texture_scale = 1.74

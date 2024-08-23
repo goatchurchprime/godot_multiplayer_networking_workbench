@@ -1,4 +1,4 @@
-[gd_scene load_steps=14 format=3 uid="uid://denbhipr26x6c"]
+[gd_scene load_steps=11 format=3 uid="uid://denbhipr26x6c"]
 
 [ext_resource type="Script" path="res://addons/player-networking/PlayerFrameLocal.gd" id="1"]
 [ext_resource type="Script" path="res://quickoptionsmenu.gd" id="1_8ecn3"]
@@ -11,21 +11,10 @@
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_31q8f"]
 bg_color = Color(0.6, 0.6, 0.0588235, 1)
 
-[sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_is50g"]
-
 [sub_resource type="CanvasTexture" id="CanvasTexture_t3x1q"]
 diffuse_texture = ExtResource("2_ycy4d")
 normal_texture = ExtResource("3_1a6vp")
 specular_shininess = 0.0
-
-[sub_resource type="Gradient" id="Gradient_y7cr2"]
-offsets = PackedFloat32Array(0, 0.68, 1)
-colors = PackedColorArray(1, 1, 1, 1, 0.177143, 0.177143, 0.177143, 1, 0, 0, 0, 1)
-
-[sub_resource type="GradientTexture2D" id="GradientTexture2D_oom8b"]
-gradient = SubResource("Gradient_y7cr2")
-fill = 1
-fill_from = Vector2(0.5, 0.5)
 
 [sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_h8pkk"]
 
@@ -87,26 +76,14 @@ offset_right = 663.0
 offset_bottom = 423.0
 localplayerscene = "res://controlplayer.tscn"
 
-[node name="JoystickControls" type="Node2D" parent="."]
-material = SubResource("CanvasItemMaterial_is50g")
-position = Vector2(0, 400)
-
-[node name="Sprite2D" type="Sprite2D" parent="JoystickControls"]
+[node name="Background" type="Sprite2D" parent="."]
 modulate = Color(0.592157, 0.592157, 0.592157, 1)
 z_index = -100
 texture_repeat = 2
+position = Vector2(300, 400)
 texture = SubResource("CanvasTexture_t3x1q")
-offset = Vector2(330, 0)
 region_enabled = true
-region_rect = Rect2(-678.5, -457.143, 1799.36, 1518.75)
-
-[node name="PointLight2D" type="PointLight2D" parent="JoystickControls"]
-position = Vector2(529, 219)
-scale = Vector2(2.14062, 2)
-color = Color(0.435294, 1, 1, 1)
-energy = 1.24
-texture = SubResource("GradientTexture2D_oom8b")
-texture_scale = 1.74
+region_rect = Rect2(0, 0, 1800, 1500)
 
 [node name="Players" type="Node2D" parent="."]
 position = Vector2(0, 400)
