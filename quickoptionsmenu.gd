@@ -17,4 +17,4 @@ func _on_connect_toggled(toggled_on):
 		NetworkGateway.selectandtrigger_networkoption(NetworkGateway.NETWORK_OPTIONS.NETWORK_OFF)
 
 func _process(delta):
-	$PlayerCount.value = NetworkGateway.get_node("PlayerConnections").Dconnectedplayerscount
+	$PlayerCount.value = NetworkGateway.Dconnectedplayerscount

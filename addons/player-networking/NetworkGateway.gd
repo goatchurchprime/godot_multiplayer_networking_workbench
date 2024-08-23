@@ -11,6 +11,7 @@ extends Panel
 @export var remoteservers = [ "127.0.0.1" ]
 @export var playersnodepath : NodePath = "/root/Main/Players"
 @export var localplayerscene : String = "" # "res://controlplayer.tscn"
+var Dconnectedplayerscount = 0
 
 enum NETWORK_PROTOCOL { ENET = 0, 
 						WEBSOCKET = 1,

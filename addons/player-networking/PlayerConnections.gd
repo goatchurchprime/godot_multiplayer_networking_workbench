@@ -20,8 +20,6 @@ var deferred_playerconnections = null
 # player node to remove
 var remote_players_idstonodenames = { }
 
-var Dconnectedplayerscount = 0
-
 @onready var NetworkGateway = get_node("..")
 @onready var PlayersNode = get_node(NetworkGateway.playersnodepath)
 @onready var PlayerList = $HBoxMain/VBoxContainer/HBox_players/PlayerList
@@ -95,8 +93,8 @@ func _connected_to_server():
 	connectionlog("_my networkid=%d\n" % LocalPlayer.get_node("PlayerFrame").networkID)
 	print("my playerid=", LocalPlayer.get_node("PlayerFrame").networkID)
 	LocalPlayer.PF_connectedtoserver()
-	Dconnectedplayerscount += 1  
-	assert (Dconnectedplayerscount == 1)
+	NetworkGateway.Dconnectedplayerscount += 1  
+	assert (NetworkGateway.Dconnectedplayerscount == 1)
 
 	# act on the prematurely received _peer_connected signals
 	if deferred_playerconnections != null:
@@ -114,8 +112,8 @@ func _connection_failed():
 func _server_disconnected():
 	deferred_playerconnections = null
 	if (multiplayer.multiplayer_peer is OfflineMultiplayerPeer):
-		Dconnectedplayerscount -= 1
-		assert (Dconnectedplayerscount == 0)
+		NetworkGateway.Dconnectedplayerscount -= 1
+		assert (NetworkGateway.Dconnectedplayerscount == 0)
 		return
 	var serverisself = multiplayer.is_server()
 	connectionlog("_server(self) disconnect\n" if serverisself else "_server disconnect\n")
@@ -127,9 +125,9 @@ func _server_disconnected():
 	LocalPlayer.set_name("R%d" % LocalPlayer.get_node("PlayerFrame").networkID) 
 	for id in remote_players_idstonodenames.duplicate():
 		_peer_disconnected(id)
-	prints("svedisconnected ", Dconnectedplayerscount, multiplayer.get_unique_id())
-	Dconnectedplayerscount -= 1
-	assert (Dconnectedplayerscount == 0)
+	prints("svedisconnected ", NetworkGateway.Dconnectedplayerscount, multiplayer.get_unique_id())
+	NetworkGateway.Dconnectedplayerscount -= 1
+	assert (NetworkGateway.Dconnectedplayerscount == 0)
 	print("*** _server_disconnected ", LocalPlayer.get_node("PlayerFrame").networkID)
 	updateplayerlist()
 	if NetworkGateway.get_node("ProtocolOptions").selected == NetworkGateway.NETWORK_PROTOCOL.ENET:
@@ -157,8 +155,8 @@ func _peer_connected(id):
 		deferred_playerconnections.push_back(id)
 		connectionlog("_add playerid %d (defer)\n" % id)
 		return
-	assert (Dconnectedplayerscount >= 1)
-	Dconnectedplayerscount += 1
+	assert (NetworkGateway.Dconnectedplayerscount >= 1)
+	NetworkGateway.Dconnectedplayerscount += 1
 	connectionlog("_add playerid %d\n" % id)
 	var serverisself = multiplayer.is_server()
 	assert (LocalPlayer.get_node("PlayerFrame").networkID >= 1)
@@ -173,9 +171,9 @@ func _peer_connected(id):
 
 func _peer_disconnected(id):
 	connectionlog("_remove playerid %d\n" % id)
-	prints("hhhh ", Dconnectedplayerscount, id, multiplayer.get_unique_id())
-	Dconnectedplayerscount -= 1
-	assert (Dconnectedplayerscount >= 1)
+	prints("hhhh ", NetworkGateway.Dconnectedplayerscount, id, multiplayer.get_unique_id())
+	NetworkGateway.Dconnectedplayerscount -= 1
+	assert (NetworkGateway.Dconnectedplayerscount >= 1)
 	assert (remote_players_idstonodenames.has(id))
 	var remoteplayernodename = remote_players_idstonodenames[id]
 	remote_players_idstonodenames.erase(id)
