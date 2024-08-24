@@ -36,9 +36,9 @@ func mouseexit(mousetoy):
 			currentmousetoy.get_node("MouseIn").visible = false
 			currentmousetoy = null
 
-func interactcurrenttoy(pressed):
+func interactcurrenttoy(pressed, gpos):
 	if pressed and relmouse == null and currentmousetoy != null:
-		relmouse = get_global_mouse_position() - currentmousetoy.get_global_position()
+		relmouse = gpos - currentmousetoy.get_global_position()
 		if currentmousetoy.z_index < topzindex:
 			topzindex += 1
 			currentmousetoy.z_index = topzindex
@@ -87,7 +87,7 @@ func _input(event):
 		spawnnexttoy(get_global_mouse_position())
 
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
-		interactcurrenttoy(event.pressed)
+		interactcurrenttoy(event.pressed, event.global_position)
 		#get_viewport().set_input_as_handled()
 	if event is InputEventMouseMotion:
 		motioncurrenttoy(event.global_position)

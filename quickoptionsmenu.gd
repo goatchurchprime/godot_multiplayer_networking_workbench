@@ -3,6 +3,7 @@ extends HBoxContainer
 @onready var NetworkGateway = $"../NetworkGateway"
 
 func _ready():
+	set_as_top_level(true)
 	$ShowNetworkGateway.set_pressed_no_signal(NetworkGateway.visible)
 	if OS.has_feature("Server"):
 		await get_tree().create_timer(1.5).timeout
@@ -41,7 +42,7 @@ func _on_cc_button_toggled(toggled_on):
 
 func _process(delta):
 	$PlayerCount.value = NetworkGateway.Dconnectedplayerscount
-
+	#print(get_viewport().canvas_transform.origin, get_viewport().global_canvas_transform.origin)
 
 func _on_new_card_pressed():
 	var multiplayerauthority = get_node("../SyncObjects/MultiplayerSpawner")

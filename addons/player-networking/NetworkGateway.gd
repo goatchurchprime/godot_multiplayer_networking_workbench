@@ -9,7 +9,7 @@ extends Panel
 # make a new timeline visualizer that shows the jitter of the recent incoming packets
 
 @export var remoteservers = [ "127.0.0.1" ]
-@export var playersnodepath : NodePath = "/root/Main/Players"
+@export var playersnodepath : NodePath = ""
 @export var localplayerscene : String = "" # "res://controlplayer.tscn"
 var Dconnectedplayerscount = 0
 

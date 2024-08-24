@@ -5,6 +5,9 @@ var batvelocity = 200
 var clientawaitingspawnpoint = false
 var nextframeisfirst = false
 
+var minmouseposition = Vector2(300 - 1800/2, 400 - 1500/2)
+var maxmouseposition = Vector2(300 + 1800/2, 400 + 1500/2)
+
 # The PF_functions are called by the PlayerConnections object and the 
 # PlayerFrame node which is a child of this player node and handles 
 # the rpc calls between the players in the network
@@ -79,7 +82,7 @@ func PF_processlocalavatarposition(delta):
 	if clientawaitingspawnpoint:
 		return false
 
-	global_position = get_global_mouse_position().clamp(Vector2(0,0), get_window().get_size())
+	global_position = get_global_mouse_position().clamp(minmouseposition, maxmouseposition)
 	
 	var vec = Vector2((-1 if Input.is_action_pressed("ui_left") else 0) + (1 if Input.is_action_pressed("ui_right") else 0), 
 						(-1 if Input.is_action_pressed("ui_up") else 0) + (1 if Input.is_action_pressed("ui_down") else 0))

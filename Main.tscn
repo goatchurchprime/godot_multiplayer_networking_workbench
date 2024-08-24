@@ -20,8 +20,8 @@ specular_shininess = 0.0
 layout_mode = 3
 anchor_right = 0.761571
 anchor_bottom = 1.3
-offset_right = 138.9
-offset_bottom = -187.0
+offset_right = -533.1
+offset_bottom = -1040.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
@@ -86,7 +86,6 @@ offset_left = 4.0
 offset_top = 44.0
 offset_right = 663.0
 offset_bottom = 423.0
-localplayerscene = "res://controlplayer.tscn"
 
 [node name="Background" type="Sprite2D" parent="."]
 modulate = Color(0.592157, 0.592157, 0.592157, 1)
@@ -106,6 +105,15 @@ position = Vector2(95, 40)
 [node name="PlayerFrame" type="Node" parent="Players/LocalPlayer"]
 script = ExtResource("1")
 
+[node name="Camera2D" type="Camera2D" parent="Players/LocalPlayer"]
+position_smoothing_enabled = true
+drag_horizontal_enabled = true
+drag_vertical_enabled = true
+drag_left_margin = 0.8
+drag_top_margin = 0.8
+drag_right_margin = 0.8
+drag_bottom_margin = 0.8
+
 [node name="SyncObjects" type="Node2D" parent="."]
 z_index = 1
 script = ExtResource("6_jvykx")
@@ -115,6 +123,23 @@ _spawnable_scenes = PackedStringArray("res://mulitplayerspawntoy.tscn")
 spawn_path = NodePath("../SpawnedObjects")
 
 [node name="SpawnedObjects" type="Node2D" parent="SyncObjects"]
+
+[node name="SubViewportContainer" type="SubViewportContainer" parent="."]
+layout_mode = 0
+offset_top = 90.0
+offset_right = 100.0
+offset_bottom = 140.0
+stretch = true
+
+[node name="SubViewport" type="SubViewport" parent="SubViewportContainer"]
+handle_input_locally = false
+size = Vector2i(100, 50)
+render_target_update_mode = 4
+
+[node name="Button" type="Button" parent="SubViewportContainer/SubViewport"]
+offset_right = 8.0
+offset_bottom = 8.0
+text = "rtertert"
 
 [connection signal="toggled" from="QuickOptions/ShowNetworkGateway" to="QuickOptions" method="_on_show_network_gateway_toggled"]
 [connection signal="toggled" from="QuickOptions/Connect" to="QuickOptions" method="_on_connect_toggled"]
