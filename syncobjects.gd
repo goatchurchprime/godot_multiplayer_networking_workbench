@@ -9,8 +9,10 @@ var spawntoyscene = load("res://mulitplayerspawntoy.tscn")
 # The MultiplayerSynchronizer synchronizes in the direction of the authority to the peers
 func _ready():
 	Input.set_default_cursor_shape(Input.CURSOR_CROSS)
-	$MultiplayerSpawner.set_spawn_function(spawnthistoy)
+	$MultiplayerSpawner.set_spawn_function(spawnfunction)
+	$MultiplayerSpawner.rpc_config("spawn", {"call_local":true, "rpc_mode":MultiplayerAPI.RPC_MODE_ANY_PEER})
 	spawnnexttoy(Vector2i(300, 700))
+
 
 var currentmousetoy = null
 var relmouse = null
@@ -50,22 +52,27 @@ func motioncurrenttoy(gpos):
 	if currentmousetoy != null and relmouse != null:
 		currentmousetoy.global_position = gpos - relmouse
 
-func spawnthistoy(data):
-	print(" -- spawnthistoy ", data, multiplayer.get_unique_id(), " ", multiplayer.is_server())
+var xx = 0
+var letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+func spawnfunction(data):
+	print(" -- spawnfunction ", data, multiplayer.get_unique_id(), " ", multiplayer.is_server())
 	var k = spawntoyscene.instantiate()
-	k.get_node("Label").text = data["letter"]
+	if data.has("letter"):
+		k.get_node("Label").text = data["letter"]
+	else:
+		k.get_node("Label").text = letters[xx]
+		xx += 1
+	k.global_position = data["gpos"]
 	k.get_node("MultiplayerSynchronizer").rpc_config("set_multiplayer_authority", {"call_local":true, "rpc_mode":MultiplayerAPI.RPC_MODE_ANY_PEER})
 	return k
 
-var xx = 0
-var letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 func spawnnexttoy(gpos):
-	print("  ;spawnnexttoy ", gpos, " ", letters[xx], " ", $MultiplayerSpawner.get_spawn_function())
-	var h = $MultiplayerSpawner.spawn({"letter":letters[xx]})
+	print("  ;spawnnexttoy ", gpos, " ", letters[xx], " ", $MultiplayerSpawner.get_spawn_function(), " ", multiplayer.is_server(), "  ", $MultiplayerSpawner.get_multiplayer_authority())
+	var hh = $MultiplayerSpawner.rpc_id($MultiplayerSpawner.get_multiplayer_authority(), "spawn", {"letter":letters[xx], "gpos":gpos})
+	#var hh = $MultiplayerSpawner.spawn({"letter":letters[xx], "gpos":gpos})
+	print(" spawnnexttoy ", hh)
 	xx += 1
-	h.global_position = gpos
-#	h.mouse_entered.connect(mouseenter.bind(h))
-#	h.mouse_exited.connect(mouseexit.bind(h))
+	#hh.global_position = gpos
 	return
 
 func _input(event):
