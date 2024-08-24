@@ -52,5 +52,6 @@ offset_bottom = 38.0
 mouse_filter = 2
 color = Color(1, 1, 0.027451, 1)
 
+[connection signal="body_entered" from="." to="." method="_on_body_entered"]
 [connection signal="mouse_entered" from="." to="." method="mouseentered"]
 [connection signal="mouse_exited" from="." to="." method="mouseexited"]

@@ -21,7 +21,7 @@ var deferred_playerconnections = null
 var remote_players_idstonodenames = { }
 
 @onready var NetworkGateway = get_node("..")
-@onready var PlayersNode = get_node(NetworkGateway.playersnodepath)
+@onready var PlayersNode = NetworkGateway.get_node(NetworkGateway.playersnodepath)
 @onready var PlayerList = $HBoxMain/VBoxContainer/HBox_players/PlayerList
 
 func _ready():

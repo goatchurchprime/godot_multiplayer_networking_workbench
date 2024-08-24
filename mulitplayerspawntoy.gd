@@ -5,3 +5,7 @@ func mouseentered():
 	
 func mouseexited():
 	get_node("../..").mouseexit(self)
+
+
+func _on_body_entered(body):
+	print(" _on_body_entered ", body)

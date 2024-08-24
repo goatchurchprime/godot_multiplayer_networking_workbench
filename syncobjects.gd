@@ -87,8 +87,15 @@ func _input(event):
 		spawnnexttoy(get_global_mouse_position())
 
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
+		var pp = get_node("../Players").get_child(0)
+		print("ppp ", pp, pp.get_overlapping_areas(), pp.get_overlapping_bodies())
+		var pq = pp.get_overlapping_bodies()
+		if len(pq) != 0:
+			currentmousetoy = pq[0]
+
 		interactcurrenttoy(event.pressed, event.global_position)
 		#get_viewport().set_input_as_handled()
+
 	if event is InputEventMouseMotion:
 		motioncurrenttoy(event.global_position)
 	

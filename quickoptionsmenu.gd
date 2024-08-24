@@ -2,12 +2,15 @@ extends HBoxContainer
 
 @onready var NetworkGateway = $"../NetworkGateway"
 
+# Need to find how to map the clicks from the mouse to the window
+
 func _ready():
 	set_as_top_level(true)
 	$ShowNetworkGateway.set_pressed_no_signal(NetworkGateway.visible)
 	if OS.has_feature("Server"):
 		await get_tree().create_timer(1.5).timeout
 		NetworkGateway.selectandtrigger_networkoption(NetworkGateway.NETWORK_OPTIONS.AS_SERVER)
+	get_node("../SubViewportContainer/SubViewport").size = get_window().size
 	
 func _on_show_network_gateway_toggled(toggled_on):
 	NetworkGateway.visible = toggled_on
@@ -45,8 +48,9 @@ func _process(delta):
 	#print(get_viewport().canvas_transform.origin, get_viewport().global_canvas_transform.origin)
 
 func _on_new_card_pressed():
-	var multiplayerauthority = get_node("../SyncObjects/MultiplayerSpawner")
+	var multiplayerauthority = NetworkGateway.get_node(NetworkGateway.playersnodepath).get_node("../SyncObjects/MultiplayerSpawner")
 	var data = { }
-	data["gpos"] = get_global_mouse_position() + Vector2(0,80)
+	var jj = get_node("../SubViewportContainer/SubViewport").canvas_transform.affine_inverse()
+	data["gpos"] = jj*get_global_mouse_position() + Vector2(0,80)
 	var sid = multiplayerauthority.get_multiplayer_authority()
 	multiplayerauthority.rpc_id(sid, "spawn", data)
