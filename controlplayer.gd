@@ -79,7 +79,6 @@ func PF_processlocalavatarposition(delta):
 	if clientawaitingspawnpoint:
 		return false
 
-	print("ggg ", get_global_mouse_position(), get_window().get_size())
 	global_position = get_global_mouse_position().clamp(Vector2(0,0), get_window().get_size())
 	
 	var vec = Vector2((-1 if Input.is_action_pressed("ui_left") else 0) + (1 if Input.is_action_pressed("ui_right") else 0), 

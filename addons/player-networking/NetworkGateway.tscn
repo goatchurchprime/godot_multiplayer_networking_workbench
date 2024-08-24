@@ -181,7 +181,6 @@ pivot_offset = Vector2(103.791, -1.38985)
 text = "Connection:"
 
 [node name="UDPipdiscovery" type="ColorRect" parent="."]
-visible = false
 layout_mode = 0
 offset_left = 11.0
 offset_top = 48.0
@@ -505,6 +504,7 @@ button_pressed = true
 text = "autoconnect"
 
 [node name="MQTTsignalling" type="ColorRect" parent="."]
+visible = false
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0

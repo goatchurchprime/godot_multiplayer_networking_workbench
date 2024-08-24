@@ -19,5 +19,25 @@ func _on_connect_toggled(toggled_on):
 	else:
 		NetworkGateway.selectandtrigger_networkoption(NetworkGateway.NETWORK_OPTIONS.NETWORK_OFF)
 
+func _on_cs_button_toggled(toggled_on):
+	if toggled_on:
+		NetworkGateway.get_node("ProtocolOptions").selected = NetworkGateway.NETWORK_PROTOCOL.ENET
+		NetworkGateway._on_ProtocolOptions_item_selected(NetworkGateway.NETWORK_PROTOCOL.ENET)
+		NetworkGateway.selectandtrigger_networkoption(NetworkGateway.NETWORK_OPTIONS.AS_SERVER)
+		NetworkGateway.get_node("UDPipdiscovery/udpenabled").button_pressed = false
+		NetworkGateway.set_vox_on()
+	else:
+		NetworkGateway.selectandtrigger_networkoption(NetworkGateway.NETWORK_OPTIONS.NETWORK_OFF)
+
+func _on_cc_button_toggled(toggled_on):
+	if toggled_on:
+		NetworkGateway.get_node("ProtocolOptions").selected = NetworkGateway.NETWORK_PROTOCOL.ENET
+		NetworkGateway._on_ProtocolOptions_item_selected(NetworkGateway.NETWORK_PROTOCOL.ENET)
+		NetworkGateway.selectandtrigger_networkoption(NetworkGateway.NETWORK_OPTIONS.FIXED_URL)
+		NetworkGateway.get_node("UDPipdiscovery/udpenabled").button_pressed = false
+		#NetworkGateway.set_vox_on()
+	else:
+		NetworkGateway.selectandtrigger_networkoption(NetworkGateway.NETWORK_OPTIONS.NETWORK_OFF)
+
 func _process(delta):
 	$PlayerCount.value = NetworkGateway.Dconnectedplayerscount

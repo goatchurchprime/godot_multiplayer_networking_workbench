@@ -1,4 +1,4 @@
-[gd_scene load_steps=11 format=3 uid="uid://denbhipr26x6c"]
+[gd_scene load_steps=10 format=3 uid="uid://denbhipr26x6c"]
 
 [ext_resource type="Script" path="res://addons/player-networking/PlayerFrameLocal.gd" id="1"]
 [ext_resource type="Script" path="res://quickoptionsmenu.gd" id="1_8ecn3"]
@@ -15,8 +15,6 @@ bg_color = Color(0.6, 0.6, 0.0588235, 1)
 diffuse_texture = ExtResource("2_ycy4d")
 normal_texture = ExtResource("3_1a6vp")
 specular_shininess = 0.0
-
-[sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_h8pkk"]
 
 [node name="Main" type="Control"]
 layout_mode = 3
@@ -51,6 +49,16 @@ layout_mode = 2
 theme_override_styles/pressed = SubResource("StyleBoxFlat_31q8f")
 toggle_mode = true
 text = "Connect"
+
+[node name="CSButton" type="Button" parent="QuickOptions"]
+layout_mode = 2
+toggle_mode = true
+text = "CS"
+
+[node name="CCButton" type="Button" parent="QuickOptions"]
+layout_mode = 2
+toggle_mode = true
+text = "CC"
 
 [node name="VSeparator2" type="VSeparator" parent="QuickOptions"]
 layout_mode = 2
@@ -103,12 +111,9 @@ script = ExtResource("6_jvykx")
 _spawnable_scenes = PackedStringArray("res://mulitplayerspawntoy.tscn")
 spawn_path = NodePath("../SpawnedObjects")
 
-[node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="SyncObjects"]
-root_path = NodePath("../SpawnedObjects")
-delta_interval = 3.0
-replication_config = SubResource("SceneReplicationConfig_h8pkk")
-
 [node name="SpawnedObjects" type="Node2D" parent="SyncObjects"]
 
 [connection signal="toggled" from="QuickOptions/ShowNetworkGateway" to="QuickOptions" method="_on_show_network_gateway_toggled"]
 [connection signal="toggled" from="QuickOptions/Connect" to="QuickOptions" method="_on_connect_toggled"]
+[connection signal="toggled" from="QuickOptions/CSButton" to="QuickOptions" method="_on_cs_button_toggled"]
+[connection signal="toggled" from="QuickOptions/CCButton" to="QuickOptions" method="_on_cc_button_toggled"]

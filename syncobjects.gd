@@ -8,7 +8,6 @@ var spawntoyscene = load("res://mulitplayerspawntoy.tscn")
 	
 # The MultiplayerSynchronizer synchronizes in the direction of the authority to the peers
 func _ready():
-	$MultiplayerSynchronizer.rpc_config("set_multiplayer_authority", {"call_local":true, "rpc_mode":MultiplayerAPI.RPC_MODE_ANY_PEER})
 	Input.set_default_cursor_shape(Input.CURSOR_CROSS)
 	$MultiplayerSpawner.set_spawn_function(spawnthistoy)
 	spawnnexttoy(Vector2i(300, 700))
@@ -44,7 +43,6 @@ func interactcurrenttoy(pressed):
 		if currentmousetoy.get_node("MultiplayerSynchronizer").get_multiplayer_authority() != multiplayer.get_unique_id():
 			currentmousetoy.get_node("MultiplayerSynchronizer").rpc("set_multiplayer_authority", multiplayer.get_unique_id())
 
-
 	elif relmouse != null and not pressed:
 		relmouse = null
 
@@ -53,7 +51,7 @@ func motioncurrenttoy(gpos):
 		currentmousetoy.global_position = gpos - relmouse
 
 func spawnthistoy(data):
-	print("spawnthistoy ", data)
+	print(" -- spawnthistoy ", data, multiplayer.get_unique_id(), " ", multiplayer.is_server())
 	var k = spawntoyscene.instantiate()
 	k.get_node("Label").text = data["letter"]
 	k.get_node("MultiplayerSynchronizer").rpc_config("set_multiplayer_authority", {"call_local":true, "rpc_mode":MultiplayerAPI.RPC_MODE_ANY_PEER})
@@ -62,6 +60,7 @@ func spawnthistoy(data):
 var xx = 0
 var letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 func spawnnexttoy(gpos):
+	print("  ;spawnnexttoy ", gpos, " ", letters[xx], " ", $MultiplayerSpawner.get_spawn_function())
 	var h = $MultiplayerSpawner.spawn({"letter":letters[xx]})
 	xx += 1
 	h.global_position = gpos
@@ -76,13 +75,6 @@ func _input(event):
 	if event is InputEventKey and event.pressed and event.keycode == KEY_Y:
 		prints($spawnedtoy.get_multiplayer_authority(), multiplayer.get_unique_id())
 		$spawnedtoy.position.x -= 15
-	if event is InputEventKey and event.pressed and event.keycode == KEY_A:
-#		$RigidBody2D.rpc(set_multiplayer_authority(multiplayer.get_unique_id())
-		print("calling out to ssss")
-		await get_tree().create_timer(0.01)
-		rpc("ssss", "mme %d" % multiplayer.get_unique_id())
-		#$RigidBody2D.rpc("set_multiplayer_authority", multiplayer.get_unique_id())
-		$MultiplayerSynchronizer.rpc("set_multiplayer_authority", multiplayer.get_unique_id())
 
 	if event is InputEventKey and event.pressed and event.keycode == KEY_Q:
 		spawnnexttoy(get_global_mouse_position())
