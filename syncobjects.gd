@@ -4,6 +4,8 @@ extends Node2D
 func ssss(me):
 	print("ssss ", me, "  ll ", multiplayer.get_unique_id(), " ", $RigidBody2D.get_multiplayer_authority(), " :", multiplayer.get_remote_sender_id())
 
+@onready var NetworkGateway = get_node("../../../NetworkGateway")
+
 var spawntoyscene = load("res://mulitplayerspawntoy.tscn")
 	
 # The MultiplayerSynchronizer synchronizes in the direction of the authority to the peers
@@ -42,7 +44,10 @@ func _on_local_player_body_exited(mousetoy):
 
 func interactcurrenttoy(pressed, gpos):
 	if pressed and relmouse == null and currentmousetoy != null:
-		relmouse = gpos - currentmousetoy.get_global_position()
+		var pp = NetworkGateway.get_node("PlayerConnections").LocalPlayer
+		relmouse = pp.global_position - currentmousetoy.get_global_position()
+		#currentmousetoy.global_position = pp.global_position
+
 		if currentmousetoy.z_index < topzindex:
 			topzindex += 1
 			currentmousetoy.z_index = topzindex
@@ -52,9 +57,13 @@ func interactcurrenttoy(pressed, gpos):
 	elif relmouse != null and not pressed:
 		relmouse = null
 
-func motioncurrenttoy(gpos):
+
+func _process(delta):
 	if currentmousetoy != null and relmouse != null:
-		currentmousetoy.global_position = gpos - relmouse
+		var pp = NetworkGateway.get_node("PlayerConnections").LocalPlayer
+		currentmousetoy.global_position = pp.global_position - relmouse
+
+
 
 var xx = 0
 var letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
@@ -92,6 +101,7 @@ func _input(event):
 
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
 		var pp = get_node("../Players").get_child(0)
+		pp = NetworkGateway.get_node("PlayerConnections").LocalPlayer
 		print("ppp ", pp, pp.get_overlapping_areas(), pp.get_overlapping_bodies())
 		var pq = pp.get_overlapping_bodies()
 		if len(pq) != 0:
@@ -99,7 +109,4 @@ func _input(event):
 
 		interactcurrenttoy(event.pressed, event.global_position)
 		#get_viewport().set_input_as_handled()
-
-	if event is InputEventMouseMotion:
-		motioncurrenttoy(event.global_position)
 	
