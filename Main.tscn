@@ -142,5 +142,7 @@ playersnodepath = NodePath("../SubViewportContainer/SubViewport/Players")
 [connection signal="toggled" from="QuickOptions/CSButton" to="QuickOptions" method="_on_cs_button_toggled"]
 [connection signal="toggled" from="QuickOptions/CCButton" to="QuickOptions" method="_on_cc_button_toggled"]
 [connection signal="pressed" from="QuickOptions/NewCard" to="QuickOptions" method="_on_new_card_pressed"]
+[connection signal="mouse_entered" from="SubViewportContainer" to="QuickOptions" method="_on_sub_viewport_container_mouse_entered"]
+[connection signal="mouse_exited" from="SubViewportContainer" to="QuickOptions" method="_on_sub_viewport_container_mouse_exited"]
 [connection signal="body_entered" from="SubViewportContainer/SubViewport/Players/LocalPlayer" to="SubViewportContainer/SubViewport/SyncObjects" method="_on_local_player_body_entered"]
 [connection signal="body_exited" from="SubViewportContainer/SubViewport/Players/LocalPlayer" to="SubViewportContainer/SubViewport/SyncObjects" method="_on_local_player_body_exited"]

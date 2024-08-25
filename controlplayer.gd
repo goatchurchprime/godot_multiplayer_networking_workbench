@@ -1,6 +1,5 @@
 extends Area2D
 
-var localavatarvelocity = Vector2()
 var batvelocity = 200
 var clientawaitingspawnpoint = false
 var nextframeisfirst = false
@@ -82,13 +81,10 @@ func PF_processlocalavatarposition(delta):
 	if clientawaitingspawnpoint:
 		return false
 
-	global_position = get_global_mouse_position().clamp(minmouseposition, maxmouseposition)
-	
-	var vec = Vector2((-1 if Input.is_action_pressed("ui_left") else 0) + (1 if Input.is_action_pressed("ui_right") else 0), 
-						(-1 if Input.is_action_pressed("ui_up") else 0) + (1 if Input.is_action_pressed("ui_down") else 0))
-	localavatarvelocity = vec
-#	position = Vector2(clamp(position.x + localavatarvelocity.x*batvelocity*delta, 65, 500), 
-#					   clamp(position.y + localavatarvelocity.y*batvelocity*delta, 7, 339))
+	if get_window().has_focus():
+		var quickoptions = get_node("../../../../QuickOptions")
+		if quickoptions.subviewpointcontainerhasmouse:
+			global_position = get_global_mouse_position().clamp(minmouseposition, maxmouseposition)
 	return true
 	
 func PF_avatartoframedata():

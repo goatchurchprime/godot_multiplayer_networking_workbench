@@ -54,3 +54,11 @@ func _on_new_card_pressed():
 	data["gpos"] = jj*get_global_mouse_position() + Vector2(0,80)
 	var sid = multiplayerauthority.get_multiplayer_authority()
 	multiplayerauthority.rpc_id(sid, "spawn", data)
+
+
+
+var subviewpointcontainerhasmouse = false
+func _on_sub_viewport_container_mouse_entered():
+	subviewpointcontainerhasmouse = true
+func _on_sub_viewport_container_mouse_exited():
+	subviewpointcontainerhasmouse = false
