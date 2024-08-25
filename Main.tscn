@@ -127,12 +127,6 @@ spawn_path = NodePath("../SpawnedObjects")
 
 [node name="SpawnedObjects" type="Node2D" parent="SubViewportContainer/SubViewport/SyncObjects"]
 
-[node name="Button" type="Button" parent="SubViewportContainer/SubViewport"]
-offset_right = 8.0
-offset_bottom = 8.0
-text = "xfgadfgadfgsdfg
-dzfgdfgzdfg"
-
 [node name="NetworkGateway" parent="." instance=ExtResource("3")]
 visible = false
 z_index = 1000
@@ -148,3 +142,5 @@ playersnodepath = NodePath("../SubViewportContainer/SubViewport/Players")
 [connection signal="toggled" from="QuickOptions/CSButton" to="QuickOptions" method="_on_cs_button_toggled"]
 [connection signal="toggled" from="QuickOptions/CCButton" to="QuickOptions" method="_on_cc_button_toggled"]
 [connection signal="pressed" from="QuickOptions/NewCard" to="QuickOptions" method="_on_new_card_pressed"]
+[connection signal="body_entered" from="SubViewportContainer/SubViewport/Players/LocalPlayer" to="SubViewportContainer/SubViewport/SyncObjects" method="_on_local_player_body_entered"]
+[connection signal="body_exited" from="SubViewportContainer/SubViewport/Players/LocalPlayer" to="SubViewportContainer/SubViewport/SyncObjects" method="_on_local_player_body_exited"]

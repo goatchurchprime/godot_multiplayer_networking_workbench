@@ -17,7 +17,8 @@ func _ready():
 var currentmousetoy = null
 var relmouse = null
 var topzindex = 2
-func mouseenter(mousetoy):
+func _on_local_player_body_entered(mousetoy):
+	pass # Replace with function body.
 	print("ment ", mousetoy)
 	if relmouse == null: 
 			# need a more complex system keeping track of all the ins
@@ -28,13 +29,16 @@ func mouseenter(mousetoy):
 		currentmousetoy = mousetoy
 		currentmousetoy.get_node("MouseIn").visible = true
 
-func mouseexit(mousetoy):
+func _on_local_player_body_exited(mousetoy):
+	pass # Replace with function body.
 	print(" mexit ", mousetoy)
 	mousetoy.get_node("MouseIn").visible = false
 	if currentmousetoy == mousetoy:
 		if relmouse == null: 
 			currentmousetoy.get_node("MouseIn").visible = false
 			currentmousetoy = null
+
+
 
 func interactcurrenttoy(pressed, gpos):
 	if pressed and relmouse == null and currentmousetoy != null:

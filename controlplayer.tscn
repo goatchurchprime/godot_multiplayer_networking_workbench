@@ -26,6 +26,7 @@ fill_from = Vector2(0.5, 0.5)
 size = Vector2(13, 13)
 
 [node name="RemotePlayer" type="Area2D"]
+collision_layer = 4
 script = ExtResource("1")
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
