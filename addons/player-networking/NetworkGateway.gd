@@ -200,38 +200,7 @@ func _on_udpenabled_toggled(button_pressed):
 	NetworkOptions.set_item_disabled(NETWORK_OPTIONS.LOCAL_NETWORK, not button_pressed)
 
 func _on_NetworkOptionsMQTTWebRTC_item_selected(ns):
-	assert (ProtocolOptions.selected == NETWORK_PROTOCOL.WEBRTC_MQTTSIGNAL)
-	var selectasoff = (ns == NETWORK_OPTIONS.NETWORK_OFF)
-	if not selectasoff:
-		$PlayerConnections.clearconnectionlog()
-	MQTTsignalling.get_node("StartMQTT").button_pressed = false
-	await get_tree().process_frame
-	if MQTTsignalling.get_node("StartMQTT").is_connected("toggled", Callable(MQTTsignalling.get_node("Servermode"), "_on_StartServer_toggled")):
-		MQTTsignalling.get_node("StartMQTT").disconnect("toggled", Callable(MQTTsignalling.get_node("Servermode"), "_on_StartServer_toggled"))
-	if MQTTsignalling.get_node("StartMQTT").is_connected("toggled", Callable(MQTTsignalling.get_node("Clientmode"), "_on_StartClient_toggled")):
-		MQTTsignalling.get_node("StartMQTT").disconnect("toggled", Callable(MQTTsignalling.get_node("Clientmode"), "_on_StartClient_toggled"))
-
-	var selectasserver = (ns == NETWORK_OPTIONS_MQTT_WEBRTC.AS_SERVER)
-	var selectasclient = (ns == NETWORK_OPTIONS_MQTT_WEBRTC.AS_CLIENT)
-	var selectasnecessary = (ns == NETWORK_OPTIONS_MQTT_WEBRTC.AS_NECESSARY)
-	MQTTsignalling.get_node("Servermode").visible = selectasserver
-	MQTTsignalling.get_node("Clientmode").visible = selectasclient
-	ProtocolOptions.disabled = not selectasoff
-	if selectasserver:
-		MQTTsignalling.get_node("StartMQTT").connect("toggled", Callable(MQTTsignalling.get_node("Servermode"), "_on_StartServer_toggled"))
-		if MQTTsignalling.get_node("mqttautoconnect").button_pressed:
-			MQTTsignalling.get_node("StartMQTT").button_pressed = true
-	if selectasclient or selectasnecessary:
-		MQTTsignalling.get_node("StartMQTT").connect("toggled", Callable(MQTTsignalling.get_node("Clientmode"), "_on_StartClient_toggled"))
-		if MQTTsignalling.get_node("mqttautoconnect").button_pressed:
-			MQTTsignalling.get_node("StartMQTT").button_pressed = true
-#	if $MQTTsignalling/mqttautoconnect.button_pressed:
-#		$MQTTsignalling/StartMQTT.button_pressed = selectasclient or selectasnecessary
-	MQTTsignalling.get_node("Servermode/WebRTCmultiplayerserver/StartWebRTCmultiplayer").button_pressed = false
-	MQTTsignalling.get_node("Servermode/WebRTCmultiplayerserver/StartWebRTCmultiplayer").disabled = true
-	MQTTsignalling.get_node("Clientmode/WebRTCmultiplayerclient/StartWebRTCmultiplayer").button_pressed = false
-	MQTTsignalling.get_node("Clientmode/WebRTCmultiplayerclient/StartWebRTCmultiplayer").disabled = true
-
+	MQTTsignalling._on_NetworkOptionsMQTTWebRTC_item_selected(ns)
 
 
 func getrandomdoppelgangerdelay(disabledropout=false):

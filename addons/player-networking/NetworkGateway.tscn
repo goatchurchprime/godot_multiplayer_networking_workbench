@@ -1,4 +1,4 @@
-[gd_scene load_steps=27 format=3 uid="uid://cfmoahalri06d"]
+[gd_scene load_steps=28 format=3 uid="uid://cfmoahalri06d"]
 
 [ext_resource type="Script" path="res://addons/player-networking/NetworkGateway.gd" id="1"]
 [ext_resource type="Script" path="res://addons/player-networking/Enetmultiplayerserver.gd" id="3"]
@@ -11,6 +11,7 @@
 [ext_resource type="Script" path="res://addons/player-networking/WebRTCmultiplayerserver.gd" id="10"]
 [ext_resource type="Script" path="res://addons/player-networking/ServermodeMQTTsignal.gd" id="11"]
 [ext_resource type="Script" path="res://addons/player-networking/Websocketmultiplayerclient.gd" id="12"]
+[ext_resource type="Script" path="res://addons/player-networking/MQTTsignalling.gd" id="12_dj107"]
 [ext_resource type="Script" path="res://addons/player-networking/ClientmodeWebSocketsignal.gd" id="13"]
 [ext_resource type="Script" path="res://addons/player-networking/WebRTCmultiplayerclient.gd" id="14"]
 [ext_resource type="PackedScene" uid="uid://ktm7k0co2o7l" path="res://addons/mqtt/mqtt.tscn" id="14_c5n2c"]
@@ -468,6 +469,7 @@ text = "autoconnect"
 visible = false
 layout_mode = 2
 color = Color(0.215686, 0.145098, 0.294118, 1)
+script = ExtResource("12_dj107")
 metadata/_tab_index = 1
 
 [node name="Servermode" type="Control" parent="TabContainer/MQTTsignalling"]
