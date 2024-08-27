@@ -33,7 +33,7 @@ func _process(delta):
 		if spkt[0] == broadcastserverheader:
 			var likelyserveraddresses =  spkt[1].substr(1).split(",")  if len(spkt) > 1 and spkt[1][0] == "@"  else [ ]
 			var NetworkGateway = get_node("../..")
-			var NetworkOptions = NetworkGateway.get_node("NetworkOptions")
+			var NetworkOptions = NetworkGateway.NetworkOptions
 			var receivedIPnumber = peer.get_packet_ip()
 			if not (receivedIPnumber in likelyserveraddresses):
 				likelyserveraddresses.push_back(receivedIPnumber)
@@ -44,5 +44,5 @@ func _process(delta):
 				if not (likelyserveripaddress in listedserveraddresses):
 					NetworkOptions.add_item(likelyserveripaddress)
 					listedserveraddresses.push_back(likelyserveripaddress)
-			print("eeep", NetworkGateway.get_node("NetworkOptions").selected)
+			print("eeep", NetworkGateway.NetworkOptions.selected)
 			NetworkGateway.selectandtrigger_networkoption(listedserveraddresses.find(likelyserveraddresses[0]) + NetworkGateway.NETWORK_OPTIONS.FIXED_URL)

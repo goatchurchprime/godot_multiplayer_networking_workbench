@@ -134,7 +134,6 @@ spawn_path = NodePath("../SpawnedObjects")
 [node name="SpawnedObjects" type="Node2D" parent="SubViewportContainer/SubViewport/SyncObjects"]
 
 [node name="NetworkGateway" parent="." instance=ExtResource("3")]
-visible = false
 z_index = 1000
 layout_mode = 0
 offset_left = 4.0

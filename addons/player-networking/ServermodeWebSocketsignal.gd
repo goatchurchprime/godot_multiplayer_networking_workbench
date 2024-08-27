@@ -85,7 +85,7 @@ func _process(delta):
 		websocketclientsconnected.erase(id)
 
 func startwebsocketsignalserver():
-	var portnumber = int(NetworkGateway.get_node("NetworkOptions/portnumber").text)
+	var portnumber = int(NetworkGateway.NetworkOptions_portnumber.text)
 	tcpserver = TCPServer.new()
 	var E = tcpserver.listen(portnumber, "*")
 	if E == OK:

@@ -25,7 +25,7 @@ func _on_connect_toggled(toggled_on):
 
 func _on_cs_button_toggled(toggled_on):
 	if toggled_on:
-		NetworkGateway.get_node("ProtocolOptions").selected = NetworkGateway.NETWORK_PROTOCOL.ENET
+		NetworkGateway.ProtocolOptions.selected = NetworkGateway.NETWORK_PROTOCOL.ENET
 		NetworkGateway._on_ProtocolOptions_item_selected(NetworkGateway.NETWORK_PROTOCOL.ENET)
 		NetworkGateway.get_node("UDPipdiscovery/udpenabled").button_pressed = false
 		NetworkGateway.selectandtrigger_networkoption(NetworkGateway.NETWORK_OPTIONS.AS_SERVER)
@@ -35,7 +35,7 @@ func _on_cs_button_toggled(toggled_on):
 
 func _on_cc_button_toggled(toggled_on):
 	if toggled_on:
-		NetworkGateway.get_node("ProtocolOptions").selected = NetworkGateway.NETWORK_PROTOCOL.ENET
+		NetworkGateway.ProtocolOptions.selected = NetworkGateway.NETWORK_PROTOCOL.ENET
 		NetworkGateway._on_ProtocolOptions_item_selected(NetworkGateway.NETWORK_PROTOCOL.ENET)
 		NetworkGateway.get_node("UDPipdiscovery/udpenabled").button_pressed = false
 		NetworkGateway.selectandtrigger_networkoption(NetworkGateway.NETWORK_OPTIONS.FIXED_URL)

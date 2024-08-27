@@ -117,7 +117,7 @@ func _server_disconnected():
 		return
 	var serverisself = multiplayer.is_server()
 	connectionlog("_server(self) disconnect\n" if serverisself else "_server disconnect\n")
-	var ns = NetworkGateway.get_node("NetworkOptions").selected
+	var ns = NetworkGateway.NetworkOptions.selected
 	print("(networkplayer_server_disconnected ", serverisself)
 	multiplayer.multiplayer_peer = OfflineMultiplayerPeer.new()
 	print("setnetworkpeer OfflineMultiplayerPeer")
@@ -130,15 +130,15 @@ func _server_disconnected():
 	assert (NetworkGateway.Dconnectedplayerscount == 0)
 	print("*** _server_disconnected ", LocalPlayer.get_node("PlayerFrame").networkID)
 	updateplayerlist()
-	if NetworkGateway.get_node("ProtocolOptions").selected == NetworkGateway.NETWORK_PROTOCOL.ENET:
+	if NetworkGateway.ProtocolOptions.selected == NetworkGateway.NETWORK_PROTOCOL.ENET:
 		NetworkGateway.get_node("ENetMultiplayer/Servermode/StartENetmultiplayer").set_pressed_no_signal(false)
 		NetworkGateway.get_node("ENetMultiplayer/Clientmode/StartENetmultiplayer").set_pressed_no_signal(false)
-	if NetworkGateway.get_node("ProtocolOptions").selected == NetworkGateway.NETWORK_PROTOCOL.WEBRTC_MQTTSIGNAL:
+	if NetworkGateway.ProtocolOptions.selected == NetworkGateway.NETWORK_PROTOCOL.WEBRTC_MQTTSIGNAL:
 		NetworkGateway.get_node("MQTTsignalling/Servermode/WebRTCmultiplayerserver/StartWebRTCmultiplayer").set_pressed_no_signal(false)
 		NetworkGateway.get_node("MQTTsignalling/Clientmode/WebRTCmultiplayerclient/StartWebRTCmultiplayer").set_pressed_no_signal(false)
-		NetworkGateway.get_node("NetworkOptionsMQTTWebRTC").selected = NetworkGateway.NETWORK_OPTIONS.NETWORK_OFF
+		NetworkGateway.NetworkOptionsMQTTWebRTC.selected = NetworkGateway.NETWORK_OPTIONS.NETWORK_OFF
 	else:
-		NetworkGateway.get_node("NetworkOptions").selected = NetworkGateway.NETWORK_OPTIONS.NETWORK_OFF
+		NetworkGateway.NetworkOptions.selected = NetworkGateway.NETWORK_OPTIONS.NETWORK_OFF
 		
 
 func updateplayerlist():

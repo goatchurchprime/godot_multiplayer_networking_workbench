@@ -5,7 +5,7 @@ extends Control
 
 func _on_StartWebSocketmultiplayer_toggled(button_pressed):
 	if button_pressed:
-		var portnumber = int(NetworkGateway.get_node("NetworkOptions/portnumber").text)
+		var portnumber = int(NetworkGateway.NetworkOptions_portnumber.text)
 		var multiplayerpeer = WebSocketMultiplayerPeer.new()
 		var E = multiplayerpeer.create_server(portnumber)
 		if E != OK:

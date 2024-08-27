@@ -88,10 +88,10 @@ func received_mqtt(topic, msg):
 					if StartMQTT.button_pressed:
 						assert (selectedserver == "")
 						var serverfound = choosefromopenservers()
-						var selectasnecessary = (NetworkGateway.get_node("NetworkOptionsMQTTWebRTC").selected == NetworkGateway.NETWORK_OPTIONS_MQTT_WEBRTC.AS_NECESSARY)
+						var selectasnecessary = (NetworkGateway.NetworkOptionsMQTTWebRTC.selected == NetworkGateway.NETWORK_OPTIONS_MQTT_WEBRTC.AS_NECESSARY)
 						if selectasnecessary:
 							if serverfound:
-								NetworkGateway.get_node("NetworkOptionsMQTTWebRTC").selected = NetworkGateway.NETWORK_OPTIONS_MQTT_WEBRTC.AS_CLIENT
+								NetworkGateway.NetworkOptionsMQTTWebRTC.selected = NetworkGateway.NETWORK_OPTIONS_MQTT_WEBRTC.AS_CLIENT
 							else:
 								NetworkGateway.selectandtrigger_networkoption(NetworkGateway.NETWORK_OPTIONS_MQTT_WEBRTC.AS_SERVER)
 

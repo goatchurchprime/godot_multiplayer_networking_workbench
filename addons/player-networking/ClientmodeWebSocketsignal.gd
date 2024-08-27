@@ -76,7 +76,7 @@ func startwebsocketsignalclient():
 	websocketclient = WebSocketPeer.new()
 	var portnumber = int(NetworkGateway.get_node("NetworkOptions/portnumber").text)
 	var ns = NetworkGateway.get_node("NetworkOptions").selected
-	var serverIPnumber = NetworkGateway.get_node("NetworkOptions").get_item_text(ns).split(" ", 1)[0]
+	var serverIPnumber = NetworkGateway.NetworkOptions.get_item_text(ns).split(" ", 1)[0]
 	var wsurl = "ws://%s:%d" % [serverIPnumber, portnumber]
 	print("Websocketclient connect to: ", wsurl)
 	var clienterror = websocketclient.connect_to_url(wsurl)
@@ -88,5 +88,3 @@ func startwebsocketsignalclient():
 	else:
 		print("Bad start websocket")
 		get_parent().get_parent().setnetworkoff()
-
-

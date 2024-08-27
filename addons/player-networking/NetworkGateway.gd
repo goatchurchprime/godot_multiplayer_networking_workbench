@@ -13,6 +13,11 @@ extends Panel
 @export var localplayerscene : String = "" # "res://controlplayer.tscn"
 var Dconnectedplayerscount = 0
 
+@onready var ProtocolOptions = $ProtocolModes/ProtocolOptions
+@onready var NetworkOptions = $ProtocolModes/TabContainer/HBox/NetworkOptions
+@onready var NetworkOptions_portnumber = $ProtocolModes/TabContainer/HBox/portnumber
+@onready var NetworkOptionsMQTTWebRTC = $ProtocolModes/TabContainer/NetworkOptionsMQTTWebRTC
+
 enum NETWORK_PROTOCOL { ENET = 0, 
 						WEBSOCKET = 1,
 						WEBRTC_WEBSOCKETSIGNAL = 2,
@@ -39,59 +44,59 @@ var rng = RandomNumberGenerator.new()
 	
 func _ready():
 	for rs in remoteservers:
-		$NetworkOptions.add_item(rs)
-	if $NetworkOptions.selected == -1:  $NetworkOptions.selected = 0
-	if $ProtocolOptions.selected == -1:  $ProtocolOptions.selected = 3
-	if $NetworkOptionsMQTTWebRTC.selected == -1:  $NetworkOptionsMQTTWebRTC.selected = 0
+		NetworkOptions.add_item(rs)
+	if NetworkOptions.selected == -1:  NetworkOptions.selected = 0
+	if ProtocolOptions.selected == -1:  ProtocolOptions.selected = 3
+	if NetworkOptionsMQTTWebRTC.selected == -1:  NetworkOptionsMQTTWebRTC.selected = 0
 	if $MQTTsignalling/brokeraddress.selected == -1:  $MQTTsignalling/brokeraddress.selected = 0
 	if OS.has_feature("HTML5"):
-		$NetworkOptions.set_item_disabled(NETWORK_OPTIONS.LOCAL_NETWORK,  true)
-		$NetworkOptions.set_item_disabled(NETWORK_OPTIONS.AS_SERVER,  true)
-		$ProtocolOptions.set_item_disabled(NETWORK_PROTOCOL.ENET, true)
-		$ProtocolOptions.selected = max(NETWORK_PROTOCOL.WEBSOCKET, $ProtocolOptions.selected)
+		NetworkOptions.set_item_disabled(NETWORK_OPTIONS.LOCAL_NETWORK,  true)
+		NetworkOptions.set_item_disabled(NETWORK_OPTIONS.AS_SERVER,  true)
+		ProtocolOptions.set_item_disabled(NETWORK_PROTOCOL.ENET, true)
+		ProtocolOptions.selected = max(NETWORK_PROTOCOL.WEBSOCKET, ProtocolOptions.selected)
 	rng.randomize()
-	_on_ProtocolOptions_item_selected($ProtocolOptions.selected)
+	_on_ProtocolOptions_item_selected(ProtocolOptions.selected)
 
 
 func initialstatenormal(protocol, networkoption):
 	assert (protocol >= NETWORK_PROTOCOL.ENET and protocol <= NETWORK_PROTOCOL.WEBRTC_WEBSOCKETSIGNAL)
-	$ProtocolOptions.selected = protocol
-	_on_ProtocolOptions_item_selected($ProtocolOptions.selected)
+	ProtocolOptions.selected = protocol
+	_on_ProtocolOptions_item_selected(ProtocolOptions.selected)
 	selectandtrigger_networkoption(networkoption)
 
 func initialstatemqttwebrtc(networkoption, roomname, brokeraddress):
-	$ProtocolOptions.selected = NETWORK_PROTOCOL.WEBRTC_MQTTSIGNAL
-	_on_ProtocolOptions_item_selected($ProtocolOptions.selected)
+	ProtocolOptions.selected = NETWORK_PROTOCOL.WEBRTC_MQTTSIGNAL
+	_on_ProtocolOptions_item_selected(ProtocolOptions.selected)
 	if brokeraddress:
 		$MQTTsignalling/brokeraddress.text = brokeraddress
 	if roomname:
 		$MQTTsignalling/roomname.text = roomname
-	$NetworkOptionsMQTTWebRTC.selected = networkoption
-	_on_NetworkOptionsMQTTWebRTC_item_selected($NetworkOptionsMQTTWebRTC.selected)
+	NetworkOptionsMQTTWebRTC.selected = networkoption
+	_on_NetworkOptionsMQTTWebRTC_item_selected(NetworkOptionsMQTTWebRTC.selected)
 
 func selectandtrigger_networkoption(networkoption):
-	if $ProtocolOptions.selected == NETWORK_PROTOCOL.WEBRTC_MQTTSIGNAL:
-		if $NetworkOptionsMQTTWebRTC.selected != networkoption:
-			$NetworkOptionsMQTTWebRTC.selected = networkoption
+	if ProtocolOptions.selected == NETWORK_PROTOCOL.WEBRTC_MQTTSIGNAL:
+		if NetworkOptionsMQTTWebRTC.selected != networkoption:
+			NetworkOptionsMQTTWebRTC.selected = networkoption
 			_on_NetworkOptionsMQTTWebRTC_item_selected(networkoption)
 	else:
-		if $NetworkOptions.selected != networkoption:
-			$NetworkOptions.selected = networkoption
+		if NetworkOptions.selected != networkoption:
+			NetworkOptions.selected = networkoption
 			_on_NetworkOptions_item_selected(networkoption)
 
 func _on_ProtocolOptions_item_selected(np):
-	assert ($NetworkOptions.selected == NETWORK_OPTIONS.NETWORK_OFF or $NetworkOptions.selected == -1)
-	assert ($NetworkOptionsMQTTWebRTC.selected == NETWORK_OPTIONS_MQTT_WEBRTC.NETWORK_OFF or $NetworkOptionsMQTTWebRTC.selected == -1)
+	assert (NetworkOptions.selected == NETWORK_OPTIONS.NETWORK_OFF or NetworkOptions.selected == -1)
+	assert (NetworkOptionsMQTTWebRTC.selected == NETWORK_OPTIONS_MQTT_WEBRTC.NETWORK_OFF or NetworkOptionsMQTTWebRTC.selected == -1)
 	var selectasmqttwebrtc = (np == NETWORK_PROTOCOL.WEBRTC_MQTTSIGNAL)
 	var selectaswebrtcwebsocket = (np == NETWORK_PROTOCOL.WEBRTC_WEBSOCKETSIGNAL)
 	var selectasenet = (np == NETWORK_PROTOCOL.ENET)
 	var selectaswebsocket = (np == NETWORK_PROTOCOL.WEBSOCKET)	
-	$NetworkOptions.visible = not selectasmqttwebrtc
-	$NetworkOptionsMQTTWebRTC.visible = selectasmqttwebrtc
+	$ProtocolModes/TabContainer.current_tab = (1 if selectasmqttwebrtc else 0)
+	NetworkOptionsMQTTWebRTC.visible = selectasmqttwebrtc
 	$MQTTsignalling.visible = selectasmqttwebrtc
 	$MQTTsignalling/Servermode.visible = false
 	$MQTTsignalling/Clientmode.visible = false
-	$UDPipdiscovery.visible = $NetworkOptions.visible and (not OS.has_feature("Server")) and (not OS.has_feature("HTML5"))
+	$UDPipdiscovery.visible = NetworkOptions.visible and (not OS.has_feature("Server")) and (not OS.has_feature("HTML5"))
 	$ENetMultiplayer.visible = selectasenet
 	$ENetMultiplayer/Servermode.visible = false
 	$ENetMultiplayer/Clientmode.visible = false
@@ -127,7 +132,7 @@ func _on_NetworkOptions_item_selected(ns):
 	if $WebSocketsignalling/Clientmode.websocketclient != null:
 		$WebSocketsignalling/Clientmode.stopwebsocketsignalclient()
 
-	var np = $ProtocolOptions.selected 
+	var np = ProtocolOptions.selected 
 	assert (np != NETWORK_PROTOCOL.WEBRTC_MQTTSIGNAL)
 
 	var selectasserver = (ns == NETWORK_OPTIONS.AS_SERVER)
@@ -143,7 +148,7 @@ func _on_NetworkOptions_item_selected(ns):
 	else:
 		$UDPipdiscovery.visible = selectUDPipdiscoveryserver or selectassearchingclient
 	assert (not $MQTTsignalling.visible)
-	$ProtocolOptions.disabled = not selectasoff
+	ProtocolOptions.disabled = not selectasoff
 	$UDPipdiscovery/Servermode.visible = selectasserver
 	if selectUDPipdiscoveryserver and $UDPipdiscovery/udpenabled.button_pressed:
 		$UDPipdiscovery/Servermode.startUDPbroadcasting()
@@ -184,10 +189,10 @@ func _on_NetworkOptions_item_selected(ns):
 
 
 func _on_udpenabled_toggled(button_pressed):
-	$NetworkOptions.set_item_disabled(NETWORK_OPTIONS.LOCAL_NETWORK, not button_pressed)
+	NetworkOptions.set_item_disabled(NETWORK_OPTIONS.LOCAL_NETWORK, not button_pressed)
 
 func _on_NetworkOptionsMQTTWebRTC_item_selected(ns):
-	assert ($ProtocolOptions.selected == NETWORK_PROTOCOL.WEBRTC_MQTTSIGNAL)
+	assert (ProtocolOptions.selected == NETWORK_PROTOCOL.WEBRTC_MQTTSIGNAL)
 	var selectasoff = (ns == NETWORK_OPTIONS.NETWORK_OFF)
 	if not selectasoff:
 		$PlayerConnections.clearconnectionlog()
@@ -203,7 +208,7 @@ func _on_NetworkOptionsMQTTWebRTC_item_selected(ns):
 	var selectasnecessary = (ns == NETWORK_OPTIONS_MQTT_WEBRTC.AS_NECESSARY)
 	$MQTTsignalling/Servermode.visible = selectasserver
 	$MQTTsignalling/Clientmode.visible = selectasclient
-	$ProtocolOptions.disabled = not selectasoff
+	ProtocolOptions.disabled = not selectasoff
 	if selectasserver:
 		$MQTTsignalling/StartMQTT.connect("toggled", Callable($MQTTsignalling/Servermode, "_on_StartServer_toggled"))
 		if $MQTTsignalling/mqttautoconnect.button_pressed:
