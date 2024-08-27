@@ -4,7 +4,7 @@ signal mqttsig_connection_established(wclientid)   # (badly named: applies to we
 signal mqttsig_packet_received(v)
 signal mqttsig_connection_closed()
 
-@onready var NetworkGateway = get_node("../..")
+@onready var NetworkGateway = get_node("../../../../..")
 var websocketclient = null
 const websocketprotocol = "webrtc-signalling"
 var wclientid = 0

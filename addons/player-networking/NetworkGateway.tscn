@@ -172,16 +172,11 @@ tabs_visible = false
 layout_mode = 2
 metadata/_tab_index = 0
 
-[node name="UDPipdiscovery" type="ColorRect" parent="TabContainer/VBox"]
+[node name="UDPipdiscovery" type="HBoxContainer" parent="TabContainer/VBox"]
 layout_mode = 2
-color = Color(0.270588, 0.235294, 0.0509804, 1)
 
 [node name="Servermode" type="Control" parent="TabContainer/VBox/UDPipdiscovery"]
-anchors_preset = 0
-offset_left = 242.0
-offset_top = 3.0
-offset_right = 364.0
-offset_bottom = 24.0
+layout_mode = 2
 script = ExtResource("5")
 
 [node name="broadcastperiod" type="LineEdit" parent="TabContainer/VBox/UDPipdiscovery/Servermode"]
@@ -209,11 +204,7 @@ offset_bottom = 27.0
 color = Color(0.968627, 0.933333, 0.0431373, 1)
 
 [node name="broadcastport" type="LineEdit" parent="TabContainer/VBox/UDPipdiscovery"]
-layout_mode = 0
-offset_left = 85.7593
-offset_top = 3.0
-offset_right = 143.759
-offset_bottom = 27.0
+layout_mode = 2
 text = "4546"
 
 [node name="Label" type="Label" parent="TabContainer/VBox/UDPipdiscovery/broadcastport"]
@@ -224,36 +215,25 @@ offset_bottom = 26.0
 text = "udp port"
 
 [node name="Clientmode" type="Control" parent="TabContainer/VBox/UDPipdiscovery"]
-anchors_preset = 0
-offset_left = 275.0
-offset_top = 22.0
-offset_right = 337.0
-offset_bottom = 27.0
+layout_mode = 2
 script = ExtResource("6")
 
 [node name="udpenabled" type="CheckBox" parent="TabContainer/VBox/UDPipdiscovery"]
-layout_mode = 0
-offset_left = 154.879
-offset_top = 3.0
-offset_right = 225.879
-offset_bottom = 27.0
+layout_mode = 2
 button_pressed = true
 text = "enable"
 
 [node name="TabContainer" type="TabContainer" parent="TabContainer/VBox"]
-visible = false
 layout_mode = 2
+current_tab = 0
+tabs_visible = false
 
-[node name="ENetMultiplayer" type="ColorRect" parent="."]
-visible = false
-layout_mode = 0
-offset_left = 11.0
-offset_top = 94.0
-offset_right = 365.0
-offset_bottom = 152.0
+[node name="ENetMultiplayer" type="ColorRect" parent="TabContainer/VBox/TabContainer"]
+layout_mode = 2
 color = Color(0.0980392, 0.305882, 0.160784, 1)
+metadata/_tab_index = 0
 
-[node name="Servermode" type="Control" parent="ENetMultiplayer"]
+[node name="Servermode" type="Control" parent="TabContainer/VBox/TabContainer/ENetMultiplayer"]
 visible = false
 anchors_preset = 0
 offset_left = 157.0
@@ -262,7 +242,7 @@ offset_right = 339.0
 offset_bottom = 49.0
 script = ExtResource("3")
 
-[node name="StartENetmultiplayer" type="Button" parent="ENetMultiplayer/Servermode"]
+[node name="StartENetmultiplayer" type="Button" parent="TabContainer/VBox/TabContainer/ENetMultiplayer/Servermode"]
 layout_mode = 0
 offset_left = 49.0
 offset_top = 8.99999
@@ -271,7 +251,7 @@ offset_bottom = 40.0
 toggle_mode = true
 text = "Start ENet server"
 
-[node name="Clientmode" type="Control" parent="ENetMultiplayer"]
+[node name="Clientmode" type="Control" parent="TabContainer/VBox/TabContainer/ENetMultiplayer"]
 visible = false
 anchors_preset = 0
 offset_left = 157.0
@@ -280,7 +260,7 @@ offset_right = 346.0
 offset_bottom = 62.0
 script = ExtResource("7")
 
-[node name="StartENetmultiplayer" type="Button" parent="ENetMultiplayer/Clientmode"]
+[node name="StartENetmultiplayer" type="Button" parent="TabContainer/VBox/TabContainer/ENetMultiplayer/Clientmode"]
 layout_mode = 0
 offset_left = 53.0
 offset_top = -7.0
@@ -289,7 +269,7 @@ offset_bottom = 24.0
 toggle_mode = true
 text = "Start ENet client"
 
-[node name="Label" type="Label" parent="ENetMultiplayer"]
+[node name="Label" type="Label" parent="TabContainer/VBox/TabContainer/ENetMultiplayer"]
 layout_mode = 0
 offset_left = 8.74201
 offset_top = 4.087
@@ -297,7 +277,7 @@ offset_right = 119.742
 offset_bottom = 18.087
 text = "ENet multiplayer"
 
-[node name="autoconnect" type="CheckBox" parent="ENetMultiplayer"]
+[node name="autoconnect" type="CheckBox" parent="TabContainer/VBox/TabContainer/ENetMultiplayer"]
 layout_mode = 1
 anchors_preset = -1
 anchor_bottom = 0.068
@@ -308,16 +288,13 @@ offset_bottom = 52.056
 button_pressed = true
 text = "autoconnect"
 
-[node name="WebSocketMultiplayer" type="ColorRect" parent="."]
+[node name="WebSocketMultiplayer" type="ColorRect" parent="TabContainer/VBox/TabContainer"]
 visible = false
-layout_mode = 0
-offset_left = 13.0
-offset_top = 95.0
-offset_right = 458.0
-offset_bottom = 153.0
+layout_mode = 2
 color = Color(0.0980392, 0.305882, 0.160784, 1)
+metadata/_tab_index = 1
 
-[node name="Servermode" type="Control" parent="WebSocketMultiplayer"]
+[node name="Servermode" type="Control" parent="TabContainer/VBox/TabContainer/WebSocketMultiplayer"]
 anchors_preset = 0
 offset_left = 157.0
 offset_top = 4.0
@@ -325,7 +302,7 @@ offset_right = 339.0
 offset_bottom = 49.0
 script = ExtResource("8")
 
-[node name="StartWebSocketmultiplayer" type="Button" parent="WebSocketMultiplayer/Servermode"]
+[node name="StartWebSocketmultiplayer" type="Button" parent="TabContainer/VBox/TabContainer/WebSocketMultiplayer/Servermode"]
 layout_mode = 0
 offset_left = 97.0
 offset_top = 11.0
@@ -334,7 +311,7 @@ offset_bottom = 42.0
 toggle_mode = true
 text = "Start WebSocket server"
 
-[node name="Clientmode" type="Control" parent="WebSocketMultiplayer"]
+[node name="Clientmode" type="Control" parent="TabContainer/VBox/TabContainer/WebSocketMultiplayer"]
 anchors_preset = 0
 offset_left = 249.0
 offset_top = 7.0
@@ -342,7 +319,7 @@ offset_right = 438.0
 offset_bottom = 53.0
 script = ExtResource("12")
 
-[node name="StartWebSocketmultiplayer" type="Button" parent="WebSocketMultiplayer/Clientmode"]
+[node name="StartWebSocketmultiplayer" type="Button" parent="TabContainer/VBox/TabContainer/WebSocketMultiplayer/Clientmode"]
 layout_mode = 0
 offset_left = 7.0
 offset_top = 7.0
@@ -351,7 +328,7 @@ offset_bottom = 38.0
 toggle_mode = true
 text = "Start WebSocket client"
 
-[node name="Label" type="Label" parent="WebSocketMultiplayer"]
+[node name="Label" type="Label" parent="TabContainer/VBox/TabContainer/WebSocketMultiplayer"]
 layout_mode = 0
 offset_left = 8.74201
 offset_top = 4.087
@@ -359,7 +336,7 @@ offset_right = 119.742
 offset_bottom = 18.087
 text = "WebSocket multiplayer"
 
-[node name="autoconnect" type="CheckBox" parent="WebSocketMultiplayer"]
+[node name="autoconnect" type="CheckBox" parent="TabContainer/VBox/TabContainer/WebSocketMultiplayer"]
 layout_mode = 1
 anchors_preset = -1
 anchor_bottom = 0.068
@@ -370,21 +347,13 @@ offset_bottom = 52.056
 button_pressed = true
 text = "autoconnect"
 
-[node name="WebSocketsignalling" type="ColorRect" parent="."]
+[node name="WebSocketsignalling" type="ColorRect" parent="TabContainer/VBox/TabContainer"]
 visible = false
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = 11.0
-offset_top = 86.0
-offset_right = -6.0
-offset_bottom = -221.0
-grow_horizontal = 2
-grow_vertical = 2
+layout_mode = 2
 color = Color(0.145098, 0.231373, 0.294118, 1)
+metadata/_tab_index = 2
 
-[node name="Servermode" type="Control" parent="WebSocketsignalling"]
+[node name="Servermode" type="Control" parent="TabContainer/VBox/TabContainer/WebSocketsignalling"]
 visible = false
 anchors_preset = 0
 anchor_right = 1.0
@@ -394,7 +363,7 @@ offset_top = 11.0
 offset_bottom = -8.00012
 script = ExtResource("9")
 
-[node name="WebRTCmultiplayerserver" type="Control" parent="WebSocketsignalling/Servermode"]
+[node name="WebRTCmultiplayerserver" type="Control" parent="TabContainer/VBox/TabContainer/WebSocketsignalling/Servermode"]
 anchors_preset = 0
 offset_left = 2.8562
 offset_top = 47.5227
@@ -402,7 +371,7 @@ offset_right = 229.856
 offset_bottom = 129.523
 script = ExtResource("10")
 
-[node name="StartWebRTCmultiplayer" type="Button" parent="WebSocketsignalling/Servermode/WebRTCmultiplayerserver"]
+[node name="StartWebRTCmultiplayer" type="Button" parent="TabContainer/VBox/TabContainer/WebSocketsignalling/Servermode/WebRTCmultiplayerserver"]
 layout_mode = 0
 offset_left = -7.97717
 offset_top = -23.5996
@@ -411,7 +380,7 @@ offset_bottom = -3.59962
 toggle_mode = true
 text = "StartWebrtc server"
 
-[node name="statuslabel" type="Label" parent="WebSocketsignalling/Servermode/WebRTCmultiplayerserver"]
+[node name="statuslabel" type="Label" parent="TabContainer/VBox/TabContainer/WebSocketsignalling/Servermode/WebRTCmultiplayerserver"]
 layout_mode = 0
 offset_left = 137.999
 offset_top = -19.9523
@@ -419,14 +388,14 @@ offset_right = 177.999
 offset_bottom = -3.95229
 text = "null"
 
-[node name="ClientsList" type="OptionButton" parent="WebSocketsignalling/Servermode"]
+[node name="ClientsList" type="OptionButton" parent="TabContainer/VBox/TabContainer/WebSocketsignalling/Servermode"]
 layout_mode = 0
 offset_left = 2.8562
 offset_top = -3.15384
 offset_right = 140.856
 offset_bottom = 16.8462
 
-[node name="Clientmode" type="Control" parent="WebSocketsignalling"]
+[node name="Clientmode" type="Control" parent="TabContainer/VBox/TabContainer/WebSocketsignalling"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -439,7 +408,7 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("13")
 
-[node name="WebRTCmultiplayerclient" type="Control" parent="WebSocketsignalling/Clientmode"]
+[node name="WebRTCmultiplayerclient" type="Control" parent="TabContainer/VBox/TabContainer/WebSocketsignalling/Clientmode"]
 anchors_preset = 0
 offset_left = -3.0
 offset_top = 9.0
@@ -447,7 +416,7 @@ offset_right = 135.0
 offset_bottom = 35.0
 script = ExtResource("14")
 
-[node name="StartWebRTCmultiplayer" type="Button" parent="WebSocketsignalling/Clientmode/WebRTCmultiplayerclient"]
+[node name="StartWebRTCmultiplayer" type="Button" parent="TabContainer/VBox/TabContainer/WebSocketsignalling/Clientmode/WebRTCmultiplayerclient"]
 layout_mode = 0
 offset_left = 86.0
 offset_top = 9.0
@@ -456,7 +425,7 @@ offset_bottom = 40.0
 toggle_mode = true
 text = "StartWebrtc client"
 
-[node name="statuslabel" type="Label" parent="WebSocketsignalling/Clientmode/WebRTCmultiplayerclient"]
+[node name="statuslabel" type="Label" parent="TabContainer/VBox/TabContainer/WebSocketsignalling/Clientmode/WebRTCmultiplayerclient"]
 layout_mode = 0
 offset_left = 98.0308
 offset_top = -34.9594
@@ -464,14 +433,14 @@ offset_right = 166.031
 offset_bottom = -20.9594
 text = "null"
 
-[node name="VSeparator" type="VSeparator" parent="WebSocketsignalling"]
+[node name="VSeparator" type="VSeparator" parent="TabContainer/VBox/TabContainer/WebSocketsignalling"]
 layout_mode = 0
 offset_left = 347.879
 offset_top = 5.087
 offset_right = 358.879
 offset_bottom = 45.087
 
-[node name="client_id" type="LineEdit" parent="WebSocketsignalling"]
+[node name="client_id" type="LineEdit" parent="TabContainer/VBox/TabContainer/WebSocketsignalling"]
 layout_mode = 0
 offset_left = 178.0
 offset_top = 6.0
@@ -479,14 +448,14 @@ offset_right = 262.0
 offset_bottom = 37.0
 editable = false
 
-[node name="Label" type="Label" parent="WebSocketsignalling/client_id"]
+[node name="Label" type="Label" parent="TabContainer/VBox/TabContainer/WebSocketsignalling/client_id"]
 layout_mode = 0
 offset_left = -165.0
 offset_right = -17.0
 offset_bottom = 26.0
 text = "websocket clientid:"
 
-[node name="autoconnect" type="CheckBox" parent="WebSocketsignalling"]
+[node name="autoconnect" type="CheckBox" parent="TabContainer/VBox/TabContainer/WebSocketsignalling"]
 layout_mode = 0
 offset_left = 150.0
 offset_top = 38.0
@@ -495,21 +464,13 @@ offset_bottom = 69.0
 button_pressed = true
 text = "autoconnect"
 
-[node name="MQTTsignalling" type="ColorRect" parent="."]
+[node name="MQTTsignalling" type="ColorRect" parent="TabContainer"]
 visible = false
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = 25.0
-offset_top = 48.0
-offset_right = -14.0
-offset_bottom = -221.0
-grow_horizontal = 2
-grow_vertical = 2
+layout_mode = 2
 color = Color(0.215686, 0.145098, 0.294118, 1)
+metadata/_tab_index = 1
 
-[node name="Servermode" type="Control" parent="MQTTsignalling"]
+[node name="Servermode" type="Control" parent="TabContainer/MQTTsignalling"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -521,7 +482,7 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("11")
 
-[node name="WebRTCmultiplayerserver" type="Control" parent="MQTTsignalling/Servermode"]
+[node name="WebRTCmultiplayerserver" type="Control" parent="TabContainer/MQTTsignalling/Servermode"]
 anchors_preset = 0
 offset_left = 2.8562
 offset_top = 47.5227
@@ -529,7 +490,7 @@ offset_right = 229.856
 offset_bottom = 129.523
 script = ExtResource("10")
 
-[node name="StartWebRTCmultiplayer" type="Button" parent="MQTTsignalling/Servermode/WebRTCmultiplayerserver"]
+[node name="StartWebRTCmultiplayer" type="Button" parent="TabContainer/MQTTsignalling/Servermode/WebRTCmultiplayerserver"]
 layout_mode = 0
 offset_left = 37.1438
 offset_top = 13.4773
@@ -538,7 +499,7 @@ offset_bottom = 44.4773
 toggle_mode = true
 text = "StartWebrtc server"
 
-[node name="statuslabel" type="Label" parent="MQTTsignalling/Servermode/WebRTCmultiplayerserver"]
+[node name="statuslabel" type="Label" parent="TabContainer/MQTTsignalling/Servermode/WebRTCmultiplayerserver"]
 layout_mode = 0
 offset_left = 199.144
 offset_top = 7.4773
@@ -546,14 +507,14 @@ offset_right = 239.144
 offset_bottom = 33.4773
 text = "null"
 
-[node name="ClientsList" type="OptionButton" parent="MQTTsignalling/Servermode"]
+[node name="ClientsList" type="OptionButton" parent="TabContainer/MQTTsignalling/Servermode"]
 layout_mode = 0
 offset_left = 43.0
 offset_top = 40.0
 offset_right = 180.999
 offset_bottom = 60.0
 
-[node name="Clientmode" type="Control" parent="MQTTsignalling"]
+[node name="Clientmode" type="Control" parent="TabContainer/MQTTsignalling"]
 visible = false
 anchors_preset = 0
 anchor_right = 1.0
@@ -564,7 +525,7 @@ offset_right = -14.6655
 offset_bottom = -14.077
 script = ExtResource("15")
 
-[node name="WebRTCmultiplayerclient" type="Control" parent="MQTTsignalling/Clientmode"]
+[node name="WebRTCmultiplayerclient" type="Control" parent="TabContainer/MQTTsignalling/Clientmode"]
 anchors_preset = 0
 offset_left = -3.0
 offset_top = 9.0
@@ -572,7 +533,7 @@ offset_right = 135.0
 offset_bottom = 35.0
 script = ExtResource("14")
 
-[node name="StartWebRTCmultiplayer" type="Button" parent="MQTTsignalling/Clientmode/WebRTCmultiplayerclient"]
+[node name="StartWebRTCmultiplayer" type="Button" parent="TabContainer/MQTTsignalling/Clientmode/WebRTCmultiplayerclient"]
 layout_mode = 0
 offset_left = 8.4729
 offset_top = 15.0
@@ -581,7 +542,7 @@ offset_bottom = 35.0
 toggle_mode = true
 text = "StartWebrtc client"
 
-[node name="statuslabel" type="Label" parent="MQTTsignalling/Clientmode/WebRTCmultiplayerclient"]
+[node name="statuslabel" type="Label" parent="TabContainer/MQTTsignalling/Clientmode/WebRTCmultiplayerclient"]
 layout_mode = 0
 offset_left = 8.4729
 offset_top = 38.5227
@@ -589,7 +550,7 @@ offset_right = 50.4729
 offset_bottom = 59.5227
 text = "null"
 
-[node name="brokeraddress" type="OptionButton" parent="MQTTsignalling"]
+[node name="brokeraddress" type="OptionButton" parent="TabContainer/MQTTsignalling"]
 layout_mode = 0
 offset_left = 5.0
 offset_top = 6.0
@@ -604,7 +565,7 @@ popup/item_2/id = 2
 popup/item_3/text = "5.161.75.32"
 popup/item_3/id = 3
 
-[node name="roomname" type="LineEdit" parent="MQTTsignalling"]
+[node name="roomname" type="LineEdit" parent="TabContainer/MQTTsignalling"]
 layout_mode = 0
 offset_left = 115.0
 offset_top = 35.0
@@ -612,7 +573,7 @@ offset_right = 195.0
 offset_bottom = 66.0
 text = "lettuce"
 
-[node name="Label" type="Label" parent="MQTTsignalling/roomname"]
+[node name="Label" type="Label" parent="TabContainer/MQTTsignalling/roomname"]
 layout_mode = 0
 offset_left = -105.0
 offset_top = 5.0
@@ -620,14 +581,14 @@ offset_right = -11.0
 offset_bottom = 31.0
 text = "Roomname:"
 
-[node name="VSeparator" type="VSeparator" parent="MQTTsignalling"]
+[node name="VSeparator" type="VSeparator" parent="TabContainer/MQTTsignalling"]
 layout_mode = 0
 offset_left = 378.0
 offset_top = 26.0
 offset_right = 389.0
 offset_bottom = 66.0
 
-[node name="mqttautoconnect" type="CheckBox" parent="MQTTsignalling"]
+[node name="mqttautoconnect" type="CheckBox" parent="TabContainer/MQTTsignalling"]
 layout_mode = 0
 offset_left = 199.0
 offset_top = 37.0
@@ -637,7 +598,7 @@ button_pressed = true
 action_mode = 0
 text = "mqtt autoconnect"
 
-[node name="client_id" type="LineEdit" parent="MQTTsignalling"]
+[node name="client_id" type="LineEdit" parent="TabContainer/MQTTsignalling"]
 layout_mode = 0
 offset_left = 218.0
 offset_top = 71.0
@@ -645,7 +606,7 @@ offset_right = 325.0
 offset_bottom = 102.0
 editable = false
 
-[node name="Label" type="Label" parent="MQTTsignalling/client_id"]
+[node name="Label" type="Label" parent="TabContainer/MQTTsignalling/client_id"]
 layout_mode = 0
 offset_left = -124.0
 offset_top = 10.0
@@ -653,7 +614,7 @@ offset_right = -20.0
 offset_bottom = 36.0
 text = "mqtt clientid:"
 
-[node name="autoconnect" type="CheckBox" parent="MQTTsignalling"]
+[node name="autoconnect" type="CheckBox" parent="TabContainer/MQTTsignalling"]
 layout_mode = 0
 offset_left = 429.0
 offset_top = 16.0
@@ -662,7 +623,7 @@ offset_bottom = 47.0
 button_pressed = true
 text = "autoconnect"
 
-[node name="StartMQTT" type="Button" parent="MQTTsignalling"]
+[node name="StartMQTT" type="Button" parent="TabContainer/MQTTsignalling"]
 layout_mode = 0
 offset_left = 297.0
 offset_top = 9.0
@@ -671,7 +632,7 @@ offset_bottom = 40.0
 toggle_mode = true
 text = "Start mqtt"
 
-[node name="statuslabel" type="Label" parent="MQTTsignalling/StartMQTT"]
+[node name="statuslabel" type="Label" parent="TabContainer/MQTTsignalling/StartMQTT"]
 layout_mode = 0
 offset_left = 100.19
 offset_top = 3.10048
@@ -679,7 +640,7 @@ offset_right = 151.19
 offset_bottom = 29.1005
 text = "Off"
 
-[node name="MQTT" parent="MQTTsignalling" instance=ExtResource("14_c5n2c")]
+[node name="MQTT" parent="TabContainer/MQTTsignalling" instance=ExtResource("14_c5n2c")]
 verbose_level = 0
 
 [node name="PlayerConnections" type="ColorRect" parent="."]
@@ -863,19 +824,19 @@ text = "0.1"
 [connection signal="item_selected" from="ProtocolModes/TabContainer/HBox/NetworkOptions" to="." method="_on_NetworkOptions_item_selected"]
 [connection signal="item_selected" from="ProtocolModes/TabContainer/NetworkOptionsMQTTWebRTC" to="." method="_on_NetworkOptionsMQTTWebRTC_item_selected"]
 [connection signal="toggled" from="TabContainer/VBox/UDPipdiscovery/udpenabled" to="." method="_on_udpenabled_toggled"]
-[connection signal="toggled" from="ENetMultiplayer/Servermode/StartENetmultiplayer" to="ENetMultiplayer/Servermode" method="_on_StartENetmultiplayer_toggled"]
-[connection signal="toggled" from="ENetMultiplayer/Clientmode/StartENetmultiplayer" to="ENetMultiplayer/Clientmode" method="_on_StartENetmultiplayer_toggled"]
-[connection signal="toggled" from="WebSocketMultiplayer/Servermode/StartWebSocketmultiplayer" to="WebSocketMultiplayer/Servermode" method="_on_StartWebSocketmultiplayer_toggled"]
-[connection signal="toggled" from="WebSocketMultiplayer/Clientmode/StartWebSocketmultiplayer" to="WebSocketMultiplayer/Clientmode" method="_on_StartWebSocketmultiplayer_toggled"]
-[connection signal="toggled" from="WebSocketsignalling/Servermode/WebRTCmultiplayerserver/StartWebRTCmultiplayer" to="WebSocketsignalling/Servermode/WebRTCmultiplayerserver" method="_on_StartWebRTCmultiplayer_toggled"]
-[connection signal="toggled" from="WebSocketsignalling/Clientmode/WebRTCmultiplayerclient/StartWebRTCmultiplayer" to="WebSocketsignalling/Clientmode/WebRTCmultiplayerclient" method="_on_StartWebRTCmultiplayer_toggled"]
-[connection signal="toggled" from="MQTTsignalling/Servermode/WebRTCmultiplayerserver/StartWebRTCmultiplayer" to="MQTTsignalling/Servermode/WebRTCmultiplayerserver" method="_on_StartWebRTCmultiplayer_toggled"]
-[connection signal="toggled" from="MQTTsignalling/Clientmode/WebRTCmultiplayerclient/StartWebRTCmultiplayer" to="MQTTsignalling/Clientmode/WebRTCmultiplayerclient" method="_on_StartWebRTCmultiplayer_toggled"]
-[connection signal="button_down" from="MQTTsignalling/brokeraddress" to="." method="_on_brokeraddress_button_down"]
-[connection signal="gui_input" from="MQTTsignalling/mqttautoconnect" to="." method="_on_mqttautoconnect_gui_input"]
-[connection signal="mouse_entered" from="MQTTsignalling/mqttautoconnect" to="." method="_on_mqttautoconnect_mouse_entered"]
-[connection signal="pressed" from="MQTTsignalling/mqttautoconnect" to="." method="_on_mqttautoconnect_pressed"]
-[connection signal="toggled" from="MQTTsignalling/StartMQTT" to="MQTTsignalling/Servermode" method="_on_StartServer_toggled"]
+[connection signal="toggled" from="TabContainer/VBox/TabContainer/ENetMultiplayer/Servermode/StartENetmultiplayer" to="TabContainer/VBox/TabContainer/ENetMultiplayer/Servermode" method="_on_StartENetmultiplayer_toggled"]
+[connection signal="toggled" from="TabContainer/VBox/TabContainer/ENetMultiplayer/Clientmode/StartENetmultiplayer" to="TabContainer/VBox/TabContainer/ENetMultiplayer/Clientmode" method="_on_StartENetmultiplayer_toggled"]
+[connection signal="toggled" from="TabContainer/VBox/TabContainer/WebSocketMultiplayer/Servermode/StartWebSocketmultiplayer" to="TabContainer/VBox/TabContainer/WebSocketMultiplayer/Servermode" method="_on_StartWebSocketmultiplayer_toggled"]
+[connection signal="toggled" from="TabContainer/VBox/TabContainer/WebSocketMultiplayer/Clientmode/StartWebSocketmultiplayer" to="TabContainer/VBox/TabContainer/WebSocketMultiplayer/Clientmode" method="_on_StartWebSocketmultiplayer_toggled"]
+[connection signal="toggled" from="TabContainer/VBox/TabContainer/WebSocketsignalling/Servermode/WebRTCmultiplayerserver/StartWebRTCmultiplayer" to="TabContainer/VBox/TabContainer/WebSocketsignalling/Servermode/WebRTCmultiplayerserver" method="_on_StartWebRTCmultiplayer_toggled"]
+[connection signal="toggled" from="TabContainer/VBox/TabContainer/WebSocketsignalling/Clientmode/WebRTCmultiplayerclient/StartWebRTCmultiplayer" to="TabContainer/VBox/TabContainer/WebSocketsignalling/Clientmode/WebRTCmultiplayerclient" method="_on_StartWebRTCmultiplayer_toggled"]
+[connection signal="toggled" from="TabContainer/MQTTsignalling/Servermode/WebRTCmultiplayerserver/StartWebRTCmultiplayer" to="TabContainer/MQTTsignalling/Servermode/WebRTCmultiplayerserver" method="_on_StartWebRTCmultiplayer_toggled"]
+[connection signal="toggled" from="TabContainer/MQTTsignalling/Clientmode/WebRTCmultiplayerclient/StartWebRTCmultiplayer" to="TabContainer/MQTTsignalling/Clientmode/WebRTCmultiplayerclient" method="_on_StartWebRTCmultiplayer_toggled"]
+[connection signal="button_down" from="TabContainer/MQTTsignalling/brokeraddress" to="." method="_on_brokeraddress_button_down"]
+[connection signal="gui_input" from="TabContainer/MQTTsignalling/mqttautoconnect" to="." method="_on_mqttautoconnect_gui_input"]
+[connection signal="mouse_entered" from="TabContainer/MQTTsignalling/mqttautoconnect" to="." method="_on_mqttautoconnect_mouse_entered"]
+[connection signal="pressed" from="TabContainer/MQTTsignalling/mqttautoconnect" to="." method="_on_mqttautoconnect_pressed"]
+[connection signal="toggled" from="TabContainer/MQTTsignalling/StartMQTT" to="TabContainer/MQTTsignalling/Servermode" method="_on_StartServer_toggled"]
 [connection signal="item_selected" from="PlayerConnections/HBoxMain/VBoxContainer/HBox_players/PlayerList" to="PlayerConnections" method="_on_PlayerList_item_selected"]
 [connection signal="toggled" from="PlayerConnections/HBoxMain/VBoxContainer/RecordingFeature/Vox" to="PlayerConnections/HBoxMain/VBoxContainer/RecordingFeature" method="_on_vox_toggled"]
 [connection signal="gui_input" from="PlayerConnections/HBoxMain/VBoxContainer/RecordingFeature/VoxThreshold" to="PlayerConnections/HBoxMain/VBoxContainer/RecordingFeature" method="_on_vox_threshold_gui_input"]

@@ -2,7 +2,15 @@ extends Control
 
 
 @onready var clientsignalling = get_parent()
-@onready var PlayerConnections = get_node("../../../PlayerConnections")
+var NetworkGateway
+var PlayerConnections
+
+func _ready():
+	var n = self
+	while n.name != "NetworkGateway":
+		n = n.get_parent()
+	NetworkGateway = n
+	PlayerConnections = NetworkGateway.get_node("PlayerConnections")
 
 func client_ice_candidate_created(mid_name, index_name, sdp_name):
 	clientsignalling.sendpacket_toserver({"subject":"ice_candidate", "mid_name":mid_name, "index_name":index_name, "sdp_name":sdp_name})

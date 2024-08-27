@@ -7,7 +7,7 @@ extends Control
 @onready var StartMQTT = SetupMQTTsignal.get_node("StartMQTT")
 @onready var StartMQTTstatuslabel = SetupMQTTsignal.get_node("StartMQTT/statuslabel")
 
-@onready var NetworkGateway = get_node("../..")
+@onready var NetworkGateway = get_node("../../..")
 
 var roomname = ""
 var wclientid = 0
@@ -39,7 +39,7 @@ func choosefromopenservers():
 	var lselectedserver = null
 	for ss in openserversconnections:
 		if openserversconnections[ss] < Nmaxnconnectionstoserver:
-			if lselectedserver == null or openserversconnections[ss] > openserversconnections[selectedserver]:
+			if lselectedserver == null or openserversconnections[ss] > openserversconnections[lselectedserver]:
 				lselectedserver = ss
 	if lselectedserver != null:
 		selectedserver = lselectedserver

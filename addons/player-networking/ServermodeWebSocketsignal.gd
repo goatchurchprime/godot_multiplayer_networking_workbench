@@ -1,6 +1,6 @@
 extends Control
 
-@onready var NetworkGateway = get_node("../..")
+@onready var NetworkGateway = get_node("../../../../..")
 var websocketserver = null
 const websocketprotocol = "webrtc-signalling"
 
