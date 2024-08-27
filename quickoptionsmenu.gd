@@ -52,6 +52,7 @@ func _on_new_card_pressed():
 	var data = { }
 	var jj = get_node("../SubViewportContainer/SubViewport").canvas_transform.affine_inverse()
 	data["gpos"] = jj*get_global_mouse_position() + Vector2(0,80)
+	data["letter"] = "*next"
 	var sid = multiplayerauthority.get_multiplayer_authority()
 	multiplayerauthority.rpc_id(sid, "spawn", data)
 
@@ -62,3 +63,10 @@ func _on_sub_viewport_container_mouse_entered():
 	subviewpointcontainerhasmouse = true
 func _on_sub_viewport_container_mouse_exited():
 	subviewpointcontainerhasmouse = false
+
+
+func _on_physics_toggled(toggled_on):
+	var spawnobjects = get_node("../SubViewportContainer/SubViewport/SyncObjects/SpawnedObjects")
+	for c in spawnobjects.get_children():
+		c.freeze = not toggled_on
+	pass # Replace with function body.

@@ -67,12 +67,10 @@ func spawnfunction(data):
 	print(" -- spawnfunction ", data, multiplayer.get_unique_id(), " ", multiplayer.is_server())
 	var k = spawntoyscene.instantiate()
 	if data.has("letter"):
-		k.get_node("Label").text = data["letter"]
-	else:
-		k.get_node("Label").text = letters[xx]
-		xx += 1
-	k.global_position = data["gpos"]
-	k.get_node("MultiplayerSynchronizer").rpc_config("set_multiplayer_authority", {"call_local":true, "rpc_mode":MultiplayerAPI.RPC_MODE_ANY_PEER})
+		if data["letter"] == "*next":
+			data["letter"] = letters[xx]
+			xx += 1
+	k.postspawnfunctionsetup(data)
 	return k
 
 func spawnnexttoy(gpos):

@@ -22,7 +22,9 @@ noise = SubResource("FastNoiseLite_sqhgx")
 
 [node name="spawnedtoy" type="RigidBody2D"]
 input_pickable = true
+gravity_scale = 0.01
 freeze = true
+freeze_mode = 1
 script = ExtResource("1_idxh0")
 
 [node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="."]
@@ -34,6 +36,11 @@ shape = SubResource("RectangleShape2D_5qp8h")
 [node name="Sprite2D" type="Sprite2D" parent="."]
 modulate = Color(0.54902, 0.419608, 1, 1)
 texture = SubResource("NoiseTexture2D_t03b6")
+
+[node name="Polygon2D" type="Polygon2D" parent="."]
+visible = false
+color = Color(0.0431373, 1, 0.0470588, 1)
+polygon = PackedVector2Array(0, 0, 20, 0, 0, 20)
 
 [node name="Label" type="Label" parent="."]
 offset_left = -11.0
@@ -51,7 +58,3 @@ offset_right = 3.0
 offset_bottom = 38.0
 mouse_filter = 2
 color = Color(1, 1, 0.027451, 1)
-
-[connection signal="body_entered" from="." to="." method="_on_body_entered"]
-[connection signal="mouse_entered" from="." to="." method="mouseentered"]
-[connection signal="mouse_exited" from="." to="." method="mouseexited"]

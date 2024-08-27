@@ -79,6 +79,11 @@ prefix = "playercount"
 layout_mode = 2
 text = "New Card"
 
+[node name="Physics" type="Button" parent="QuickOptions"]
+layout_mode = 2
+toggle_mode = true
+text = "Physics"
+
 [node name="SubViewportContainer" type="SubViewportContainer" parent="."]
 layout_mode = 0
 offset_right = 512.0
@@ -99,6 +104,7 @@ region_enabled = true
 region_rect = Rect2(0, 0, 1800, 1500)
 
 [node name="Players" type="Node2D" parent="SubViewportContainer/SubViewport"]
+z_index = 900
 position = Vector2(-0.000152588, 400)
 
 [node name="LocalPlayer" parent="SubViewportContainer/SubViewport/Players" instance=ExtResource("2")]
@@ -142,6 +148,7 @@ playersnodepath = NodePath("../SubViewportContainer/SubViewport/Players")
 [connection signal="toggled" from="QuickOptions/CSButton" to="QuickOptions" method="_on_cs_button_toggled"]
 [connection signal="toggled" from="QuickOptions/CCButton" to="QuickOptions" method="_on_cc_button_toggled"]
 [connection signal="pressed" from="QuickOptions/NewCard" to="QuickOptions" method="_on_new_card_pressed"]
+[connection signal="toggled" from="QuickOptions/Physics" to="QuickOptions" method="_on_physics_toggled"]
 [connection signal="mouse_entered" from="SubViewportContainer" to="QuickOptions" method="_on_sub_viewport_container_mouse_entered"]
 [connection signal="mouse_exited" from="SubViewportContainer" to="QuickOptions" method="_on_sub_viewport_container_mouse_exited"]
 [connection signal="body_entered" from="SubViewportContainer/SubViewport/Players/LocalPlayer" to="SubViewportContainer/SubViewport/SyncObjects" method="_on_local_player_body_entered"]
