@@ -9,8 +9,9 @@ extends Panel
 # make a new timeline visualizer that shows the jitter of the recent incoming packets
 
 @export var remoteservers = [ "127.0.0.1" ]
-@export var playersnodepath : NodePath = "/root/Main/Players"
+@export var playersnodepath : NodePath = ""
 @export var localplayerscene : String = "" # "res://controlplayer.tscn"
+var Dconnectedplayerscount = 0
 
 enum NETWORK_PROTOCOL { ENET = 0, 
 						WEBSOCKET = 1,
@@ -35,7 +36,6 @@ const errordecodes = { ERR_ALREADY_IN_USE:"ERR_ALREADY_IN_USE",
 					   ERR_CANT_CREATE:"ERR_CANT_CREATE"
 					 }
 var rng = RandomNumberGenerator.new()
-
 	
 func _ready():
 	for rs in remoteservers:
@@ -235,8 +235,11 @@ func setnetworkoff():
 func _data_channel_received(channel: Object):
 	print("_data_channel_received ", channel)
 
-
-
+func set_vox_on():
+	$PlayerConnections/HBoxMain/VBoxContainer/RecordingFeature/Vox.button_pressed = true
+	var voxthreshold = 0.09
+	$PlayerConnections/HBoxMain/VBoxContainer/RecordingFeature.voxthreshhold = voxthreshold
+	$PlayerConnections/HBoxMain/VBoxContainer/RecordingFeature/VoxThreshold.material.set_shader_parameter("voxthreshhold", voxthreshold)
 
 
 

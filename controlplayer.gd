@@ -1,9 +1,11 @@
-extends Node2D
+extends Area2D
 
-var localavatarvelocity = Vector2()
 var batvelocity = 200
 var clientawaitingspawnpoint = false
 var nextframeisfirst = false
+
+var minmouseposition = Vector2(300 - 1800/2, 400 - 1500/2)
+var maxmouseposition = Vector2(300 + 1800/2, 400 + 1500/2)
 
 # The PF_functions are called by the PlayerConnections object and the 
 # PlayerFrame node which is a child of this player node and handles 
@@ -18,7 +20,7 @@ func PF_initlocalplayer():
 	randomize()
 	position.y += randi()%300
 	modulate = Color.YELLOW
-	$ColorRect/Label.text = possibleusernames[randi()%len(possibleusernames)]
+	$Label.text = possibleusernames[randi()%len(possibleusernames)]
 
 # Called on connection to server so we can get ready
 func PF_connectedtoserver():
@@ -48,8 +50,8 @@ func spawnpointreceivedfromserver(sfd):
 # Data about ourself that is sent to the other players on connection
 func PF_datafornewconnectedplayer():
 	var avatardata = { "avatarsceneresource":scene_file_path, 
-						"labeltext":$ColorRect/Label.text
-						}
+						"labeltext":$Label.text
+					 }
 
 	# if we are the server then we should send them a spawn point
 	if multiplayer.is_server():
@@ -65,7 +67,7 @@ func PF_datafornewconnectedplayer():
 # The receiver of the the above function after the scene 
 # specified by avatarsceneresource has been instanced
 func PF_startupdatafromconnectedplayer(avatardata, localplayer):
-	$ColorRect/Label.text = avatardata["labeltext"]
+	$Label.text = avatardata["labeltext"]
 	if "framedata0" in avatardata:
 		get_node("PlayerFrame").networkedavatarthinnedframedata(avatardata["framedata0"])
 	else:
@@ -78,12 +80,11 @@ func PF_startupdatafromconnectedplayer(avatardata, localplayer):
 func PF_processlocalavatarposition(delta):
 	if clientawaitingspawnpoint:
 		return false
-	var vec = Vector2((-1 if Input.is_action_pressed("ui_left") else 0) + (1 if Input.is_action_pressed("ui_right") else 0), 
-						(-1 if Input.is_action_pressed("ui_up") else 0) + (1 if Input.is_action_pressed("ui_down") else 0))
-	var mousecommandvelocity = get_node("/root/Main/JoystickControls").mousecommandvelocity
-	localavatarvelocity = vec + mousecommandvelocity
-	position = Vector2(clamp(position.x + localavatarvelocity.x*batvelocity*delta, 65, 500), 
-					   clamp(position.y + localavatarvelocity.y*batvelocity*delta, 7, 339))
+
+	if get_window().has_focus():
+		var quickoptions = get_node("../../../../QuickOptions")
+		if quickoptions.subviewpointcontainerhasmouse:
+			global_position = get_global_mouse_position().clamp(minmouseposition, maxmouseposition)
 	return true
 	
 func PF_avatartoframedata():
@@ -103,9 +104,8 @@ func PF_framedatatoavatar(fd):
 	if fd.has(NCONSTANTS.CFI_SPEAKING):
 		$SpeakingIcon.visible = fd[NCONSTANTS.CFI_SPEAKING]
 
-	
 func playername():
-	return $ColorRect/Label.text 
+	return $Label.text 
 
 static func PF_changethinnedframedatafordoppelganger(fd, doppelnetoffset, isframe0):
 	fd[NCONSTANTS.CFI_TIMESTAMP] += doppelnetoffset
