@@ -159,15 +159,24 @@ popup/item_3/text = "As necessary"
 popup/item_3/id = 3
 metadata/_tab_index = 1
 
-[node name="UDPipdiscovery" type="ColorRect" parent="."]
+[node name="TabContainer" type="TabContainer" parent="."]
 layout_mode = 0
-offset_left = 11.0
+offset_left = 6.0
 offset_top = 48.0
-offset_right = 419.0
-offset_bottom = 85.0
+offset_right = 642.0
+offset_bottom = 164.0
+current_tab = 0
+tabs_visible = false
+
+[node name="VBox" type="VBoxContainer" parent="TabContainer"]
+layout_mode = 2
+metadata/_tab_index = 0
+
+[node name="UDPipdiscovery" type="ColorRect" parent="TabContainer/VBox"]
+layout_mode = 2
 color = Color(0.270588, 0.235294, 0.0509804, 1)
 
-[node name="Servermode" type="Control" parent="UDPipdiscovery"]
+[node name="Servermode" type="Control" parent="TabContainer/VBox/UDPipdiscovery"]
 anchors_preset = 0
 offset_left = 242.0
 offset_top = 3.0
@@ -175,7 +184,7 @@ offset_right = 364.0
 offset_bottom = 24.0
 script = ExtResource("5")
 
-[node name="broadcastperiod" type="LineEdit" parent="UDPipdiscovery/Servermode"]
+[node name="broadcastperiod" type="LineEdit" parent="TabContainer/VBox/UDPipdiscovery/Servermode"]
 layout_mode = 0
 offset_left = 84.0
 offset_top = 1.0
@@ -183,7 +192,7 @@ offset_right = 151.062
 offset_bottom = 32.0
 text = "2.0"
 
-[node name="Label" type="Label" parent="UDPipdiscovery/Servermode/broadcastperiod"]
+[node name="Label" type="Label" parent="TabContainer/VBox/UDPipdiscovery/Servermode/broadcastperiod"]
 layout_mode = 0
 offset_left = -73.0
 offset_top = 3.0
@@ -191,7 +200,7 @@ offset_right = -9.0
 offset_bottom = 29.0
 text = "interval:"
 
-[node name="ColorRect" type="ColorRect" parent="UDPipdiscovery/Servermode"]
+[node name="ColorRect" type="ColorRect" parent="TabContainer/VBox/UDPipdiscovery/Servermode"]
 layout_mode = 0
 offset_left = 146.0
 offset_top = 6.0
@@ -199,7 +208,7 @@ offset_right = 150.0
 offset_bottom = 27.0
 color = Color(0.968627, 0.933333, 0.0431373, 1)
 
-[node name="broadcastport" type="LineEdit" parent="UDPipdiscovery"]
+[node name="broadcastport" type="LineEdit" parent="TabContainer/VBox/UDPipdiscovery"]
 layout_mode = 0
 offset_left = 85.7593
 offset_top = 3.0
@@ -207,14 +216,14 @@ offset_right = 143.759
 offset_bottom = 27.0
 text = "4546"
 
-[node name="Label" type="Label" parent="UDPipdiscovery/broadcastport"]
+[node name="Label" type="Label" parent="TabContainer/VBox/UDPipdiscovery/broadcastport"]
 layout_mode = 0
 offset_left = -80.7593
 offset_right = -12.7593
 offset_bottom = 26.0
 text = "udp port"
 
-[node name="Clientmode" type="Control" parent="UDPipdiscovery"]
+[node name="Clientmode" type="Control" parent="TabContainer/VBox/UDPipdiscovery"]
 anchors_preset = 0
 offset_left = 275.0
 offset_top = 22.0
@@ -222,7 +231,7 @@ offset_right = 337.0
 offset_bottom = 27.0
 script = ExtResource("6")
 
-[node name="udpenabled" type="CheckBox" parent="UDPipdiscovery"]
+[node name="udpenabled" type="CheckBox" parent="TabContainer/VBox/UDPipdiscovery"]
 layout_mode = 0
 offset_left = 154.879
 offset_top = 3.0
@@ -230,6 +239,10 @@ offset_right = 225.879
 offset_bottom = 27.0
 button_pressed = true
 text = "enable"
+
+[node name="TabContainer" type="TabContainer" parent="TabContainer/VBox"]
+visible = false
+layout_mode = 2
 
 [node name="ENetMultiplayer" type="ColorRect" parent="."]
 visible = false
@@ -849,7 +862,7 @@ text = "0.1"
 [connection signal="item_selected" from="ProtocolModes/ProtocolOptions" to="." method="_on_ProtocolOptions_item_selected"]
 [connection signal="item_selected" from="ProtocolModes/TabContainer/HBox/NetworkOptions" to="." method="_on_NetworkOptions_item_selected"]
 [connection signal="item_selected" from="ProtocolModes/TabContainer/NetworkOptionsMQTTWebRTC" to="." method="_on_NetworkOptionsMQTTWebRTC_item_selected"]
-[connection signal="toggled" from="UDPipdiscovery/udpenabled" to="." method="_on_udpenabled_toggled"]
+[connection signal="toggled" from="TabContainer/VBox/UDPipdiscovery/udpenabled" to="." method="_on_udpenabled_toggled"]
 [connection signal="toggled" from="ENetMultiplayer/Servermode/StartENetmultiplayer" to="ENetMultiplayer/Servermode" method="_on_StartENetmultiplayer_toggled"]
 [connection signal="toggled" from="ENetMultiplayer/Clientmode/StartENetmultiplayer" to="ENetMultiplayer/Clientmode" method="_on_StartENetmultiplayer_toggled"]
 [connection signal="toggled" from="WebSocketMultiplayer/Servermode/StartWebSocketmultiplayer" to="WebSocketMultiplayer/Servermode" method="_on_StartWebSocketmultiplayer_toggled"]

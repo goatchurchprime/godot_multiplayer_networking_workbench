@@ -74,8 +74,8 @@ func _process(delta):
 func startwebsocketsignalclient():
 	assert (websocketclient == null)
 	websocketclient = WebSocketPeer.new()
-	var portnumber = int(NetworkGateway.get_node("NetworkOptions/portnumber").text)
-	var ns = NetworkGateway.get_node("NetworkOptions").selected
+	var portnumber = int(NetworkGateway.NetworkOptions_portnumber.text)
+	var ns = NetworkGateway.NetworkOptions.selected
 	var serverIPnumber = NetworkGateway.NetworkOptions.get_item_text(ns).split(" ", 1)[0]
 	var wsurl = "ws://%s:%d" % [serverIPnumber, portnumber]
 	print("Websocketclient connect to: ", wsurl)

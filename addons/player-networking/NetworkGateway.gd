@@ -17,6 +17,7 @@ var Dconnectedplayerscount = 0
 @onready var NetworkOptions = $ProtocolModes/TabContainer/HBox/NetworkOptions
 @onready var NetworkOptions_portnumber = $ProtocolModes/TabContainer/HBox/portnumber
 @onready var NetworkOptionsMQTTWebRTC = $ProtocolModes/TabContainer/NetworkOptionsMQTTWebRTC
+@onready var UDPipdiscovery = $TabContainer/VBox/UDPipdiscovery
 
 enum NETWORK_PROTOCOL { ENET = 0, 
 						WEBSOCKET = 1,
@@ -96,7 +97,7 @@ func _on_ProtocolOptions_item_selected(np):
 	$MQTTsignalling.visible = selectasmqttwebrtc
 	$MQTTsignalling/Servermode.visible = false
 	$MQTTsignalling/Clientmode.visible = false
-	$UDPipdiscovery.visible = NetworkOptions.visible and (not OS.has_feature("Server")) and (not OS.has_feature("HTML5"))
+	UDPipdiscovery.visible = NetworkOptions.visible and (not OS.has_feature("Server")) and (not OS.has_feature("HTML5"))
 	$ENetMultiplayer.visible = selectasenet
 	$ENetMultiplayer/Servermode.visible = false
 	$ENetMultiplayer/Clientmode.visible = false
@@ -119,10 +120,10 @@ func _on_NetworkOptions_item_selected(ns):
 			print("closing connection ", $PlayerConnections.LocalPlayer.get_node("PlayerFrame").networkID, multiplayer.multiplayer_peer)
 		$PlayerConnections._server_disconnected()
 	assert ($PlayerConnections.LocalPlayer.get_node("PlayerFrame").networkID == 0)
-	if $UDPipdiscovery/Servermode.is_processing():
-		$UDPipdiscovery/Servermode.stopUDPbroadcasting()
-	if $UDPipdiscovery/Clientmode.is_processing():
-		$UDPipdiscovery/Clientmode.stopUDPreceiving()
+	if UDPipdiscovery.get_node("Servermode").is_processing():
+		UDPipdiscovery.get_node("Servermode").stopUDPbroadcasting()
+	if UDPipdiscovery.get_node("Clientmode").is_processing():
+		UDPipdiscovery.get_node("Clientmode").stopUDPreceiving()
 	$ENetMultiplayer/Servermode/StartENetmultiplayer.button_pressed = false
 	$ENetMultiplayer/Clientmode/StartENetmultiplayer.button_pressed = false
 	$WebSocketMultiplayer/Servermode/StartWebSocketmultiplayer.button_pressed = false
@@ -144,16 +145,16 @@ func _on_NetworkOptions_item_selected(ns):
 	var selectaswebrtcwebsocket = (np == NETWORK_PROTOCOL.WEBRTC_WEBSOCKETSIGNAL)	
 
 	if selectasoff:
-		$UDPipdiscovery.visible = (not OS.has_feature("Server")) and (not OS.has_feature("HTML5"))
+		UDPipdiscovery.visible = (not OS.has_feature("Server")) and (not OS.has_feature("HTML5"))
 	else:
-		$UDPipdiscovery.visible = selectUDPipdiscoveryserver or selectassearchingclient
+		UDPipdiscovery.visible = selectUDPipdiscoveryserver or selectassearchingclient
 	assert (not $MQTTsignalling.visible)
 	ProtocolOptions.disabled = not selectasoff
-	$UDPipdiscovery/Servermode.visible = selectasserver
-	if selectUDPipdiscoveryserver and $UDPipdiscovery/udpenabled.button_pressed:
-		$UDPipdiscovery/Servermode.startUDPbroadcasting()
+	UDPipdiscovery.get_node("Servermode").visible = selectasserver
+	if selectUDPipdiscoveryserver and UDPipdiscovery.get_node("udpenabled").button_pressed:
+		UDPipdiscovery.get_node("Servermode").startUDPbroadcasting()
 	if selectassearchingclient:
-		$UDPipdiscovery/Clientmode.startUDPreceiving()
+		UDPipdiscovery.get_node("Clientmode").startUDPreceiving()
 	
 	if selectasenet:
 		$ENetMultiplayer/Servermode.visible = selectasserver

@@ -5,6 +5,8 @@ const broadcastudpipnum = "255.255.255.255"
 const broadcastserverheader = "GodotServer_here!"
 var udpdiscoveryreceivingserver = null
 
+@onready var NetworkGateway = get_node("../../../..")
+
 func _ready():
 	set_process(false)
 
@@ -32,7 +34,6 @@ func _process(delta):
 		print("Received: ", spkt, " from ", peer.get_packet_ip())
 		if spkt[0] == broadcastserverheader:
 			var likelyserveraddresses =  spkt[1].substr(1).split(",")  if len(spkt) > 1 and spkt[1][0] == "@"  else [ ]
-			var NetworkGateway = get_node("../..")
 			var NetworkOptions = NetworkGateway.NetworkOptions
 			var receivedIPnumber = peer.get_packet_ip()
 			if not (receivedIPnumber in likelyserveraddresses):
