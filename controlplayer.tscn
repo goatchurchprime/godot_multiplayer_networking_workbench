@@ -1,4 +1,4 @@
-[gd_scene load_steps=8 format=3 uid="uid://dhd8tliyhvtiw"]
+[gd_scene load_steps=9 format=3 uid="uid://dhd8tliyhvtiw"]
 
 [ext_resource type="Script" path="res://controlplayer.gd" id="1"]
 [ext_resource type="Texture2D" uid="uid://b3ueu15i4oe2k" path="res://addons/player-networking/AudioStreamPlayer3D.svg" id="2_6jomj"]
@@ -12,6 +12,8 @@ colors = PackedColorArray(0, 0, 0, 1, 0.902003, 0.902003, 0.902003, 1, 0.658823,
 gradient = SubResource("Gradient_s8w0r")
 fill = 2
 fill_from = Vector2(0.5, 0.5)
+
+[sub_resource type="AudioStreamOpusChunked" id="AudioStreamOpusChunked_i52lg"]
 
 [sub_resource type="Gradient" id="Gradient_y7cr2"]
 offsets = PackedFloat32Array(0, 0.645714, 1)
@@ -45,6 +47,7 @@ text = "Remoteplayer"
 horizontal_alignment = 1
 
 [node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="."]
+stream = SubResource("AudioStreamOpusChunked_i52lg")
 
 [node name="SpeakingIcon" type="Sprite2D" parent="."]
 position = Vector2(1, 16)

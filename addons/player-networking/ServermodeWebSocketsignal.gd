@@ -1,6 +1,6 @@
 extends Control
 
-@onready var NetworkGateway = get_node("../..")
+@onready var NetworkGateway = find_parent("NetworkGateway")
 var websocketserver = null
 const websocketprotocol = "webrtc-signalling"
 
@@ -85,19 +85,19 @@ func _process(delta):
 		websocketclientsconnected.erase(id)
 
 func startwebsocketsignalserver():
-	var portnumber = int(NetworkGateway.get_node("NetworkOptions/portnumber").text)
+	var portnumber = int(NetworkGateway.NetworkOptions_portnumber.text)
 	tcpserver = TCPServer.new()
 	var E = tcpserver.listen(portnumber, "*")
 	if E == OK:
 		set_process(true)
-		get_node("../client_id").text = "server"
+		get_node("../HBox/client_id").text = "server"
 		$ClientsList.clear()
 		$ClientsList.add_item("1", 1)
 		$ClientsList.selected = 0
 		websocketclientsconnected.clear()
 		websocketclientsconnecting.clear()
 		$WebRTCmultiplayerserver/StartWebRTCmultiplayer.disabled = false
-		if get_node("../autoconnect").button_pressed:
+		if get_node("../HBox/autoconnect").button_pressed:
 			$WebRTCmultiplayerserver/StartWebRTCmultiplayer.button_pressed = true
 
 	else:
@@ -109,7 +109,7 @@ func startwebsocketsignalserver():
 func stopwebsocketsignalserver():
 	assert (websocketserver != null)
 	set_process(false)
-	get_node("../client_id").text = ""
+	get_node("../HBox/client_id").text = ""
 	websocketserver = null
 	
 	for id in websocketclientsconnected.keys():

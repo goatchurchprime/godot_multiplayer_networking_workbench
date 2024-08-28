@@ -4,7 +4,7 @@ signal mqttsig_connection_established(wclientid)   # (badly named: applies to we
 signal mqttsig_packet_received(v)
 signal mqttsig_connection_closed()
 
-@onready var NetworkGateway = get_node("../..")
+@onready var NetworkGateway = find_parent("NetworkGateway")
 var websocketclient = null
 const websocketprotocol = "webrtc-signalling"
 var wclientid = 0
@@ -20,11 +20,11 @@ func isconnectedtosignalserver():
 		
 func wsc_connection_closed(was_clean_close: bool):
 	print("wsc_connection_closed ", was_clean_close)
-	get_parent().get_parent().setnetworkoff()
+	NetworkGateway.setnetworkoff()
 	
 func wsc_connection_error():
 	print("wsc_connection_error")
-	get_parent().get_parent().setnetworkoff()
+	NetworkGateway.setnetworkoff()
 	
 func stopwebsocketsignalclient():
 	assert (websocketclient != null)
@@ -40,10 +40,10 @@ func wsc_data_received():
 			if v["subject"] == "firstmessage":
 				assert (wclientid == -1)
 				wclientid = v["clientid"]
-				get_node("../client_id").text = str(wclientid)
+				get_node("../HBox/client_id").text = str(wclientid)
 				emit_signal("mqttsig_connection_established", int(wclientid))
 				$WebRTCmultiplayerclient/StartWebRTCmultiplayer.disabled = false
-				if get_node("../autoconnect").button_pressed:
+				if get_node("../HBox/autoconnect").button_pressed:
 					$WebRTCmultiplayerclient/StartWebRTCmultiplayer.button_pressed = true
 			else:
 				emit_signal("mqttsig_packet_received", v)
@@ -65,8 +65,8 @@ func _process(delta):
 		print("WebSocket closed with code: %d, reason %s. Clean: %s" % [code, reason, code != -1])
 		set_process(false) # Stop processing.
 		websocketclient = null
-		get_parent().get_parent().setnetworkoff()
-		get_node("../client_id").text = "off"
+		NetworkGateway.setnetworkoff()
+		get_node("../HBox/client_id").text = "off"
 		wclientid = 0
 		emit_signal("mqttsig_connection_closed")
 
@@ -74,19 +74,17 @@ func _process(delta):
 func startwebsocketsignalclient():
 	assert (websocketclient == null)
 	websocketclient = WebSocketPeer.new()
-	var portnumber = int(NetworkGateway.get_node("NetworkOptions/portnumber").text)
-	var ns = NetworkGateway.get_node("NetworkOptions").selected
-	var serverIPnumber = NetworkGateway.get_node("NetworkOptions").get_item_text(ns).split(" ", 1)[0]
+	var portnumber = int(NetworkGateway.NetworkOptions_portnumber.text)
+	var ns = NetworkGateway.NetworkOptions.selected
+	var serverIPnumber = NetworkGateway.NetworkOptions.get_item_text(ns).split(" ", 1)[0]
 	var wsurl = "ws://%s:%d" % [serverIPnumber, portnumber]
 	print("Websocketclient connect to: ", wsurl)
 	var clienterror = websocketclient.connect_to_url(wsurl)
 	if clienterror == OK:
 		set_process(true)
-		get_node("../client_id").text = "connecting"
+		get_node("../HBox/client_id").text = "connecting"
 		wclientid = -1
 
 	else:
 		print("Bad start websocket")
-		get_parent().get_parent().setnetworkoff()
-
-
+		NetworkGateway.setnetworkoff()

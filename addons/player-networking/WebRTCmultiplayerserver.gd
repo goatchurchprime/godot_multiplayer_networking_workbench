@@ -1,7 +1,7 @@
 extends Control
 
 @onready var serversignalling = get_parent()
-@onready var PlayerConnections = get_node("../../../PlayerConnections")
+@onready var NetworkGateway = find_parent("NetworkGateway")
 
 
 func _on_StartWebRTCmultiplayer_toggled(button_pressed):
@@ -17,7 +17,7 @@ func _on_StartWebRTCmultiplayer_toggled(button_pressed):
 		assert (multiplayer.server_relay)
 		assert (multiplayer.get_unique_id() == 1)
 		assert (get_tree().multiplayer_poll)
-		PlayerConnections._connected_to_server()
+		NetworkGateway.PlayerConnections._connected_to_server()
 
 		serversignalling.mqttsig_client_connected.connect(server_client_connected) 
 		serversignalling.mqttsig_client_disconnected.connect(server_client_disconnected) 
@@ -27,7 +27,7 @@ func _on_StartWebRTCmultiplayer_toggled(button_pressed):
 		serversignalling.mqttsig_client_connected.disconnect(server_client_connected) 
 		serversignalling.mqttsig_client_disconnected.disconnect(server_client_disconnected) 
 		serversignalling.mqttsig_packet_received.disconnect(server_packet_received) 
-		PlayerConnections._server_disconnected()
+		NetworkGateway.PlayerConnections._server_disconnected()
 
 
 func server_ice_candidate_created(mid_name, index_name, sdp_name, id):
@@ -39,7 +39,7 @@ func server_session_description_created(type, data, id):
 	var peerconnection = multiplayer.multiplayer_peer.get_peer(id)
 	peerconnection["connection"].set_local_description(type, data)
 	serversignalling.sendpacket_toclient(id, {"subject":"offer", "data":data})
-	PlayerConnections.connectionlog("send offer %s" %id)
+	NetworkGateway.PlayerConnections.connectionlog("send offer %s" %id)
 
 func server_client_connected(id):
 	print("server client connected ", id)
@@ -63,16 +63,16 @@ func server_packet_received(id, v):
 		multiplayer.multiplayer_peer.add_peer(peerconnection, id)
 		var webrtcpeererror = peerconnection.create_offer()
 		print("peer create offer ", peerconnection, "id ", id, " Error:", webrtcpeererror, " connstate")
-		PlayerConnections.connectionlog("create offer %s" %id)
-
+		NetworkGateway.PlayerConnections.connectionlog("create offer %s" %id)
+		
 	elif v["subject"] == "answer":
 		print("Check equal multiplayer ", multiplayer, " vs ", multiplayer)
 		assert (multiplayer.multiplayer_peer.is_class("WebRTCMultiplayerPeer"))
 		var peerconnection = multiplayer.multiplayer_peer.get_peer(id)
 		peerconnection["connection"].set_remote_description("answer", v["data"])
-		PlayerConnections.connectionlog("receive answer %s" %id)
+		NetworkGateway.PlayerConnections.connectionlog("receive answer %s" %id)
 
 	elif v["subject"] == "ice_candidate":
 		var peerconnection = multiplayer.multiplayer_peer.get_peer(id)
 		peerconnection["connection"].add_ice_candidate(v["mid_name"], v["index_name"], v["sdp_name"])
-		PlayerConnections.connectionlog("receive ice_candidate %s" %id)
+		NetworkGateway.PlayerConnections.connectionlog("receive ice_candidate %s" %id)

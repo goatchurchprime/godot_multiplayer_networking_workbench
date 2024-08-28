@@ -117,10 +117,13 @@ script = ExtResource("1")
 position_smoothing_enabled = true
 drag_horizontal_enabled = true
 drag_vertical_enabled = true
-drag_left_margin = 0.8
-drag_top_margin = 0.8
-drag_right_margin = 0.8
-drag_bottom_margin = 0.8
+drag_left_margin = 0.7
+drag_top_margin = 0.6
+drag_right_margin = 0.6
+drag_bottom_margin = 0.6
+
+[node name="AudioListener2D" type="AudioListener2D" parent="SubViewportContainer/SubViewport/Players/LocalPlayer"]
+current = true
 
 [node name="SyncObjects" type="Node2D" parent="SubViewportContainer/SubViewport"]
 z_index = 1
@@ -134,7 +137,6 @@ spawn_path = NodePath("../SpawnedObjects")
 [node name="SpawnedObjects" type="Node2D" parent="SubViewportContainer/SubViewport/SyncObjects"]
 
 [node name="NetworkGateway" parent="." instance=ExtResource("3")]
-visible = false
 z_index = 1000
 layout_mode = 0
 offset_left = 4.0

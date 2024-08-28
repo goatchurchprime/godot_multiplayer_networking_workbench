@@ -1,4 +1,4 @@
-extends ColorRect
+extends Control
 
 
 ## PlayerConnections 
@@ -6,8 +6,13 @@ extends ColorRect
 ## This object receives and manages all networked multiplayer connections and 
 ## disconnections
 
-@onready var playerframelocalgdscriptfile = get_parent().scene_file_path.get_base_dir() + "/PlayerFrameLocal.gd"
-@onready var playerframeremotegdscriptfile = get_parent().scene_file_path.get_base_dir() + "/PlayerFrameRemote.gd"
+
+# We should implement this to log what passes through
+# https://docs.godotengine.org/en/stable/classes/class_multiplayerapiextension.html
+
+@onready var NetworkGateway = find_parent("NetworkGateway")
+@onready var playerframelocalgdscriptfile = NetworkGateway.scene_file_path.get_base_dir() + "/PlayerFrameLocal.gd"
+@onready var playerframeremotegdscriptfile = NetworkGateway.scene_file_path.get_base_dir() + "/PlayerFrameRemote.gd"
 
 var LocalPlayer = null    # Points into Players for my current self
 var ServerPlayer = null   # Should be myself if I am a server
@@ -20,13 +25,12 @@ var deferred_playerconnections = null
 # player node to remove
 var remote_players_idstonodenames = { }
 
-@onready var NetworkGateway = get_node("..")
 @onready var PlayersNode = NetworkGateway.get_node(NetworkGateway.playersnodepath)
-@onready var PlayerList = $HBoxMain/VBoxContainer/HBox_players/PlayerList
+@onready var PlayerList = $VBox/HBox/PlayerList
 
 func _ready():
-	assert ($HBoxMain/VBoxContainer/HBox_players/PlayerList.item_count == 1)
-	if $HBoxMain/VBoxContainer/HBox_players/PlayerList.selected == -1:  $HBoxMain/VBoxContainer/HBox_players/PlayerList.selected = 0
+	assert (PlayerList.item_count == 1)
+	if PlayerList.selected == -1:  PlayerList.selected = 0
 
 	# Overwrite the localplayer node if the local player scene is defined
 	if PlayersNode.get_child_count() == 1 and NetworkGateway.localplayerscene:
@@ -43,6 +47,7 @@ func _ready():
 		playerframe.set_script(load(playerframelocalgdscriptfile))
 		LocalPlayer.add_child(playerframe)
 	else:
+		print(LocalPlayer.get_node("PlayerFrame").get_script().resource_path)
 		assert (LocalPlayer.get_node("PlayerFrame").get_script().resource_path == playerframelocalgdscriptfile)
 	LocalPlayer.get_node("PlayerFrame").PlayerConnections = self
 
@@ -66,23 +71,23 @@ func _ready():
 
 var prevtxt = ""
 func clearconnectionlog():
-	$HBoxMain/ConnectionLog.text = ""
+	$VBox/ConnectionLog.text = ""
 	prevtxt = ""
 
 func connectionlog(txt):
 	if not txt.ends_with("\n"):
 		if txt == prevtxt:
-			$HBoxMain/ConnectionLog.text += "."
+			$VBox/ConnectionLog.text += "."
 		else:
 			if prevtxt != "":
-				$HBoxMain/ConnectionLog.text += "\n"
-			$HBoxMain/ConnectionLog.text += txt
+				$VBox/ConnectionLog.text += "\n"
+			$VBox/ConnectionLog.text += txt
 			prevtxt = txt
 	else:
-		$HBoxMain/ConnectionLog.text += txt
+		$VBox/ConnectionLog.text += txt
 		prevtxt = ""
-	var cl = $HBoxMain/ConnectionLog.get_line_count()
-	$HBoxMain/ConnectionLog.set_caret_line(cl)
+	var cl = $VBox/ConnectionLog.get_line_count()
+	$VBox/ConnectionLog.set_caret_line(cl)
 
 func _connected_to_server():
 	var serverisself = multiplayer.is_server()
@@ -117,7 +122,7 @@ func _server_disconnected():
 		return
 	var serverisself = multiplayer.is_server()
 	connectionlog("_server(self) disconnect\n" if serverisself else "_server disconnect\n")
-	var ns = NetworkGateway.get_node("NetworkOptions").selected
+	var ns = NetworkGateway.NetworkOptions.selected
 	print("(networkplayer_server_disconnected ", serverisself)
 	multiplayer.multiplayer_peer = OfflineMultiplayerPeer.new()
 	print("setnetworkpeer OfflineMultiplayerPeer")
@@ -130,15 +135,15 @@ func _server_disconnected():
 	assert (NetworkGateway.Dconnectedplayerscount == 0)
 	print("*** _server_disconnected ", LocalPlayer.get_node("PlayerFrame").networkID)
 	updateplayerlist()
-	if NetworkGateway.get_node("ProtocolOptions").selected == NetworkGateway.NETWORK_PROTOCOL.ENET:
-		NetworkGateway.get_node("ENetMultiplayer/Servermode/StartENetmultiplayer").set_pressed_no_signal(false)
-		NetworkGateway.get_node("ENetMultiplayer/Clientmode/StartENetmultiplayer").set_pressed_no_signal(false)
-	if NetworkGateway.get_node("ProtocolOptions").selected == NetworkGateway.NETWORK_PROTOCOL.WEBRTC_MQTTSIGNAL:
-		NetworkGateway.get_node("MQTTsignalling/Servermode/WebRTCmultiplayerserver/StartWebRTCmultiplayer").set_pressed_no_signal(false)
-		NetworkGateway.get_node("MQTTsignalling/Clientmode/WebRTCmultiplayerclient/StartWebRTCmultiplayer").set_pressed_no_signal(false)
-		NetworkGateway.get_node("NetworkOptionsMQTTWebRTC").selected = NetworkGateway.NETWORK_OPTIONS.NETWORK_OFF
+	if NetworkGateway.ProtocolOptions.selected == NetworkGateway.NETWORK_PROTOCOL.ENET:
+		NetworkGateway.ENetMultiplayer.get_node("HBox/Servermode/StartENetmultiplayer").set_pressed_no_signal(false)
+		NetworkGateway.ENetMultiplayer.get_node("HBox/Clientmode/StartENetmultiplayer").set_pressed_no_signal(false)
+	if NetworkGateway.ProtocolOptions.selected == NetworkGateway.NETWORK_PROTOCOL.WEBRTC_MQTTSIGNAL:
+		NetworkGateway.MQTTsignalling.get_node("VBox/Servermode/WebRTCmultiplayerserver/StartWebRTCmultiplayer").set_pressed_no_signal(false)
+		NetworkGateway.MQTTsignalling.get_node("VBox/Clientmode/WebRTCmultiplayerclient/StartWebRTCmultiplayer").set_pressed_no_signal(false)
+		NetworkGateway.NetworkOptionsMQTTWebRTC.selected = NetworkGateway.NETWORK_OPTIONS.NETWORK_OFF
 	else:
-		NetworkGateway.get_node("NetworkOptions").selected = NetworkGateway.NETWORK_OPTIONS.NETWORK_OFF
+		NetworkGateway.NetworkOptions.selected = NetworkGateway.NETWORK_OPTIONS.NETWORK_OFF
 		
 
 func updateplayerlist():
@@ -198,10 +203,10 @@ func _on_Doppelganger_toggled(button_pressed):
 		var doppelnetoffset = get_node("../DoppelgangerPanel").getnetoffset()
 		LocalPlayer.PF_changethinnedframedatafordoppelganger(fd, doppelnetoffset, true)
 		avatardata["framedata0"] = fd
-		var doppelgangerdelay = get_node("..").getrandomdoppelgangerdelay(true)
+		var doppelgangerdelay = NetworkGateway.getrandomdoppelgangerdelay(true)
 		await get_tree().create_timer(doppelgangerdelay*0.001).timeout
 		LocalPlayer.get_node("PlayerFrame").doppelgangernode = newremoteplayer(avatardata)
-		LocalPlayer.get_node("PlayerFrame").NetworkGatewayForDoppelganger = get_node("..")
+		LocalPlayer.get_node("PlayerFrame").NetworkGatewayForDoppelganger = NetworkGateway
 	else:
 		DoppelgangerPanel.seteditable(true)
 		LocalPlayer.get_node("PlayerFrame").doppelgangernode = null
@@ -276,7 +281,7 @@ func removeremoteplayer(playernodename):
 
 func _on_PlayerList_item_selected(index):
 	var player = PlayersNode.get_child(index)
-	$HBoxMain/VBoxContainer/HBoxLag/PlayerLagSlider.value = 0.0 if player == LocalPlayer else player.get_node("PlayerFrame").laglatency
+	$VBox/HBox/PlayerLagSlider.value = 0.0 if player == LocalPlayer else player.get_node("PlayerFrame").laglatency
 	
 func _on_PlayerLagSlider_value_changed(value):
 	var player = PlayersNode.get_child(PlayerList.selected)
