@@ -56,7 +56,7 @@ func _ready():
 	if NetworkOptions.selected == -1:  NetworkOptions.selected = 0
 	if ProtocolOptions.selected == -1:  ProtocolOptions.selected = 3
 	if NetworkOptionsMQTTWebRTC.selected == -1:  NetworkOptionsMQTTWebRTC.selected = 0
-	if MQTTsignalling.get_node("brokeraddress").selected == -1:  MQTTsignalling.get_node("brokeraddress").selected = 0
+	if MQTTsignalling.get_node("VBox/HBox/brokeraddress").selected == -1:  MQTTsignalling.get_node("VBox/HBox/brokeraddress").selected = 0
 	if OS.has_feature("HTML5"):
 		NetworkOptions.set_item_disabled(NETWORK_OPTIONS.LOCAL_NETWORK,  true)
 		NetworkOptions.set_item_disabled(NETWORK_OPTIONS.AS_SERVER,  true)
@@ -76,9 +76,9 @@ func initialstatemqttwebrtc(networkoption, roomname, brokeraddress):
 	ProtocolOptions.selected = NETWORK_PROTOCOL.WEBRTC_MQTTSIGNAL
 	_on_ProtocolOptions_item_selected(ProtocolOptions.selected)
 	if brokeraddress:
-		MQTTsignalling.get_node("brokeraddress").text = brokeraddress
+		MQTTsignalling.get_node("VBox/HBox/brokeraddress").text = brokeraddress
 	if roomname:
-		MQTTsignalling.get_node("roomname").text = roomname
+		MQTTsignalling.get_node("VBox/HBox2/roomname").text = roomname
 	NetworkOptionsMQTTWebRTC.selected = networkoption
 	_on_NetworkOptionsMQTTWebRTC_item_selected(NetworkOptionsMQTTWebRTC.selected)
 
@@ -102,8 +102,8 @@ func _on_ProtocolOptions_item_selected(np):
 	$ProtocolModes/TabContainer.current_tab = (1 if selectasmqttwebrtc else 0)
 	NetworkOptionsMQTTWebRTC.visible = selectasmqttwebrtc
 	MQTTsignalling.visible = selectasmqttwebrtc
-	MQTTsignalling.get_node("Servermode").visible = false
-	MQTTsignalling.get_node("Clientmode").visible = false
+	MQTTsignalling.get_node("VBox/Servermode").visible = false
+	MQTTsignalling.get_node("VBox/Clientmode").visible = false
 	UDPipdiscovery.visible = NetworkOptions.visible and (not OS.has_feature("Server")) and (not OS.has_feature("HTML5"))
 
 	ENetMultiplayer.visible = selectasenet
