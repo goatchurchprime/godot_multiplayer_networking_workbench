@@ -1,7 +1,6 @@
 extends PanelContainer
 
 @onready var NetworkGateway = find_parent("NetworkGateway")
-@onready var PlayerConnections = NetworkGateway.get_node("PlayerConnections")
 
 func _on_StartENetmultiplayer_toggled(button_pressed):
 	if button_pressed:
@@ -16,10 +15,10 @@ func _on_StartENetmultiplayer_toggled(button_pressed):
 			return
 		
 		multiplayer.multiplayer_peer = multiplayerpeer
-		PlayerConnections.deferred_playerconnections = [ ]
+		NetworkGateway.PlayerConnections.deferred_playerconnections = [ ]
 		assert (get_tree().multiplayer_poll)
 
 
 	else:
-		PlayerConnections._server_disconnected()
+		NetworkGateway.PlayerConnections._server_disconnected()
 		

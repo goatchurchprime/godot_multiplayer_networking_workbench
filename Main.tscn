@@ -122,6 +122,9 @@ drag_top_margin = 0.8
 drag_right_margin = 0.8
 drag_bottom_margin = 0.8
 
+[node name="AudioListener2D" type="AudioListener2D" parent="SubViewportContainer/SubViewport/Players/LocalPlayer"]
+current = true
+
 [node name="SyncObjects" type="Node2D" parent="SubViewportContainer/SubViewport"]
 z_index = 1
 position = Vector2(-0.000152588, 0)
