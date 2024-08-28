@@ -4,8 +4,7 @@ extends Node2D
 func ssss(me):
 	print("ssss ", me, "  ll ", multiplayer.get_unique_id(), " ", $RigidBody2D.get_multiplayer_authority(), " :", multiplayer.get_remote_sender_id())
 
-@onready var NetworkGateway = get_node("../../../NetworkGateway")
-@onready var PlayerConnections = get_node("../../../NetworkGateway/PlayerConnections")
+@onready var NetworkGateway = find_parent("Main").get_node("NetworkGateway")
 
 var spawntoyscene = load("res://mulitplayerspawntoy.tscn")
 	
@@ -45,7 +44,7 @@ func _on_local_player_body_exited(mousetoy):
 
 func interactcurrenttoy(pressed, gpos):
 	if pressed and relmouse == null and currentmousetoy != null:
-		relmouse = PlayerConnections.LocalPlayer.global_position - currentmousetoy.get_global_position()
+		relmouse = NetworkGateway.PlayerConnections.LocalPlayer.global_position - currentmousetoy.get_global_position()
 		if currentmousetoy.z_index < topzindex:
 			topzindex += 1
 			currentmousetoy.z_index = topzindex
@@ -58,7 +57,7 @@ func interactcurrenttoy(pressed, gpos):
 
 func _process(delta):
 	if currentmousetoy != null and relmouse != null:
-		currentmousetoy.global_position = PlayerConnections.LocalPlayer.global_position - relmouse
+		currentmousetoy.global_position = NetworkGateway.PlayerConnections.LocalPlayer.global_position - relmouse
 
 
 var xx = 0
@@ -95,8 +94,8 @@ func _input(event):
 
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
 		var pp = get_node("../Players").get_child(0)
-		var pq = PlayerConnections.LocalPlayer.get_overlapping_bodies()
-		print("ppp ", PlayerConnections.LocalPlayer, pq, PlayerConnections.LocalPlayer.get_overlapping_bodies())
+		var pq = NetworkGateway.PlayerConnections.LocalPlayer.get_overlapping_bodies()
+		print("ppp ", NetworkGateway.PlayerConnections.LocalPlayer, pq, NetworkGateway.PlayerConnections.LocalPlayer.get_overlapping_bodies())
 		if len(pq) != 0:
 			currentmousetoy = pq[0]
 

@@ -106,21 +106,24 @@ spacing_bottom = -6
 spacing_top = -6
 spacing_bottom = -3
 
-[node name="NetworkGateway" type="VBoxContainer"]
+[node name="NetworkGateway" type="PanelContainer"]
 self_modulate = Color(0.32549, 0.317647, 0.317647, 1)
 offset_top = -1.0
-offset_right = 648.0
-offset_bottom = 378.0
+offset_right = 638.0
+offset_bottom = 293.0
 script = ExtResource("1")
 
-[node name="ProtocolModes" type="HBoxContainer" parent="."]
+[node name="VBox" type="VBoxContainer" parent="."]
 layout_mode = 2
 
-[node name="Label" type="Label" parent="ProtocolModes"]
+[node name="ProtocolModes" type="HBoxContainer" parent="VBox"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="VBox/ProtocolModes"]
 layout_mode = 2
 text = "Protocol:"
 
-[node name="ProtocolOptions" type="OptionButton" parent="ProtocolModes"]
+[node name="ProtocolOptions" type="OptionButton" parent="VBox/ProtocolModes"]
 layout_mode = 2
 item_count = 4
 popup/item_0/text = "ENet"
@@ -131,20 +134,20 @@ popup/item_2/id = 2
 popup/item_3/text = "WebRTC (mqtt signal)"
 popup/item_3/id = 3
 
-[node name="NetworkLabel" type="Label" parent="ProtocolModes"]
+[node name="NetworkLabel" type="Label" parent="VBox/ProtocolModes"]
 layout_mode = 2
 text = "Connection:"
 
-[node name="TabContainer" type="TabContainer" parent="ProtocolModes"]
+[node name="TabContainer" type="TabContainer" parent="VBox/ProtocolModes"]
 layout_mode = 2
 current_tab = 0
 tabs_visible = false
 
-[node name="HBox" type="HBoxContainer" parent="ProtocolModes/TabContainer"]
+[node name="HBox" type="HBoxContainer" parent="VBox/ProtocolModes/TabContainer"]
 layout_mode = 2
 metadata/_tab_index = 0
 
-[node name="NetworkOptions" type="OptionButton" parent="ProtocolModes/TabContainer/HBox"]
+[node name="NetworkOptions" type="OptionButton" parent="VBox/ProtocolModes/TabContainer/HBox"]
 layout_mode = 2
 item_count = 3
 popup/item_0/text = "Network off"
@@ -153,16 +156,16 @@ popup/item_1/id = 1
 popup/item_2/text = "Local network"
 popup/item_2/id = 2
 
-[node name="Label" type="Label" parent="ProtocolModes/TabContainer/HBox"]
+[node name="Label" type="Label" parent="VBox/ProtocolModes/TabContainer/HBox"]
 layout_mode = 2
 text = ":"
 
-[node name="portnumber" type="LineEdit" parent="ProtocolModes/TabContainer/HBox"]
+[node name="portnumber" type="LineEdit" parent="VBox/ProtocolModes/TabContainer/HBox"]
 layout_mode = 2
 tooltip_text = "Port number"
 text = "4547"
 
-[node name="NetworkOptionsMQTTWebRTC" type="OptionButton" parent="ProtocolModes/TabContainer"]
+[node name="NetworkOptionsMQTTWebRTC" type="OptionButton" parent="VBox/ProtocolModes/TabContainer"]
 visible = false
 layout_mode = 2
 item_count = 4
@@ -175,224 +178,224 @@ popup/item_3/text = "As necessary"
 popup/item_3/id = 3
 metadata/_tab_index = 1
 
-[node name="TabContainer" type="TabContainer" parent="."]
+[node name="TabContainer" type="TabContainer" parent="VBox"]
 layout_mode = 2
 current_tab = 1
 tabs_visible = false
 
-[node name="VBox" type="VBoxContainer" parent="TabContainer"]
+[node name="VBox" type="VBoxContainer" parent="VBox/TabContainer"]
 visible = false
 layout_mode = 2
 metadata/_tab_index = 0
 
-[node name="PanelContainer" type="PanelContainer" parent="TabContainer/VBox"]
+[node name="PanelContainer" type="PanelContainer" parent="VBox/TabContainer/VBox"]
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_5i8wh")
 
-[node name="UDPipdiscovery" type="HBoxContainer" parent="TabContainer/VBox/PanelContainer"]
+[node name="UDPipdiscovery" type="HBoxContainer" parent="VBox/TabContainer/VBox/PanelContainer"]
 visibility_layer = 3
 material = SubResource("CanvasItemMaterial_o112m")
 layout_mode = 2
 
-[node name="Label2" type="Label" parent="TabContainer/VBox/PanelContainer/UDPipdiscovery"]
+[node name="Label2" type="Label" parent="VBox/TabContainer/VBox/PanelContainer/UDPipdiscovery"]
 layout_mode = 2
 text = "UDP local-ip discovery --"
 
-[node name="udpenabled" type="CheckBox" parent="TabContainer/VBox/PanelContainer/UDPipdiscovery"]
+[node name="udpenabled" type="CheckBox" parent="VBox/TabContainer/VBox/PanelContainer/UDPipdiscovery"]
 layout_mode = 2
 button_pressed = true
 text = "enable"
 
-[node name="Label" type="Label" parent="TabContainer/VBox/PanelContainer/UDPipdiscovery"]
+[node name="Label" type="Label" parent="VBox/TabContainer/VBox/PanelContainer/UDPipdiscovery"]
 layout_mode = 2
 text = "port:"
 
-[node name="broadcastport" type="LineEdit" parent="TabContainer/VBox/PanelContainer/UDPipdiscovery"]
+[node name="broadcastport" type="LineEdit" parent="VBox/TabContainer/VBox/PanelContainer/UDPipdiscovery"]
 layout_mode = 2
 text = "4546"
 
-[node name="Servermode" type="HBoxContainer" parent="TabContainer/VBox/PanelContainer/UDPipdiscovery"]
+[node name="Servermode" type="HBoxContainer" parent="VBox/TabContainer/VBox/PanelContainer/UDPipdiscovery"]
 layout_mode = 2
 script = ExtResource("5")
 
-[node name="Label" type="Label" parent="TabContainer/VBox/PanelContainer/UDPipdiscovery/Servermode"]
+[node name="Label" type="Label" parent="VBox/TabContainer/VBox/PanelContainer/UDPipdiscovery/Servermode"]
 layout_mode = 2
 text = "interval:"
 
-[node name="broadcastperiod" type="LineEdit" parent="TabContainer/VBox/PanelContainer/UDPipdiscovery/Servermode"]
+[node name="broadcastperiod" type="LineEdit" parent="VBox/TabContainer/VBox/PanelContainer/UDPipdiscovery/Servermode"]
 layout_mode = 2
 text = "2.0"
 
-[node name="ColorRect" type="ColorRect" parent="TabContainer/VBox/PanelContainer/UDPipdiscovery/Servermode"]
+[node name="ColorRect" type="ColorRect" parent="VBox/TabContainer/VBox/PanelContainer/UDPipdiscovery/Servermode"]
 custom_minimum_size = Vector2(5, 0)
 layout_mode = 2
 color = Color(0.968627, 0.933333, 0.0431373, 1)
 
-[node name="Clientmode" type="Control" parent="TabContainer/VBox/PanelContainer/UDPipdiscovery"]
+[node name="Clientmode" type="Control" parent="VBox/TabContainer/VBox/PanelContainer/UDPipdiscovery"]
 layout_mode = 2
 script = ExtResource("6")
 
-[node name="TabContainer" type="TabContainer" parent="TabContainer/VBox"]
+[node name="TabContainer" type="TabContainer" parent="VBox/TabContainer/VBox"]
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_638ev")
 current_tab = 2
 tabs_visible = false
 
-[node name="ENetMultiplayer" type="PanelContainer" parent="TabContainer/VBox/TabContainer"]
+[node name="ENetMultiplayer" type="PanelContainer" parent="VBox/TabContainer/VBox/TabContainer"]
 visible = false
 layout_mode = 2
 metadata/_tab_index = 0
 
-[node name="HBox" type="HBoxContainer" parent="TabContainer/VBox/TabContainer/ENetMultiplayer"]
+[node name="HBox" type="HBoxContainer" parent="VBox/TabContainer/VBox/TabContainer/ENetMultiplayer"]
 layout_mode = 2
 
-[node name="Label" type="Label" parent="TabContainer/VBox/TabContainer/ENetMultiplayer/HBox"]
+[node name="Label" type="Label" parent="VBox/TabContainer/VBox/TabContainer/ENetMultiplayer/HBox"]
 layout_mode = 2
 text = "ENet multiplayer"
 
-[node name="autoconnect" type="CheckBox" parent="TabContainer/VBox/TabContainer/ENetMultiplayer/HBox"]
+[node name="autoconnect" type="CheckBox" parent="VBox/TabContainer/VBox/TabContainer/ENetMultiplayer/HBox"]
 layout_mode = 2
 button_pressed = true
 text = "autoconnect"
 
-[node name="Servermode" type="PanelContainer" parent="TabContainer/VBox/TabContainer/ENetMultiplayer/HBox"]
+[node name="Servermode" type="PanelContainer" parent="VBox/TabContainer/VBox/TabContainer/ENetMultiplayer/HBox"]
 visible = false
 layout_mode = 2
 script = ExtResource("3")
 
-[node name="StartENetmultiplayer" type="Button" parent="TabContainer/VBox/TabContainer/ENetMultiplayer/HBox/Servermode"]
+[node name="StartENetmultiplayer" type="Button" parent="VBox/TabContainer/VBox/TabContainer/ENetMultiplayer/HBox/Servermode"]
 layout_mode = 2
 toggle_mode = true
 text = "Start ENet server"
 
-[node name="Clientmode" type="PanelContainer" parent="TabContainer/VBox/TabContainer/ENetMultiplayer/HBox"]
+[node name="Clientmode" type="PanelContainer" parent="VBox/TabContainer/VBox/TabContainer/ENetMultiplayer/HBox"]
 visible = false
 layout_mode = 2
 script = ExtResource("7")
 
-[node name="StartENetmultiplayer" type="Button" parent="TabContainer/VBox/TabContainer/ENetMultiplayer/HBox/Clientmode"]
+[node name="StartENetmultiplayer" type="Button" parent="VBox/TabContainer/VBox/TabContainer/ENetMultiplayer/HBox/Clientmode"]
 layout_mode = 2
 toggle_mode = true
 text = "Start ENet client"
 
-[node name="WebSocketMultiplayer" type="PanelContainer" parent="TabContainer/VBox/TabContainer"]
+[node name="WebSocketMultiplayer" type="PanelContainer" parent="VBox/TabContainer/VBox/TabContainer"]
 visible = false
 layout_mode = 2
 metadata/_tab_index = 1
 
-[node name="HBox" type="HBoxContainer" parent="TabContainer/VBox/TabContainer/WebSocketMultiplayer"]
+[node name="HBox" type="HBoxContainer" parent="VBox/TabContainer/VBox/TabContainer/WebSocketMultiplayer"]
 layout_mode = 2
 
-[node name="Label" type="Label" parent="TabContainer/VBox/TabContainer/WebSocketMultiplayer/HBox"]
+[node name="Label" type="Label" parent="VBox/TabContainer/VBox/TabContainer/WebSocketMultiplayer/HBox"]
 layout_mode = 2
 text = "WebSocket multiplayer"
 
-[node name="autoconnect" type="CheckBox" parent="TabContainer/VBox/TabContainer/WebSocketMultiplayer/HBox"]
+[node name="autoconnect" type="CheckBox" parent="VBox/TabContainer/VBox/TabContainer/WebSocketMultiplayer/HBox"]
 layout_mode = 2
 button_pressed = true
 text = "autoconnect"
 
-[node name="Servermode" type="PanelContainer" parent="TabContainer/VBox/TabContainer/WebSocketMultiplayer/HBox"]
+[node name="Servermode" type="PanelContainer" parent="VBox/TabContainer/VBox/TabContainer/WebSocketMultiplayer/HBox"]
 visible = false
 layout_mode = 2
 script = ExtResource("8")
 
-[node name="StartWebSocketmultiplayer" type="Button" parent="TabContainer/VBox/TabContainer/WebSocketMultiplayer/HBox/Servermode"]
+[node name="StartWebSocketmultiplayer" type="Button" parent="VBox/TabContainer/VBox/TabContainer/WebSocketMultiplayer/HBox/Servermode"]
 layout_mode = 2
 toggle_mode = true
 text = "Start WebSocket server"
 
-[node name="Clientmode" type="PanelContainer" parent="TabContainer/VBox/TabContainer/WebSocketMultiplayer/HBox"]
+[node name="Clientmode" type="PanelContainer" parent="VBox/TabContainer/VBox/TabContainer/WebSocketMultiplayer/HBox"]
 layout_mode = 2
 script = ExtResource("12")
 
-[node name="StartWebSocketmultiplayer" type="Button" parent="TabContainer/VBox/TabContainer/WebSocketMultiplayer/HBox/Clientmode"]
+[node name="StartWebSocketmultiplayer" type="Button" parent="VBox/TabContainer/VBox/TabContainer/WebSocketMultiplayer/HBox/Clientmode"]
 layout_mode = 2
 toggle_mode = true
 text = "Start WebSocket client"
 
-[node name="WebSocketsignalling" type="PanelContainer" parent="TabContainer/VBox/TabContainer"]
+[node name="WebSocketsignalling" type="PanelContainer" parent="VBox/TabContainer/VBox/TabContainer"]
 layout_mode = 2
 metadata/_tab_index = 2
 
-[node name="VBox" type="VBoxContainer" parent="TabContainer/VBox/TabContainer/WebSocketsignalling"]
+[node name="VBox" type="VBoxContainer" parent="VBox/TabContainer/VBox/TabContainer/WebSocketsignalling"]
 layout_mode = 2
 
-[node name="HBox" type="HBoxContainer" parent="TabContainer/VBox/TabContainer/WebSocketsignalling/VBox"]
+[node name="HBox" type="HBoxContainer" parent="VBox/TabContainer/VBox/TabContainer/WebSocketsignalling/VBox"]
 layout_mode = 2
 
-[node name="Label" type="Label" parent="TabContainer/VBox/TabContainer/WebSocketsignalling/VBox/HBox"]
+[node name="Label" type="Label" parent="VBox/TabContainer/VBox/TabContainer/WebSocketsignalling/VBox/HBox"]
 layout_mode = 2
 text = "WebRTC with websocket signalling:"
 
-[node name="autoconnect" type="CheckBox" parent="TabContainer/VBox/TabContainer/WebSocketsignalling/VBox/HBox"]
+[node name="autoconnect" type="CheckBox" parent="VBox/TabContainer/VBox/TabContainer/WebSocketsignalling/VBox/HBox"]
 layout_mode = 2
 button_pressed = true
 text = "autoconnect"
 
-[node name="Label2" type="Label" parent="TabContainer/VBox/TabContainer/WebSocketsignalling/VBox/HBox"]
+[node name="Label2" type="Label" parent="VBox/TabContainer/VBox/TabContainer/WebSocketsignalling/VBox/HBox"]
 layout_mode = 2
 text = "websocket clientid:"
 
-[node name="client_id" type="LineEdit" parent="TabContainer/VBox/TabContainer/WebSocketsignalling/VBox/HBox"]
+[node name="client_id" type="LineEdit" parent="VBox/TabContainer/VBox/TabContainer/WebSocketsignalling/VBox/HBox"]
 layout_mode = 2
 editable = false
 
-[node name="Servermode" type="HBoxContainer" parent="TabContainer/VBox/TabContainer/WebSocketsignalling/VBox"]
+[node name="Servermode" type="HBoxContainer" parent="VBox/TabContainer/VBox/TabContainer/WebSocketsignalling/VBox"]
 visible = false
 layout_mode = 2
 script = ExtResource("9")
 
-[node name="WebRTCmultiplayerserver" type="HBoxContainer" parent="TabContainer/VBox/TabContainer/WebSocketsignalling/VBox/Servermode"]
+[node name="WebRTCmultiplayerserver" type="HBoxContainer" parent="VBox/TabContainer/VBox/TabContainer/WebSocketsignalling/VBox/Servermode"]
 layout_mode = 2
 script = ExtResource("10")
 
-[node name="StartWebRTCmultiplayer" type="Button" parent="TabContainer/VBox/TabContainer/WebSocketsignalling/VBox/Servermode/WebRTCmultiplayerserver"]
+[node name="StartWebRTCmultiplayer" type="Button" parent="VBox/TabContainer/VBox/TabContainer/WebSocketsignalling/VBox/Servermode/WebRTCmultiplayerserver"]
 layout_mode = 2
 toggle_mode = true
 text = "StartWebrtc server"
 
-[node name="statuslabel" type="Label" parent="TabContainer/VBox/TabContainer/WebSocketsignalling/VBox/Servermode/WebRTCmultiplayerserver"]
+[node name="statuslabel" type="Label" parent="VBox/TabContainer/VBox/TabContainer/WebSocketsignalling/VBox/Servermode/WebRTCmultiplayerserver"]
 layout_mode = 2
 text = "null"
 
-[node name="ClientsList" type="OptionButton" parent="TabContainer/VBox/TabContainer/WebSocketsignalling/VBox/Servermode"]
+[node name="ClientsList" type="OptionButton" parent="VBox/TabContainer/VBox/TabContainer/WebSocketsignalling/VBox/Servermode"]
 layout_mode = 2
 
-[node name="Clientmode" type="HBoxContainer" parent="TabContainer/VBox/TabContainer/WebSocketsignalling/VBox"]
+[node name="Clientmode" type="HBoxContainer" parent="VBox/TabContainer/VBox/TabContainer/WebSocketsignalling/VBox"]
 layout_mode = 2
 script = ExtResource("13")
 
-[node name="WebRTCmultiplayerclient" type="HBoxContainer" parent="TabContainer/VBox/TabContainer/WebSocketsignalling/VBox/Clientmode"]
+[node name="WebRTCmultiplayerclient" type="HBoxContainer" parent="VBox/TabContainer/VBox/TabContainer/WebSocketsignalling/VBox/Clientmode"]
 layout_mode = 2
 script = ExtResource("14")
 
-[node name="StartWebRTCmultiplayer" type="Button" parent="TabContainer/VBox/TabContainer/WebSocketsignalling/VBox/Clientmode/WebRTCmultiplayerclient"]
+[node name="StartWebRTCmultiplayer" type="Button" parent="VBox/TabContainer/VBox/TabContainer/WebSocketsignalling/VBox/Clientmode/WebRTCmultiplayerclient"]
 layout_mode = 2
 toggle_mode = true
 text = "StartWebrtc client"
 
-[node name="statuslabel" type="Label" parent="TabContainer/VBox/TabContainer/WebSocketsignalling/VBox/Clientmode/WebRTCmultiplayerclient"]
+[node name="statuslabel" type="Label" parent="VBox/TabContainer/VBox/TabContainer/WebSocketsignalling/VBox/Clientmode/WebRTCmultiplayerclient"]
 layout_mode = 2
 text = "null"
 
-[node name="MQTTsignalling" type="PanelContainer" parent="TabContainer"]
+[node name="MQTTsignalling" type="PanelContainer" parent="VBox/TabContainer"]
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_e1vu8")
 script = ExtResource("12_dj107")
 metadata/_tab_index = 1
 
-[node name="VBox" type="VBoxContainer" parent="TabContainer/MQTTsignalling"]
+[node name="VBox" type="VBoxContainer" parent="VBox/TabContainer/MQTTsignalling"]
 layout_mode = 2
 
-[node name="HBox" type="HBoxContainer" parent="TabContainer/MQTTsignalling/VBox"]
+[node name="HBox" type="HBoxContainer" parent="VBox/TabContainer/MQTTsignalling/VBox"]
 layout_mode = 2
 
-[node name="Label" type="Label" parent="TabContainer/MQTTsignalling/VBox/HBox"]
+[node name="Label" type="Label" parent="VBox/TabContainer/MQTTsignalling/VBox/HBox"]
 layout_mode = 2
 text = "WebRTC with MQTT signalling:"
 
-[node name="brokeraddress" type="OptionButton" parent="TabContainer/MQTTsignalling/VBox/HBox"]
+[node name="brokeraddress" type="OptionButton" parent="VBox/TabContainer/MQTTsignalling/VBox/HBox"]
 layout_mode = 2
 item_count = 4
 popup/item_0/text = "mosquitto.doesliverpool.xyz"
@@ -403,277 +406,277 @@ popup/item_2/id = 2
 popup/item_3/text = "5.161.75.32"
 popup/item_3/id = 3
 
-[node name="MQTTUser" type="LineEdit" parent="TabContainer/MQTTsignalling/VBox/HBox"]
+[node name="MQTTUser" type="LineEdit" parent="VBox/TabContainer/MQTTsignalling/VBox/HBox"]
 layout_mode = 2
 placeholder_text = "User"
 
-[node name="MQTTPass" type="LineEdit" parent="TabContainer/MQTTsignalling/VBox/HBox"]
+[node name="MQTTPass" type="LineEdit" parent="VBox/TabContainer/MQTTsignalling/VBox/HBox"]
 layout_mode = 2
 placeholder_text = "Pass"
 
-[node name="HBox2" type="HBoxContainer" parent="TabContainer/MQTTsignalling/VBox"]
+[node name="HBox2" type="HBoxContainer" parent="VBox/TabContainer/MQTTsignalling/VBox"]
 layout_mode = 2
 
-[node name="Label3" type="Label" parent="TabContainer/MQTTsignalling/VBox/HBox2"]
+[node name="Label3" type="Label" parent="VBox/TabContainer/MQTTsignalling/VBox/HBox2"]
 layout_mode = 2
 text = "Topic:"
 
-[node name="roomname" type="LineEdit" parent="TabContainer/MQTTsignalling/VBox/HBox2"]
+[node name="roomname" type="LineEdit" parent="VBox/TabContainer/MQTTsignalling/VBox/HBox2"]
 layout_mode = 2
 text = "lettuce"
 
-[node name="Label2" type="Label" parent="TabContainer/MQTTsignalling/VBox/HBox2"]
+[node name="Label2" type="Label" parent="VBox/TabContainer/MQTTsignalling/VBox/HBox2"]
 layout_mode = 2
 text = "mqtt clientid:"
 
-[node name="client_id" type="LineEdit" parent="TabContainer/MQTTsignalling/VBox/HBox2"]
+[node name="client_id" type="LineEdit" parent="VBox/TabContainer/MQTTsignalling/VBox/HBox2"]
 layout_mode = 2
 editable = false
 
-[node name="StartMQTT" type="Button" parent="TabContainer/MQTTsignalling/VBox/HBox2"]
+[node name="StartMQTT" type="Button" parent="VBox/TabContainer/MQTTsignalling/VBox/HBox2"]
 layout_mode = 2
 toggle_mode = true
 text = "Start mqtt"
 
-[node name="statuslabel" type="Label" parent="TabContainer/MQTTsignalling/VBox/HBox2"]
+[node name="statuslabel" type="Label" parent="VBox/TabContainer/MQTTsignalling/VBox/HBox2"]
 layout_mode = 2
 text = "Off"
 
-[node name="mqttautoconnect" type="CheckBox" parent="TabContainer/MQTTsignalling/VBox/HBox2"]
+[node name="mqttautoconnect" type="CheckBox" parent="VBox/TabContainer/MQTTsignalling/VBox/HBox2"]
 layout_mode = 2
 button_pressed = true
 action_mode = 0
 text = "autoconnect"
 
-[node name="Servermode" type="HBoxContainer" parent="TabContainer/MQTTsignalling/VBox"]
+[node name="Servermode" type="HBoxContainer" parent="VBox/TabContainer/MQTTsignalling/VBox"]
 visible = false
 layout_mode = 2
 script = ExtResource("11")
 
-[node name="WebRTCmultiplayerserver" type="HBoxContainer" parent="TabContainer/MQTTsignalling/VBox/Servermode"]
+[node name="WebRTCmultiplayerserver" type="HBoxContainer" parent="VBox/TabContainer/MQTTsignalling/VBox/Servermode"]
 layout_mode = 2
 script = ExtResource("10")
 
-[node name="StartWebRTCmultiplayer" type="Button" parent="TabContainer/MQTTsignalling/VBox/Servermode/WebRTCmultiplayerserver"]
+[node name="StartWebRTCmultiplayer" type="Button" parent="VBox/TabContainer/MQTTsignalling/VBox/Servermode/WebRTCmultiplayerserver"]
 layout_mode = 2
 toggle_mode = true
 text = "StartWebrtc server"
 
-[node name="statuslabel" type="Label" parent="TabContainer/MQTTsignalling/VBox/Servermode/WebRTCmultiplayerserver"]
+[node name="statuslabel" type="Label" parent="VBox/TabContainer/MQTTsignalling/VBox/Servermode/WebRTCmultiplayerserver"]
 layout_mode = 2
 text = "null"
 
-[node name="ClientsList" type="OptionButton" parent="TabContainer/MQTTsignalling/VBox/Servermode"]
+[node name="ClientsList" type="OptionButton" parent="VBox/TabContainer/MQTTsignalling/VBox/Servermode"]
 layout_mode = 2
 
-[node name="autoconnect" type="CheckBox" parent="TabContainer/MQTTsignalling/VBox/Servermode"]
+[node name="autoconnect" type="CheckBox" parent="VBox/TabContainer/MQTTsignalling/VBox/Servermode"]
 layout_mode = 2
 button_pressed = true
 text = "autoconnect"
 
-[node name="Clientmode" type="HBoxContainer" parent="TabContainer/MQTTsignalling/VBox"]
+[node name="Clientmode" type="HBoxContainer" parent="VBox/TabContainer/MQTTsignalling/VBox"]
 layout_mode = 2
 script = ExtResource("15")
 
-[node name="WebRTCmultiplayerclient" type="HBoxContainer" parent="TabContainer/MQTTsignalling/VBox/Clientmode"]
+[node name="WebRTCmultiplayerclient" type="HBoxContainer" parent="VBox/TabContainer/MQTTsignalling/VBox/Clientmode"]
 layout_mode = 2
 script = ExtResource("14")
 
-[node name="StartWebRTCmultiplayer" type="Button" parent="TabContainer/MQTTsignalling/VBox/Clientmode/WebRTCmultiplayerclient"]
+[node name="StartWebRTCmultiplayer" type="Button" parent="VBox/TabContainer/MQTTsignalling/VBox/Clientmode/WebRTCmultiplayerclient"]
 layout_mode = 2
 toggle_mode = true
 text = "StartWebrtc client"
 
-[node name="statuslabel" type="Label" parent="TabContainer/MQTTsignalling/VBox/Clientmode/WebRTCmultiplayerclient"]
+[node name="statuslabel" type="Label" parent="VBox/TabContainer/MQTTsignalling/VBox/Clientmode/WebRTCmultiplayerclient"]
 layout_mode = 2
 text = "null"
 
-[node name="autoconnect" type="CheckBox" parent="TabContainer/MQTTsignalling/VBox/Clientmode"]
+[node name="autoconnect" type="CheckBox" parent="VBox/TabContainer/MQTTsignalling/VBox/Clientmode"]
 layout_mode = 2
 button_pressed = true
 text = "autoconnect"
 
-[node name="MQTT" parent="TabContainer/MQTTsignalling" instance=ExtResource("14_c5n2c")]
+[node name="MQTT" parent="VBox/TabContainer/MQTTsignalling" instance=ExtResource("14_c5n2c")]
 verbose_level = 0
 
-[node name="PlayerConnections" type="PanelContainer" parent="."]
+[node name="PlayerConnections" type="PanelContainer" parent="VBox"]
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_wj0xm")
 script = ExtResource("4")
 
-[node name="HBoxMain" type="HSplitContainer" parent="PlayerConnections"]
+[node name="HBoxMain" type="HSplitContainer" parent="VBox/PlayerConnections"]
 layout_mode = 2
 
-[node name="VBoxContainer" type="VBoxContainer" parent="PlayerConnections/HBoxMain"]
+[node name="VBoxContainer" type="VBoxContainer" parent="VBox/PlayerConnections/HBoxMain"]
 layout_mode = 2
 
-[node name="HBox_players" type="HBoxContainer" parent="PlayerConnections/HBoxMain/VBoxContainer"]
+[node name="HBox_players" type="HBoxContainer" parent="VBox/PlayerConnections/HBoxMain/VBoxContainer"]
 layout_mode = 2
 
-[node name="Label" type="Label" parent="PlayerConnections/HBoxMain/VBoxContainer/HBox_players"]
+[node name="Label" type="Label" parent="VBox/PlayerConnections/HBoxMain/VBoxContainer/HBox_players"]
 layout_mode = 2
 text = "Players:"
 
-[node name="PlayerList" type="OptionButton" parent="PlayerConnections/HBoxMain/VBoxContainer/HBox_players"]
+[node name="PlayerList" type="OptionButton" parent="VBox/PlayerConnections/HBoxMain/VBoxContainer/HBox_players"]
 layout_mode = 2
 size_flags_horizontal = 10
 item_count = 1
 popup/item_0/text = "me"
 
-[node name="RecordingFeature" type="HBoxContainer" parent="PlayerConnections/HBoxMain/VBoxContainer"]
+[node name="RecordingFeature" type="HBoxContainer" parent="VBox/PlayerConnections/HBoxMain/VBoxContainer"]
 layout_mode = 2
 script = ExtResource("16_hf3ik")
 
-[node name="AudioStreamPlayerMicrophone" type="AudioStreamPlayer" parent="PlayerConnections/HBoxMain/VBoxContainer/RecordingFeature"]
+[node name="AudioStreamPlayerMicrophone" type="AudioStreamPlayer" parent="VBox/PlayerConnections/HBoxMain/VBoxContainer/RecordingFeature"]
 stream = SubResource("2")
 autoplay = true
 bus = &"MicrophoneBus"
 
-[node name="PTT" type="Button" parent="PlayerConnections/HBoxMain/VBoxContainer/RecordingFeature"]
+[node name="PTT" type="Button" parent="VBox/PlayerConnections/HBoxMain/VBoxContainer/RecordingFeature"]
 layout_mode = 2
 theme_override_colors/font_pressed_color = Color(0.992157, 0.984314, 0.00392157, 1)
 theme_override_styles/pressed = SubResource("StyleBoxFlat_3abk2")
 text = "PTT"
 
-[node name="Vox" type="Button" parent="PlayerConnections/HBoxMain/VBoxContainer/RecordingFeature"]
+[node name="Vox" type="Button" parent="VBox/PlayerConnections/HBoxMain/VBoxContainer/RecordingFeature"]
 layout_mode = 2
 theme_override_styles/pressed = SubResource("StyleBoxFlat_mpv2x")
 toggle_mode = true
 text = "Vox"
 
-[node name="VoxThreshold" type="ColorRect" parent="PlayerConnections/HBoxMain/VBoxContainer/RecordingFeature"]
+[node name="VoxThreshold" type="ColorRect" parent="VBox/PlayerConnections/HBoxMain/VBoxContainer/RecordingFeature"]
 material = SubResource("ShaderMaterial_c0q00")
 layout_mode = 2
 size_flags_horizontal = 3
 color = Color(0.104768, 0.249346, 0.350987, 1)
 
-[node name="HBoxLag" type="HBoxContainer" parent="PlayerConnections/HBoxMain/VBoxContainer"]
+[node name="HBoxLag" type="HBoxContainer" parent="VBox/PlayerConnections/HBoxMain/VBoxContainer"]
 layout_mode = 2
 
-[node name="Label" type="Label" parent="PlayerConnections/HBoxMain/VBoxContainer/HBoxLag"]
+[node name="Label" type="Label" parent="VBox/PlayerConnections/HBoxMain/VBoxContainer/HBoxLag"]
 layout_mode = 2
 text = "Lag latency:"
 
-[node name="PlayerLagSlider" type="HSlider" parent="PlayerConnections/HBoxMain/VBoxContainer/HBoxLag"]
+[node name="PlayerLagSlider" type="HSlider" parent="VBox/PlayerConnections/HBoxMain/VBoxContainer/HBoxLag"]
 custom_minimum_size = Vector2(100, 0)
 layout_mode = 2
 size_flags_horizontal = 6
 max_value = 5.0
 step = 0.0
 
-[node name="LogRec" type="Button" parent="PlayerConnections/HBoxMain/VBoxContainer/HBoxLag"]
+[node name="LogRec" type="Button" parent="VBox/PlayerConnections/HBoxMain/VBoxContainer/HBoxLag"]
 layout_mode = 2
 text = "LogRec
 "
 
-[node name="ConnectionLog" type="TextEdit" parent="PlayerConnections/HBoxMain"]
+[node name="ConnectionLog" type="TextEdit" parent="VBox/PlayerConnections/HBoxMain"]
 layout_mode = 2
 
-[node name="DoppelgangerPanel" type="PanelContainer" parent="."]
+[node name="DoppelgangerPanel" type="PanelContainer" parent="VBox"]
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_uvrja")
 script = ExtResource("16_i8v6k")
 
-[node name="hbox" type="HBoxContainer" parent="DoppelgangerPanel"]
+[node name="hbox" type="HBoxContainer" parent="VBox/DoppelgangerPanel"]
 layout_mode = 2
 
-[node name="VBox_enable" type="VBoxContainer" parent="DoppelgangerPanel/hbox"]
+[node name="VBox_enable" type="VBoxContainer" parent="VBox/DoppelgangerPanel/hbox"]
 layout_mode = 2
 size_flags_horizontal = 0
 
-[node name="DoppelgangerEnable" type="CheckBox" parent="DoppelgangerPanel/hbox/VBox_enable"]
+[node name="DoppelgangerEnable" type="CheckBox" parent="VBox/DoppelgangerPanel/hbox/VBox_enable"]
 layout_mode = 2
 size_flags_horizontal = 4
 text = "DoppelgangerDD"
 
-[node name="VSeparator" type="VSeparator" parent="DoppelgangerPanel/hbox"]
+[node name="VSeparator" type="VSeparator" parent="VBox/DoppelgangerPanel/hbox"]
 layout_mode = 2
 size_flags_horizontal = 0
 
-[node name="VBox_offset" type="VBoxContainer" parent="DoppelgangerPanel/hbox"]
+[node name="VBox_offset" type="VBoxContainer" parent="VBox/DoppelgangerPanel/hbox"]
 layout_mode = 2
 size_flags_horizontal = 10
 
-[node name="Label_offset" type="Label" parent="DoppelgangerPanel/hbox/VBox_offset"]
+[node name="Label_offset" type="Label" parent="VBox/DoppelgangerPanel/hbox/VBox_offset"]
 layout_mode = 2
 text = "offset:"
 
-[node name="netoffset" type="LineEdit" parent="DoppelgangerPanel/hbox/VBox_offset"]
+[node name="netoffset" type="LineEdit" parent="VBox/DoppelgangerPanel/hbox/VBox_offset"]
 layout_mode = 2
 size_flags_vertical = 4
 theme_override_fonts/font = SubResource("FontVariation_pmwxj")
 text = "-4000"
 
-[node name="VSeparator2" type="VSeparator" parent="DoppelgangerPanel/hbox"]
+[node name="VSeparator2" type="VSeparator" parent="VBox/DoppelgangerPanel/hbox"]
 layout_mode = 2
 size_flags_horizontal = 10
 
-[node name="VBox_delaymin" type="VBoxContainer" parent="DoppelgangerPanel/hbox"]
+[node name="VBox_delaymin" type="VBoxContainer" parent="VBox/DoppelgangerPanel/hbox"]
 layout_mode = 2
 
-[node name="Label_delaymin" type="Label" parent="DoppelgangerPanel/hbox/VBox_delaymin"]
+[node name="Label_delaymin" type="Label" parent="VBox/DoppelgangerPanel/hbox/VBox_delaymin"]
 layout_mode = 2
 text = "delay min:"
 
-[node name="netdelaymin" type="LineEdit" parent="DoppelgangerPanel/hbox/VBox_delaymin"]
+[node name="netdelaymin" type="LineEdit" parent="VBox/DoppelgangerPanel/hbox/VBox_delaymin"]
 layout_mode = 2
 size_flags_vertical = 4
 theme_override_fonts/font = SubResource("FontVariation_mwhde")
 text = "70"
 
-[node name="VSeparator3" type="VSeparator" parent="DoppelgangerPanel/hbox"]
+[node name="VSeparator3" type="VSeparator" parent="VBox/DoppelgangerPanel/hbox"]
 layout_mode = 2
 size_flags_horizontal = 10
 
-[node name="VBox_netdelay" type="VBoxContainer" parent="DoppelgangerPanel/hbox"]
+[node name="VBox_netdelay" type="VBoxContainer" parent="VBox/DoppelgangerPanel/hbox"]
 layout_mode = 2
 
-[node name="Label_netdelay" type="Label" parent="DoppelgangerPanel/hbox/VBox_netdelay"]
+[node name="Label_netdelay" type="Label" parent="VBox/DoppelgangerPanel/hbox/VBox_netdelay"]
 layout_mode = 2
 text = "delay add:"
 
-[node name="netdelayadd" type="LineEdit" parent="DoppelgangerPanel/hbox/VBox_netdelay"]
+[node name="netdelayadd" type="LineEdit" parent="VBox/DoppelgangerPanel/hbox/VBox_netdelay"]
 layout_mode = 2
 theme_override_fonts/font = SubResource("FontVariation_1w4f6")
 text = "30"
 
-[node name="VSeparator4" type="VSeparator" parent="DoppelgangerPanel/hbox"]
+[node name="VSeparator4" type="VSeparator" parent="VBox/DoppelgangerPanel/hbox"]
 layout_mode = 2
 size_flags_horizontal = 10
 
-[node name="VBox_netdrop" type="VBoxContainer" parent="DoppelgangerPanel/hbox"]
+[node name="VBox_netdrop" type="VBoxContainer" parent="VBox/DoppelgangerPanel/hbox"]
 layout_mode = 2
 size_flags_horizontal = 8
 
-[node name="Label_netdrop" type="Label" parent="DoppelgangerPanel/hbox/VBox_netdrop"]
+[node name="Label_netdrop" type="Label" parent="VBox/DoppelgangerPanel/hbox/VBox_netdrop"]
 layout_mode = 2
 text = "drop out%:"
 
-[node name="netdroppc" type="LineEdit" parent="DoppelgangerPanel/hbox/VBox_netdrop"]
+[node name="netdroppc" type="LineEdit" parent="VBox/DoppelgangerPanel/hbox/VBox_netdrop"]
 layout_mode = 2
 theme_override_fonts/font = SubResource("FontVariation_8pqve")
 text = "0.1"
 
 [connection signal="gui_input" from="." to="." method="_on_gui_input"]
-[connection signal="item_selected" from="ProtocolModes/ProtocolOptions" to="." method="_on_ProtocolOptions_item_selected"]
-[connection signal="item_selected" from="ProtocolModes/TabContainer/HBox/NetworkOptions" to="." method="_on_NetworkOptions_item_selected"]
-[connection signal="item_selected" from="ProtocolModes/TabContainer/NetworkOptionsMQTTWebRTC" to="." method="_on_NetworkOptionsMQTTWebRTC_item_selected"]
-[connection signal="toggled" from="TabContainer/VBox/PanelContainer/UDPipdiscovery/udpenabled" to="." method="_on_udpenabled_toggled"]
-[connection signal="toggled" from="TabContainer/VBox/TabContainer/ENetMultiplayer/HBox/Servermode/StartENetmultiplayer" to="TabContainer/VBox/TabContainer/ENetMultiplayer/HBox/Servermode" method="_on_StartENetmultiplayer_toggled"]
-[connection signal="toggled" from="TabContainer/VBox/TabContainer/ENetMultiplayer/HBox/Clientmode/StartENetmultiplayer" to="TabContainer/VBox/TabContainer/ENetMultiplayer/HBox/Clientmode" method="_on_StartENetmultiplayer_toggled"]
-[connection signal="toggled" from="TabContainer/VBox/TabContainer/WebSocketMultiplayer/HBox/Servermode/StartWebSocketmultiplayer" to="TabContainer/VBox/TabContainer/WebSocketMultiplayer/HBox/Servermode" method="_on_StartWebSocketmultiplayer_toggled"]
-[connection signal="toggled" from="TabContainer/VBox/TabContainer/WebSocketMultiplayer/HBox/Clientmode/StartWebSocketmultiplayer" to="TabContainer/VBox/TabContainer/WebSocketMultiplayer/HBox/Clientmode" method="_on_StartWebSocketmultiplayer_toggled"]
-[connection signal="toggled" from="TabContainer/VBox/TabContainer/WebSocketsignalling/VBox/Servermode/WebRTCmultiplayerserver/StartWebRTCmultiplayer" to="TabContainer/VBox/TabContainer/WebSocketsignalling/VBox/Servermode/WebRTCmultiplayerserver" method="_on_StartWebRTCmultiplayer_toggled"]
-[connection signal="toggled" from="TabContainer/VBox/TabContainer/WebSocketsignalling/VBox/Clientmode/WebRTCmultiplayerclient/StartWebRTCmultiplayer" to="TabContainer/VBox/TabContainer/WebSocketsignalling/VBox/Clientmode/WebRTCmultiplayerclient" method="_on_StartWebRTCmultiplayer_toggled"]
-[connection signal="button_down" from="TabContainer/MQTTsignalling/VBox/HBox/brokeraddress" to="." method="_on_brokeraddress_button_down"]
-[connection signal="toggled" from="TabContainer/MQTTsignalling/VBox/HBox2/StartMQTT" to="TabContainer/MQTTsignalling/VBox/Servermode" method="_on_StartServer_toggled"]
-[connection signal="gui_input" from="TabContainer/MQTTsignalling/VBox/HBox2/mqttautoconnect" to="." method="_on_mqttautoconnect_gui_input"]
-[connection signal="mouse_entered" from="TabContainer/MQTTsignalling/VBox/HBox2/mqttautoconnect" to="." method="_on_mqttautoconnect_mouse_entered"]
-[connection signal="pressed" from="TabContainer/MQTTsignalling/VBox/HBox2/mqttautoconnect" to="." method="_on_mqttautoconnect_pressed"]
-[connection signal="toggled" from="TabContainer/MQTTsignalling/VBox/Servermode/WebRTCmultiplayerserver/StartWebRTCmultiplayer" to="TabContainer/MQTTsignalling/VBox/Servermode/WebRTCmultiplayerserver" method="_on_StartWebRTCmultiplayer_toggled"]
-[connection signal="toggled" from="TabContainer/MQTTsignalling/VBox/Clientmode/WebRTCmultiplayerclient/StartWebRTCmultiplayer" to="TabContainer/MQTTsignalling/VBox/Clientmode/WebRTCmultiplayerclient" method="_on_StartWebRTCmultiplayer_toggled"]
-[connection signal="item_selected" from="PlayerConnections/HBoxMain/VBoxContainer/HBox_players/PlayerList" to="PlayerConnections" method="_on_PlayerList_item_selected"]
-[connection signal="toggled" from="PlayerConnections/HBoxMain/VBoxContainer/RecordingFeature/Vox" to="PlayerConnections/HBoxMain/VBoxContainer/RecordingFeature" method="_on_vox_toggled"]
-[connection signal="gui_input" from="PlayerConnections/HBoxMain/VBoxContainer/RecordingFeature/VoxThreshold" to="PlayerConnections/HBoxMain/VBoxContainer/RecordingFeature" method="_on_vox_threshold_gui_input"]
-[connection signal="value_changed" from="PlayerConnections/HBoxMain/VBoxContainer/HBoxLag/PlayerLagSlider" to="PlayerConnections" method="_on_PlayerLagSlider_value_changed"]
-[connection signal="toggled" from="DoppelgangerPanel/hbox/VBox_enable/DoppelgangerEnable" to="PlayerConnections" method="_on_Doppelganger_toggled"]
+[connection signal="item_selected" from="VBox/ProtocolModes/ProtocolOptions" to="." method="_on_ProtocolOptions_item_selected"]
+[connection signal="item_selected" from="VBox/ProtocolModes/TabContainer/HBox/NetworkOptions" to="." method="_on_NetworkOptions_item_selected"]
+[connection signal="item_selected" from="VBox/ProtocolModes/TabContainer/NetworkOptionsMQTTWebRTC" to="." method="_on_NetworkOptionsMQTTWebRTC_item_selected"]
+[connection signal="toggled" from="VBox/TabContainer/VBox/PanelContainer/UDPipdiscovery/udpenabled" to="." method="_on_udpenabled_toggled"]
+[connection signal="toggled" from="VBox/TabContainer/VBox/TabContainer/ENetMultiplayer/HBox/Servermode/StartENetmultiplayer" to="VBox/TabContainer/VBox/TabContainer/ENetMultiplayer/HBox/Servermode" method="_on_StartENetmultiplayer_toggled"]
+[connection signal="toggled" from="VBox/TabContainer/VBox/TabContainer/ENetMultiplayer/HBox/Clientmode/StartENetmultiplayer" to="VBox/TabContainer/VBox/TabContainer/ENetMultiplayer/HBox/Clientmode" method="_on_StartENetmultiplayer_toggled"]
+[connection signal="toggled" from="VBox/TabContainer/VBox/TabContainer/WebSocketMultiplayer/HBox/Servermode/StartWebSocketmultiplayer" to="VBox/TabContainer/VBox/TabContainer/WebSocketMultiplayer/HBox/Servermode" method="_on_StartWebSocketmultiplayer_toggled"]
+[connection signal="toggled" from="VBox/TabContainer/VBox/TabContainer/WebSocketMultiplayer/HBox/Clientmode/StartWebSocketmultiplayer" to="VBox/TabContainer/VBox/TabContainer/WebSocketMultiplayer/HBox/Clientmode" method="_on_StartWebSocketmultiplayer_toggled"]
+[connection signal="toggled" from="VBox/TabContainer/VBox/TabContainer/WebSocketsignalling/VBox/Servermode/WebRTCmultiplayerserver/StartWebRTCmultiplayer" to="VBox/TabContainer/VBox/TabContainer/WebSocketsignalling/VBox/Servermode/WebRTCmultiplayerserver" method="_on_StartWebRTCmultiplayer_toggled"]
+[connection signal="toggled" from="VBox/TabContainer/VBox/TabContainer/WebSocketsignalling/VBox/Clientmode/WebRTCmultiplayerclient/StartWebRTCmultiplayer" to="VBox/TabContainer/VBox/TabContainer/WebSocketsignalling/VBox/Clientmode/WebRTCmultiplayerclient" method="_on_StartWebRTCmultiplayer_toggled"]
+[connection signal="button_down" from="VBox/TabContainer/MQTTsignalling/VBox/HBox/brokeraddress" to="." method="_on_brokeraddress_button_down"]
+[connection signal="toggled" from="VBox/TabContainer/MQTTsignalling/VBox/HBox2/StartMQTT" to="VBox/TabContainer/MQTTsignalling/VBox/Servermode" method="_on_StartServer_toggled"]
+[connection signal="gui_input" from="VBox/TabContainer/MQTTsignalling/VBox/HBox2/mqttautoconnect" to="." method="_on_mqttautoconnect_gui_input"]
+[connection signal="mouse_entered" from="VBox/TabContainer/MQTTsignalling/VBox/HBox2/mqttautoconnect" to="." method="_on_mqttautoconnect_mouse_entered"]
+[connection signal="pressed" from="VBox/TabContainer/MQTTsignalling/VBox/HBox2/mqttautoconnect" to="." method="_on_mqttautoconnect_pressed"]
+[connection signal="toggled" from="VBox/TabContainer/MQTTsignalling/VBox/Servermode/WebRTCmultiplayerserver/StartWebRTCmultiplayer" to="VBox/TabContainer/MQTTsignalling/VBox/Servermode/WebRTCmultiplayerserver" method="_on_StartWebRTCmultiplayer_toggled"]
+[connection signal="toggled" from="VBox/TabContainer/MQTTsignalling/VBox/Clientmode/WebRTCmultiplayerclient/StartWebRTCmultiplayer" to="VBox/TabContainer/MQTTsignalling/VBox/Clientmode/WebRTCmultiplayerclient" method="_on_StartWebRTCmultiplayer_toggled"]
+[connection signal="item_selected" from="VBox/PlayerConnections/HBoxMain/VBoxContainer/HBox_players/PlayerList" to="VBox/PlayerConnections" method="_on_PlayerList_item_selected"]
+[connection signal="toggled" from="VBox/PlayerConnections/HBoxMain/VBoxContainer/RecordingFeature/Vox" to="VBox/PlayerConnections/HBoxMain/VBoxContainer/RecordingFeature" method="_on_vox_toggled"]
+[connection signal="gui_input" from="VBox/PlayerConnections/HBoxMain/VBoxContainer/RecordingFeature/VoxThreshold" to="VBox/PlayerConnections/HBoxMain/VBoxContainer/RecordingFeature" method="_on_vox_threshold_gui_input"]
+[connection signal="value_changed" from="VBox/PlayerConnections/HBoxMain/VBoxContainer/HBoxLag/PlayerLagSlider" to="VBox/PlayerConnections" method="_on_PlayerLagSlider_value_changed"]
+[connection signal="toggled" from="VBox/DoppelgangerPanel/hbox/VBox_enable/DoppelgangerEnable" to="VBox/PlayerConnections" method="_on_Doppelganger_toggled"]

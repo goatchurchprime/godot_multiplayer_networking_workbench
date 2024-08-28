@@ -2,15 +2,8 @@ extends Control
 
 
 @onready var clientsignalling = get_parent()
-var NetworkGateway
-var PlayerConnections
+@onready var NetworkGateway = find_parent("NetworkGateway")
 
-func _ready():
-	var n = self
-	while n.name != "NetworkGateway":
-		n = n.get_parent()
-	NetworkGateway = n
-	PlayerConnections = NetworkGateway.get_node("PlayerConnections")
 
 func client_ice_candidate_created(mid_name, index_name, sdp_name):
 	clientsignalling.sendpacket_toserver({"subject":"ice_candidate", "mid_name":mid_name, "index_name":index_name, "sdp_name":sdp_name})
@@ -20,14 +13,14 @@ func client_session_description_created(type, data):
 	var peer = multiplayer.multiplayer_peer.get_peer(1)
 	peer["connection"].set_local_description("answer", data)
 	clientsignalling.sendpacket_toserver({"subject":"answer", "data":data})
-	PlayerConnections.connectionlog("answer")
+	NetworkGateway.PlayerConnections.connectionlog("answer")
 	$statuslabel.text = "answer"
 		
 func client_connection_established(lwclientid):
 	print("server client connected ", lwclientid)
 	if $StartWebRTCmultiplayer.button_pressed:
 		clientsignalling.sendpacket_toserver({"subject":"request_offer"})
-		PlayerConnections.connectionlog("request_offer")
+		NetworkGateway.PlayerConnections.connectionlog("request_offer")
 		$statuslabel.text = "request offer"
 		
 func client_connection_closed():
@@ -50,13 +43,13 @@ func client_packet_received(v):
 		E = peerconnection.set_remote_description("offer", v["data"])
 		if E != 0:	print("Errrr ", E)
 		assert (multiplayer.get_unique_id() == clientsignalling.wclientid)
-		PlayerConnections.connectionlog("receive offer")
+		NetworkGateway.PlayerConnections.connectionlog("receive offer")
 		$statuslabel.text = "receive offer"
 
 	elif v["subject"] == "ice_candidate":
 		var peer = multiplayer.multiplayer_peer.get_peer(1)
 		peer["connection"].add_ice_candidate(v["mid_name"], v["index_name"], v["sdp_name"])
-		PlayerConnections.connectionlog("receive ice_candidate")
+		NetworkGateway.PlayerConnections.connectionlog("receive ice_candidate")
 		$statuslabel.text = "ice candidate"
 
 func _on_StartWebRTCmultiplayer_toggled(button_pressed):
@@ -74,11 +67,11 @@ func _on_StartWebRTCmultiplayer_toggled(button_pressed):
 		clientsignalling.mqttsig_packet_received.connect(client_packet_received) 
 		if clientsignalling.isconnectedtosignalserver():
 			clientsignalling.sendpacket_toserver({"subject":"request_offer"})
-		PlayerConnections.connectionlog("request offer")
+		NetworkGateway.PlayerConnections.connectionlog("request offer")
 		$statuslabel.text = "request offer"
 		
 	else:
 		clientsignalling.mqttsig_connection_established.disconnect(client_connection_established) 
 		clientsignalling.mqttsig_connection_closed.disconnect(client_connection_closed) 
 		clientsignalling.mqttsig_packet_received.disconnect(client_packet_received) 
-		PlayerConnections._server_disconnected()
+		NetworkGateway.PlayerConnections._server_disconnected()

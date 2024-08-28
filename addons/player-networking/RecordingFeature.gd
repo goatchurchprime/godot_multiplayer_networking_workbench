@@ -9,7 +9,7 @@ func transmitaudiopacket(packet):
 	if PlayerFrame.networkID >= 1:
 		PlayerConnections.rpc("RPCincomingaudiopacket", packet)
 	if PlayerFrame.doppelgangernode != null:
-		var doppelnetoffset = PlayerFrame.NetworkGatewayForDoppelganger.get_node("DoppelgangerPanel").getnetoffset()
+		var doppelnetoffset = PlayerFrame.NetworkGatewayForDoppelganger.DoppelgangerPanel.getnetoffset()
 		var doppelgangerdelay = PlayerFrame.NetworkGatewayForDoppelganger.getrandomdoppelgangerdelay()
 		if doppelgangerdelay != -1.0:
 			await get_tree().create_timer(doppelgangerdelay*0.001).timeout

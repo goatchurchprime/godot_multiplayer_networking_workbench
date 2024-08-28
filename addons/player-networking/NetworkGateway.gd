@@ -13,18 +13,20 @@ extends Control
 @export var localplayerscene : String = "" # "res://controlplayer.tscn"
 var Dconnectedplayerscount = 0
 
-@onready var ProtocolOptions = $ProtocolModes/ProtocolOptions
-@onready var NetworkOptions = $ProtocolModes/TabContainer/HBox/NetworkOptions
-@onready var NetworkOptions_portnumber = $ProtocolModes/TabContainer/HBox/portnumber
-@onready var NetworkOptionsMQTTWebRTC = $ProtocolModes/TabContainer/NetworkOptionsMQTTWebRTC
-@onready var UDPipdiscovery = $TabContainer/VBox/PanelContainer/UDPipdiscovery
+@onready var ProtocolModes = find_child("ProtocolModes")
+@onready var ProtocolOptions = ProtocolModes.find_child("ProtocolOptions")
+@onready var NetworkOptions = ProtocolModes.find_child("NetworkOptions")
+@onready var NetworkOptions_portnumber = ProtocolModes.find_child("portnumber")
+@onready var NetworkOptionsMQTTWebRTC = find_child("NetworkOptionsMQTTWebRTC")
+@onready var UDPipdiscovery = find_child("UDPipdiscovery")
 
-@onready var ENetMultiplayer = $TabContainer/VBox/TabContainer/ENetMultiplayer
-@onready var WebSocketMultiplayer = $TabContainer/VBox/TabContainer/WebSocketMultiplayer
-@onready var WebSocketsignalling = $TabContainer/VBox/TabContainer/WebSocketsignalling
-@onready var MQTTsignalling = $TabContainer/MQTTsignalling
+@onready var ENetMultiplayer = find_child("ENetMultiplayer")
+@onready var WebSocketMultiplayer = find_child("WebSocketMultiplayer")
+@onready var WebSocketsignalling = find_child("WebSocketsignalling")
+@onready var MQTTsignalling = find_child("MQTTsignalling")
 
-@onready var PlayerConnections = $PlayerConnections
+@onready var PlayerConnections = find_child("PlayerConnections")
+@onready var DoppelgangerPanel = find_child("DoppelgangerPanel")
 
 enum NETWORK_PROTOCOL { ENET = 0, 
 						WEBSOCKET = 1,
@@ -99,7 +101,7 @@ func _on_ProtocolOptions_item_selected(np):
 	var selectaswebrtcwebsocket = (np == NETWORK_PROTOCOL.WEBRTC_WEBSOCKETSIGNAL)
 	var selectasenet = (np == NETWORK_PROTOCOL.ENET)
 	var selectaswebsocket = (np == NETWORK_PROTOCOL.WEBSOCKET)	
-	$ProtocolModes/TabContainer.current_tab = (1 if selectasmqttwebrtc else 0)
+	ProtocolModes.get_node("TabContainer").current_tab = (1 if selectasmqttwebrtc else 0)
 	NetworkOptionsMQTTWebRTC.visible = selectasmqttwebrtc
 	MQTTsignalling.visible = selectasmqttwebrtc
 	MQTTsignalling.get_node("VBox/Servermode").visible = false
@@ -122,13 +124,13 @@ func _on_NetworkOptions_item_selected(ns):
 	print("_on_OptionButton_item_selected_on_OptionButton_item_selected_on_OptionButton_item_selected ", ns)
 	var selectasoff = (ns == NETWORK_OPTIONS.NETWORK_OFF)
 	if not selectasoff:
-		$PlayerConnections.clearconnectionlog()
+		PlayerConnections.clearconnectionlog()
 
-	if $PlayerConnections.LocalPlayer.get_node("PlayerFrame").networkID != 0:
+	if PlayerConnections.LocalPlayer.get_node("PlayerFrame").networkID != 0:
 		if not (multiplayer.multiplayer_peer is OfflineMultiplayerPeer):
-			print("closing connection ", $PlayerConnections.LocalPlayer.get_node("PlayerFrame").networkID, multiplayer.multiplayer_peer)
-		$PlayerConnections._server_disconnected()
-	assert ($PlayerConnections.LocalPlayer.get_node("PlayerFrame").networkID == 0)
+			print("closing connection ", PlayerConnections.LocalPlayer.get_node("PlayerFrame").networkID, multiplayer.multiplayer_peer)
+		PlayerConnections._server_disconnected()
+	assert (PlayerConnections.LocalPlayer.get_node("PlayerFrame").networkID == 0)
 
 	if UDPipdiscovery.get_node("Servermode").is_processing():
 		UDPipdiscovery.get_node("Servermode").stopUDPbroadcasting()
@@ -208,11 +210,11 @@ func _on_NetworkOptionsMQTTWebRTC_item_selected(ns):
 
 
 func getrandomdoppelgangerdelay(disabledropout=false):
-	if not disabledropout and rng.randf_range(0, 100) < float($DoppelgangerPanel/hbox/VBox_netdrop/netdroppc.text):
+	if not disabledropout and rng.randf_range(0, 100) < float(DoppelgangerPanel.get_node("hbox/VBox_netdrop/netdroppc").text):
 		print("Dropped")
 		return -1.0
-	var netdelayadd = float($DoppelgangerPanel/hbox/VBox_netdelay/netdelayadd.text)
-	var doppelgangerdelay = int($DoppelgangerPanel/hbox/VBox_delaymin/netdelaymin.text) + max(0.0, rng.randfn(netdelayadd, netdelayadd*0.4))
+	var netdelayadd = float(DoppelgangerPanel.get_node("hbox/VBox_netdelay/netdelayadd").text)
+	var doppelgangerdelay = int(DoppelgangerPanel.get_node("hbox/VBox_delaymin/netdelaymin").text) + max(0.0, rng.randfn(netdelayadd, netdelayadd*0.4))
 	return doppelgangerdelay
 	
 func setnetworkoff():	
@@ -222,10 +224,11 @@ func _data_channel_received(channel: Object):
 	print("_data_channel_received ", channel)
 
 func set_vox_on():
-	$PlayerConnections/HBoxMain/VBoxContainer/RecordingFeature/Vox.button_pressed = true
+	var RecordingFeature = PlayerConnections.get_node("HBoxMain/VBoxContainer/RecordingFeature")
+	RecordingFeature.get_node("Vox").button_pressed = true
 	var voxthreshold = 0.09
-	$PlayerConnections/HBoxMain/VBoxContainer/RecordingFeature.voxthreshhold = voxthreshold
-	$PlayerConnections/HBoxMain/VBoxContainer/RecordingFeature/VoxThreshold.material.set_shader_parameter("voxthreshhold", voxthreshold)
+	RecordingFeature.voxthreshhold = voxthreshold
+	RecordingFeature.get_node("VoxThreshold").material.set_shader_parameter("voxthreshhold", voxthreshold)
 
 
 

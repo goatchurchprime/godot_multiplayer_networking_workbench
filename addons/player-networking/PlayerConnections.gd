@@ -6,8 +6,13 @@ extends Control
 ## This object receives and manages all networked multiplayer connections and 
 ## disconnections
 
-@onready var playerframelocalgdscriptfile = get_parent().scene_file_path.get_base_dir() + "/PlayerFrameLocal.gd"
-@onready var playerframeremotegdscriptfile = get_parent().scene_file_path.get_base_dir() + "/PlayerFrameRemote.gd"
+
+# We should implement this to log what passes through
+# https://docs.godotengine.org/en/stable/classes/class_multiplayerapiextension.html
+
+@onready var NetworkGateway = find_parent("NetworkGateway")
+@onready var playerframelocalgdscriptfile = NetworkGateway.scene_file_path.get_base_dir() + "/PlayerFrameLocal.gd"
+@onready var playerframeremotegdscriptfile = NetworkGateway.scene_file_path.get_base_dir() + "/PlayerFrameRemote.gd"
 
 var LocalPlayer = null    # Points into Players for my current self
 var ServerPlayer = null   # Should be myself if I am a server
@@ -20,7 +25,6 @@ var deferred_playerconnections = null
 # player node to remove
 var remote_players_idstonodenames = { }
 
-@onready var NetworkGateway = find_parent("NetworkGateway")
 @onready var PlayersNode = NetworkGateway.get_node(NetworkGateway.playersnodepath)
 @onready var PlayerList = $HBoxMain/VBoxContainer/HBox_players/PlayerList
 
@@ -43,6 +47,7 @@ func _ready():
 		playerframe.set_script(load(playerframelocalgdscriptfile))
 		LocalPlayer.add_child(playerframe)
 	else:
+		print(LocalPlayer.get_node("PlayerFrame").get_script().resource_path)
 		assert (LocalPlayer.get_node("PlayerFrame").get_script().resource_path == playerframelocalgdscriptfile)
 	LocalPlayer.get_node("PlayerFrame").PlayerConnections = self
 
