@@ -1,6 +1,6 @@
 extends Control
 
-@onready var NetworkGateway = get_node("../../../../..")
+@onready var NetworkGateway = get_node("../../../../../..")
 @onready var PlayerConnections = NetworkGateway.get_node("PlayerConnections")
 
 func _on_StartWebSocketmultiplayer_toggled(button_pressed):
