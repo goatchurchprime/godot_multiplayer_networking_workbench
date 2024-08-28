@@ -504,72 +504,67 @@ layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_wj0xm")
 script = ExtResource("4")
 
-[node name="HBoxMain" type="HSplitContainer" parent="VBox/PlayerConnections"]
+[node name="VBox" type="VBoxContainer" parent="VBox/PlayerConnections"]
 layout_mode = 2
 
-[node name="VBoxContainer" type="VBoxContainer" parent="VBox/PlayerConnections/HBoxMain"]
+[node name="HBox" type="HBoxContainer" parent="VBox/PlayerConnections/VBox"]
 layout_mode = 2
 
-[node name="HBox_players" type="HBoxContainer" parent="VBox/PlayerConnections/HBoxMain/VBoxContainer"]
-layout_mode = 2
-
-[node name="Label" type="Label" parent="VBox/PlayerConnections/HBoxMain/VBoxContainer/HBox_players"]
+[node name="Label" type="Label" parent="VBox/PlayerConnections/VBox/HBox"]
 layout_mode = 2
 text = "Players:"
 
-[node name="PlayerList" type="OptionButton" parent="VBox/PlayerConnections/HBoxMain/VBoxContainer/HBox_players"]
+[node name="PlayerList" type="OptionButton" parent="VBox/PlayerConnections/VBox/HBox"]
 layout_mode = 2
-size_flags_horizontal = 10
+size_flags_horizontal = 2
 item_count = 1
 popup/item_0/text = "me"
 
-[node name="RecordingFeature" type="HBoxContainer" parent="VBox/PlayerConnections/HBoxMain/VBoxContainer"]
-layout_mode = 2
-script = ExtResource("16_hf3ik")
-
-[node name="AudioStreamPlayerMicrophone" type="AudioStreamPlayer" parent="VBox/PlayerConnections/HBoxMain/VBoxContainer/RecordingFeature"]
-stream = SubResource("2")
-autoplay = true
-bus = &"MicrophoneBus"
-
-[node name="PTT" type="Button" parent="VBox/PlayerConnections/HBoxMain/VBoxContainer/RecordingFeature"]
-layout_mode = 2
-theme_override_colors/font_pressed_color = Color(0.992157, 0.984314, 0.00392157, 1)
-theme_override_styles/pressed = SubResource("StyleBoxFlat_3abk2")
-text = "PTT"
-
-[node name="Vox" type="Button" parent="VBox/PlayerConnections/HBoxMain/VBoxContainer/RecordingFeature"]
-layout_mode = 2
-theme_override_styles/pressed = SubResource("StyleBoxFlat_mpv2x")
-toggle_mode = true
-text = "Vox"
-
-[node name="VoxThreshold" type="ColorRect" parent="VBox/PlayerConnections/HBoxMain/VBoxContainer/RecordingFeature"]
-material = SubResource("ShaderMaterial_c0q00")
-layout_mode = 2
-size_flags_horizontal = 3
-color = Color(0.104768, 0.249346, 0.350987, 1)
-
-[node name="HBoxLag" type="HBoxContainer" parent="VBox/PlayerConnections/HBoxMain/VBoxContainer"]
-layout_mode = 2
-
-[node name="Label" type="Label" parent="VBox/PlayerConnections/HBoxMain/VBoxContainer/HBoxLag"]
+[node name="Label2" type="Label" parent="VBox/PlayerConnections/VBox/HBox"]
 layout_mode = 2
 text = "Lag latency:"
 
-[node name="PlayerLagSlider" type="HSlider" parent="VBox/PlayerConnections/HBoxMain/VBoxContainer/HBoxLag"]
+[node name="PlayerLagSlider" type="HSlider" parent="VBox/PlayerConnections/VBox/HBox"]
 custom_minimum_size = Vector2(100, 0)
 layout_mode = 2
 size_flags_horizontal = 6
 max_value = 5.0
 step = 0.0
 
-[node name="LogRec" type="Button" parent="VBox/PlayerConnections/HBoxMain/VBoxContainer/HBoxLag"]
+[node name="LogRec" type="Button" parent="VBox/PlayerConnections/VBox/HBox"]
 layout_mode = 2
 text = "LogRec
 "
 
-[node name="ConnectionLog" type="TextEdit" parent="VBox/PlayerConnections/HBoxMain"]
+[node name="RecordingFeature" type="HBoxContainer" parent="VBox/PlayerConnections/VBox"]
+layout_mode = 2
+script = ExtResource("16_hf3ik")
+
+[node name="AudioStreamPlayerMicrophone" type="AudioStreamPlayer" parent="VBox/PlayerConnections/VBox/RecordingFeature"]
+stream = SubResource("2")
+autoplay = true
+bus = &"MicrophoneBus"
+
+[node name="PTT" type="Button" parent="VBox/PlayerConnections/VBox/RecordingFeature"]
+layout_mode = 2
+theme_override_colors/font_pressed_color = Color(0.992157, 0.984314, 0.00392157, 1)
+theme_override_styles/pressed = SubResource("StyleBoxFlat_3abk2")
+text = "PTT"
+
+[node name="Vox" type="Button" parent="VBox/PlayerConnections/VBox/RecordingFeature"]
+layout_mode = 2
+theme_override_styles/pressed = SubResource("StyleBoxFlat_mpv2x")
+toggle_mode = true
+text = "Vox"
+
+[node name="VoxThreshold" type="ColorRect" parent="VBox/PlayerConnections/VBox/RecordingFeature"]
+material = SubResource("ShaderMaterial_c0q00")
+layout_mode = 2
+size_flags_horizontal = 3
+color = Color(0.104768, 0.249346, 0.350987, 1)
+
+[node name="ConnectionLog" type="TextEdit" parent="VBox/PlayerConnections/VBox"]
+custom_minimum_size = Vector2(0, 30)
 layout_mode = 2
 
 [node name="DoppelgangerPanel" type="PanelContainer" parent="VBox"]
@@ -675,8 +670,8 @@ text = "0.1"
 [connection signal="pressed" from="VBox/TabContainer/MQTTsignalling/VBox/HBox2/mqttautoconnect" to="." method="_on_mqttautoconnect_pressed"]
 [connection signal="toggled" from="VBox/TabContainer/MQTTsignalling/VBox/Servermode/WebRTCmultiplayerserver/StartWebRTCmultiplayer" to="VBox/TabContainer/MQTTsignalling/VBox/Servermode/WebRTCmultiplayerserver" method="_on_StartWebRTCmultiplayer_toggled"]
 [connection signal="toggled" from="VBox/TabContainer/MQTTsignalling/VBox/Clientmode/WebRTCmultiplayerclient/StartWebRTCmultiplayer" to="VBox/TabContainer/MQTTsignalling/VBox/Clientmode/WebRTCmultiplayerclient" method="_on_StartWebRTCmultiplayer_toggled"]
-[connection signal="item_selected" from="VBox/PlayerConnections/HBoxMain/VBoxContainer/HBox_players/PlayerList" to="VBox/PlayerConnections" method="_on_PlayerList_item_selected"]
-[connection signal="toggled" from="VBox/PlayerConnections/HBoxMain/VBoxContainer/RecordingFeature/Vox" to="VBox/PlayerConnections/HBoxMain/VBoxContainer/RecordingFeature" method="_on_vox_toggled"]
-[connection signal="gui_input" from="VBox/PlayerConnections/HBoxMain/VBoxContainer/RecordingFeature/VoxThreshold" to="VBox/PlayerConnections/HBoxMain/VBoxContainer/RecordingFeature" method="_on_vox_threshold_gui_input"]
-[connection signal="value_changed" from="VBox/PlayerConnections/HBoxMain/VBoxContainer/HBoxLag/PlayerLagSlider" to="VBox/PlayerConnections" method="_on_PlayerLagSlider_value_changed"]
+[connection signal="item_selected" from="VBox/PlayerConnections/VBox/HBox/PlayerList" to="VBox/PlayerConnections" method="_on_PlayerList_item_selected"]
+[connection signal="value_changed" from="VBox/PlayerConnections/VBox/HBox/PlayerLagSlider" to="VBox/PlayerConnections" method="_on_PlayerLagSlider_value_changed"]
+[connection signal="toggled" from="VBox/PlayerConnections/VBox/RecordingFeature/Vox" to="VBox/PlayerConnections/VBox/RecordingFeature" method="_on_vox_toggled"]
+[connection signal="gui_input" from="VBox/PlayerConnections/VBox/RecordingFeature/VoxThreshold" to="VBox/PlayerConnections/VBox/RecordingFeature" method="_on_vox_threshold_gui_input"]
 [connection signal="toggled" from="VBox/DoppelgangerPanel/hbox/VBox_enable/DoppelgangerEnable" to="VBox/PlayerConnections" method="_on_Doppelganger_toggled"]

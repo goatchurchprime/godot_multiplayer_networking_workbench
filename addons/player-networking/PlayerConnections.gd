@@ -26,11 +26,11 @@ var deferred_playerconnections = null
 var remote_players_idstonodenames = { }
 
 @onready var PlayersNode = NetworkGateway.get_node(NetworkGateway.playersnodepath)
-@onready var PlayerList = $HBoxMain/VBoxContainer/HBox_players/PlayerList
+@onready var PlayerList = $VBox/HBox/PlayerList
 
 func _ready():
-	assert ($HBoxMain/VBoxContainer/HBox_players/PlayerList.item_count == 1)
-	if $HBoxMain/VBoxContainer/HBox_players/PlayerList.selected == -1:  $HBoxMain/VBoxContainer/HBox_players/PlayerList.selected = 0
+	assert (PlayerList.item_count == 1)
+	if PlayerList.selected == -1:  PlayerList.selected = 0
 
 	# Overwrite the localplayer node if the local player scene is defined
 	if PlayersNode.get_child_count() == 1 and NetworkGateway.localplayerscene:
@@ -71,23 +71,23 @@ func _ready():
 
 var prevtxt = ""
 func clearconnectionlog():
-	$HBoxMain/ConnectionLog.text = ""
+	$VBox/ConnectionLog.text = ""
 	prevtxt = ""
 
 func connectionlog(txt):
 	if not txt.ends_with("\n"):
 		if txt == prevtxt:
-			$HBoxMain/ConnectionLog.text += "."
+			$VBox/ConnectionLog.text += "."
 		else:
 			if prevtxt != "":
-				$HBoxMain/ConnectionLog.text += "\n"
-			$HBoxMain/ConnectionLog.text += txt
+				$VBox/ConnectionLog.text += "\n"
+			$VBox/ConnectionLog.text += txt
 			prevtxt = txt
 	else:
-		$HBoxMain/ConnectionLog.text += txt
+		$VBox/ConnectionLog.text += txt
 		prevtxt = ""
-	var cl = $HBoxMain/ConnectionLog.get_line_count()
-	$HBoxMain/ConnectionLog.set_caret_line(cl)
+	var cl = $VBox/ConnectionLog.get_line_count()
+	$VBox/ConnectionLog.set_caret_line(cl)
 
 func _connected_to_server():
 	var serverisself = multiplayer.is_server()
@@ -281,7 +281,7 @@ func removeremoteplayer(playernodename):
 
 func _on_PlayerList_item_selected(index):
 	var player = PlayersNode.get_child(index)
-	$HBoxMain/VBoxContainer/HBoxLag/PlayerLagSlider.value = 0.0 if player == LocalPlayer else player.get_node("PlayerFrame").laglatency
+	$VBox/HBox/PlayerLagSlider.value = 0.0 if player == LocalPlayer else player.get_node("PlayerFrame").laglatency
 	
 func _on_PlayerLagSlider_value_changed(value):
 	var player = PlayersNode.get_child(PlayerList.selected)
