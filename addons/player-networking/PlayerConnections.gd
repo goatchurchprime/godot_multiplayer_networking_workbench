@@ -1,4 +1,4 @@
-extends ColorRect
+extends Control
 
 
 ## PlayerConnections 

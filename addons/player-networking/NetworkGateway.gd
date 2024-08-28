@@ -1,4 +1,4 @@
-extends Panel
+extends Control
 
 # keep trying to get the HTML5 version working (not connecting to mqtt!)
 # http://goatchurchprime.github.io/godot_multiplayer_networking_workbench/minimal_peer_networking.html
