@@ -105,9 +105,11 @@ func _on_ProtocolOptions_item_selected(np):
 	MQTTsignalling.get_node("Servermode").visible = false
 	MQTTsignalling.get_node("Clientmode").visible = false
 	UDPipdiscovery.visible = NetworkOptions.visible and (not OS.has_feature("Server")) and (not OS.has_feature("HTML5"))
+
 	ENetMultiplayer.visible = selectasenet
-	ENetMultiplayer.get_node("Servermode").visible = false
-	ENetMultiplayer.get_node("Clientmode").visible = false
+	ENetMultiplayer.get_node("HBox/Servermode").visible = false
+	ENetMultiplayer.get_node("HBox/Clientmode").visible = false
+
 	WebSocketMultiplayer.visible = selectaswebsocket
 	WebSocketMultiplayer.get_node("Servermode").visible = false
 	WebSocketMultiplayer.get_node("Clientmode").visible = false
@@ -133,8 +135,8 @@ func _on_NetworkOptions_item_selected(ns):
 	if UDPipdiscovery.get_node("Clientmode").is_processing():
 		UDPipdiscovery.get_node("Clientmode").stopUDPreceiving()
 
-	ENetMultiplayer.get_node("Servermode/StartENetmultiplayer").button_pressed = false
-	ENetMultiplayer.get_node("Clientmode/StartENetmultiplayer").button_pressed = false
+	ENetMultiplayer.get_node("HBox/Servermode/StartENetmultiplayer").button_pressed = false
+	ENetMultiplayer.get_node("HBox/Clientmode/StartENetmultiplayer").button_pressed = false
 	WebSocketMultiplayer.get_node("Servermode/StartWebSocketmultiplayer").button_pressed = false
 	WebSocketMultiplayer.get_node("Clientmode/StartWebSocketmultiplayer").button_pressed = false
 	if WebSocketsignalling.get_node("Servermode").websocketserver != null:
@@ -166,14 +168,14 @@ func _on_NetworkOptions_item_selected(ns):
 		UDPipdiscovery.get_node("Clientmode").startUDPreceiving()
 	
 	if selectasenet:
-		ENetMultiplayer.get_node("Servermode").visible = selectasserver
-		ENetMultiplayer.get_node("Clientmode").visible = selectasclient or selectassearchingclient
-		ENetMultiplayer.get_node("Clientmode/StartENetmultiplayer").disabled = selectassearchingclient
-		if ENetMultiplayer.get_node("autoconnect").button_pressed:
+		ENetMultiplayer.get_node("HBox/Servermode").visible = selectasserver
+		ENetMultiplayer.get_node("HBox/Clientmode").visible = selectasclient or selectassearchingclient
+		ENetMultiplayer.get_node("HBox/Clientmode/StartENetmultiplayer").disabled = selectassearchingclient
+		if ENetMultiplayer.get_node("HBox/autoconnect").button_pressed:
 			if selectasserver:
-				ENetMultiplayer.get_node("Servermode/StartENetmultiplayer").button_pressed = true
+				ENetMultiplayer.get_node("HBox/Servermode/StartENetmultiplayer").button_pressed = true
 			if selectasclient:
-				ENetMultiplayer.get_node("Clientmode/StartENetmultiplayer").button_pressed = true
+				ENetMultiplayer.get_node("HBox/Clientmode/StartENetmultiplayer").button_pressed = true
 
 	if selectaswebsocket:
 		WebSocketMultiplayer.get_node("Servermode").visible = selectasserver

@@ -231,69 +231,44 @@ script = ExtResource("6")
 [node name="TabContainer" type="TabContainer" parent="TabContainer/VBox"]
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_638ev")
-current_tab = 2
+current_tab = 0
 tabs_visible = false
 
-[node name="ENetMultiplayer" type="ColorRect" parent="TabContainer/VBox/TabContainer"]
-visible = false
+[node name="ENetMultiplayer" type="PanelContainer" parent="TabContainer/VBox/TabContainer"]
 layout_mode = 2
-color = Color(0.0980392, 0.305882, 0.160784, 1)
 metadata/_tab_index = 0
 
-[node name="Servermode" type="Control" parent="TabContainer/VBox/TabContainer/ENetMultiplayer"]
+[node name="HBox" type="HBoxContainer" parent="TabContainer/VBox/TabContainer/ENetMultiplayer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="TabContainer/VBox/TabContainer/ENetMultiplayer/HBox"]
+layout_mode = 2
+text = "ENet multiplayer"
+
+[node name="autoconnect" type="CheckBox" parent="TabContainer/VBox/TabContainer/ENetMultiplayer/HBox"]
+layout_mode = 2
+button_pressed = true
+text = "autoconnect"
+
+[node name="Servermode" type="PanelContainer" parent="TabContainer/VBox/TabContainer/ENetMultiplayer/HBox"]
 visible = false
-anchors_preset = 0
-offset_left = 157.0
-offset_top = 4.0
-offset_right = 339.0
-offset_bottom = 49.0
+layout_mode = 2
 script = ExtResource("3")
 
-[node name="StartENetmultiplayer" type="Button" parent="TabContainer/VBox/TabContainer/ENetMultiplayer/Servermode"]
-layout_mode = 0
-offset_left = 49.0
-offset_top = 8.99999
-offset_right = 189.0
-offset_bottom = 40.0
+[node name="StartENetmultiplayer" type="Button" parent="TabContainer/VBox/TabContainer/ENetMultiplayer/HBox/Servermode"]
+layout_mode = 2
 toggle_mode = true
 text = "Start ENet server"
 
-[node name="Clientmode" type="Control" parent="TabContainer/VBox/TabContainer/ENetMultiplayer"]
+[node name="Clientmode" type="PanelContainer" parent="TabContainer/VBox/TabContainer/ENetMultiplayer/HBox"]
 visible = false
-anchors_preset = 0
-offset_left = 157.0
-offset_top = 16.0
-offset_right = 346.0
-offset_bottom = 62.0
+layout_mode = 2
 script = ExtResource("7")
 
-[node name="StartENetmultiplayer" type="Button" parent="TabContainer/VBox/TabContainer/ENetMultiplayer/Clientmode"]
-layout_mode = 0
-offset_left = 53.0
-offset_top = -7.0
-offset_right = 187.0
-offset_bottom = 24.0
+[node name="StartENetmultiplayer" type="Button" parent="TabContainer/VBox/TabContainer/ENetMultiplayer/HBox/Clientmode"]
+layout_mode = 2
 toggle_mode = true
 text = "Start ENet client"
-
-[node name="Label" type="Label" parent="TabContainer/VBox/TabContainer/ENetMultiplayer"]
-layout_mode = 0
-offset_left = 8.74201
-offset_top = 4.087
-offset_right = 119.742
-offset_bottom = 18.087
-text = "ENet multiplayer"
-
-[node name="autoconnect" type="CheckBox" parent="TabContainer/VBox/TabContainer/ENetMultiplayer"]
-layout_mode = 1
-anchors_preset = -1
-anchor_bottom = 0.068
-offset_left = 13.0
-offset_top = 25.0
-offset_right = 138.0
-offset_bottom = 52.056
-button_pressed = true
-text = "autoconnect"
 
 [node name="WebSocketMultiplayer" type="ColorRect" parent="TabContainer/VBox/TabContainer"]
 visible = false
@@ -302,6 +277,7 @@ color = Color(0.0980392, 0.305882, 0.160784, 1)
 metadata/_tab_index = 1
 
 [node name="Servermode" type="Control" parent="TabContainer/VBox/TabContainer/WebSocketMultiplayer"]
+visible = false
 anchors_preset = 0
 offset_left = 157.0
 offset_top = 4.0
@@ -355,6 +331,7 @@ button_pressed = true
 text = "autoconnect"
 
 [node name="WebSocketsignalling" type="ColorRect" parent="TabContainer/VBox/TabContainer"]
+visible = false
 layout_mode = 2
 color = Color(0.145098, 0.231373, 0.294118, 1)
 metadata/_tab_index = 2
@@ -831,8 +808,8 @@ text = "0.1"
 [connection signal="item_selected" from="ProtocolModes/TabContainer/HBox/NetworkOptions" to="." method="_on_NetworkOptions_item_selected"]
 [connection signal="item_selected" from="ProtocolModes/TabContainer/NetworkOptionsMQTTWebRTC" to="." method="_on_NetworkOptionsMQTTWebRTC_item_selected"]
 [connection signal="toggled" from="TabContainer/VBox/PanelContainer/UDPipdiscovery/udpenabled" to="." method="_on_udpenabled_toggled"]
-[connection signal="toggled" from="TabContainer/VBox/TabContainer/ENetMultiplayer/Servermode/StartENetmultiplayer" to="TabContainer/VBox/TabContainer/ENetMultiplayer/Servermode" method="_on_StartENetmultiplayer_toggled"]
-[connection signal="toggled" from="TabContainer/VBox/TabContainer/ENetMultiplayer/Clientmode/StartENetmultiplayer" to="TabContainer/VBox/TabContainer/ENetMultiplayer/Clientmode" method="_on_StartENetmultiplayer_toggled"]
+[connection signal="toggled" from="TabContainer/VBox/TabContainer/ENetMultiplayer/HBox/Servermode/StartENetmultiplayer" to="TabContainer/VBox/TabContainer/ENetMultiplayer/HBox/Servermode" method="_on_StartENetmultiplayer_toggled"]
+[connection signal="toggled" from="TabContainer/VBox/TabContainer/ENetMultiplayer/HBox/Clientmode/StartENetmultiplayer" to="TabContainer/VBox/TabContainer/ENetMultiplayer/HBox/Clientmode" method="_on_StartENetmultiplayer_toggled"]
 [connection signal="toggled" from="TabContainer/VBox/TabContainer/WebSocketMultiplayer/Servermode/StartWebSocketmultiplayer" to="TabContainer/VBox/TabContainer/WebSocketMultiplayer/Servermode" method="_on_StartWebSocketmultiplayer_toggled"]
 [connection signal="toggled" from="TabContainer/VBox/TabContainer/WebSocketMultiplayer/Clientmode/StartWebSocketmultiplayer" to="TabContainer/VBox/TabContainer/WebSocketMultiplayer/Clientmode" method="_on_StartWebSocketmultiplayer_toggled"]
 [connection signal="toggled" from="TabContainer/VBox/TabContainer/WebSocketsignalling/Servermode/WebRTCmultiplayerserver/StartWebRTCmultiplayer" to="TabContainer/VBox/TabContainer/WebSocketsignalling/Servermode/WebRTCmultiplayerserver" method="_on_StartWebRTCmultiplayer_toggled"]

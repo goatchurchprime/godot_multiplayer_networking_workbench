@@ -131,8 +131,8 @@ func _server_disconnected():
 	print("*** _server_disconnected ", LocalPlayer.get_node("PlayerFrame").networkID)
 	updateplayerlist()
 	if NetworkGateway.ProtocolOptions.selected == NetworkGateway.NETWORK_PROTOCOL.ENET:
-		NetworkGateway.ENetMultiplayer.get_node("Servermode/StartENetmultiplayer").set_pressed_no_signal(false)
-		NetworkGateway.ENetMultiplayer.get_node("Clientmode/StartENetmultiplayer").set_pressed_no_signal(false)
+		NetworkGateway.ENetMultiplayer.get_node("HBox/Servermode/StartENetmultiplayer").set_pressed_no_signal(false)
+		NetworkGateway.ENetMultiplayer.get_node("HBox/Clientmode/StartENetmultiplayer").set_pressed_no_signal(false)
 	if NetworkGateway.ProtocolOptions.selected == NetworkGateway.NETWORK_PROTOCOL.WEBRTC_MQTTSIGNAL:
 		NetworkGateway.MQTTsignalling.get_node("Servermode/WebRTCmultiplayerserver/StartWebRTCmultiplayer").set_pressed_no_signal(false)
 		NetworkGateway.MQTTsignalling.get_node("Clientmode/WebRTCmultiplayerclient/StartWebRTCmultiplayer").set_pressed_no_signal(false)

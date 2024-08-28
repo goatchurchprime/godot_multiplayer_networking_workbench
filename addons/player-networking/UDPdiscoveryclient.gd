@@ -5,7 +5,7 @@ const broadcastudpipnum = "255.255.255.255"
 const broadcastserverheader = "GodotServer_here!"
 var udpdiscoveryreceivingserver = null
 
-@onready var NetworkGateway = get_node("../../../..")
+@onready var NetworkGateway = get_node("../../../../..")
 
 func _ready():
 	set_process(false)
