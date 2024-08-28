@@ -557,6 +557,12 @@ theme_override_styles/pressed = SubResource("StyleBoxFlat_mpv2x")
 toggle_mode = true
 text = "Vox"
 
+[node name="Denoise" type="Button" parent="VBox/PlayerConnections/VBox/RecordingFeature"]
+layout_mode = 2
+toggle_mode = true
+button_pressed = true
+text = "Denoise"
+
 [node name="VoxThreshold" type="ColorRect" parent="VBox/PlayerConnections/VBox/RecordingFeature"]
 material = SubResource("ShaderMaterial_c0q00")
 layout_mode = 2

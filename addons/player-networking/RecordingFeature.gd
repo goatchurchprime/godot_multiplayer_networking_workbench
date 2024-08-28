@@ -3,8 +3,9 @@ extends HBoxContainer
 var audioopuschunkedeffect : AudioEffect = null
 var chunkprefix : PackedByteArray = PackedByteArray([0,0]) 
 
+@onready var PlayerConnections = find_parent("PlayerConnections")
+
 func transmitaudiopacket(packet):
-	var PlayerConnections = get_node("../../..")
 	var PlayerFrame = PlayerConnections.LocalPlayer.get_node("PlayerFrame")
 	if PlayerFrame.networkID >= 1:
 		PlayerConnections.rpc("RPCincomingaudiopacket", packet)
@@ -90,7 +91,8 @@ func processsendopuschunk():
 		chunkprefix.set(0, (opusframecount%256))  # 32768 frames is 10 minutes
 		chunkprefix.set(1, (int(opusframecount/256)&127) + (opusstreamcount%2)*128)
 		opusframecount += 1
-		audioopuschunkedeffect.denoise_resampled_chunk()
+		if $Denoise.button_pressed:
+			audioopuschunkedeffect.denoise_resampled_chunk()
 		var opuspacket = audioopuschunkedeffect.read_opus_packet(chunkprefix)
 		transmitaudiopacket(opuspacket)
 	audioopuschunkedeffect.drop_chunk()

@@ -203,10 +203,10 @@ func _on_Doppelganger_toggled(button_pressed):
 		var doppelnetoffset = get_node("../DoppelgangerPanel").getnetoffset()
 		LocalPlayer.PF_changethinnedframedatafordoppelganger(fd, doppelnetoffset, true)
 		avatardata["framedata0"] = fd
-		var doppelgangerdelay = get_node("..").getrandomdoppelgangerdelay(true)
+		var doppelgangerdelay = NetworkGateway.getrandomdoppelgangerdelay(true)
 		await get_tree().create_timer(doppelgangerdelay*0.001).timeout
 		LocalPlayer.get_node("PlayerFrame").doppelgangernode = newremoteplayer(avatardata)
-		LocalPlayer.get_node("PlayerFrame").NetworkGatewayForDoppelganger = get_node("..")
+		LocalPlayer.get_node("PlayerFrame").NetworkGatewayForDoppelganger = NetworkGateway
 	else:
 		DoppelgangerPanel.seteditable(true)
 		LocalPlayer.get_node("PlayerFrame").doppelgangernode = null
