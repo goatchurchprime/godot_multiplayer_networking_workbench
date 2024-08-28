@@ -117,10 +117,10 @@ script = ExtResource("1")
 position_smoothing_enabled = true
 drag_horizontal_enabled = true
 drag_vertical_enabled = true
-drag_left_margin = 0.8
-drag_top_margin = 0.8
-drag_right_margin = 0.8
-drag_bottom_margin = 0.8
+drag_left_margin = 0.7
+drag_top_margin = 0.6
+drag_right_margin = 0.6
+drag_bottom_margin = 0.6
 
 [node name="AudioListener2D" type="AudioListener2D" parent="SubViewportContainer/SubViewport/Players/LocalPlayer"]
 current = true

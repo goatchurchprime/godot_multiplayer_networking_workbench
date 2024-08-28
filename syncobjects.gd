@@ -94,6 +94,7 @@ func _input(event):
 
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
 		var pp = get_node("../Players").get_child(0)
+		NetworkGateway.PlayerConnections.LocalPlayer.PF_processlocalavatarposition(0) # force update on position
 		var pq = NetworkGateway.PlayerConnections.LocalPlayer.get_overlapping_bodies()
 		print("ppp ", NetworkGateway.PlayerConnections.LocalPlayer, pq, NetworkGateway.PlayerConnections.LocalPlayer.get_overlapping_bodies())
 		if len(pq) != 0:
