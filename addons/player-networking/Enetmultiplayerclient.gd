@@ -1,6 +1,6 @@
 extends PanelContainer
 
-@onready var NetworkGateway = get_node("../../../../../..")
+@onready var NetworkGateway = find_parent("NetworkGateway")
 @onready var PlayerConnections = NetworkGateway.get_node("PlayerConnections")
 
 func _on_StartENetmultiplayer_toggled(button_pressed):

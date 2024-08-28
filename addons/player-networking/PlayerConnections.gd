@@ -20,7 +20,7 @@ var deferred_playerconnections = null
 # player node to remove
 var remote_players_idstonodenames = { }
 
-@onready var NetworkGateway = get_node("..")
+@onready var NetworkGateway = find_parent("NetworkGateway")
 @onready var PlayersNode = NetworkGateway.get_node(NetworkGateway.playersnodepath)
 @onready var PlayerList = $HBoxMain/VBoxContainer/HBox_players/PlayerList
 

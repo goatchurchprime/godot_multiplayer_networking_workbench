@@ -7,7 +7,7 @@ extends Control
 @onready var StartMQTT = SetupMQTTsignal.get_node("VBox/HBox2/StartMQTT")
 @onready var StartMQTTstatuslabel = SetupMQTTsignal.get_node("VBox/HBox2/statuslabel")
 
-@onready var NetworkGateway = get_node("../../../..")
+@onready var NetworkGateway = find_parent("NetworkGateway")
 
 var roomname = ""
 var wclientid = 0

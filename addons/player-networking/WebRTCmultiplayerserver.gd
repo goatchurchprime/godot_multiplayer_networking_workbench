@@ -1,13 +1,8 @@
 extends Control
 
 @onready var serversignalling = get_parent()
-var NetworkGateway
+@onready var NetworkGateway = find_parent("NetworkGateway")
 
-func _ready():
-	var n = self
-	while n.name != "NetworkGateway":
-		n = n.get_parent()
-	NetworkGateway = n
 
 func _on_StartWebRTCmultiplayer_toggled(button_pressed):
 	if button_pressed:

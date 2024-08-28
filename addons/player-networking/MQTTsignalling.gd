@@ -1,6 +1,6 @@
 extends Control
 
-@onready var NetworkGateway = get_node("../..")
+@onready var NetworkGateway = find_parent("NetworkGateway")
 
 func _on_NetworkOptionsMQTTWebRTC_item_selected(ns):
 	#assert (ProtocolOptions.selected == NETWORK_PROTOCOL.WEBRTC_MQTTSIGNAL)
