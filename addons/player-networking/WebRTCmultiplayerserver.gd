@@ -1,8 +1,13 @@
 extends Control
 
 @onready var serversignalling = get_parent()
-@onready var NetworkGateway = get_node("../../../..")
+var NetworkGateway
 
+func _ready():
+	var n = self
+	while n.name != "NetworkGateway":
+		n = n.get_parent()
+	NetworkGateway = n
 
 func _on_StartWebRTCmultiplayer_toggled(button_pressed):
 	if button_pressed:
@@ -64,7 +69,7 @@ func server_packet_received(id, v):
 		var webrtcpeererror = peerconnection.create_offer()
 		print("peer create offer ", peerconnection, "id ", id, " Error:", webrtcpeererror, " connstate")
 		NetworkGateway.PlayerConnections.connectionlog("create offer %s" %id)
-
+		
 	elif v["subject"] == "answer":
 		print("Check equal multiplayer ", multiplayer, " vs ", multiplayer)
 		assert (multiplayer.multiplayer_peer.is_class("WebRTCMultiplayerPeer"))

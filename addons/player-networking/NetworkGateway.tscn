@@ -231,7 +231,7 @@ script = ExtResource("6")
 [node name="TabContainer" type="TabContainer" parent="TabContainer/VBox"]
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_638ev")
-current_tab = 1
+current_tab = 2
 tabs_visible = false
 
 [node name="ENetMultiplayer" type="PanelContainer" parent="TabContainer/VBox/TabContainer"]
@@ -272,6 +272,7 @@ toggle_mode = true
 text = "Start ENet client"
 
 [node name="WebSocketMultiplayer" type="PanelContainer" parent="TabContainer/VBox/TabContainer"]
+visible = false
 layout_mode = 2
 metadata/_tab_index = 1
 
@@ -306,122 +307,70 @@ layout_mode = 2
 toggle_mode = true
 text = "Start WebSocket client"
 
-[node name="WebSocketsignalling" type="ColorRect" parent="TabContainer/VBox/TabContainer"]
-visible = false
+[node name="WebSocketsignalling" type="PanelContainer" parent="TabContainer/VBox/TabContainer"]
 layout_mode = 2
-color = Color(0.145098, 0.231373, 0.294118, 1)
 metadata/_tab_index = 2
 
-[node name="Servermode" type="Control" parent="TabContainer/VBox/TabContainer/WebSocketsignalling"]
+[node name="VBox" type="VBoxContainer" parent="TabContainer/VBox/TabContainer/WebSocketsignalling"]
+layout_mode = 2
+
+[node name="HBox" type="HBoxContainer" parent="TabContainer/VBox/TabContainer/WebSocketsignalling/VBox"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="TabContainer/VBox/TabContainer/WebSocketsignalling/VBox/HBox"]
+layout_mode = 2
+text = "WebRTC with websocket signalling:"
+
+[node name="autoconnect" type="CheckBox" parent="TabContainer/VBox/TabContainer/WebSocketsignalling/VBox/HBox"]
+layout_mode = 2
+button_pressed = true
+text = "autoconnect"
+
+[node name="Label2" type="Label" parent="TabContainer/VBox/TabContainer/WebSocketsignalling/VBox/HBox"]
+layout_mode = 2
+text = "websocket clientid:"
+
+[node name="client_id" type="LineEdit" parent="TabContainer/VBox/TabContainer/WebSocketsignalling/VBox/HBox"]
+layout_mode = 2
+editable = false
+
+[node name="Servermode" type="HBoxContainer" parent="TabContainer/VBox/TabContainer/WebSocketsignalling/VBox"]
 visible = false
-anchors_preset = 0
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = 364.0
-offset_top = 11.0
-offset_bottom = -8.00012
+layout_mode = 2
 script = ExtResource("9")
 
-[node name="WebRTCmultiplayerserver" type="Control" parent="TabContainer/VBox/TabContainer/WebSocketsignalling/Servermode"]
-anchors_preset = 0
-offset_left = 2.8562
-offset_top = 47.5227
-offset_right = 229.856
-offset_bottom = 129.523
+[node name="WebRTCmultiplayerserver" type="HBoxContainer" parent="TabContainer/VBox/TabContainer/WebSocketsignalling/VBox/Servermode"]
+layout_mode = 2
 script = ExtResource("10")
 
-[node name="StartWebRTCmultiplayer" type="Button" parent="TabContainer/VBox/TabContainer/WebSocketsignalling/Servermode/WebRTCmultiplayerserver"]
-layout_mode = 0
-offset_left = -7.97717
-offset_top = -23.5996
-offset_right = 123.023
-offset_bottom = -3.59962
+[node name="StartWebRTCmultiplayer" type="Button" parent="TabContainer/VBox/TabContainer/WebSocketsignalling/VBox/Servermode/WebRTCmultiplayerserver"]
+layout_mode = 2
 toggle_mode = true
 text = "StartWebrtc server"
 
-[node name="statuslabel" type="Label" parent="TabContainer/VBox/TabContainer/WebSocketsignalling/Servermode/WebRTCmultiplayerserver"]
-layout_mode = 0
-offset_left = 137.999
-offset_top = -19.9523
-offset_right = 177.999
-offset_bottom = -3.95229
+[node name="statuslabel" type="Label" parent="TabContainer/VBox/TabContainer/WebSocketsignalling/VBox/Servermode/WebRTCmultiplayerserver"]
+layout_mode = 2
 text = "null"
 
-[node name="ClientsList" type="OptionButton" parent="TabContainer/VBox/TabContainer/WebSocketsignalling/Servermode"]
-layout_mode = 0
-offset_left = 2.8562
-offset_top = -3.15384
-offset_right = 140.856
-offset_bottom = 16.8462
+[node name="ClientsList" type="OptionButton" parent="TabContainer/VBox/TabContainer/WebSocketsignalling/VBox/Servermode"]
+layout_mode = 2
 
-[node name="Clientmode" type="Control" parent="TabContainer/VBox/TabContainer/WebSocketsignalling"]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = 379.0
-offset_top = 12.0
-offset_right = -11.0
-offset_bottom = -1.99973
-grow_horizontal = 2
-grow_vertical = 2
+[node name="Clientmode" type="HBoxContainer" parent="TabContainer/VBox/TabContainer/WebSocketsignalling/VBox"]
+layout_mode = 2
 script = ExtResource("13")
 
-[node name="WebRTCmultiplayerclient" type="Control" parent="TabContainer/VBox/TabContainer/WebSocketsignalling/Clientmode"]
-anchors_preset = 0
-offset_left = -3.0
-offset_top = 9.0
-offset_right = 135.0
-offset_bottom = 35.0
+[node name="WebRTCmultiplayerclient" type="HBoxContainer" parent="TabContainer/VBox/TabContainer/WebSocketsignalling/VBox/Clientmode"]
+layout_mode = 2
 script = ExtResource("14")
 
-[node name="StartWebRTCmultiplayer" type="Button" parent="TabContainer/VBox/TabContainer/WebSocketsignalling/Clientmode/WebRTCmultiplayerclient"]
-layout_mode = 0
-offset_left = 86.0
-offset_top = 9.0
-offset_right = 234.0
-offset_bottom = 40.0
+[node name="StartWebRTCmultiplayer" type="Button" parent="TabContainer/VBox/TabContainer/WebSocketsignalling/VBox/Clientmode/WebRTCmultiplayerclient"]
+layout_mode = 2
 toggle_mode = true
 text = "StartWebrtc client"
 
-[node name="statuslabel" type="Label" parent="TabContainer/VBox/TabContainer/WebSocketsignalling/Clientmode/WebRTCmultiplayerclient"]
-layout_mode = 0
-offset_left = 102.0
-offset_top = -16.0001
-offset_right = 170.0
-offset_bottom = 6.99986
+[node name="statuslabel" type="Label" parent="TabContainer/VBox/TabContainer/WebSocketsignalling/VBox/Clientmode/WebRTCmultiplayerclient"]
+layout_mode = 2
 text = "null"
-
-[node name="VSeparator" type="VSeparator" parent="TabContainer/VBox/TabContainer/WebSocketsignalling"]
-layout_mode = 0
-offset_left = 347.879
-offset_top = 5.087
-offset_right = 358.879
-offset_bottom = 45.087
-
-[node name="client_id" type="LineEdit" parent="TabContainer/VBox/TabContainer/WebSocketsignalling"]
-layout_mode = 0
-offset_left = 178.0
-offset_top = 6.0
-offset_right = 262.0
-offset_bottom = 37.0
-editable = false
-
-[node name="Label" type="Label" parent="TabContainer/VBox/TabContainer/WebSocketsignalling/client_id"]
-layout_mode = 0
-offset_left = -165.0
-offset_right = -17.0
-offset_bottom = 26.0
-text = "websocket clientid:"
-
-[node name="autoconnect" type="CheckBox" parent="TabContainer/VBox/TabContainer/WebSocketsignalling"]
-layout_mode = 0
-offset_left = 150.0
-offset_top = 38.0
-offset_right = 346.0
-offset_bottom = 69.0
-button_pressed = true
-text = "autoconnect"
 
 [node name="MQTTsignalling" type="ColorRect" parent="TabContainer"]
 visible = false
@@ -788,8 +737,8 @@ text = "0.1"
 [connection signal="toggled" from="TabContainer/VBox/TabContainer/ENetMultiplayer/HBox/Clientmode/StartENetmultiplayer" to="TabContainer/VBox/TabContainer/ENetMultiplayer/HBox/Clientmode" method="_on_StartENetmultiplayer_toggled"]
 [connection signal="toggled" from="TabContainer/VBox/TabContainer/WebSocketMultiplayer/HBox/Servermode/StartWebSocketmultiplayer" to="TabContainer/VBox/TabContainer/WebSocketMultiplayer/HBox/Servermode" method="_on_StartWebSocketmultiplayer_toggled"]
 [connection signal="toggled" from="TabContainer/VBox/TabContainer/WebSocketMultiplayer/HBox/Clientmode/StartWebSocketmultiplayer" to="TabContainer/VBox/TabContainer/WebSocketMultiplayer/HBox/Clientmode" method="_on_StartWebSocketmultiplayer_toggled"]
-[connection signal="toggled" from="TabContainer/VBox/TabContainer/WebSocketsignalling/Servermode/WebRTCmultiplayerserver/StartWebRTCmultiplayer" to="TabContainer/VBox/TabContainer/WebSocketsignalling/Servermode/WebRTCmultiplayerserver" method="_on_StartWebRTCmultiplayer_toggled"]
-[connection signal="toggled" from="TabContainer/VBox/TabContainer/WebSocketsignalling/Clientmode/WebRTCmultiplayerclient/StartWebRTCmultiplayer" to="TabContainer/VBox/TabContainer/WebSocketsignalling/Clientmode/WebRTCmultiplayerclient" method="_on_StartWebRTCmultiplayer_toggled"]
+[connection signal="toggled" from="TabContainer/VBox/TabContainer/WebSocketsignalling/VBox/Servermode/WebRTCmultiplayerserver/StartWebRTCmultiplayer" to="TabContainer/VBox/TabContainer/WebSocketsignalling/VBox/Servermode/WebRTCmultiplayerserver" method="_on_StartWebRTCmultiplayer_toggled"]
+[connection signal="toggled" from="TabContainer/VBox/TabContainer/WebSocketsignalling/VBox/Clientmode/WebRTCmultiplayerclient/StartWebRTCmultiplayer" to="TabContainer/VBox/TabContainer/WebSocketsignalling/VBox/Clientmode/WebRTCmultiplayerclient" method="_on_StartWebRTCmultiplayer_toggled"]
 [connection signal="toggled" from="TabContainer/MQTTsignalling/Servermode/WebRTCmultiplayerserver/StartWebRTCmultiplayer" to="TabContainer/MQTTsignalling/Servermode/WebRTCmultiplayerserver" method="_on_StartWebRTCmultiplayer_toggled"]
 [connection signal="toggled" from="TabContainer/MQTTsignalling/Clientmode/WebRTCmultiplayerclient/StartWebRTCmultiplayer" to="TabContainer/MQTTsignalling/Clientmode/WebRTCmultiplayerclient" method="_on_StartWebRTCmultiplayer_toggled"]
 [connection signal="button_down" from="TabContainer/MQTTsignalling/brokeraddress" to="." method="_on_brokeraddress_button_down"]

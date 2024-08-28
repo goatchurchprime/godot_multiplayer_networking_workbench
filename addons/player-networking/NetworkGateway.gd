@@ -114,8 +114,8 @@ func _on_ProtocolOptions_item_selected(np):
 	WebSocketMultiplayer.get_node("HBox/Servermode").visible = false
 	WebSocketMultiplayer.get_node("HBox/Clientmode").visible = false
 	WebSocketsignalling.visible = selectaswebrtcwebsocket
-	WebSocketsignalling.get_node("Servermode").visible = false
-	WebSocketsignalling.get_node("Clientmode").visible = false
+	WebSocketsignalling.get_node("VBox/Servermode").visible = false
+	WebSocketsignalling.get_node("VBox/Clientmode").visible = false
 
 	
 func _on_NetworkOptions_item_selected(ns):
@@ -139,10 +139,10 @@ func _on_NetworkOptions_item_selected(ns):
 	ENetMultiplayer.get_node("HBox/Clientmode/StartENetmultiplayer").button_pressed = false
 	WebSocketMultiplayer.get_node("HBox/Servermode/StartWebSocketmultiplayer").button_pressed = false
 	WebSocketMultiplayer.get_node("HBox/Clientmode/StartWebSocketmultiplayer").button_pressed = false
-	if WebSocketsignalling.get_node("Servermode").websocketserver != null:
-		WebSocketsignalling.get_node("Servermode").stopwebsocketsignalserver()
-	if WebSocketsignalling.get_node("Clientmode").websocketclient != null:
-		WebSocketsignalling.get_node("Clientmode").stopwebsocketsignalclient()
+	if WebSocketsignalling.get_node("VBox/Servermode").websocketserver != null:
+		WebSocketsignalling.get_node("VBox/Servermode").stopwebsocketsignalserver()
+	if WebSocketsignalling.get_node("VBox/Clientmode").websocketclient != null:
+		WebSocketsignalling.get_node("VBox/Clientmode").stopwebsocketsignalclient()
 
 	var np = ProtocolOptions.selected 
 	assert (np != NETWORK_PROTOCOL.WEBRTC_MQTTSIGNAL)
@@ -188,16 +188,16 @@ func _on_NetworkOptions_item_selected(ns):
 				WebSocketMultiplayer.get_node("HBox/Clientmode/StartWebSocketmultiplayer").button_pressed = true
 
 	if selectaswebrtcwebsocket:
-		WebSocketsignalling.get_node("Servermode").visible = selectasserver
-		WebSocketsignalling.get_node("Clientmode").visible = selectasclient or selectassearchingclient
-		WebSocketsignalling.get_node("Servermode/WebRTCmultiplayerserver/StartWebRTCmultiplayer").button_pressed = false
-		WebSocketsignalling.get_node("Servermode/WebRTCmultiplayerserver/StartWebRTCmultiplayer").disabled = true
-		WebSocketsignalling.get_node("Clientmode/WebRTCmultiplayerclient/StartWebRTCmultiplayer").button_pressed = false
-		WebSocketsignalling.get_node("Clientmode/WebRTCmultiplayerclient/StartWebRTCmultiplayer").disabled = true
+		WebSocketsignalling.get_node("VBox/Servermode").visible = selectasserver
+		WebSocketsignalling.get_node("VBox/Clientmode").visible = selectasclient or selectassearchingclient
+		WebSocketsignalling.get_node("VBox/Servermode/WebRTCmultiplayerserver/StartWebRTCmultiplayer").button_pressed = false
+		WebSocketsignalling.get_node("VBox/Servermode/WebRTCmultiplayerserver/StartWebRTCmultiplayer").disabled = true
+		WebSocketsignalling.get_node("VBox/Clientmode/WebRTCmultiplayerclient/StartWebRTCmultiplayer").button_pressed = false
+		WebSocketsignalling.get_node("VBox/Clientmode/WebRTCmultiplayerclient/StartWebRTCmultiplayer").disabled = true
 		if selectasserver:
-			WebSocketsignalling.get_node("Servermode").startwebsocketsignalserver()
+			WebSocketsignalling.get_node("VBox/Servermode").startwebsocketsignalserver()
 		if selectasclient:
-			WebSocketsignalling.get_node("Clientmode").startwebsocketsignalclient()
+			WebSocketsignalling.get_node("VBox/Clientmode").startwebsocketsignalclient()
 
 
 func _on_udpenabled_toggled(button_pressed):
