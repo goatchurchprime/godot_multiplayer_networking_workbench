@@ -1,4 +1,4 @@
-extends Control
+extends HBoxContainer
 
 var udpdiscoveryport = 4546
 const broadcastudpipnum = "255.255.255.255"

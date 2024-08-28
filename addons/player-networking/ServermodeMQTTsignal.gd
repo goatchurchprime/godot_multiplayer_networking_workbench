@@ -7,7 +7,7 @@ extends Control
 @onready var StartMQTTstatuslabel = SetupMQTTsignal.get_node("StartMQTT/statuslabel")
 
 var roomname = ""
-	
+
 var nextclientnumber = 2
 var clientidtowclientid = { }
 var wclientidtoclientid = { }

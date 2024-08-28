@@ -1,4 +1,4 @@
-[gd_scene load_steps=28 format=3 uid="uid://cfmoahalri06d"]
+[gd_scene load_steps=31 format=3 uid="uid://cfmoahalri06d"]
 
 [ext_resource type="Script" path="res://addons/player-networking/NetworkGateway.gd" id="1"]
 [ext_resource type="Script" path="res://addons/player-networking/Enetmultiplayerserver.gd" id="3"]
@@ -18,6 +18,14 @@
 [ext_resource type="Script" path="res://addons/player-networking/ClientmodeMQTTsignal.gd" id="15"]
 [ext_resource type="Script" path="res://addons/player-networking/RecordingFeature.gd" id="16_hf3ik"]
 [ext_resource type="Script" path="res://addons/player-networking/DoppelgangerPanel_ui.gd" id="16_i8v6k"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_5i8wh"]
+bg_color = Color(0.296469, 0.496474, 0.299525, 1)
+
+[sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_o112m"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_638ev"]
+bg_color = Color(0.682353, 0.584314, 0.392157, 1)
 
 [sub_resource type="AudioStreamMicrophone" id="2"]
 
@@ -173,63 +181,61 @@ tabs_visible = false
 layout_mode = 2
 metadata/_tab_index = 0
 
-[node name="UDPipdiscovery" type="HBoxContainer" parent="TabContainer/VBox"]
+[node name="PanelContainer" type="PanelContainer" parent="TabContainer/VBox"]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_5i8wh")
+
+[node name="UDPipdiscovery" type="HBoxContainer" parent="TabContainer/VBox/PanelContainer"]
+visibility_layer = 3
+material = SubResource("CanvasItemMaterial_o112m")
 layout_mode = 2
 
-[node name="Servermode" type="Control" parent="TabContainer/VBox/UDPipdiscovery"]
+[node name="Label2" type="Label" parent="TabContainer/VBox/PanelContainer/UDPipdiscovery"]
 layout_mode = 2
-script = ExtResource("5")
+text = "UDP local-ip discovery --"
 
-[node name="broadcastperiod" type="LineEdit" parent="TabContainer/VBox/UDPipdiscovery/Servermode"]
-layout_mode = 0
-offset_left = 84.0
-offset_top = 1.0
-offset_right = 151.062
-offset_bottom = 32.0
-text = "2.0"
-
-[node name="Label" type="Label" parent="TabContainer/VBox/UDPipdiscovery/Servermode/broadcastperiod"]
-layout_mode = 0
-offset_left = -73.0
-offset_top = 3.0
-offset_right = -9.0
-offset_bottom = 29.0
-text = "interval:"
-
-[node name="ColorRect" type="ColorRect" parent="TabContainer/VBox/UDPipdiscovery/Servermode"]
-layout_mode = 0
-offset_left = 146.0
-offset_top = 6.0
-offset_right = 150.0
-offset_bottom = 27.0
-color = Color(0.968627, 0.933333, 0.0431373, 1)
-
-[node name="broadcastport" type="LineEdit" parent="TabContainer/VBox/UDPipdiscovery"]
-layout_mode = 2
-text = "4546"
-
-[node name="Label" type="Label" parent="TabContainer/VBox/UDPipdiscovery/broadcastport"]
-layout_mode = 0
-offset_left = -80.7593
-offset_right = -12.7593
-offset_bottom = 26.0
-text = "udp port"
-
-[node name="Clientmode" type="Control" parent="TabContainer/VBox/UDPipdiscovery"]
-layout_mode = 2
-script = ExtResource("6")
-
-[node name="udpenabled" type="CheckBox" parent="TabContainer/VBox/UDPipdiscovery"]
+[node name="udpenabled" type="CheckBox" parent="TabContainer/VBox/PanelContainer/UDPipdiscovery"]
 layout_mode = 2
 button_pressed = true
 text = "enable"
 
+[node name="Label" type="Label" parent="TabContainer/VBox/PanelContainer/UDPipdiscovery"]
+layout_mode = 2
+text = "port:"
+
+[node name="broadcastport" type="LineEdit" parent="TabContainer/VBox/PanelContainer/UDPipdiscovery"]
+layout_mode = 2
+text = "4546"
+
+[node name="Servermode" type="HBoxContainer" parent="TabContainer/VBox/PanelContainer/UDPipdiscovery"]
+layout_mode = 2
+script = ExtResource("5")
+
+[node name="Label" type="Label" parent="TabContainer/VBox/PanelContainer/UDPipdiscovery/Servermode"]
+layout_mode = 2
+text = "interval:"
+
+[node name="broadcastperiod" type="LineEdit" parent="TabContainer/VBox/PanelContainer/UDPipdiscovery/Servermode"]
+layout_mode = 2
+text = "2.0"
+
+[node name="ColorRect" type="ColorRect" parent="TabContainer/VBox/PanelContainer/UDPipdiscovery/Servermode"]
+custom_minimum_size = Vector2(5, 0)
+layout_mode = 2
+color = Color(0.968627, 0.933333, 0.0431373, 1)
+
+[node name="Clientmode" type="Control" parent="TabContainer/VBox/PanelContainer/UDPipdiscovery"]
+layout_mode = 2
+script = ExtResource("6")
+
 [node name="TabContainer" type="TabContainer" parent="TabContainer/VBox"]
 layout_mode = 2
-current_tab = 0
+theme_override_styles/panel = SubResource("StyleBoxFlat_638ev")
+current_tab = 2
 tabs_visible = false
 
 [node name="ENetMultiplayer" type="ColorRect" parent="TabContainer/VBox/TabContainer"]
+visible = false
 layout_mode = 2
 color = Color(0.0980392, 0.305882, 0.160784, 1)
 metadata/_tab_index = 0
@@ -349,7 +355,6 @@ button_pressed = true
 text = "autoconnect"
 
 [node name="WebSocketsignalling" type="ColorRect" parent="TabContainer/VBox/TabContainer"]
-visible = false
 layout_mode = 2
 color = Color(0.145098, 0.231373, 0.294118, 1)
 metadata/_tab_index = 2
@@ -428,10 +433,10 @@ text = "StartWebrtc client"
 
 [node name="statuslabel" type="Label" parent="TabContainer/VBox/TabContainer/WebSocketsignalling/Clientmode/WebRTCmultiplayerclient"]
 layout_mode = 0
-offset_left = 98.0308
-offset_top = -34.9594
-offset_right = 166.031
-offset_bottom = -20.9594
+offset_left = 102.0
+offset_top = -16.0001
+offset_right = 170.0
+offset_bottom = 6.99986
 text = "null"
 
 [node name="VSeparator" type="VSeparator" parent="TabContainer/VBox/TabContainer/WebSocketsignalling"]
@@ -825,7 +830,7 @@ text = "0.1"
 [connection signal="item_selected" from="ProtocolModes/ProtocolOptions" to="." method="_on_ProtocolOptions_item_selected"]
 [connection signal="item_selected" from="ProtocolModes/TabContainer/HBox/NetworkOptions" to="." method="_on_NetworkOptions_item_selected"]
 [connection signal="item_selected" from="ProtocolModes/TabContainer/NetworkOptionsMQTTWebRTC" to="." method="_on_NetworkOptionsMQTTWebRTC_item_selected"]
-[connection signal="toggled" from="TabContainer/VBox/UDPipdiscovery/udpenabled" to="." method="_on_udpenabled_toggled"]
+[connection signal="toggled" from="TabContainer/VBox/PanelContainer/UDPipdiscovery/udpenabled" to="." method="_on_udpenabled_toggled"]
 [connection signal="toggled" from="TabContainer/VBox/TabContainer/ENetMultiplayer/Servermode/StartENetmultiplayer" to="TabContainer/VBox/TabContainer/ENetMultiplayer/Servermode" method="_on_StartENetmultiplayer_toggled"]
 [connection signal="toggled" from="TabContainer/VBox/TabContainer/ENetMultiplayer/Clientmode/StartENetmultiplayer" to="TabContainer/VBox/TabContainer/ENetMultiplayer/Clientmode" method="_on_StartENetmultiplayer_toggled"]
 [connection signal="toggled" from="TabContainer/VBox/TabContainer/WebSocketMultiplayer/Servermode/StartWebSocketmultiplayer" to="TabContainer/VBox/TabContainer/WebSocketMultiplayer/Servermode" method="_on_StartWebSocketmultiplayer_toggled"]

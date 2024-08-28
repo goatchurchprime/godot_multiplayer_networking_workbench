@@ -17,7 +17,7 @@ var Dconnectedplayerscount = 0
 @onready var NetworkOptions = $ProtocolModes/TabContainer/HBox/NetworkOptions
 @onready var NetworkOptions_portnumber = $ProtocolModes/TabContainer/HBox/portnumber
 @onready var NetworkOptionsMQTTWebRTC = $ProtocolModes/TabContainer/NetworkOptionsMQTTWebRTC
-@onready var UDPipdiscovery = $TabContainer/VBox/UDPipdiscovery
+@onready var UDPipdiscovery = $TabContainer/VBox/PanelContainer/UDPipdiscovery
 
 @onready var ENetMultiplayer = $TabContainer/VBox/TabContainer/ENetMultiplayer
 @onready var WebSocketMultiplayer = $TabContainer/VBox/TabContainer/WebSocketMultiplayer
@@ -127,10 +127,12 @@ func _on_NetworkOptions_item_selected(ns):
 			print("closing connection ", $PlayerConnections.LocalPlayer.get_node("PlayerFrame").networkID, multiplayer.multiplayer_peer)
 		$PlayerConnections._server_disconnected()
 	assert ($PlayerConnections.LocalPlayer.get_node("PlayerFrame").networkID == 0)
+
 	if UDPipdiscovery.get_node("Servermode").is_processing():
 		UDPipdiscovery.get_node("Servermode").stopUDPbroadcasting()
 	if UDPipdiscovery.get_node("Clientmode").is_processing():
 		UDPipdiscovery.get_node("Clientmode").stopUDPreceiving()
+
 	ENetMultiplayer.get_node("Servermode/StartENetmultiplayer").button_pressed = false
 	ENetMultiplayer.get_node("Clientmode/StartENetmultiplayer").button_pressed = false
 	WebSocketMultiplayer.get_node("Servermode/StartWebSocketmultiplayer").button_pressed = false
