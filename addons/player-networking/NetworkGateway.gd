@@ -9,8 +9,10 @@ extends Control
 # make a new timeline visualizer that shows the jitter of the recent incoming packets
 
 @export var remoteservers = [ "127.0.0.1" ]
-@export var playersnodepath : NodePath = ""
-@export var localplayerscene : String = "" # "res://controlplayer.tscn"
+@export var playersnodepath : NodePath = "VBox/FallbackPlayersNode"
+@export var localplayerscene : String = "res://addons/player-networking/FallbackControlplayer.tscn"
+@export var enabled = true
+
 var Dconnectedplayerscount = 0
 
 @onready var ProtocolModes = find_child("ProtocolModes")
@@ -28,6 +30,9 @@ var Dconnectedplayerscount = 0
 @onready var PlayerConnections = find_child("PlayerConnections")
 @onready var DoppelgangerPanel = find_child("DoppelgangerPanel")
 
+signal resolved_as_necessary(asserver)
+signal webrtc_multiplayerpeer_set(asserver)
+
 enum NETWORK_PROTOCOL { ENET = 0, 
 						WEBSOCKET = 1,
 						WEBRTC_WEBSOCKETSIGNAL = 2,
@@ -43,7 +48,8 @@ enum NETWORK_OPTIONS_MQTT_WEBRTC {
 						NETWORK_OFF = 0,
 						AS_SERVER = 1,
 						AS_CLIENT = 2,
-						AS_NECESSARY = 3
+						AS_NECESSARY = 3,
+						AS_NECESSARY_MANUALCHANGE = 4
 					}
 
 
@@ -122,6 +128,7 @@ func _on_ProtocolOptions_item_selected(np):
 	
 func _on_NetworkOptions_item_selected(ns):
 	print("_on_OptionButton_item_selected_on_OptionButton_item_selected_on_OptionButton_item_selected ", ns)
+	PlayerConnections.connect_multiplayersignals()
 	var selectasoff = (ns == NETWORK_OPTIONS.NETWORK_OFF)
 	if not selectasoff:
 		PlayerConnections.clearconnectionlog()
@@ -206,6 +213,7 @@ func _on_udpenabled_toggled(button_pressed):
 	NetworkOptions.set_item_disabled(NETWORK_OPTIONS.LOCAL_NETWORK, not button_pressed)
 
 func _on_NetworkOptionsMQTTWebRTC_item_selected(ns):
+	PlayerConnections.connect_multiplayersignals()
 	MQTTsignalling._on_NetworkOptionsMQTTWebRTC_item_selected(ns)
 
 
@@ -224,12 +232,22 @@ func _data_channel_received(channel: Object):
 	print("_data_channel_received ", channel)
 
 func set_vox_on():
-	var RecordingFeature = PlayerConnections.get_node("HBoxMain/VBoxContainer/RecordingFeature")
+	var RecordingFeature = PlayerConnections.get_node("VBox/RecordingFeature")
 	RecordingFeature.get_node("Vox").button_pressed = true
-	var voxthreshold = 0.09
+	var voxthreshold = 0.06
 	RecordingFeature.voxthreshhold = voxthreshold
 	RecordingFeature.get_node("VoxThreshold").material.set_shader_parameter("voxthreshhold", voxthreshold)
 
+func is_disconnected():
+	return Dconnectedplayerscount == 0
+
+func simple_webrtc_connect(roomname):
+	if roomname:
+		MQTTsignalling.get_node("VBox/HBox2/roomname").text = roomname
+		selectandtrigger_networkoption(NETWORK_OPTIONS_MQTT_WEBRTC.AS_NECESSARY)
+		set_vox_on()
+	else:
+		selectandtrigger_networkoption(NETWORK_OPTIONS.NETWORK_OFF)
 
 
 

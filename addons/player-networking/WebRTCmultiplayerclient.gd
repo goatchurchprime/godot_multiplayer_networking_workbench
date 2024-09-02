@@ -60,6 +60,8 @@ func _on_StartWebRTCmultiplayer_toggled(button_pressed):
 			print("bad")
 			return
 		multiplayer.multiplayer_peer = multiplayerpeer
+		NetworkGateway.emit_signal("webrtc_multiplayerpeer_set", false)
+
 		assert (get_tree().multiplayer_poll)
 		
 		clientsignalling.mqttsig_connection_established.connect(client_connection_established) 

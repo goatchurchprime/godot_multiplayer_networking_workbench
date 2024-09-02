@@ -61,7 +61,9 @@ func processtalkstreamends():
 		opusstreamcount += 1
 
 func processvox():
-	var chunkmax = audioopuschunkedeffect.chunk_max(false, false)
+	if $Denoise.button_pressed:
+		audioopuschunkedeffect.denoise_resampled_chunk()
+	var chunkmax = audioopuschunkedeffect.chunk_max(false, $Denoise.button_pressed)
 	$VoxThreshold.material.set_shader_parameter("chunkmax", chunkmax)
 	if chunkmax >= voxthreshhold:
 		if $Vox.button_pressed and not $PTT.button_pressed:
@@ -106,7 +108,9 @@ func _process(delta):
 
 func _ready():
 	$VoxThreshold.material.set_shader_parameter("voxthreshhold", voxthreshhold)
-	assert ($AudioStreamPlayerMicrophone.bus == "MicrophoneBus")
+	if $AudioStreamPlayerMicrophone.bus != "MicrophoneBus":
+		print("AudioStreamPlayerMicrophone doesn't use MicrophoneBus, disabling")
+		return
 	assert ($AudioStreamPlayerMicrophone.stream.is_class("AudioStreamMicrophone"))
 	var microphonebusidx = AudioServer.get_bus_index($AudioStreamPlayerMicrophone.bus)
 	for i in range(AudioServer.get_bus_effect_count(microphonebusidx)):

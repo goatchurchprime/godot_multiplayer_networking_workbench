@@ -168,7 +168,7 @@ text = "4547"
 [node name="NetworkOptionsMQTTWebRTC" type="OptionButton" parent="VBox/ProtocolModes/TabContainer"]
 visible = false
 layout_mode = 2
-item_count = 4
+item_count = 5
 popup/item_0/text = "Network off"
 popup/item_1/text = "As server"
 popup/item_1/id = 1
@@ -176,6 +176,8 @@ popup/item_2/text = "As client"
 popup/item_2/id = 2
 popup/item_3/text = "As necessary"
 popup/item_3/id = 3
+popup/item_4/text = "As necessary manual"
+popup/item_4/id = 4
 metadata/_tab_index = 1
 
 [node name="TabContainer" type="TabContainer" parent="VBox"]
@@ -543,7 +545,6 @@ script = ExtResource("16_hf3ik")
 [node name="AudioStreamPlayerMicrophone" type="AudioStreamPlayer" parent="VBox/PlayerConnections/VBox/RecordingFeature"]
 stream = SubResource("2")
 autoplay = true
-bus = &"MicrophoneBus"
 
 [node name="PTT" type="Button" parent="VBox/PlayerConnections/VBox/RecordingFeature"]
 layout_mode = 2
@@ -657,6 +658,9 @@ text = "drop out%:"
 layout_mode = 2
 theme_override_fonts/font = SubResource("FontVariation_8pqve")
 text = "0.1"
+
+[node name="FallbackPlayersNode" type="Control" parent="VBox"]
+layout_mode = 2
 
 [connection signal="gui_input" from="." to="." method="_on_gui_input"]
 [connection signal="item_selected" from="VBox/ProtocolModes/ProtocolOptions" to="." method="_on_ProtocolOptions_item_selected"]

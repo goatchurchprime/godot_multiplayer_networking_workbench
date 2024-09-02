@@ -13,6 +13,8 @@ func _on_StartWebRTCmultiplayer_toggled(button_pressed):
 			print("Failed ", error_string(E))
 			return
 		multiplayer.multiplayer_peer = multiplayerpeer
+		NetworkGateway.emit_signal("webrtc_multiplayerpeer_set", true)
+
 		assert(multiplayer.multiplayer_peer.is_server_relay_supported())
 		assert (multiplayer.server_relay)
 		assert (multiplayer.get_unique_id() == 1)
