@@ -296,6 +296,7 @@ offset_top = 44.0
 offset_right = 663.0
 offset_bottom = 423.0
 playersnodepath = NodePath("../SubViewportContainer/SubViewport/Players")
+localplayerscene = ""
 
 [connection signal="toggled" from="QuickOptions/ShowNetworkGateway" to="QuickOptions" method="_on_show_network_gateway_toggled"]
 [connection signal="toggled" from="QuickOptions/Connect" to="QuickOptions" method="_on_connect_toggled"]

@@ -55,6 +55,7 @@ func client_packet_received(v):
 func _on_StartWebRTCmultiplayer_toggled(button_pressed):
 	if button_pressed:
 		var multiplayerpeer = WebRTCMultiplayerPeer.new()
+		print("*** clientsignalling.wclientid ", clientsignalling.wclientid)
 		var E = multiplayerpeer.create_client(clientsignalling.wclientid)
 		if E != OK:
 			print("bad")
