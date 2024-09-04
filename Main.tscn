@@ -1,4 +1,4 @@
-[gd_scene load_steps=18 format=3 uid="uid://denbhipr26x6c"]
+[gd_scene load_steps=15 format=3 uid="uid://denbhipr26x6c"]
 
 [ext_resource type="Script" path="res://addons/player-networking/PlayerFrameLocal.gd" id="1"]
 [ext_resource type="Script" path="res://quickoptionsmenu.gd" id="1_8ecn3"]
@@ -7,7 +7,6 @@
 [ext_resource type="PackedScene" uid="uid://cfmoahalri06d" path="res://addons/player-networking/NetworkGateway.tscn" id="3"]
 [ext_resource type="Texture2D" uid="uid://baeyk5co8xxrj" path="res://moonlow/_normal.png" id="3_1a6vp"]
 [ext_resource type="Script" path="res://syncobjects.gd" id="6_jvykx"]
-[ext_resource type="Texture2D" uid="uid://8814p6n3qb2r" path="res://art/survivalgame-terrian-defult.png" id="7_7xk4y"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_31q8f"]
 bg_color = Color(0.6, 0.6, 0.0588235, 1)
@@ -60,95 +59,6 @@ _data = {
 "RESET": SubResource("Animation_dy77l"),
 "adaptive": SubResource("Animation_dswac")
 }
-
-[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_oppjg"]
-texture = ExtResource("7_7xk4y")
-texture_region_size = Vector2i(40, 40)
-0:0/0 = 0
-1:0/0 = 0
-2:0/0 = 0
-3:0/0 = 0
-4:0/0 = 0
-5:0/0 = 0
-6:0/0 = 0
-8:0/0 = 0
-10:0/0 = 0
-11:0/0 = 0
-12:0/0 = 0
-13:0/0 = 0
-14:0/0 = 0
-15:0/0 = 0
-16:0/0 = 0
-17:0/0 = 0
-18:0/0 = 0
-20:0/0 = 0
-22:0/0 = 0
-23:0/0 = 0
-24:0/0 = 0
-25:0/0 = 0
-26:0/0 = 0
-0:1/0 = 0
-1:1/0 = 0
-2:1/0 = 0
-3:1/0 = 0
-4:1/0 = 0
-5:1/0 = 0
-6:1/0 = 0
-7:1/0 = 0
-8:1/0 = 0
-9:1/0 = 0
-10:1/0 = 0
-11:1/0 = 0
-12:1/0 = 0
-13:1/0 = 0
-14:1/0 = 0
-15:1/0 = 0
-16:1/0 = 0
-17:1/0 = 0
-18:1/0 = 0
-19:1/0 = 0
-20:1/0 = 0
-21:1/0 = 0
-22:1/0 = 0
-23:1/0 = 0
-24:1/0 = 0
-25:1/0 = 0
-26:1/0 = 0
-0:2/0 = 0
-1:2/0 = 0
-2:2/0 = 0
-3:2/0 = 0
-4:2/0 = 0
-5:2/0 = 0
-6:2/0 = 0
-8:2/0 = 0
-10:2/0 = 0
-11:2/0 = 0
-12:2/0 = 0
-13:2/0 = 0
-14:2/0 = 0
-15:2/0 = 0
-16:2/0 = 0
-17:2/0 = 0
-18:2/0 = 0
-20:2/0 = 0
-22:2/0 = 0
-23:2/0 = 0
-24:2/0 = 0
-25:2/0 = 0
-26:2/0 = 0
-3:3/0 = 0
-4:3/0 = 0
-5:3/0 = 0
-6:3/0 = 0
-15:3/0 = 0
-16:3/0 = 0
-17:3/0 = 0
-18:3/0 = 0
-
-[sub_resource type="TileSet" id="TileSet_vrks8"]
-tile_size = Vector2i(40, 40)
-sources/1 = SubResource("TileSetAtlasSource_oppjg")
 
 [node name="Main" type="Control"]
 layout_mode = 3
@@ -281,11 +191,6 @@ texture = SubResource("GradientTexture2D_d7327")
 libraries = {
 "": SubResource("AnimationLibrary_m8t5j")
 }
-
-[node name="TileMap" type="TileMap" parent="SubViewportContainer/SubViewport"]
-tile_set = SubResource("TileSet_vrks8")
-rendering_quadrant_size = 40
-format = 2
 
 [node name="NetworkGateway" parent="." instance=ExtResource("3")]
 visible = false
