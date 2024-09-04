@@ -1,10 +1,10 @@
 extends Control
 
 
-@onready var SetupMQTTsignal = get_parent().get_parent()
-@onready var MQTT = SetupMQTTsignal.get_node("MQTT")
-@onready var StartMQTT = SetupMQTTsignal.get_node("VBox/HBox2/StartMQTT")
-@onready var StartMQTTstatuslabel = SetupMQTTsignal.get_node("VBox/HBox2/statuslabel")
+@onready var MQTTsignalling = find_parent("MQTTsignalling")
+@onready var MQTT = MQTTsignalling.get_node("MQTT")
+@onready var StartMQTT = MQTTsignalling.get_node("VBox/HBox2/StartMQTT")
+@onready var StartMQTTstatuslabel = MQTTsignalling.get_node("VBox/HBox2/statuslabel")
 
 var roomname = ""
 
@@ -114,17 +114,17 @@ func _on_StartServer_toggled(button_pressed):
 		MQTT.received_message.connect(received_mqtt)
 		MQTT.broker_connected.connect(on_broker_connect)
 		MQTT.broker_disconnected.connect(on_broker_disconnect)
-		roomname = SetupMQTTsignal.get_node("VBox/HBox2/roomname").text
-		SetupMQTTsignal.get_node("VBox/HBox2/roomname").editable = false
+		roomname = MQTTsignalling.get_node("VBox/HBox2/roomname").text
+		MQTTsignalling.get_node("VBox/HBox2/roomname").editable = false
 		StartMQTTstatuslabel.text = "on"
 		randomize()
 		MQTT.client_id = "s%d" % randi()
-		SetupMQTTsignal.get_node("VBox/HBox2/client_id").text = MQTT.client_id
+		MQTTsignalling.get_node("VBox/HBox2/client_id").text = MQTT.client_id
 		statustopic = "%s/%s/server" % [roomname, MQTT.client_id]
 		MQTT.set_last_will(statustopic, JSON.new().stringify({"subject":"dead", "comment":"by_will"}), true)
 		StartMQTTstatuslabel.text = "connecting"
-		var brokerurl = SetupMQTTsignal.get_node("VBox/HBox/brokeraddress").text
-		SetupMQTTsignal.get_node("VBox/HBox/brokeraddress").disabled = true
+		var brokerurl = MQTTsignalling.get_node("VBox/HBox/brokeraddress").text
+		MQTTsignalling.get_node("VBox/HBox/brokeraddress").disabled = true
 		MQTT.connect_to_broker(brokerurl)
 
 	else:
@@ -136,9 +136,9 @@ func _on_StartServer_toggled(button_pressed):
 		MQTT.disconnect_from_server()
 		StartMQTTstatuslabel.text = "off"
 		roomname = ""
-		SetupMQTTsignal.get_node("VBox/HBox2/roomname").editable = true
-		SetupMQTTsignal.get_node("VBox/HBox2/client_id").text = ""
-		SetupMQTTsignal.get_node("VBox/HBox/brokeraddress").disabled = false
+		MQTTsignalling.get_node("VBox/HBox2/roomname").editable = true
+		MQTTsignalling.get_node("VBox/HBox2/client_id").text = ""
+		MQTTsignalling.get_node("VBox/HBox/brokeraddress").disabled = false
 		for s in clientidtowclientid:
 			emit_signal("mqttsig_client_disconnected", clientidtowclientid[s])
 		$ClientsList.clear()

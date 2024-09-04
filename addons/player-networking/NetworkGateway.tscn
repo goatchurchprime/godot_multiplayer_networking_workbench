@@ -545,6 +545,7 @@ script = ExtResource("16_hf3ik")
 [node name="AudioStreamPlayerMicrophone" type="AudioStreamPlayer" parent="VBox/PlayerConnections/VBox/RecordingFeature"]
 stream = SubResource("2")
 autoplay = true
+bus = &"MicrophoneBus"
 
 [node name="PTT" type="Button" parent="VBox/PlayerConnections/VBox/RecordingFeature"]
 layout_mode = 2
