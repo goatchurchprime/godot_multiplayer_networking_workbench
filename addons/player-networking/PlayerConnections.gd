@@ -25,17 +25,35 @@ var deferred_playerconnections = null
 # player node to remove
 var remote_players_idstonodenames = { }
 
-@onready var PlayersNode = NetworkGateway.get_node(NetworkGateway.playersnodepath)
+@onready var PlayersNode = NetworkGateway.get_node_or_null(NetworkGateway.playersnodepath)
 @onready var PlayerList = $VBox/HBox/PlayerList
+
+var multiplayersignalsconnected = false
+func connect_multiplayersignals():
+	if not multiplayersignalsconnected:
+		# Signals received on behalf of any other player in the network 
+		# including the server.  These are are sent by a new player to 
+		# all other players and by all other players to the new player
+		multiplayer.peer_connected.connect(_peer_connected)
+		multiplayer.peer_disconnected.connect(_peer_disconnected)
+
+		# signals generated only in the client.  These functions are 
+		# mamnually called at the startup of the server code code simplicity
+		multiplayer.connected_to_server.connect(_connected_to_server)
+		multiplayer.connection_failed.connect(_connection_failed)
+		multiplayer.server_disconnected.connect(_server_disconnected)
+		multiplayersignalsconnected = true
 
 func _ready():
 	assert (PlayerList.item_count == 1)
 	if PlayerList.selected == -1:  PlayerList.selected = 0
 
+
 	# Overwrite the localplayer node if the local player scene is defined
 	if PlayersNode.get_child_count() == 1 and NetworkGateway.localplayerscene:
 		PlayersNode.get_child(0).free()
 	if PlayersNode.get_child_count() == 0:
+		var g = load(NetworkGateway.localplayerscene)
 		PlayersNode.add_child(load(NetworkGateway.localplayerscene).instantiate())
 	assert (PlayersNode.get_child_count() == 1) 
 
@@ -52,18 +70,6 @@ func _ready():
 	LocalPlayer.get_node("PlayerFrame").PlayerConnections = self
 
 	LocalPlayer.PF_initlocalplayer()
-
-	# Signals received on behalf of any other player in the network 
-	# including the server.  These are are sent by a new player to 
-	# all other players and by all other players to the new player
-	multiplayer.peer_connected.connect(_peer_connected)
-	multiplayer.peer_disconnected.connect(_peer_disconnected)
-
-	# signals generated only in the client.  These functions are 
-	# mamnually called at the startup of the server code code simplicity
-	multiplayer.connected_to_server.connect(_connected_to_server)
-	multiplayer.connection_failed.connect(_connection_failed)
-	multiplayer.server_disconnected.connect(_server_disconnected)
 
 	LocalPlayer.get_node("PlayerFrame").networkID = 0
 	LocalPlayer.set_name("R%d" % LocalPlayer.get_node("PlayerFrame").networkID) 
@@ -92,12 +98,13 @@ func connectionlog(txt):
 func _connected_to_server():
 	var serverisself = multiplayer.is_server()
 	connectionlog("_server(self) connect\n" if serverisself else "_server connect\n")
-	LocalPlayer.get_node("PlayerFrame").networkID = multiplayer.get_unique_id()
-	assert (LocalPlayer.get_node("PlayerFrame").networkID >= 1)
-	LocalPlayer.set_name("R%d" % LocalPlayer.get_node("PlayerFrame").networkID)
-	connectionlog("_my networkid=%d\n" % LocalPlayer.get_node("PlayerFrame").networkID)
-	print("my playerid=", LocalPlayer.get_node("PlayerFrame").networkID)
-	LocalPlayer.PF_connectedtoserver()
+	if LocalPlayer:
+		LocalPlayer.get_node("PlayerFrame").networkID = multiplayer.get_unique_id()
+		assert (LocalPlayer.get_node("PlayerFrame").networkID >= 1)
+		LocalPlayer.set_name("R%d" % LocalPlayer.get_node("PlayerFrame").networkID)
+		connectionlog("_my networkid=%d\n" % LocalPlayer.get_node("PlayerFrame").networkID)
+		print("my playerid=", LocalPlayer.get_node("PlayerFrame").networkID)
+		LocalPlayer.PF_connectedtoserver()
 	NetworkGateway.Dconnectedplayerscount += 1  
 	assert (NetworkGateway.Dconnectedplayerscount == 1)
 

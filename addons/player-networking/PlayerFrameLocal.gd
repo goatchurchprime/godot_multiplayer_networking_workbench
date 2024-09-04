@@ -95,4 +95,7 @@ func _process(delta):
 		if doppelgangerdelay != -1.0:
 			await get_tree().create_timer(doppelgangerdelay*0.001).timeout
 			if doppelgangernode != null:
-				doppelgangernode.get_node("PlayerFrame").networkedavatarthinnedframedata(vd)
+				if doppelgangernode.has_method("networkedavatarthinnedframedataANIM"):
+					doppelgangernode.networkedavatarthinnedframedataANIM(vd)
+				else:
+					doppelgangernode.get_node("PlayerFrame").networkedavatarthinnedframedata(vd)

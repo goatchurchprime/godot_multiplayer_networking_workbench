@@ -88,16 +88,15 @@ func received_mqtt(topic, msg):
 					if StartMQTT.button_pressed:
 						assert (selectedserver == "")
 						var serverfound = choosefromopenservers()
+						var selectasnecessarymanualchange = (NetworkGateway.NetworkOptionsMQTTWebRTC.selected == NetworkGateway.NETWORK_OPTIONS_MQTT_WEBRTC.AS_NECESSARY_MANUALCHANGE)
 						var selectasnecessary = (NetworkGateway.NetworkOptionsMQTTWebRTC.selected == NetworkGateway.NETWORK_OPTIONS_MQTT_WEBRTC.AS_NECESSARY)
-						if selectasnecessary:
+						if selectasnecessarymanualchange:
+							NetworkGateway.emit_signal("resolved_as_necessary", not serverfound)
+						elif selectasnecessary:
 							if serverfound:
-								#NetworkGateway.NetworkOptionsMQTTWebRTC.selected = NetworkGateway.NETWORK_OPTIONS_MQTT_WEBRTC.AS_CLIENT
 								NetworkGateway.selectandtrigger_networkoption(NetworkGateway.NETWORK_OPTIONS_MQTT_WEBRTC.AS_CLIENT)
 							else:
 								NetworkGateway.selectandtrigger_networkoption(NetworkGateway.NETWORK_OPTIONS_MQTT_WEBRTC.AS_SERVER)
-
-							
-
 
 			elif len(stopic) == 4 and sendingserverid == selectedserver and stopic[2] == "packet" and stopic[3] == MQTT.client_id:
 				if not serverconnected:

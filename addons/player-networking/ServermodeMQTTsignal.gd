@@ -8,9 +8,10 @@ extends Control
 
 var roomname = ""
 
-var nextclientnumber = 2
+# these might be superfluous if we are using the MQTT.client_id plus a character
 var clientidtowclientid = { }
 var wclientidtoclientid = { }
+
 var clearlostretainedclients = true
 var clearlostretainedservers = true
 var Dclearlostdanglingservers = false
@@ -42,8 +43,7 @@ func received_mqtt(topic, msg):
 				if clientidtowclientid.has(sendingclientid):
 					emit_signal("mqttsig_packet_received", clientidtowclientid[sendingclientid], v)
 				elif v["subject"] == "request_connection":
-					var wclientid = nextclientnumber
-					nextclientnumber += 1
+					var wclientid = int(sendingclientid)
 					clientidtowclientid[sendingclientid] = wclientid
 					wclientidtoclientid[wclientid] = sendingclientid
 					if not clearlostretainedclients:

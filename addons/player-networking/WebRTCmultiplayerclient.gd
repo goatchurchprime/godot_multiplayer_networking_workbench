@@ -55,11 +55,14 @@ func client_packet_received(v):
 func _on_StartWebRTCmultiplayer_toggled(button_pressed):
 	if button_pressed:
 		var multiplayerpeer = WebRTCMultiplayerPeer.new()
+		print("*** clientsignalling.wclientid ", clientsignalling.wclientid)
 		var E = multiplayerpeer.create_client(clientsignalling.wclientid)
 		if E != OK:
 			print("bad")
 			return
 		multiplayer.multiplayer_peer = multiplayerpeer
+		NetworkGateway.emit_signal("webrtc_multiplayerpeer_set", false)
+
 		assert (get_tree().multiplayer_poll)
 		
 		clientsignalling.mqttsig_connection_established.connect(client_connection_established) 

@@ -55,10 +55,6 @@ func interactcurrenttoy(pressed, gpos):
 		relmouse = null
 
 
-func _process(delta):
-	if currentmousetoy != null and relmouse != null:
-		currentmousetoy.global_position = NetworkGateway.PlayerConnections.LocalPlayer.global_position - relmouse
-
 
 var xx = 0
 var letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
@@ -80,6 +76,7 @@ func spawnnexttoy(gpos):
 	xx += 1
 	#hh.global_position = gpos
 	return
+
 
 func _input(event):
 	if event is InputEventKey and event.pressed and event.keycode == KEY_U:
@@ -103,3 +100,43 @@ func _input(event):
 		interactcurrenttoy(event.pressed, event.global_position)
 		#get_viewport().set_input_as_handled()
 	
+	if event is InputEventKey and event.pressed and event.keycode == KEY_N:
+		$Node2D/AnimationPlayer.play("adaptive")
+		print($Node2D/AnimationPlayer.current_animation_position)
+	if event is InputEventKey and event.pressed and event.keycode == KEY_M:
+		if $Node2D/AnimationPlayer.is_playing():
+			$Node2D/AnimationPlayer.pause()
+		else:
+			$Node2D/AnimationPlayer.advance(0.2)
+		print($Node2D/AnimationPlayer.current_animation, $Node2D/AnimationPlayer.current_animation_position)
+
+	if event is InputEventKey and event.pressed and (event.keycode == KEY_B or event.keycode == KEY_V):
+		print("Current animation '%s'" % $Node2D/AnimationPlayer.current_animation, $Node2D/AnimationPlayer.assigned_animation)
+		var a : Animation = $Node2D/AnimationPlayer.get_animation("adaptive")
+		print(a.track_get_key_count(0))
+		print(a.track_get_key_value(0, 2))
+		var v = a.track_get_key_value(0, 2)
+		a.track_set_key_value(0, 2, Vector2(500,100) if event.keycode == KEY_B else Vector2(200,400))
+		$Node2D/AnimationPlayer.advance(0.0)
+		print(a)
+
+func _process(delta):
+	if currentmousetoy != null and relmouse != null:
+		currentmousetoy.global_position = NetworkGateway.PlayerConnections.LocalPlayer.global_position - relmouse
+
+
+	if true and $Node2D/AnimationPlayer.is_playing():
+		var a : Animation = $Node2D/AnimationPlayer.get_animation("adaptive")
+		if $Node2D/AnimationPlayer.current_animation_position > a.length - 0.5:
+			prints("eek", a.length, a.track_get_key_count(0))
+			var t = a.length + 1.0
+			var k = a.track_insert_key(0, t, Vector2(sin(t)*100 + 300, cos(t)*100 + 300))
+			a.track_set_key_transition(0, k, 1)
+			a.track_set_key_transition(0, k-2, 5)  # easing applies to next edge
+			a.length = t
+			if a.track_get_key_count(0) >= 2 and a.track_get_key_time(0, 1) < $Node2D/AnimationPlayer.current_animation_position:
+				a.track_remove_key(0, 0)
+
+#		print(a.track_get_key_count(0))
+#		print(a.track_get_key_value(0, 2))
+#		var v = a.track_get_key_value(0, 2)

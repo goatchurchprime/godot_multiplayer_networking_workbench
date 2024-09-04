@@ -16,7 +16,7 @@ func _on_NetworkOptionsMQTTWebRTC_item_selected(ns):
 
 	var selectasserver = (ns == NetworkGateway.NETWORK_OPTIONS_MQTT_WEBRTC.AS_SERVER)
 	var selectasclient = (ns == NetworkGateway.NETWORK_OPTIONS_MQTT_WEBRTC.AS_CLIENT)
-	var selectasnecessary = (ns == NetworkGateway.NETWORK_OPTIONS_MQTT_WEBRTC.AS_NECESSARY)
+	var selectasnecessary = (ns == NetworkGateway.NETWORK_OPTIONS_MQTT_WEBRTC.AS_NECESSARY or ns == NetworkGateway.NETWORK_OPTIONS_MQTT_WEBRTC.AS_NECESSARY_MANUALCHANGE)
 	$VBox/Servermode.visible = selectasserver
 	$VBox/Clientmode.visible = selectasclient
 	NetworkGateway.ProtocolOptions.disabled = not selectasoff
