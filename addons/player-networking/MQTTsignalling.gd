@@ -3,6 +3,10 @@ extends Control
 @onready var NetworkGateway = find_parent("NetworkGateway")
 
 func _on_NetworkOptionsMQTTWebRTC_item_selected(ns):
+	roomname = $VBox/HBox2/roomname.text
+	randomize()
+	$MQTT.client_id = "x%d" % (2 + (randi()%0x7ffffff8))
+
 	#assert (ProtocolOptions.selected == NETWORK_PROTOCOL.WEBRTC_MQTTSIGNAL)
 	var selectasoff = (ns == NetworkGateway.NETWORK_OPTIONS.NETWORK_OFF)
 	if not selectasoff:
@@ -34,3 +38,6 @@ func _on_NetworkOptionsMQTTWebRTC_item_selected(ns):
 	$VBox/Servermode/WebRTCmultiplayerserver/StartWebRTCmultiplayer.disabled = true
 	$VBox/Clientmode/WebRTCmultiplayerclient/StartWebRTCmultiplayer.button_pressed = false
 	$VBox/Clientmode/WebRTCmultiplayerclient/StartWebRTCmultiplayer.disabled = true
+
+# var wclientid = int($MQTT.client_id)
+var roomname = ""
