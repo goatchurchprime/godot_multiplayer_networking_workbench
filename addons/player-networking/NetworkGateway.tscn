@@ -451,7 +451,6 @@ action_mode = 0
 text = "autoconnect"
 
 [node name="Servermode" type="HBoxContainer" parent="VBox/TabContainer/MQTTsignalling/VBox"]
-visible = false
 layout_mode = 2
 script = ExtResource("11")
 
@@ -499,7 +498,6 @@ button_pressed = true
 text = "autoconnect"
 
 [node name="MQTT" parent="VBox/TabContainer/MQTTsignalling" instance=ExtResource("14_c5n2c")]
-verbose_level = 0
 
 [node name="PlayerConnections" type="PanelContainer" parent="VBox"]
 layout_mode = 2
@@ -675,7 +673,7 @@ layout_mode = 2
 [connection signal="toggled" from="VBox/TabContainer/VBox/TabContainer/WebSocketsignalling/VBox/Servermode/WebRTCmultiplayerserver/StartWebRTCmultiplayer" to="VBox/TabContainer/VBox/TabContainer/WebSocketsignalling/VBox/Servermode/WebRTCmultiplayerserver" method="_on_StartWebRTCmultiplayer_toggled"]
 [connection signal="toggled" from="VBox/TabContainer/VBox/TabContainer/WebSocketsignalling/VBox/Clientmode/WebRTCmultiplayerclient/StartWebRTCmultiplayer" to="VBox/TabContainer/VBox/TabContainer/WebSocketsignalling/VBox/Clientmode/WebRTCmultiplayerclient" method="_on_StartWebRTCmultiplayer_toggled"]
 [connection signal="button_down" from="VBox/TabContainer/MQTTsignalling/VBox/HBox/brokeraddress" to="." method="_on_brokeraddress_button_down"]
-[connection signal="toggled" from="VBox/TabContainer/MQTTsignalling/VBox/HBox2/StartMQTT" to="VBox/TabContainer/MQTTsignalling/VBox/Servermode" method="_on_StartServer_toggled"]
+[connection signal="toggled" from="VBox/TabContainer/MQTTsignalling/VBox/HBox2/StartMQTT" to="VBox/TabContainer/MQTTsignalling" method="_on_start_mqtt_toggled"]
 [connection signal="gui_input" from="VBox/TabContainer/MQTTsignalling/VBox/HBox2/mqttautoconnect" to="." method="_on_mqttautoconnect_gui_input"]
 [connection signal="mouse_entered" from="VBox/TabContainer/MQTTsignalling/VBox/HBox2/mqttautoconnect" to="." method="_on_mqttautoconnect_mouse_entered"]
 [connection signal="pressed" from="VBox/TabContainer/MQTTsignalling/VBox/HBox2/mqttautoconnect" to="." method="_on_mqttautoconnect_pressed"]

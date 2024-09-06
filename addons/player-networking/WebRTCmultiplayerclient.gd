@@ -3,6 +3,7 @@ extends Control
 
 @onready var clientsignalling = get_parent()
 @onready var NetworkGateway = find_parent("NetworkGateway")
+@onready var MQTTsignalling = find_parent("MQTTsignalling")
 
 
 func client_ice_candidate_created(mid_name, index_name, sdp_name):

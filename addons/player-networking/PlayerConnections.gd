@@ -127,10 +127,9 @@ func _server_disconnected():
 		NetworkGateway.Dconnectedplayerscount -= 1
 		assert (NetworkGateway.Dconnectedplayerscount == 0)
 		return
-	var serverisself = multiplayer.is_server()
-	connectionlog("_server(self) disconnect\n" if serverisself else "_server disconnect\n")
+	connectionlog("_server(self) disconnect\n")
 	var ns = NetworkGateway.NetworkOptions.selected
-	print("(networkplayer_server_disconnected ", serverisself)
+	print("(networkplayer_server_disconnected ")
 	multiplayer.multiplayer_peer = OfflineMultiplayerPeer.new()
 	print("setnetworkpeer OfflineMultiplayerPeer")
 	LocalPlayer.get_node("PlayerFrame").networkID = 0

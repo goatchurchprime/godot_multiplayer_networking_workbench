@@ -9,8 +9,8 @@ extends Control
 
 @onready var NetworkGateway = find_parent("NetworkGateway")
 
-var roomname = ""
-var wclientid = 0
+#var roomname = ""
+#var wclientid = 0
 
 signal mqttsig_connection_established(wclientid)
 signal mqttsig_connection_closed()
@@ -23,13 +23,11 @@ var openserversconnections = { }
 var selectedserver = ""
 var serverconnected = false
 
-var statustopic = ""  # room/wclientid/status
-
 # Messages: topic: room/clientid/[packet|server|client]/[clientid-to|]
 # 			payload: {"subject":type, ...}
 
 func sendpacket_toserver(v):
-	var t = "%s/%s/packet/%s" % [roomname, MQTT.client_id, selectedserver]
+	var t = "%s/%s/packet/%s" % [MQTTsignalling.roomname, MQTT.client_id, selectedserver]
 	MQTT.publish(t, JSON.stringify(v))
 	
 func isconnectedtosignalserver():
@@ -44,8 +42,8 @@ func choosefromopenservers():
 				lselectedserver = ss
 	if lselectedserver != null:
 		selectedserver = lselectedserver
-		MQTT.subscribe("%s/%s/packet/%s" % [roomname, selectedserver, MQTT.client_id])
-		var t = "%s/%s/packet/%s" % [roomname, MQTT.client_id, selectedserver]
+		MQTT.subscribe("%s/%s/packet/%s" % [MQTTsignalling.roomname, selectedserver, MQTT.client_id])
+		var t = "%s/%s/packet/%s" % [MQTTsignalling.roomname, MQTT.client_id, selectedserver]
 		MQTT.publish(t, JSON.stringify({"subject":"request_connection"}))
 		return true
 	return false
@@ -55,7 +53,7 @@ func received_mqtt(topic, msg):
 	var stopic = topic.split("/")
 	var v = JSON.parse_string(msg)
 	if v != null and v.has("subject"):
-		if len(stopic) >= 3 and stopic[0] == roomname:
+		if len(stopic) >= 3 and stopic[0] == MQTTsignalling.roomname:
 			var sendingserverid = stopic[1]
 
 			if len(stopic) == 3 and stopic[2] == "status":
@@ -72,12 +70,12 @@ func received_mqtt(topic, msg):
 						if serverconnected:
 							emit_signal("mqttsig_connection_closed")
 							StartMQTTstatuslabel.text = "stopped"
-							wclientid = 0
+							#wclientid = 0
 							serverconnected = false
 							$WebRTCmultiplayerclient/StartWebRTCmultiplayer.disabled = true
-						MQTT.unsubscribe("%s/%s/status" % [roomname, selectedserver])
+						MQTT.unsubscribe("%s/%s/status" % [MQTTsignalling.roomname, selectedserver])
 						selectedserver = ""
-						MQTT.publish(statustopic, JSON.stringify({"subject":"unconnected"}))
+						MQTT.publish(MQTTsignalling.statustopic, JSON.stringify({"subject":"unconnected"}))
 
 				if v["subject"] == "serveropen":
 					openserversconnections[sendingserverid] = v.get("nconnections", 0)
@@ -104,7 +102,7 @@ func received_mqtt(topic, msg):
 						wclientid = int(v["wclientid"])
 						emit_signal("mqttsig_connection_established", int(v["wclientid"]))
 						StartMQTTstatuslabel.text = "connected"
-						MQTT.publish(statustopic, JSON.stringify({"subject":"connected", "selectedserver":selectedserver}), true)
+						MQTT.publish(MQTTsignalling.statustopic, JSON.stringify({"subject":"connected", "selectedserver":selectedserver}), true)
 						$WebRTCmultiplayerclient/StartWebRTCmultiplayer.disabled = false
 						if get_node("autoconnect").button_pressed:
 							$WebRTCmultiplayerclient/StartWebRTCmultiplayer.button_pressed = true
@@ -114,12 +112,12 @@ func received_mqtt(topic, msg):
 					
 			else:
 				print("Unrecognized topic ", topic)
-
+var wclientid = 0
 var openserverconnectionsUpToDate = false
 func on_broker_connect():
-	MQTT.subscribe("%s/+/status" % roomname)
-	MQTT.publish(statustopic, JSON.stringify({"subject":"unconnected", "selectedserver":selectedserver}), true)
-	MQTT.publish("%s/caboose/status" % roomname, JSON.stringify({"subject":"caboose", "clientid":MQTT.client_id}))
+	MQTT.subscribe("%s/+/status" % MQTTsignalling.roomname)
+	MQTT.publish(MQTTsignalling.statustopic, JSON.stringify({"subject":"unconnected", "selectedserver":selectedserver}), true)
+	MQTT.publish("%s/caboose/status" % MQTTsignalling.roomname, JSON.stringify({"subject":"caboose", "clientid":MQTT.client_id}))
 	StartMQTTstatuslabel.text = "pending"
 	assert (len(openserversconnections) == 0)
 	openserverconnectionsUpToDate = false
@@ -127,42 +125,3 @@ func on_broker_connect():
 func on_broker_disconnect():
 	print("MQTT broker disconnected")
 	StartMQTT.button_pressed = false
-
-func _on_StartClient_toggled(button_pressed):
-	if button_pressed:
-		MQTT.received_message.connect(received_mqtt)
-		MQTT.broker_connected.connect(on_broker_connect)
-		MQTT.broker_disconnected.connect(on_broker_disconnect)
-		roomname = MQTTsignalling.get_node("VBox/HBox2/roomname").text
-		MQTTsignalling.get_node("VBox/HBox2/roomname").editable = false
-		StartMQTTstatuslabel.text = "on"
-		if not MQTT.client_id.begins_with("x"):
-			randomize()
-			MQTT.client_id = "c%d" % (2 + (randi()%0x7ffffff8))
-		MQTTsignalling.get_node("VBox/HBox2/client_id").text = MQTT.client_id
-		statustopic = "%s/%s/status" % [roomname, MQTT.client_id]
-		MQTT.set_last_will(statustopic, JSON.stringify({"subject":"closed", "comment":"by_will"}), true)
-		StartMQTTstatuslabel.text = "connecting"
-		var brokerurl = MQTTsignalling.get_node("VBox/HBox/brokeraddress").text
-		MQTTsignalling.get_node("VBox/HBox/brokeraddress").disabled = true
-		MQTT.connect_to_broker(brokerurl)
-				
-	else:
-		print("Disconnecting MQTT")
-		MQTT.received_message.disconnect(received_mqtt)
-		MQTT.broker_connected.disconnect(on_broker_connect)
-		MQTT.broker_disconnected.disconnect(on_broker_disconnect)
-		MQTT.publish(statustopic, JSON.stringify({"subject":"closed"}), true)
-		MQTT.disconnect_from_server()
-		statustopic = ""
-		selectedserver = ""
-		serverconnected = false
-		openserversconnections.clear()
-		StartMQTTstatuslabel.text = "off"
-		roomname = ""
-		MQTTsignalling.get_node("VBox/HBox2/roomname").editable = true
-		MQTTsignalling.get_node("VBox/HBox2/client_id").text = ""
-		MQTTsignalling.get_node("VBox/HBox/brokeraddress").disabled = false
-		emit_signal("mqttsig_connection_closed")
-		wclientid = 0
-		$WebRTCmultiplayerclient/StartWebRTCmultiplayer.disabled = false

@@ -90,6 +90,7 @@ func receiveintobuffer():
 	elif socket != null and socket.get_status() == StreamPeerTCP.STATUS_CONNECTED:
 		socket.poll()
 		var n = socket.get_available_bytes()
+		assert (n >= 0)
 		if n != 0:
 			var sv = socket.get_data(n)
 			assert (sv[0] == 0)  # error code
@@ -306,6 +307,7 @@ func disconnect_from_server():
 	cleanupsockets()
 	
 func publish(stopic, smsg, retain=false, qos=0):
+	assert (stopic)  # empty string causes disconnection
 	var msg = smsg.to_ascii_buffer() if not binarymessages else smsg
 	var topic = stopic.to_ascii_buffer()
 	
