@@ -10,6 +10,17 @@ var selectasserver = false
 var selectasclient = false
 var selectasnecessary = false
 
+var wclientid = -1  # stored here for now, but will specify from mqttid
+
+
+signal mqttsig_connection_established(wclientid)
+signal mqttsig_connection_closed()
+signal mqttsig_packet_received(v)
+
+func isconnectedtosignalserver():
+	return $VBox/Clientmode.serverconnected
+
+
 var Dns = -1
 func _on_NetworkOptionsMQTTWebRTC_item_selected(ns):
 	Dns = ns
@@ -124,9 +135,15 @@ func _on_start_mqtt_toggled(toggled_on):
 			scmode.clientidtowclientid.clear()
 			scmode.wclientidtoclientid.clear()
 
-		else:
+		if selectasclient:
 			scmode.selectedserver = ""
 			scmode.serverconnected = false
 			scmode.openserversconnections.clear()
 			scmode.emit_signal("mqttsig_connection_closed")
 			scmode.wclientid = 0
+
+
+func sendpacket_toserver(v):
+	assert (selectasclient)
+	var t = "%s/%s/packet/%s" % [roomname, $MQTT.client_id, $VBox/Clientmode.selectedserver]
+	$MQTT.publish(t, JSON.stringify(v))

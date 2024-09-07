@@ -5,6 +5,9 @@ extends Control
 @onready var NetworkGateway = find_parent("NetworkGateway")
 @onready var MQTTsignalling = find_parent("MQTTsignalling")
 
+func _ready():
+	if MQTTsignalling:
+		clientsignalling = MQTTsignalling
 
 func client_ice_candidate_created(mid_name, index_name, sdp_name):
 	clientsignalling.sendpacket_toserver({"subject":"ice_candidate", "mid_name":mid_name, "index_name":index_name, "sdp_name":sdp_name})

@@ -12,9 +12,6 @@ extends Control
 #var roomname = ""
 #var wclientid = 0
 
-signal mqttsig_connection_established(wclientid)
-signal mqttsig_connection_closed()
-signal mqttsig_packet_received(v)
 
 # mosquitto_sub -h broker.mqttdashboard.com -t "cucumber/#" -v
 # mosquitto_sub -h mosquitto.doesliverpool.xyz -v -t "lettuce/#"
@@ -26,12 +23,7 @@ var serverconnected = false
 # Messages: topic: room/clientid/[packet|server|client]/[clientid-to|]
 # 			payload: {"subject":type, ...}
 
-func sendpacket_toserver(v):
-	var t = "%s/%s/packet/%s" % [MQTTsignalling.roomname, MQTT.client_id, selectedserver]
-	MQTT.publish(t, JSON.stringify(v))
 	
-func isconnectedtosignalserver():
-	return serverconnected
 
 var Nmaxnconnectionstoserver = 3
 func choosefromopenservers():
@@ -65,7 +57,7 @@ func Dreceived_mqtt(stopic, v):
 					openserversconnections.erase(sendingserverid)
 					if selectedserver == sendingserverid:
 						if serverconnected:
-							emit_signal("mqttsig_connection_closed")
+							MQTTsignalling.emit_signal("mqttsig_connection_closed")
 							StartMQTTstatuslabel.text = "stopped"
 							#wclientid = 0
 							serverconnected = false
@@ -97,7 +89,8 @@ func Dreceived_mqtt(stopic, v):
 					if v["subject"] == "connection_established":
 						serverconnected = true
 						wclientid = int(v["wclientid"])
-						emit_signal("mqttsig_connection_established", int(v["wclientid"]))
+						MQTTsignalling.wclientid = int(v["wclientid"])
+						MQTTsignalling.emit_signal("mqttsig_connection_established", int(v["wclientid"]))
 						StartMQTTstatuslabel.text = "connected"
 						MQTT.publish(MQTTsignalling.statustopic, JSON.stringify({"subject":"connected", "selectedserver":selectedserver}), true)
 						$WebRTCmultiplayerclient/StartWebRTCmultiplayer.disabled = false
@@ -105,7 +98,7 @@ func Dreceived_mqtt(stopic, v):
 							$WebRTCmultiplayerclient/StartWebRTCmultiplayer.button_pressed = true
 							
 				else:
-					emit_signal("mqttsig_packet_received", v)
+					MQTTsignalling.emit_signal("mqttsig_packet_received", v)
 					
 			else:
 				print("Unrecognized topic ", stopic)
