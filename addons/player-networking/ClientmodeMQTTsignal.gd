@@ -48,10 +48,7 @@ func choosefromopenservers():
 		return true
 	return false
 	
-func received_mqtt(topic, msg):
-	if msg == "":  return
-	var stopic = topic.split("/")
-	var v = JSON.parse_string(msg)
+func Dreceived_mqtt(stopic, v):
 	if v != null and v.has("subject"):
 		if len(stopic) >= 3 and stopic[0] == MQTTsignalling.roomname:
 			var sendingserverid = stopic[1]
@@ -111,17 +108,14 @@ func received_mqtt(topic, msg):
 					emit_signal("mqttsig_packet_received", v)
 					
 			else:
-				print("Unrecognized topic ", topic)
+				print("Unrecognized topic ", stopic)
+
 var wclientid = 0
 var openserverconnectionsUpToDate = false
-func on_broker_connect():
+func Don_broker_connect():
 	MQTT.subscribe("%s/+/status" % MQTTsignalling.roomname)
 	MQTT.publish(MQTTsignalling.statustopic, JSON.stringify({"subject":"unconnected", "selectedserver":selectedserver}), true)
 	MQTT.publish("%s/caboose/status" % MQTTsignalling.roomname, JSON.stringify({"subject":"caboose", "clientid":MQTT.client_id}))
 	StartMQTTstatuslabel.text = "pending"
 	assert (len(openserversconnections) == 0)
 	openserverconnectionsUpToDate = false
-
-func on_broker_disconnect():
-	print("MQTT broker disconnected")
-	StartMQTT.button_pressed = false

@@ -14,25 +14,20 @@ var wclientidtoclientid = { }
 var clearlostretainedclients = true
 var clearlostretainedservers = true
 var Dclearlostdanglingservers = false
-var statustopic = ""
 
 signal mqttsig_client_connected(id)
 signal mqttsig_client_disconnected(id)
 signal mqttsig_packet_received(id, v)
 
-# Messages: topic: room/x<mqttclientid>/[packet|server|client]/[clientid-to|]
+# Messages: topic: room/x<mqttclientid>/status 
+#           topic: room/x<mqttclientid>/packet/<clientid-to>
 # 			payload: {"subject":type, ...}
-
 
 func sendpacket_toclient(wclientid, v):
 	var t = "%s/%s/packet/%s" % [MQTTsignalling.roomname, MQTT.client_id, wclientidtoclientid[wclientid]]
 	MQTT.publish(t, JSON.stringify(v))
 	
-func received_mqtt(topic, msg):
-	if msg == "":
-		return
-	var stopic = topic.split("/")
-	var v = JSON.parse_string(msg)
+func Dreceived_mqtt(stopic, v):
 	if v != null and v.has("subject"):
 		if len(stopic) >= 3 and stopic[0] == MQTTsignalling.roomname:
 			var sendingclientid = stopic[1]
@@ -48,7 +43,7 @@ func received_mqtt(topic, msg):
 						MQTT.subscribe("%s/%s/status" % [MQTTsignalling.roomname, sendingclientid])
 					var t = "%s/%s/packet/%s" % [MQTTsignalling.roomname, MQTT.client_id, sendingclientid]
 					MQTT.publish(t, JSON.stringify({"subject":"connection_established", "wclientid":wclientid}))
-					MQTT.publish(statustopic, JSON.stringify({"subject":"serveropen", "nconnections":len(clientidtowclientid)}), true)
+					MQTT.publish(MQTTsignalling.statustopic, JSON.stringify({"subject":"serveropen", "nconnections":len(clientidtowclientid)}), true)
 					emit_signal("mqttsig_client_connected", wclientid)
 					$ClientsList.add_item(sendingclientid, int(sendingclientid))
 					$ClientsList.selected = $ClientsList.get_item_count()-1
@@ -61,41 +56,25 @@ func received_mqtt(topic, msg):
 						emit_signal("mqttsig_client_disconnected", wclientid)
 						clientidtowclientid.erase(sendingclientid)
 						wclientidtoclientid.erase(wclientid)
-						MQTT.publish(topic, "", true)
 						var idx = $ClientsList.get_item_index(int(sendingclientid))
 						print(idx)
 						$ClientsList.remove_item(idx)
-						MQTT.publish(statustopic, JSON.stringify({"subject":"serveropen", "nconnections":len(clientidtowclientid)}), true)
-					else:
-						if clearlostretainedclients:
-							MQTT.publish(topic, "", true)
+						MQTT.publish(MQTTsignalling.statustopic, JSON.stringify({"subject":"serveropen", "nconnections":len(clientidtowclientid)}), true)
 
-			if len(stopic) == 3 and stopic[2] == "status":
-				if v["subject"] == "closed":
-					if clearlostretainedservers:
-						MQTT.publish(topic, "", true)
 				if v["subject"] == "serveropen":
 					if stopic[1] == MQTT.client_id:
 						print("found openserver myself: ", stopic[1])
-					else:
-						print("found openserver not myself: ", stopic[1])
-						if Dclearlostdanglingservers:
-							print("  clearing")
-							MQTT.publish(topic, "", true)
 
 			else:
-				print("Unrecognized topic ", topic)
+				print("Unrecognized topic ", stopic)
 
-func on_broker_disconnect():
-	StartMQTT.button_pressed = false
 	
-func on_broker_connect():
+func Don_broker_connect():
 	MQTT.subscribe("%s/+/packet/%s" % [MQTTsignalling.roomname, MQTT.client_id])
 	print(" subscribing to ", "%s/+/packet/%s" % [MQTTsignalling.roomname, MQTT.client_id])
 	if clearlostretainedservers or clearlostretainedclients:
 		MQTT.subscribe("%s/+/status" % MQTTsignalling.roomname)
-	statustopic = "%s/%s/status" % [MQTTsignalling.roomname, MQTT.client_id]
-	MQTT.publish(statustopic, JSON.stringify({"subject":"serveropen", "nconnections":len(clientidtowclientid)}), true)
+	MQTT.publish(MQTTsignalling.statustopic, JSON.stringify({"subject":"serveropen", "nconnections":len(clientidtowclientid)}), true)
 	StartMQTTstatuslabel.text = "connected"
 	$ClientsList.clear()
 	$ClientsList.add_item(MQTT.client_id, 1)

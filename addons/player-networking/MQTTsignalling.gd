@@ -2,9 +2,18 @@ extends Control
 
 @onready var NetworkGateway = find_parent("NetworkGateway")
 
+# var wclientid = int($MQTT.client_id)
+var roomname = ""
+var statustopic = ""
+
+var selectasserver = false
+var selectasclient = false
+var selectasnecessary = false
+
 var Dns = -1
 func _on_NetworkOptionsMQTTWebRTC_item_selected(ns):
 	Dns = ns
+	selectasserver = (Dns == NetworkGateway.NETWORK_OPTIONS_MQTT_WEBRTC.AS_SERVER)
 
 	#assert (ProtocolOptions.selected == NETWORK_PROTOCOL.WEBRTC_MQTTSIGNAL)
 	var selectasoff = (ns == NetworkGateway.NETWORK_OPTIONS.NETWORK_OFF)
@@ -21,14 +30,11 @@ func _on_NetworkOptionsMQTTWebRTC_item_selected(ns):
 
 	$VBox/HBox2/StartMQTT.button_pressed = false
 	await get_tree().process_frame
-#	if $VBox/HBox2/StartMQTT.is_connected("toggled", Callable($VBox/Servermode, "_on_StartServer_toggled")):
-#		$VBox/HBox2/StartMQTT.disconnect("toggled", Callable($VBox/Servermode, "_on_StartServer_toggled"))
-#	if $VBox/HBox2/StartMQTT.is_connected("toggled", Callable($VBox/Clientmode, "_on_StartClient_toggled")):
-#		$VBox/HBox2/StartMQTT.disconnect("toggled", Callable($VBox/Clientmode, "_on_StartClient_toggled"))
 
-	var selectasserver = (ns == NetworkGateway.NETWORK_OPTIONS_MQTT_WEBRTC.AS_SERVER)
-	var selectasclient = (ns == NetworkGateway.NETWORK_OPTIONS_MQTT_WEBRTC.AS_CLIENT)
-	var selectasnecessary = (ns == NetworkGateway.NETWORK_OPTIONS_MQTT_WEBRTC.AS_NECESSARY or ns == NetworkGateway.NETWORK_OPTIONS_MQTT_WEBRTC.AS_NECESSARY_MANUALCHANGE)
+	selectasserver = (ns == NetworkGateway.NETWORK_OPTIONS_MQTT_WEBRTC.AS_SERVER)
+	selectasclient = (ns == NetworkGateway.NETWORK_OPTIONS_MQTT_WEBRTC.AS_CLIENT)
+	selectasnecessary = (ns == NetworkGateway.NETWORK_OPTIONS_MQTT_WEBRTC.AS_NECESSARY or ns == NetworkGateway.NETWORK_OPTIONS_MQTT_WEBRTC.AS_NECESSARY_MANUALCHANGE)
+
 	$VBox/Servermode.visible = selectasserver
 	$VBox/Clientmode.visible = selectasclient
 	NetworkGateway.ProtocolOptions.disabled = not selectasoff
@@ -47,18 +53,49 @@ func _on_NetworkOptionsMQTTWebRTC_item_selected(ns):
 	$VBox/Clientmode/WebRTCmultiplayerclient/StartWebRTCmultiplayer.button_pressed = false
 	$VBox/Clientmode/WebRTCmultiplayerclient/StartWebRTCmultiplayer.disabled = true
 
-# var wclientid = int($MQTT.client_id)
-var roomname = ""
-var statustopic = ""
+
+var xclientstatuses = { }
+
+func clearclosedtopics():
+	for x in xclientstatuses:
+		if xclientstatuses[x] == "closed":
+			$MQTT.publish("%s/%s/status" % [roomname, x], "", true)
+
+func received_mqtt(topic, msg):
+	var stopic = topic.split("/")
+	if msg == "":
+		if len(stopic) >= 3 and stopic[-1] == "status":
+			var mclientid = stopic[-2]
+			if xclientstatuses.has(mclientid):
+				assert (xclientstatuses[mclientid] == "closed")
+				xclientstatuses.erase(mclientid)
+			return
+	var v = JSON.parse_string(msg)
+	if len(stopic) >= 3: 
+		var mclientid = stopic[-2]
+		if stopic[-1] == "status" and v.has("subject"):
+			xclientstatuses[mclientid] = v["subject"]
+
+	if selectasserver:
+		$VBox/Servermode.Dreceived_mqtt(stopic, v)
+	if selectasclient:
+		$VBox/Clientmode.Dreceived_mqtt(stopic, v)
+
+func on_broker_disconnect():
+	$VBox/HBox2/StartMQTT.button_pressed = false
+
+func on_broker_connect():
+	if selectasserver:
+		$VBox/Servermode.Don_broker_connect()
+	if selectasclient:
+		$VBox/Clientmode.Don_broker_connect()
 
 func _on_start_mqtt_toggled(toggled_on):
-	var selectasserver = (Dns == NetworkGateway.NETWORK_OPTIONS_MQTT_WEBRTC.AS_SERVER)
-	var scmode = $VBox/Servermode if selectasserver else $VBox/Clientmode
 	var StartMQTTstatuslabel = $VBox/HBox2/statuslabel
 	if toggled_on:
-		$MQTT.received_message.connect(scmode.received_mqtt)
-		$MQTT.broker_connected.connect(scmode.on_broker_connect)
-		$MQTT.broker_disconnected.connect(scmode.on_broker_disconnect)
+		$MQTT.received_message.connect(received_mqtt)
+		$MQTT.broker_connected.connect(on_broker_connect)
+		$MQTT.broker_disconnected.connect(on_broker_disconnect)
 		StartMQTTstatuslabel.text = "on"
 		$MQTT.set_last_will(statustopic, JSON.stringify({"subject":"closed", "comment":"by_will"}), true)
 		StartMQTTstatuslabel.text = "connecting"
@@ -68,9 +105,9 @@ func _on_start_mqtt_toggled(toggled_on):
 
 	else:
 		print("Disconnecting MQTT")
-		$MQTT.received_message.disconnect(scmode.received_mqtt)
-		$MQTT.broker_connected.disconnect(scmode.on_broker_connect)
-		$MQTT.broker_disconnected.disconnect(scmode.on_broker_disconnect)
+		$MQTT.received_message.disconnect(received_mqtt)
+		$MQTT.broker_connected.disconnect(on_broker_connect)
+		$MQTT.broker_disconnected.disconnect(on_broker_disconnect)
 		$MQTT.publish(statustopic, JSON.stringify({"subject":"closed"}), true)
 		$MQTT.disconnect_from_server()
 		StartMQTTstatuslabel.text = "off"
@@ -78,6 +115,8 @@ func _on_start_mqtt_toggled(toggled_on):
 		$VBox/HBox2/roomname.editable = true
 		$VBox/HBox2/client_id.text = ""
 		$VBox/HBox/brokeraddress.disabled = false
+
+		var scmode = $VBox/Servermode if selectasserver else $VBox/Clientmode
 		if selectasserver:
 			for s in scmode.clientidtowclientid:
 				scmode.emit_signal("mqttsig_client_disconnected", scmode.clientidtowclientid[s])
