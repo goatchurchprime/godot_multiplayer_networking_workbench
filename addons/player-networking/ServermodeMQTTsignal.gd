@@ -11,8 +11,6 @@ extends Control
 var clientidtowclientid = { }
 var wclientidtoclientid = { }
 
-var clearlostretainedclients = true
-var clearlostretainedservers = true
 var Dclearlostdanglingservers = false
 
 signal mqttsig_client_connected(id)
@@ -39,8 +37,6 @@ func Dreceived_mqtt(stopic, v):
 					var wclientid = int(sendingclientid)
 					clientidtowclientid[sendingclientid] = wclientid
 					wclientidtoclientid[wclientid] = sendingclientid
-					if not clearlostretainedclients:
-						MQTT.subscribe("%s/%s/status" % [MQTTsignalling.roomname, sendingclientid])
 					var t = "%s/%s/packet/%s" % [MQTTsignalling.roomname, MQTT.client_id, sendingclientid]
 					MQTT.publish(t, JSON.stringify({"subject":"connection_established", "wclientid":wclientid}))
 					MQTT.publish(MQTTsignalling.statustopic, JSON.stringify({"subject":"serveropen", "nconnections":len(clientidtowclientid)}), true)
@@ -71,9 +67,6 @@ func Dreceived_mqtt(stopic, v):
 	
 func Don_broker_connect():
 	MQTT.subscribe("%s/+/packet/%s" % [MQTTsignalling.roomname, MQTT.client_id])
-	print(" subscribing to ", "%s/+/packet/%s" % [MQTTsignalling.roomname, MQTT.client_id])
-	if clearlostretainedservers or clearlostretainedclients:
-		MQTT.subscribe("%s/+/status" % MQTTsignalling.roomname)
 	MQTT.publish(MQTTsignalling.statustopic, JSON.stringify({"subject":"serveropen", "nconnections":len(clientidtowclientid)}), true)
 	StartMQTTstatuslabel.text = "connected"
 	$ClientsList.clear()

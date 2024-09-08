@@ -12,7 +12,6 @@ var selectasnecessary = false
 
 var wclientid = -1  # stored here for now, but will specify from mqttid
 
-
 signal mqttsig_connection_established(wclientid)
 signal mqttsig_connection_closed()
 signal mqttsig_packet_received(v)
@@ -20,31 +19,34 @@ signal mqttsig_packet_received(v)
 func isconnectedtosignalserver():
 	return $VBox/Clientmode.serverconnected
 
+@onready var Roomplayertree = $VBox/HBoxM/HSplitContainer/Roomplayers/Tree
+
+var roomplayertreeunconnected = null
+var roomplayertreeitem_ME = null
+
+var xclientstatuses = { }
+var xclienttreeitems = { }
+
+func _ready():
+	var root = Roomplayertree.create_item()
+	roomplayertreeunconnected = Roomplayertree.create_item()
+	roomplayertreeunconnected.set_text(0, "unconnected")
+
 
 var Dns = -1
 func _on_NetworkOptionsMQTTWebRTC_item_selected(ns):
 	Dns = ns
-	selectasserver = (Dns == NetworkGateway.NETWORK_OPTIONS_MQTT_WEBRTC.AS_SERVER)
-
-	#assert (ProtocolOptions.selected == NETWORK_PROTOCOL.WEBRTC_MQTTSIGNAL)
-	var selectasoff = (ns == NetworkGateway.NETWORK_OPTIONS.NETWORK_OFF)
-	if not selectasoff:
-		NetworkGateway.PlayerConnections.clearconnectionlog()
-		$VBox/HBox2/roomname.editable = true
-		roomname = $VBox/HBox2/roomname.text
-		if not $MQTT.client_id.begins_with("x"):
-			randomize()
-			$MQTT.client_id = "x%d" % (2 + (randi()%0x7ffffff8))
-			statustopic = "%s/%s/status" % [roomname, $MQTT.client_id]
-	else:
-		$VBox/HBox2/roomname.editable = false
-
-	$VBox/HBox2/StartMQTT.button_pressed = false
-	await get_tree().process_frame
-
 	selectasserver = (ns == NetworkGateway.NETWORK_OPTIONS_MQTT_WEBRTC.AS_SERVER)
 	selectasclient = (ns == NetworkGateway.NETWORK_OPTIONS_MQTT_WEBRTC.AS_CLIENT)
 	selectasnecessary = (ns == NetworkGateway.NETWORK_OPTIONS_MQTT_WEBRTC.AS_NECESSARY or ns == NetworkGateway.NETWORK_OPTIONS_MQTT_WEBRTC.AS_NECESSARY_MANUALCHANGE)
+	var selectasoff = (ns == NetworkGateway.NETWORK_OPTIONS.NETWORK_OFF)
+	#assert (ProtocolOptions.selected == NETWORK_PROTOCOL.WEBRTC_MQTTSIGNAL)
+
+	if not selectasoff:
+		NetworkGateway.PlayerConnections.clearconnectionlog()
+
+	$VBox/HBox2/StartMQTT.button_pressed = false
+	await get_tree().process_frame
 
 	$VBox/Servermode.visible = selectasserver
 	$VBox/Clientmode.visible = selectasclient
@@ -65,14 +67,13 @@ func _on_NetworkOptionsMQTTWebRTC_item_selected(ns):
 	$VBox/Clientmode/WebRTCmultiplayerclient/StartWebRTCmultiplayer.disabled = true
 
 
-var xclientstatuses = { }
-
 func clearclosedtopics():
 	for x in xclientstatuses:
 		if xclientstatuses[x] == "closed":
 			$MQTT.publish("%s/%s/status" % [roomname, x], "", true)
 
-func received_mqtt(topic, msg):
+
+func _on_mqtt_received_message(topic, msg):
 	var stopic = topic.split("/")
 	if msg == "":
 		if len(stopic) >= 3 and stopic[-1] == "status":
@@ -81,21 +82,40 @@ func received_mqtt(topic, msg):
 				assert (xclientstatuses[mclientid] == "closed")
 				xclientstatuses.erase(mclientid)
 			return
+
 	var v = JSON.parse_string(msg)
 	if len(stopic) >= 3: 
 		var mclientid = stopic[-2]
 		if stopic[-1] == "status" and v.has("subject"):
 			xclientstatuses[mclientid] = v["subject"]
 
+			#if not xclienttreeitems.has(mclientid):
+			if v["subject"] == "unconnected":
+				xclienttreeitems[mclientid] = Roomplayertree.create_item(roomplayertreeunconnected)
+				xclienttreeitems[mclientid].set_text(0, "%s" % mclientid)
+			if v["subject"] == "serveropen":
+				clearclosedtopics()
+				xclienttreeitems[mclientid] = Roomplayertree.create_item()
+				xclienttreeitems[mclientid].set_text(0, "%s" % mclientid)
+			if v["subject"] == "closed":
+				if xclienttreeitems.has(mclientid):
+					xclienttreeitems[mclientid].free()
+					xclienttreeitems.erase(mclientid) 
+
 	if selectasserver:
 		$VBox/Servermode.Dreceived_mqtt(stopic, v)
 	if selectasclient:
 		$VBox/Clientmode.Dreceived_mqtt(stopic, v)
 
-func on_broker_disconnect():
+func _on_mqtt_broker_disconnected():
 	$VBox/HBox2/StartMQTT.button_pressed = false
 
-func on_broker_connect():
+func _on_mqtt_broker_connected():
+	assert (roomname)
+	$MQTT.subscribe("%s/+/status" % roomname)
+	$MQTT.subscribe("%s/%s/caboose" % [roomname, $MQTT.client_id])
+	$MQTT.publish(statustopic, JSON.stringify({"subject":"unconnected"}), true)
+	$MQTT.publish("%s/%s/caboose" % [roomname, $MQTT.client_id], "caboose")
 	if selectasserver:
 		$VBox/Servermode.Don_broker_connect()
 	if selectasclient:
@@ -104,9 +124,12 @@ func on_broker_connect():
 func _on_start_mqtt_toggled(toggled_on):
 	var StartMQTTstatuslabel = $VBox/HBox2/statuslabel
 	if toggled_on:
-		$MQTT.received_message.connect(received_mqtt)
-		$MQTT.broker_connected.connect(on_broker_connect)
-		$MQTT.broker_disconnected.connect(on_broker_disconnect)
+		$VBox/HBox2/roomname.editable = false
+		roomname = $VBox/HBox2/roomname.text
+		randomize()
+		$MQTT.client_id = "x%d" % (2 + (randi()%0x7ffffff8))
+		$VBox/HBox2/client_id.text = $MQTT.client_id
+		statustopic = "%s/%s/status" % [roomname, $MQTT.client_id]
 		StartMQTTstatuslabel.text = "on"
 		$MQTT.set_last_will(statustopic, JSON.stringify({"subject":"closed", "comment":"by_will"}), true)
 		StartMQTTstatuslabel.text = "connecting"
@@ -116,13 +139,11 @@ func _on_start_mqtt_toggled(toggled_on):
 
 	else:
 		print("Disconnecting MQTT")
-		$MQTT.received_message.disconnect(received_mqtt)
-		$MQTT.broker_connected.disconnect(on_broker_connect)
-		$MQTT.broker_disconnected.disconnect(on_broker_disconnect)
 		$MQTT.publish(statustopic, JSON.stringify({"subject":"closed"}), true)
 		$MQTT.disconnect_from_server()
 		StartMQTTstatuslabel.text = "off"
 		roomname = ""
+		statustopic = ""
 		$VBox/HBox2/roomname.editable = true
 		$VBox/HBox2/client_id.text = ""
 		$VBox/HBox/brokeraddress.disabled = false

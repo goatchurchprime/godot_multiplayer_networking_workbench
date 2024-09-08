@@ -9,7 +9,6 @@ extends Control
 
 @onready var NetworkGateway = find_parent("NetworkGateway")
 
-#var roomname = ""
 #var wclientid = 0
 
 
@@ -106,7 +105,6 @@ func Dreceived_mqtt(stopic, v):
 var wclientid = 0
 var openserverconnectionsUpToDate = false
 func Don_broker_connect():
-	MQTT.subscribe("%s/+/status" % MQTTsignalling.roomname)
 	MQTT.publish(MQTTsignalling.statustopic, JSON.stringify({"subject":"unconnected", "selectedserver":selectedserver}), true)
 	MQTT.publish("%s/caboose/status" % MQTTsignalling.roomname, JSON.stringify({"subject":"caboose", "clientid":MQTT.client_id}))
 	StartMQTTstatuslabel.text = "pending"
