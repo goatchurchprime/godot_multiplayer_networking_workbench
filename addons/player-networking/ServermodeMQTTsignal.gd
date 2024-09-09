@@ -40,6 +40,7 @@ func Dreceived_mqtt(stopic, v):
 					var t = "%s/%s/packet/%s" % [MQTTsignalling.roomname, MQTT.client_id, sendingclientid]
 					MQTT.publish(t, JSON.stringify({"subject":"connection_established", "wclientid":wclientid}))
 					MQTT.publish(MQTTsignalling.statustopic, JSON.stringify({"subject":"serveropen", "nconnections":len(clientidtowclientid)}), true)
+					MQTTsignalling.publishstatus("serveropen", "", len(clientidtowclientid))
 					emit_signal("mqttsig_client_connected", wclientid)
 					$ClientsList.add_item(sendingclientid, int(sendingclientid))
 					$ClientsList.selected = $ClientsList.get_item_count()-1
@@ -55,7 +56,7 @@ func Dreceived_mqtt(stopic, v):
 						var idx = $ClientsList.get_item_index(int(sendingclientid))
 						print(idx)
 						$ClientsList.remove_item(idx)
-						MQTT.publish(MQTTsignalling.statustopic, JSON.stringify({"subject":"serveropen", "nconnections":len(clientidtowclientid)}), true)
+						MQTTsignalling.publishstatus("serveropen", "", len(clientidtowclientid))
 
 				if v["subject"] == "serveropen":
 					if stopic[1] == MQTT.client_id:
@@ -68,6 +69,7 @@ func Dreceived_mqtt(stopic, v):
 func Don_broker_connect():
 	MQTT.subscribe("%s/+/packet/%s" % [MQTTsignalling.roomname, MQTT.client_id])
 	MQTT.publish(MQTTsignalling.statustopic, JSON.stringify({"subject":"serveropen", "nconnections":len(clientidtowclientid)}), true)
+	MQTTsignalling.publishstatus("serveropen", "", len(clientidtowclientid))
 	StartMQTTstatuslabel.text = "connected"
 	$ClientsList.clear()
 	$ClientsList.add_item(MQTT.client_id, 1)
