@@ -80,6 +80,42 @@ func publishstatus(status, Dselectedserver="", Dnconnections=null):
 		v["nconnections"] = Dnconnections
 	$MQTT.publish(statustopic, JSON.stringify(v), true)
 
+
+func establishtreeitemparent(mclientid, par):
+	if xclienttreeitems.has(mclientid):
+		if xclienttreeitems[mclientid].get_parent() == par:
+			return
+		xclienttreeitems[mclientid].free()
+	xclienttreeitems[mclientid] = Roomplayertree.create_item(par)
+
+func processsubscribedstatus(mclientid, v):
+	var mstatus = v["subject"]
+	#if not xclienttreeitems.has(mclientid):
+	xclientstatuses[mclientid] = mstatus
+	if mstatus == "unconnected":
+		establishtreeitemparent(mclientid, roomplayertreeunconnected)
+		xclienttreeitems[mclientid].set_text(0, "%s" % mclientid)
+	if mstatus == "connecting":
+		pass
+	if mstatus == "connected":
+		var mselectedserver = v["selectedserver"]
+		establishtreeitemparent(mclientid, xclienttreeitems[mselectedserver])
+		xclienttreeitems[mclientid].set_text(0, "%s" % mclientid)
+	if mstatus == "serveropen":
+		clearclosedtopics()
+		establishtreeitemparent(mclientid, Roomplayertree.get_root())
+		xclienttreeitems[mclientid].set_text(0, "%s" % mclientid)
+		xclienttreeitems[mclientid].set_icon(2, treenodeicon1)
+
+	if mstatus == "closed":
+		if xclienttreeitems.has(mclientid):
+			xclienttreeitems[mclientid].free()
+			xclienttreeitems.erase(mclientid)
+	else:
+		if v.has("playername"):
+			xclienttreeitems[mclientid].set_text(1, v["playername"])
+		
+
 func clearclosedtopics():
 	for x in xclientstatuses:
 		if xclientstatuses[x] == "closed":
@@ -100,25 +136,10 @@ func _on_mqtt_received_message(topic, msg):
 	if len(stopic) >= 3: 
 		var mclientid = stopic[-2]
 		if stopic[-1] == "status" and v.has("subject"):
-			xclientstatuses[mclientid] = v["subject"]
+			processsubscribedstatus(mclientid, v)
 			if mclientid == $MQTT.client_id:
 				Roomplayertreecaboosereached = true
 
-			#if not xclienttreeitems.has(mclientid):
-			if v["subject"] == "unconnected":
-				xclienttreeitems[mclientid] = Roomplayertree.create_item(roomplayertreeunconnected)
-				xclienttreeitems[mclientid].set_text(0, "%s" % mclientid)
-			if v["subject"] == "serveropen":
-				clearclosedtopics()
-				if xclienttreeitems.has(mclientid):
-					xclienttreeitems[mclientid].free()
-				xclienttreeitems[mclientid] = Roomplayertree.create_item()
-				xclienttreeitems[mclientid].set_text(0, "%s" % mclientid)
-				xclienttreeitems[mclientid].set_icon(1, treenodeicon1)
-			if v["subject"] == "closed":
-				if xclienttreeitems.has(mclientid):
-					xclienttreeitems[mclientid].free()
-					xclienttreeitems.erase(mclientid) 
 
 	if selectasserver:
 		$VBox/Servermode.Dreceived_mqtt(stopic, v)

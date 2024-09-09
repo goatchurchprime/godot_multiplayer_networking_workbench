@@ -105,7 +105,10 @@ func Dreceived_mqtt(stopic, v):
 var wclientid = 0
 var openserverconnectionsUpToDate = false
 func Don_broker_connect():
-	MQTTsignalling.publishstatus("unconnected", selectedserver)
+	if selectedserver:
+		MQTTsignalling.publishstatus("connecting", selectedserver)
+	else:
+		MQTTsignalling.publishstatus("unconnected")
 	MQTT.publish("%s/caboose/status" % MQTTsignalling.roomname, JSON.stringify({"subject":"caboose", "clientid":MQTT.client_id}))
 	StartMQTTstatuslabel.text = "pending"
 	assert (len(openserversconnections) == 0)

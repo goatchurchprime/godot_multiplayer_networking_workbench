@@ -411,7 +411,7 @@ layout_mode = 2
 
 [node name="Tree" type="Tree" parent="VBox/TabContainer/MQTTsignalling/VBox/HBoxM/HSplitContainer/Roomplayers"]
 layout_mode = 2
-columns = 2
+columns = 3
 hide_root = true
 
 [node name="HBox" type="HBoxContainer" parent="VBox/TabContainer/MQTTsignalling/VBox"]
