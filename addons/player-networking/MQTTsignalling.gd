@@ -11,6 +11,8 @@ var selectasserver = false
 var selectasclient = false
 var selectasnecessary = false
 
+var Hselectedserver = ""
+
 var wclientid = -1  # stored here for now, but will specify from mqttid
 
 signal mqttsig_connection_established(wclientid)
@@ -23,8 +25,6 @@ func isconnectedtosignalserver():
 
 @onready var Roomplayertree = $VBox/HBoxM/HSplitContainer/Roomplayers/Tree
 var Roomplayertreecaboosereached = false
-
-var roomplayertreeunconnected = null
 var roomplayertreeitem_ME = null
 
 @onready var treenodeicon1 = ImageTexture.create_from_image(Image.load_from_file("res://addons/player-networking/AudioStreamPlayer3D.svg"))
@@ -34,10 +34,6 @@ var xclienttreeitems = { }
 
 func _ready():
 	var root = Roomplayertree.create_item()
-	roomplayertreeunconnected = Roomplayertree.create_item()
-	roomplayertreeunconnected.set_text(0, "unconnected")
-	roomplayertreeunconnected.set_icon(1, treenodeicon1)
-
 
 var Dns = -1
 func _on_NetworkOptionsMQTTWebRTC_item_selected(ns):
@@ -48,25 +44,25 @@ func _on_NetworkOptionsMQTTWebRTC_item_selected(ns):
 	var selectasoff = (ns == NetworkGateway.NETWORK_OPTIONS.NETWORK_OFF)
 	#assert (ProtocolOptions.selected == NETWORK_PROTOCOL.WEBRTC_MQTTSIGNAL)
 
-	if not selectasoff:
-		NetworkGateway.PlayerConnections.clearconnectionlog()
-
-	$VBox/HBox2/StartMQTT.button_pressed = false
-	await get_tree().process_frame
-
+	if selectasoff:
+		NetworkGateway.ProtocolOptions.disabled = false
+		$VBox/HBox2/StartMQTT.button_pressed = false
+		return
+		
+	NetworkGateway.ProtocolOptions.disabled = true
+	NetworkGateway.PlayerConnections.clearconnectionlog()
+	$VBox/HBox2/StartMQTT.button_pressed = true
 	$VBox/Servermode.visible = selectasserver
 	$VBox/Clientmode.visible = selectasclient
-	NetworkGateway.ProtocolOptions.disabled = not selectasoff
-	if selectasserver:
-		$VBox/HBox2/StartMQTT.connect("toggled", Callable($VBox/Servermode, "_on_StartServer_toggled"))
-		if $VBox/HBox2/mqttautoconnect.button_pressed:
-			$VBox/HBox2/StartMQTT.button_pressed = true
-	if selectasclient or selectasnecessary:
-		$VBox/HBox2/StartMQTT.connect("toggled", Callable($VBox/Clientmode, "_on_StartClient_toggled"))
-		if $VBox/HBox2/mqttautoconnect.button_pressed:
-			$VBox/HBox2/StartMQTT.button_pressed = true
+
+	if selectasclient and not Hselectedserver and Roomplayertreecaboosereached:
+		choosefromopenservers_go()
+
+
+
 #	if $MQTTsignalling/mqttautoconnect.button_pressed:
 #		$MQTTsignalling/StartMQTT.button_pressed = selectasclient or selectasnecessary
+
 	$VBox/Servermode/WebRTCmultiplayerserver/StartWebRTCmultiplayer.button_pressed = false
 	$VBox/Servermode/WebRTCmultiplayerserver/StartWebRTCmultiplayer.disabled = true
 	$VBox/Clientmode/WebRTCmultiplayerclient/StartWebRTCmultiplayer.button_pressed = false
@@ -82,7 +78,7 @@ func publishstatus(status, Dselectedserver="", Dnconnections=null):
 
 
 func establishtreeitemparent(mclientid, par):
-	if xclienttreeitems.has(mclientid):
+	if xclienttreeitems.has(mclientid) and is_instance_valid(xclienttreeitems[mclientid]):
 		if xclienttreeitems[mclientid].get_parent() == par:
 			return
 		xclienttreeitems[mclientid].free()
@@ -90,10 +86,16 @@ func establishtreeitemparent(mclientid, par):
 
 func processsubscribedstatus(mclientid, v):
 	var mstatus = v["subject"]
-	#if not xclienttreeitems.has(mclientid):
+	if mstatus == "closed":
+		if xclienttreeitems.has(mclientid):
+			if is_instance_valid(xclienttreeitems[mclientid]):
+				xclienttreeitems[mclientid].free()
+			xclienttreeitems.erase(mclientid)
+		return
+
 	xclientstatuses[mclientid] = mstatus
 	if mstatus == "unconnected":
-		establishtreeitemparent(mclientid, roomplayertreeunconnected)
+		establishtreeitemparent(mclientid, Roomplayertree.get_root())
 		xclienttreeitems[mclientid].set_text(0, "%s" % mclientid)
 	if mstatus == "connecting":
 		pass
@@ -106,14 +108,11 @@ func processsubscribedstatus(mclientid, v):
 		establishtreeitemparent(mclientid, Roomplayertree.get_root())
 		xclienttreeitems[mclientid].set_text(0, "%s" % mclientid)
 		xclienttreeitems[mclientid].set_icon(2, treenodeicon1)
-
-	if mstatus == "closed":
-		if xclienttreeitems.has(mclientid):
-			xclienttreeitems[mclientid].free()
-			xclienttreeitems.erase(mclientid)
 	else:
-		if v.has("playername"):
-			xclienttreeitems[mclientid].set_text(1, v["playername"])
+		xclienttreeitems[mclientid].set_icon(2, null)
+		
+	if v.has("playername"):
+		xclienttreeitems[mclientid].set_text(1, v["playername"])
 		
 
 func clearclosedtopics():
@@ -135,11 +134,15 @@ func _on_mqtt_received_message(topic, msg):
 	var v = JSON.parse_string(msg)
 	if len(stopic) >= 3: 
 		var mclientid = stopic[-2]
-		if stopic[-1] == "status" and v.has("subject"):
-			processsubscribedstatus(mclientid, v)
-			if mclientid == $MQTT.client_id:
-				Roomplayertreecaboosereached = true
-
+		if mclientid != "caboose":
+			if stopic[-1] == "status" and v.has("subject"):
+				processsubscribedstatus(mclientid, v)
+				if mclientid == $MQTT.client_id:
+					Roomplayertreecaboosereached = true
+					if selectasclient and not Hselectedserver:
+						choosefromopenservers_go()
+				if v["subject"] == "serveropen" and selectasclient and not Hselectedserver and Roomplayertreecaboosereached:
+					choosefromopenservers_go()
 
 	if selectasserver:
 		$VBox/Servermode.Dreceived_mqtt(stopic, v)
@@ -153,6 +156,7 @@ func _on_mqtt_broker_connected():
 	assert (roomname)
 	$MQTT.subscribe("%s/+/status" % roomname)
 	publishstatus("unconnected")
+
 	if selectasserver:
 		$VBox/Servermode.Don_broker_connect()
 	if selectasclient:
@@ -165,9 +169,8 @@ func _on_start_mqtt_toggled(toggled_on):
 		Roomplayertree.clear()
 		xclienttreeitems.clear()
 		var root = Roomplayertree.create_item()
-		roomplayertreeunconnected = Roomplayertree.create_item()
-		roomplayertreeunconnected.set_text(0, "unconnected")
 		Roomplayertreecaboosereached = false
+		Hselectedserver = ""
 		roomname = $VBox/HBox2/roomname.text
 		randomize()
 		$MQTT.client_id = "x%d" % (2 + (randi()%0x7ffffff8))
@@ -212,3 +215,25 @@ func sendpacket_toserver(v):
 	assert (selectasclient)
 	var t = "%s/%s/packet/%s" % [roomname, $MQTT.client_id, $VBox/Clientmode.selectedserver]
 	$MQTT.publish(t, JSON.stringify(v))
+
+func choosefromopenservers_go():
+	print("choosefromopenservers_gochoosefromopenservers_go")
+	assert (not selectasserver)
+	assert (Hselectedserver == "")
+	assert (Roomplayertreecaboosereached)
+	var sel = Roomplayertree.get_selected()
+	var serversopen = [ ]
+	for ss in xclientstatuses:
+		if xclientstatuses[ss] == "serveropen":
+			if sel and xclienttreeitems[ss] == sel:
+				Hselectedserver = ss
+				break
+			serversopen.append(ss)
+	if Hselectedserver == "" and serversopen:
+		Hselectedserver = serversopen[0]
+	
+	if Hselectedserver != "":
+		$VBox/Clientmode.selectedserver = Hselectedserver
+		$MQTT.subscribe("%s/%s/packet/%s" % [roomname, Hselectedserver, $MQTT.client_id])
+		var t = "%s/%s/packet/%s" % [roomname, $MQTT.client_id, Hselectedserver]
+		$MQTT.publish(t, JSON.stringify({"subject":"request_connection"}))

@@ -25,7 +25,7 @@ var serverconnected = false
 	
 
 var Nmaxnconnectionstoserver = 3
-func choosefromopenservers():
+func Dchoosefromopenservers():
 	var lselectedserver = null
 	for ss in openserversconnections:
 		if openserversconnections[ss] < Nmaxnconnectionstoserver:
@@ -43,8 +43,7 @@ func Dreceived_mqtt(stopic, v):
 	if v != null and v.has("subject"):
 		if len(stopic) >= 3 and stopic[0] == MQTTsignalling.roomname:
 			var sendingserverid = stopic[1]
-
-			if len(stopic) == 3 and stopic[2] == "status":
+			if false and len(stopic) == 3 and stopic[2] == "status":
 				var chooseaserver = false
 				if stopic[1] == "caboose":
 					if v.get("clientid", "") == MQTT.client_id:
@@ -72,7 +71,7 @@ func Dreceived_mqtt(stopic, v):
 				if chooseaserver:
 					if StartMQTT.button_pressed:
 						assert (selectedserver == "")
-						var serverfound = choosefromopenservers()
+						var serverfound = Dchoosefromopenservers()
 						var selectasnecessarymanualchange = (NetworkGateway.NetworkOptionsMQTTWebRTC.selected == NetworkGateway.NETWORK_OPTIONS_MQTT_WEBRTC.AS_NECESSARY_MANUALCHANGE)
 						var selectasnecessary = (NetworkGateway.NetworkOptionsMQTTWebRTC.selected == NetworkGateway.NETWORK_OPTIONS_MQTT_WEBRTC.AS_NECESSARY)
 						if selectasnecessarymanualchange:
