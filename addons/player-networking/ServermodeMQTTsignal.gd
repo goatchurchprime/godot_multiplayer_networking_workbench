@@ -23,6 +23,7 @@ signal mqttsig_packet_received(id, v)
 
 func sendpacket_toclient(wclientid, v):
 	var t = "%s/%s/packet/%s" % [MQTTsignalling.roomname, MQTT.client_id, wclientidtoclientid[wclientid]]
+	print(" >>> packet to client ", t, v)
 	MQTT.publish(t, JSON.stringify(v))
 	
 func Dreceived_mqtt(stopic, v):
@@ -30,7 +31,7 @@ func Dreceived_mqtt(stopic, v):
 		if len(stopic) >= 3 and stopic[0] == MQTTsignalling.roomname:
 			var sendingclientid = stopic[1]
 			
-			if len(stopic) == 4  and stopic[2] == "packet" and stopic[3] == MQTT.client_id:
+			if len(stopic) >= 4 and stopic[-2] == "packet" and stopic[-1] == MQTT.client_id:
 				if clientidtowclientid.has(sendingclientid):
 					emit_signal("mqttsig_packet_received", clientidtowclientid[sendingclientid], v)
 				elif v["subject"] == "request_connection":
@@ -45,7 +46,7 @@ func Dreceived_mqtt(stopic, v):
 					$ClientsList.add_item(sendingclientid, int(sendingclientid))
 					$ClientsList.selected = $ClientsList.get_item_count()-1
 				
-			if len(stopic) == 3 and stopic[2] == "status":
+			elif len(stopic) == 3 and stopic[2] == "status":
 				if v["subject"] == "closed":
 					if clientidtowclientid.has(sendingclientid):
 						MQTT.unsubscribe("%s/%s/status" % [MQTTsignalling.roomname, sendingclientid])

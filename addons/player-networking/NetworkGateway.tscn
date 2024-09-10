@@ -1,4 +1,4 @@
-[gd_scene load_steps=34 format=3 uid="uid://cfmoahalri06d"]
+[gd_scene load_steps=33 format=3 uid="uid://cfmoahalri06d"]
 
 [ext_resource type="Script" path="res://addons/player-networking/NetworkGateway.gd" id="1"]
 [ext_resource type="Script" path="res://addons/player-networking/Enetmultiplayerserver.gd" id="3"]
@@ -15,7 +15,6 @@
 [ext_resource type="Script" path="res://addons/player-networking/ClientmodeWebSocketsignal.gd" id="13"]
 [ext_resource type="Script" path="res://addons/player-networking/WebRTCmultiplayerclient.gd" id="14"]
 [ext_resource type="PackedScene" uid="uid://ktm7k0co2o7l" path="res://addons/mqtt/mqtt.tscn" id="14_c5n2c"]
-[ext_resource type="Script" path="res://addons/player-networking/ClientmodeMQTTsignal.gd" id="15"]
 [ext_resource type="Script" path="res://addons/player-networking/RecordingFeature.gd" id="16_hf3ik"]
 [ext_resource type="Script" path="res://addons/player-networking/DoppelgangerPanel_ui.gd" id="16_i8v6k"]
 
@@ -501,7 +500,6 @@ text = "autoconnect"
 
 [node name="Clientmode" type="HBoxContainer" parent="VBox/TabContainer/MQTTsignalling/VBox"]
 layout_mode = 2
-script = ExtResource("15")
 
 [node name="WebRTCmultiplayerclient" type="HBoxContainer" parent="VBox/TabContainer/MQTTsignalling/VBox/Clientmode"]
 layout_mode = 2
@@ -522,6 +520,7 @@ button_pressed = true
 text = "autoconnect"
 
 [node name="MQTT" parent="VBox/TabContainer/MQTTsignalling" instance=ExtResource("14_c5n2c")]
+verbose_level = 1
 
 [node name="PlayerConnections" type="PanelContainer" parent="VBox"]
 layout_mode = 2
