@@ -116,9 +116,13 @@ func _connected_to_server():
 			_peer_connected(id)
 
 	updateplayerlist()
+	if NetworkGateway.ProtocolOptions.selected == NetworkGateway.NETWORK_PROTOCOL.WEBRTC_MQTTSIGNAL:
+		NetworkGateway.MQTTsignalling.StatusWebRTC.text = "connected"
 
 func _connection_failed():
 	connectionlog("_connection failed\n")
+	if NetworkGateway.ProtocolOptions.selected == NetworkGateway.NETWORK_PROTOCOL.WEBRTC_MQTTSIGNAL:
+		NetworkGateway.MQTTsignalling.StatusWebRTC.text = "failed"
 	NetworkGateway.setnetworkoff()
 
 func _server_disconnected():

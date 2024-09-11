@@ -28,8 +28,6 @@ var Roomplayertreecaboosereached = false
 
 @onready var treenodeicon1 = ImageTexture.create_from_image(Image.load_from_file("res://addons/player-networking/AudioStreamPlayer3D.svg"))
 
-var wclientid = -1
-
 func clearallstatuses():
 	Roomplayertree.clear()
 	Roomplayertree.create_item()
@@ -114,7 +112,7 @@ func processothermclientstatus(mclientid, v):
 		establishtreeitemparent(mclientid, Roomplayertree.get_root())
 	if mstatus == "connecting":
 		pass
-	if mstatus == "connected":
+	if mstatus == "connectto":
 		var mselectedserver = v["selectedserver"]
 		establishtreeitemparent(mclientid, xclienttreeitems[mselectedserver])
 
@@ -153,7 +151,6 @@ func start_mqtt():
 	clearallstatuses()
 	randomize()
 	$MQTT.client_id = "x%d" % (2 + (randi()%0x7ffffff8))
-	wclientid = int($MQTT.client_id)
 	Clientidtext.text = $MQTT.client_id
 	playername = NetworkGateway.PlayerConnections.LocalPlayer.playername()
 	StatusMQTT.select(1)
@@ -233,17 +230,8 @@ func _on_mqtt_received_message(topic, msg):
 		var sendingclientid = stopic[-3]
 		if selectasserver:
 			server_packet_received(sendingclientid, v)
-		
-		if selectasclient:
-			if sendingclientid == Hselectedserver:
-				if v["subject"] == "connection_prepared":
-					if not Hserverconnected:
-						Hserverconnected = true
-						publishstatus("connected", Hselectedserver)
-						startwebrtc_client()
-				else:
-					client_packet_received(v)
-
+		if selectasclient and sendingclientid == Hselectedserver:
+			client_packet_received(v)
 
 func stopwebrtc_server():
 	NetworkGateway.PlayerConnections._server_disconnected()
@@ -278,22 +266,14 @@ func server_session_description_created(type, data, id):
 	sendpacket_toclient(id, {"subject":"offer", "data":data})
 	NetworkGateway.PlayerConnections.connectionlog("send offer %s" %id)
 
-func server_client_connected(id):
-	print("server client connected ", id)
-
-func server_client_disconnected(id):
-	print("server client_disconnected ", id)
-
 func Ddata_channel_created(channel):
 	print("DDDdata_channel_created ", channel)
 
 func server_packet_received(sendingclientid, v):
 	var id = int(sendingclientid)
-	print("ssssserver_packet_received ", sendingclientid, v["subject"])
-	
 	if v["subject"] == "request_connection":
 		var t = "%s/%s/packet/%s" % [Roomnametext.text, $MQTT.client_id, sendingclientid]
-		$MQTT.publish(t, JSON.stringify({"subject":"connection_prepared", "wclientid":int(sendingclientid)}))
+		$MQTT.publish(t, JSON.stringify({"subject":"connection_accepted"}))
 		publishstatus("serveropen", "", 0)
 
 	elif v["subject"] == "request_offer":
@@ -320,8 +300,6 @@ func server_packet_received(sendingclientid, v):
 		peerconnection["connection"].add_ice_candidate(v["mid_name"], v["index_name"], v["sdp_name"])
 		NetworkGateway.PlayerConnections.connectionlog("receive ice_candidate %s" %id)
 
-
-
 func client_ice_candidate_created(mid_name, index_name, sdp_name):
 	sendpacket_toserver({"subject":"ice_candidate", "mid_name":mid_name, "index_name":index_name, "sdp_name":sdp_name})
 
@@ -341,8 +319,13 @@ func client_connection_closed():
 	print("server client_disconnected ")
 
 func client_packet_received(v):
-	print("cccccclient packet_received ", v["subject"])
-	if v["subject"] == "offer":
+	if v["subject"] == "connection_accepted":
+		if not Hserverconnected:
+			Hserverconnected = true
+			publishstatus("connectto", Hselectedserver)
+			startwebrtc_client()
+	
+	elif v["subject"] == "offer":
 		var peerconnection = WebRTCPeerConnection.new()
 		peerconnection.session_description_created.connect(client_session_description_created)
 		peerconnection.ice_candidate_created.connect(client_ice_candidate_created)
