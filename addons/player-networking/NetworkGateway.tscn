@@ -389,30 +389,6 @@ metadata/_tab_index = 1
 [node name="VBox" type="VBoxContainer" parent="VBox/TabContainer/MQTTsignalling"]
 layout_mode = 2
 
-[node name="HBoxM" type="HBoxContainer" parent="VBox/TabContainer/MQTTsignalling/VBox"]
-custom_minimum_size = Vector2(0, 100)
-layout_mode = 2
-size_flags_vertical = 3
-
-[node name="HSplitContainer" type="HSplitContainer" parent="VBox/TabContainer/MQTTsignalling/VBox/HBoxM"]
-layout_mode = 2
-size_flags_horizontal = 3
-
-[node name="Msettings" type="VBoxContainer" parent="VBox/TabContainer/MQTTsignalling/VBox/HBoxM/HSplitContainer"]
-layout_mode = 2
-
-[node name="Button" type="Button" parent="VBox/TabContainer/MQTTsignalling/VBox/HBoxM/HSplitContainer/Msettings"]
-layout_mode = 2
-text = "Nothing"
-
-[node name="Roomplayers" type="PanelContainer" parent="VBox/TabContainer/MQTTsignalling/VBox/HBoxM/HSplitContainer"]
-layout_mode = 2
-
-[node name="Tree" type="Tree" parent="VBox/TabContainer/MQTTsignalling/VBox/HBoxM/HSplitContainer/Roomplayers"]
-layout_mode = 2
-columns = 3
-hide_root = true
-
 [node name="HBox" type="HBoxContainer" parent="VBox/TabContainer/MQTTsignalling/VBox"]
 layout_mode = 2
 
@@ -439,24 +415,55 @@ placeholder_text = "User"
 layout_mode = 2
 placeholder_text = "Pass"
 
-[node name="HBox2" type="HBoxContainer" parent="VBox/TabContainer/MQTTsignalling/VBox"]
+[node name="HBoxM" type="HBoxContainer" parent="VBox/TabContainer/MQTTsignalling/VBox"]
+custom_minimum_size = Vector2(0, 100)
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="HSplitContainer" type="HSplitContainer" parent="VBox/TabContainer/MQTTsignalling/VBox/HBoxM"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Msettings" type="VBoxContainer" parent="VBox/TabContainer/MQTTsignalling/VBox/HBoxM/HSplitContainer"]
 layout_mode = 2
 
-[node name="Label3" type="Label" parent="VBox/TabContainer/MQTTsignalling/VBox/HBox2"]
+[node name="HBox" type="HBoxContainer" parent="VBox/TabContainer/MQTTsignalling/VBox/HBoxM/HSplitContainer/Msettings"]
 layout_mode = 2
-text = "Topic:"
 
-[node name="roomname" type="LineEdit" parent="VBox/TabContainer/MQTTsignalling/VBox/HBox2"]
+[node name="Label3" type="Label" parent="VBox/TabContainer/MQTTsignalling/VBox/HBoxM/HSplitContainer/Msettings/HBox"]
 layout_mode = 2
+text = "Room:"
+
+[node name="roomname" type="LineEdit" parent="VBox/TabContainer/MQTTsignalling/VBox/HBoxM/HSplitContainer/Msettings/HBox"]
+layout_mode = 2
+size_flags_horizontal = 3
 text = "grapes"
 
-[node name="Label2" type="Label" parent="VBox/TabContainer/MQTTsignalling/VBox/HBox2"]
+[node name="HBox2" type="HBoxContainer" parent="VBox/TabContainer/MQTTsignalling/VBox/HBoxM/HSplitContainer/Msettings"]
+layout_mode = 2
+
+[node name="Label2" type="Label" parent="VBox/TabContainer/MQTTsignalling/VBox/HBoxM/HSplitContainer/Msettings/HBox2"]
 layout_mode = 2
 text = "mqtt clientid:"
 
-[node name="client_id" type="LineEdit" parent="VBox/TabContainer/MQTTsignalling/VBox/HBox2"]
+[node name="client_id" type="LineEdit" parent="VBox/TabContainer/MQTTsignalling/VBox/HBoxM/HSplitContainer/Msettings/HBox2"]
 layout_mode = 2
+size_flags_horizontal = 3
 editable = false
+
+[node name="HBox3" type="HBoxContainer" parent="VBox/TabContainer/MQTTsignalling/VBox/HBoxM/HSplitContainer/Msettings"]
+layout_mode = 2
+
+[node name="Roomplayers" type="PanelContainer" parent="VBox/TabContainer/MQTTsignalling/VBox/HBoxM/HSplitContainer"]
+layout_mode = 2
+
+[node name="Tree" type="Tree" parent="VBox/TabContainer/MQTTsignalling/VBox/HBoxM/HSplitContainer/Roomplayers"]
+layout_mode = 2
+columns = 3
+hide_root = true
+
+[node name="HBox2" type="HBoxContainer" parent="VBox/TabContainer/MQTTsignalling/VBox"]
+layout_mode = 2
 
 [node name="StartMQTT" type="Button" parent="VBox/TabContainer/MQTTsignalling/VBox/HBox2"]
 layout_mode = 2

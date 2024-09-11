@@ -86,7 +86,7 @@ func initialstatemqttwebrtc(networkoption, roomname, brokeraddress):
 	if brokeraddress:
 		MQTTsignalling.get_node("VBox/HBox/brokeraddress").text = brokeraddress
 	if roomname:
-		MQTTsignalling.get_node("VBox/HBox2/roomname").text = roomname
+		MQTTsignalling.Roomnametext.text = roomname
 	NetworkOptionsMQTTWebRTC.selected = networkoption
 	_on_NetworkOptionsMQTTWebRTC_item_selected(NetworkOptionsMQTTWebRTC.selected)
 
@@ -243,7 +243,7 @@ func is_disconnected():
 
 func simple_webrtc_connect(roomname):
 	if roomname:
-		MQTTsignalling.get_node("VBox/HBox2/roomname").text = roomname
+		MQTTsignalling.Roomnametext.text = roomname
 		selectandtrigger_networkoption(NETWORK_OPTIONS_MQTT_WEBRTC.AS_NECESSARY)
 		set_vox_on()
 	else:

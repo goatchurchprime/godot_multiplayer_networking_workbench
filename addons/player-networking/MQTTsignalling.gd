@@ -2,10 +2,12 @@ extends Control
 
 @onready var NetworkGateway = find_parent("NetworkGateway")
 
+
 # var wclientid = int($MQTT.client_id)
 var roomname = ""
 var statustopic = ""
 var playername = ""
+var Dmqttbrokerconnected = false
 
 var selectasserver = false
 var selectasclient = false
@@ -16,10 +18,6 @@ var Hserverconnected = false
 
 var wclientid = -1  # stored here for now, but will specify from mqttid
 
-signal mqttsig_connection_established(wclientid)
-signal mqttsig_connection_closed()
-signal mqttsig_packet_received(v)
-
 
 func isconnectedtosignalserver():
 	return Hserverconnected
@@ -27,6 +25,9 @@ func isconnectedtosignalserver():
 @onready var Roomplayertree = $VBox/HBoxM/HSplitContainer/Roomplayers/Tree
 var Roomplayertreecaboosereached = false
 var roomplayertreeitem_ME = null
+
+@onready var Roomnametext = $VBox/HBoxM/HSplitContainer/Msettings/HBox/roomname
+@onready var Clientidtext = $VBox/HBoxM/HSplitContainer/Msettings/HBox2/client_id
 
 @onready var treenodeicon1 = ImageTexture.create_from_image(Image.load_from_file("res://addons/player-networking/AudioStreamPlayer3D.svg"))
 
@@ -63,10 +64,13 @@ func _on_NetworkOptionsMQTTWebRTC_item_selected(ns):
 	if selectasclient and not Hselectedserver and Roomplayertreecaboosereached:
 		choosefromopenservers_go()
 
+	if selectasserver and Dmqttbrokerconnected:
+		$VBox/Servermode.Don_broker_connect()
 
 
 #	if $MQTTsignalling/mqttautoconnect.button_pressed:
 #		$MQTTsignalling/StartMQTT.button_pressed = selectasclient or selectasnecessary
+
 
 	$VBox/Servermode/WebRTCmultiplayerserver/StartWebRTCmultiplayer.button_pressed = false
 	$VBox/Servermode/WebRTCmultiplayerserver/StartWebRTCmultiplayer.disabled = true
@@ -172,10 +176,12 @@ func _on_mqtt_received_message(topic, msg):
 
 
 func _on_mqtt_broker_disconnected():
+	Dmqttbrokerconnected = false
 	$VBox/HBox2/StartMQTT.button_pressed = false
 
 func _on_mqtt_broker_connected():
 	assert (roomname)
+	Dmqttbrokerconnected = true
 	$MQTT.subscribe("%s/+/status" % roomname)
 	publishstatus("unconnected")
 
@@ -191,7 +197,7 @@ func _on_mqtt_broker_connected():
 
 func _on_start_mqtt_toggled(toggled_on):
 	if toggled_on:
-		$VBox/HBox2/roomname.editable = false
+		Roomnametext.editable = false
 		Roomplayertree.clear()
 		xclienttreeitems.clear()
 		xclientstatuses.clear()
@@ -200,10 +206,10 @@ func _on_start_mqtt_toggled(toggled_on):
 		Roomplayertreecaboosereached = false
 		Hselectedserver = ""
 		Hserverconnected = false
-		roomname = $VBox/HBox2/roomname.text
+		roomname = Roomnametext.text
 		randomize()
 		$MQTT.client_id = "x%d" % (2 + (randi()%0x7ffffff8))
-		$VBox/HBox2/client_id.text = $MQTT.client_id
+		Clientidtext.text = $MQTT.client_id
 		statustopic = "%s/%s/status" % [roomname, $MQTT.client_id]
 		playername = NetworkGateway.PlayerConnections.LocalPlayer.playername()
 		StartMQTTstatuslabel.text = "on"
@@ -220,8 +226,8 @@ func _on_start_mqtt_toggled(toggled_on):
 		StartMQTTstatuslabel.text = "off"
 		roomname = ""
 		statustopic = ""
-		$VBox/HBox2/roomname.editable = true
-		$VBox/HBox2/client_id.text = ""
+		Roomnametext.editable = true
+		Clientidtext.text = ""
 		$VBox/HBox/brokeraddress.disabled = false
 
 		var scmode = $VBox/Servermode if selectasserver else $VBox/Clientmode
