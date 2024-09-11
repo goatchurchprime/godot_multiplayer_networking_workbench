@@ -37,7 +37,6 @@ var xclientclosedlist = [ ]
 
 @onready var StartMQTTstatuslabel = $VBox/HBox2/statuslabel
 
-
 func _ready():
 	var root = Roomplayertree.create_item()
 
@@ -65,7 +64,7 @@ func _on_NetworkOptionsMQTTWebRTC_item_selected(ns):
 		choosefromopenservers_go()
 
 	if selectasserver and Dmqttbrokerconnected:
-		$VBox/Servermode.Don_broker_connect()
+		startwebrtc_server()
 
 
 #	if $MQTTsignalling/mqttautoconnect.button_pressed:
@@ -183,10 +182,11 @@ func _on_mqtt_broker_connected():
 	assert (roomname)
 	Dmqttbrokerconnected = true
 	$MQTT.subscribe("%s/+/status" % roomname)
+	$MQTT.subscribe("%s/+/packet/%s" % [roomname, $MQTT.client_id])
 	publishstatus("unconnected")
 
 	if selectasserver:
-		$VBox/Servermode.Don_broker_connect()
+		startwebrtc_server()
 	if selectasclient:
 		if Hselectedserver != "":
 			publishstatus("connecting", Hselectedserver)
@@ -267,5 +267,16 @@ func choosefromopenservers_go():
 		Hselectedserver = serversopen[0]
 	
 	if Hselectedserver != "":
-		$MQTT.subscribe("%s/%s/packet/%s" % [roomname, Hselectedserver, $MQTT.client_id])
 		sendpacket_toserver({"subject":"request_connection"})
+
+
+func startwebrtc_server():
+	publishstatus("serveropen", "", len($VBox/Servermode.clientidtowclientid))
+	StartMQTTstatuslabel.text = "connected"
+	$VBox/Servermode/ClientsList.clear()
+	$VBox/Servermode/ClientsList.add_item($MQTT.client_id, 1)
+	$VBox/Servermode/ClientsList.selected = 0
+	
+	$VBox/Servermode/WebRTCmultiplayerserver/StartWebRTCmultiplayer.disabled = false
+	if $VBox/Servermode/autoconnect.button_pressed:
+		$VBox/Servermode/WebRTCmultiplayerserver/StartWebRTCmultiplayer.button_pressed = true

@@ -11,8 +11,6 @@ extends Control
 var clientidtowclientid = { }
 var wclientidtoclientid = { }
 
-var Dclearlostdanglingservers = false
-
 signal mqttsig_client_connected(id)
 signal mqttsig_client_disconnected(id)
 signal mqttsig_packet_received(id, v)
@@ -49,7 +47,6 @@ func Dreceived_mqtt(stopic, v):
 			elif len(stopic) == 3 and stopic[2] == "status":
 				if v["subject"] == "closed":
 					if clientidtowclientid.has(sendingclientid):
-						MQTT.unsubscribe("%s/%s/status" % [MQTTsignalling.roomname, sendingclientid])
 						var wclientid = clientidtowclientid[sendingclientid]
 						emit_signal("mqttsig_client_disconnected", wclientid)
 						clientidtowclientid.erase(sendingclientid)
@@ -67,16 +64,4 @@ func Dreceived_mqtt(stopic, v):
 				print("Unrecognized topic ", stopic)
 
 	
-func Don_broker_connect():
-	MQTT.subscribe("%s/+/packet/%s" % [MQTTsignalling.roomname, MQTT.client_id])
-	MQTT.publish(MQTTsignalling.statustopic, JSON.stringify({"subject":"serveropen", "nconnections":len(clientidtowclientid)}), true)
-	MQTTsignalling.publishstatus("serveropen", "", len(clientidtowclientid))
-	StartMQTTstatuslabel.text = "connected"
-	$ClientsList.clear()
-	$ClientsList.add_item(MQTT.client_id, 1)
-	$ClientsList.selected = 0
-	
-	$WebRTCmultiplayerserver/StartWebRTCmultiplayer.disabled = false
-	if get_node("autoconnect").button_pressed:
-		$WebRTCmultiplayerserver/StartWebRTCmultiplayer.button_pressed = true
 		
