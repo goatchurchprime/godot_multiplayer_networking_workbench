@@ -164,14 +164,14 @@ func start_mqtt():
 func stop_mqtt():
 	print("Disconnecting MQTT")
 	publishstatus("closed")
+	if Hserverconnected:
+		client_connection_closed()
+		Hselectedserver = ""
+		Hserverconnected = false
 	$MQTT.disconnect_from_server()
 	Roomnametext.editable = true
 	Clientidtext.text = ""
 	$VBox/HBox/brokeraddress.disabled = false
-	if selectasclient:
-		client_connection_closed()
-		Hselectedserver = ""
-		Hserverconnected = false
 
 func sendpacket_toserver(v):
 	assert (selectasclient)
@@ -310,7 +310,7 @@ func client_session_description_created(type, data):
 	sendpacket_toserver({"subject":"answer", "data":data})
 	NetworkGateway.PlayerConnections.connectionlog("answer")
 		
-		
+
 func client_connection_closed():
 	if not (multiplayer.multiplayer_peer is OfflineMultiplayerPeer):
 		var peer = multiplayer.multiplayer_peer.get_peer(1)

@@ -463,10 +463,10 @@ size_flags_horizontal = 3
 disabled = true
 selected = 0
 item_count = 3
-popup/item_0/text = "Disconnected"
-popup/item_1/text = "Connecting"
+popup/item_0/text = "disconnected"
+popup/item_1/text = "connecting"
 popup/item_1/id = 1
-popup/item_2/text = "Connected"
+popup/item_2/text = "connected"
 popup/item_2/id = 2
 
 [node name="HBox5" type="HBoxContainer" parent="VBox/TabContainer/MQTTsignalling/VBox/HBoxM/HSplitContainer/Msettings"]
