@@ -46,8 +46,9 @@ theme_override_colors/font_color = Color(0.956863, 0.968627, 0.956863, 1)
 text = "Remoteplayer"
 horizontal_alignment = 1
 
-[node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="."]
+[node name="AudioStreamPlayer" type="AudioStreamPlayer2D" parent="."]
 stream = SubResource("AudioStreamOpusChunked_i52lg")
+max_distance = 600.0
 
 [node name="SpeakingIcon" type="Sprite2D" parent="."]
 position = Vector2(1, 16)

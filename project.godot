@@ -17,6 +17,7 @@ config/icon="res://icon.png"
 
 [audio]
 
+general/2d_panning_strength=1.0
 driver/enable_input=true
 
 [debug]
