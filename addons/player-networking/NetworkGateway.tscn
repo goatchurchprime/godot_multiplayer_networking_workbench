@@ -490,27 +490,6 @@ layout_mode = 2
 columns = 3
 hide_root = true
 
-[node name="Clientmode" type="HBoxContainer" parent="VBox/TabContainer/MQTTsignalling/VBox"]
-layout_mode = 2
-
-[node name="WebRTCmultiplayerclient" type="HBoxContainer" parent="VBox/TabContainer/MQTTsignalling/VBox/Clientmode"]
-layout_mode = 2
-script = ExtResource("14")
-
-[node name="StartWebRTCmultiplayer" type="Button" parent="VBox/TabContainer/MQTTsignalling/VBox/Clientmode/WebRTCmultiplayerclient"]
-layout_mode = 2
-toggle_mode = true
-text = "StartWebrtc client"
-
-[node name="statuslabel" type="Label" parent="VBox/TabContainer/MQTTsignalling/VBox/Clientmode/WebRTCmultiplayerclient"]
-layout_mode = 2
-text = "null"
-
-[node name="autoconnect" type="CheckBox" parent="VBox/TabContainer/MQTTsignalling/VBox/Clientmode"]
-layout_mode = 2
-button_pressed = true
-text = "autoconnect"
-
 [node name="MQTT" parent="VBox/TabContainer/MQTTsignalling" instance=ExtResource("14_c5n2c")]
 verbose_level = 1
 
@@ -688,7 +667,6 @@ layout_mode = 2
 [connection signal="toggled" from="VBox/TabContainer/VBox/TabContainer/WebSocketsignalling/VBox/Servermode/WebRTCmultiplayerserver/StartWebRTCmultiplayer" to="VBox/TabContainer/VBox/TabContainer/WebSocketsignalling/VBox/Servermode/WebRTCmultiplayerserver" method="_on_StartWebRTCmultiplayer_toggled"]
 [connection signal="toggled" from="VBox/TabContainer/VBox/TabContainer/WebSocketsignalling/VBox/Clientmode/WebRTCmultiplayerclient/StartWebRTCmultiplayer" to="VBox/TabContainer/VBox/TabContainer/WebSocketsignalling/VBox/Clientmode/WebRTCmultiplayerclient" method="_on_StartWebRTCmultiplayer_toggled"]
 [connection signal="button_down" from="VBox/TabContainer/MQTTsignalling/VBox/HBox/brokeraddress" to="." method="_on_brokeraddress_button_down"]
-[connection signal="toggled" from="VBox/TabContainer/MQTTsignalling/VBox/Clientmode/WebRTCmultiplayerclient/StartWebRTCmultiplayer" to="VBox/TabContainer/MQTTsignalling/VBox/Clientmode/WebRTCmultiplayerclient" method="_on_StartWebRTCmultiplayer_toggled"]
 [connection signal="broker_connected" from="VBox/TabContainer/MQTTsignalling/MQTT" to="VBox/TabContainer/MQTTsignalling" method="_on_mqtt_broker_connected"]
 [connection signal="broker_disconnected" from="VBox/TabContainer/MQTTsignalling/MQTT" to="VBox/TabContainer/MQTTsignalling" method="_on_mqtt_broker_disconnected"]
 [connection signal="received_message" from="VBox/TabContainer/MQTTsignalling/MQTT" to="VBox/TabContainer/MQTTsignalling" method="_on_mqtt_received_message"]

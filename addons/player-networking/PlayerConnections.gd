@@ -145,7 +145,6 @@ func _server_disconnected():
 		NetworkGateway.ENetMultiplayer.get_node("HBox/Servermode/StartENetmultiplayer").set_pressed_no_signal(false)
 		NetworkGateway.ENetMultiplayer.get_node("HBox/Clientmode/StartENetmultiplayer").set_pressed_no_signal(false)
 	if NetworkGateway.ProtocolOptions.selected == NetworkGateway.NETWORK_PROTOCOL.WEBRTC_MQTTSIGNAL:
-		NetworkGateway.MQTTsignalling.get_node("VBox/Clientmode/WebRTCmultiplayerclient/StartWebRTCmultiplayer").set_pressed_no_signal(false)
 		NetworkGateway.selectandtrigger_networkoption(NetworkGateway.NETWORK_OPTIONS_MQTT_WEBRTC.NETWORK_OFF)
 	else:
 		NetworkGateway.NetworkOptions.selected = NetworkGateway.NETWORK_OPTIONS.NETWORK_OFF

@@ -17,8 +17,6 @@ var xclientopenservers = [ ]
 var xclienttreeitems = { }
 var xclientclosedlist = [ ]
 
-func isconnectedtosignalserver():
-	return Hserverconnected
 
 @onready var Roomplayertree = $VBox/HBoxM/HSplitContainer/Roomplayers/Tree
 var Roomplayertreecaboosereached = false
@@ -64,8 +62,6 @@ func _on_NetworkOptionsMQTTWebRTC_item_selected(ns):
 			NetworkGateway.selectandtrigger_networkoption(NetworkGateway.NETWORK_OPTIONS_MQTT_WEBRTC.NETWORK_OFF)
 			return
 
-	$VBox/Clientmode.visible = selectasclient
-
 	statuschange_chooseserverifnecessary(false)
 
 	if selectasserver and StatusMQTT.selected == 2:
@@ -73,10 +69,6 @@ func _on_NetworkOptionsMQTTWebRTC_item_selected(ns):
 	if not selectasserver and Wserveractive:
 		stopwebrtc_server()
 	
-	if not selectasclient:
-		$VBox/Clientmode/WebRTCmultiplayerclient/StartWebRTCmultiplayer.button_pressed = false
-		$VBox/Clientmode/WebRTCmultiplayerclient/StartWebRTCmultiplayer.disabled = true
-
 func publishstatus(status, Dselectedserver="", Dnconnections=null):
 	StatusWebRTC.text = status 
 	var v = {"subject":status, "playername":playername}
@@ -180,7 +172,7 @@ func stop_mqtt():
 	Clientidtext.text = ""
 	$VBox/HBox/brokeraddress.disabled = false
 	if selectasclient:
-		$VBox/Clientmode/WebRTCmultiplayerclient.client_connection_closed()
+		client_connection_closed()
 		Hselectedserver = ""
 		Hserverconnected = false
 
@@ -247,14 +239,10 @@ func _on_mqtt_received_message(topic, msg):
 				if v["subject"] == "connection_prepared":
 					if not Hserverconnected:
 						Hserverconnected = true
-						$VBox/Clientmode/WebRTCmultiplayerclient.client_connection_established(v["wclientid"])
 						publishstatus("connected", Hselectedserver)
-						$VBox/Clientmode/WebRTCmultiplayerclient/StartWebRTCmultiplayer.disabled = false
-						assert (wclientid == v["wclientid"])
-						if $VBox/Clientmode/autoconnect.button_pressed:
-							$VBox/Clientmode/WebRTCmultiplayerclient/StartWebRTCmultiplayer.button_pressed = true
+						startwebrtc_client()
 				else:
-					$VBox/Clientmode/WebRTCmultiplayerclient.client_packet_received(v)
+					client_packet_received(v)
 
 
 func stopwebrtc_server():
@@ -301,6 +289,8 @@ func Ddata_channel_created(channel):
 
 func server_packet_received(sendingclientid, v):
 	var id = int(sendingclientid)
+	print("ssssserver_packet_received ", sendingclientid, v["subject"])
+	
 	if v["subject"] == "request_connection":
 		var t = "%s/%s/packet/%s" % [Roomnametext.text, $MQTT.client_id, sendingclientid]
 		$MQTT.publish(t, JSON.stringify({"subject":"connection_prepared", "wclientid":int(sendingclientid)}))
@@ -329,3 +319,63 @@ func server_packet_received(sendingclientid, v):
 		var peerconnection = multiplayer.multiplayer_peer.get_peer(id)
 		peerconnection["connection"].add_ice_candidate(v["mid_name"], v["index_name"], v["sdp_name"])
 		NetworkGateway.PlayerConnections.connectionlog("receive ice_candidate %s" %id)
+
+
+
+func client_ice_candidate_created(mid_name, index_name, sdp_name):
+	sendpacket_toserver({"subject":"ice_candidate", "mid_name":mid_name, "index_name":index_name, "sdp_name":sdp_name})
+
+func client_session_description_created(type, data):
+	assert (type == "answer")
+	var peer = multiplayer.multiplayer_peer.get_peer(1)
+	peer["connection"].set_local_description("answer", data)
+	sendpacket_toserver({"subject":"answer", "data":data})
+	NetworkGateway.PlayerConnections.connectionlog("answer")
+		
+		
+func client_connection_closed():
+	if not (multiplayer.multiplayer_peer is OfflineMultiplayerPeer):
+		var peer = multiplayer.multiplayer_peer.get_peer(1)
+		if peer:
+			peer["connection"].close()
+	print("server client_disconnected ")
+
+func client_packet_received(v):
+	print("cccccclient packet_received ", v["subject"])
+	if v["subject"] == "offer":
+		var peerconnection = WebRTCPeerConnection.new()
+		peerconnection.session_description_created.connect(client_session_description_created)
+		peerconnection.ice_candidate_created.connect(client_ice_candidate_created)
+
+		peerconnection.initialize({"iceServers": [ { "urls": ["stun:stun.l.google.com:19302"] } ] })
+		var E = multiplayer.multiplayer_peer.add_peer(peerconnection, 1)
+		if E != 0:	print("Errrr3 ", E)
+		E = peerconnection.set_remote_description("offer", v["data"])
+		if E != 0:	print("Errrr ", E)
+		assert (multiplayer.get_unique_id() == int($MQTT.client_id))
+		NetworkGateway.PlayerConnections.connectionlog("receive offer")
+		StatusWebRTC.text = "receive offer"
+
+	elif v["subject"] == "ice_candidate":
+		var peer = multiplayer.multiplayer_peer.get_peer(1)
+		peer["connection"].add_ice_candidate(v["mid_name"], v["index_name"], v["sdp_name"])
+		NetworkGateway.PlayerConnections.connectionlog("receive ice_candidate")
+		StatusWebRTC.text = "ice candidate"
+
+func startwebrtc_client():
+	var multiplayerpeer = WebRTCMultiplayerPeer.new()
+	print("*** clientsignalling.wclientid ", $MQTT.client_id)
+	var E = multiplayerpeer.create_client(int($MQTT.client_id))
+	if E != OK:
+		print("bad")
+		return
+	multiplayer.multiplayer_peer = multiplayerpeer
+	NetworkGateway.emit_signal("webrtc_multiplayerpeer_set", false)
+	assert (get_tree().multiplayer_poll)
+	assert (Hserverconnected)
+	sendpacket_toserver({"subject":"request_offer"})
+	StatusWebRTC.text = "request offer"
+	NetworkGateway.PlayerConnections.connectionlog("request offer")
+		
+func stopwebrtc_client():
+	NetworkGateway.PlayerConnections._server_disconnected()
