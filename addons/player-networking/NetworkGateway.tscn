@@ -1,4 +1,4 @@
-[gd_scene load_steps=33 format=3 uid="uid://cfmoahalri06d"]
+[gd_scene load_steps=32 format=3 uid="uid://cfmoahalri06d"]
 
 [ext_resource type="Script" path="res://addons/player-networking/NetworkGateway.gd" id="1"]
 [ext_resource type="Script" path="res://addons/player-networking/Enetmultiplayerserver.gd" id="3"]
@@ -9,7 +9,6 @@
 [ext_resource type="Script" path="res://addons/player-networking/Websocketmultiplayerserver.gd" id="8"]
 [ext_resource type="Script" path="res://addons/player-networking/ServermodeWebSocketsignal.gd" id="9"]
 [ext_resource type="Script" path="res://addons/player-networking/WebRTCmultiplayerserver.gd" id="10"]
-[ext_resource type="Script" path="res://addons/player-networking/ServermodeMQTTsignal.gd" id="11"]
 [ext_resource type="Script" path="res://addons/player-networking/Websocketmultiplayerclient.gd" id="12"]
 [ext_resource type="Script" path="res://addons/player-networking/MQTTsignalling.gd" id="12_dj107"]
 [ext_resource type="Script" path="res://addons/player-networking/ClientmodeWebSocketsignal.gd" id="13"]
@@ -454,6 +453,16 @@ editable = false
 [node name="HBox3" type="HBoxContainer" parent="VBox/TabContainer/MQTTsignalling/VBox/HBoxM/HSplitContainer/Msettings"]
 layout_mode = 2
 
+[node name="StartMQTT" type="Button" parent="VBox/TabContainer/MQTTsignalling/VBox/HBoxM/HSplitContainer/Msettings/HBox3"]
+layout_mode = 2
+toggle_mode = true
+text = "Start mqtt"
+
+[node name="statuslabel" type="Label" parent="VBox/TabContainer/MQTTsignalling/VBox/HBoxM/HSplitContainer/Msettings/HBox3"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Off"
+
 [node name="Roomplayers" type="PanelContainer" parent="VBox/TabContainer/MQTTsignalling/VBox/HBoxM/HSplitContainer"]
 layout_mode = 2
 
@@ -462,27 +471,8 @@ layout_mode = 2
 columns = 3
 hide_root = true
 
-[node name="HBox2" type="HBoxContainer" parent="VBox/TabContainer/MQTTsignalling/VBox"]
-layout_mode = 2
-
-[node name="StartMQTT" type="Button" parent="VBox/TabContainer/MQTTsignalling/VBox/HBox2"]
-layout_mode = 2
-toggle_mode = true
-text = "Start mqtt"
-
-[node name="statuslabel" type="Label" parent="VBox/TabContainer/MQTTsignalling/VBox/HBox2"]
-layout_mode = 2
-text = "Off"
-
-[node name="mqttautoconnect" type="CheckBox" parent="VBox/TabContainer/MQTTsignalling/VBox/HBox2"]
-layout_mode = 2
-button_pressed = true
-action_mode = 0
-text = "autoconnect"
-
 [node name="Servermode" type="HBoxContainer" parent="VBox/TabContainer/MQTTsignalling/VBox"]
 layout_mode = 2
-script = ExtResource("11")
 
 [node name="WebRTCmultiplayerserver" type="HBoxContainer" parent="VBox/TabContainer/MQTTsignalling/VBox/Servermode"]
 layout_mode = 2
@@ -700,10 +690,7 @@ layout_mode = 2
 [connection signal="toggled" from="VBox/TabContainer/VBox/TabContainer/WebSocketsignalling/VBox/Servermode/WebRTCmultiplayerserver/StartWebRTCmultiplayer" to="VBox/TabContainer/VBox/TabContainer/WebSocketsignalling/VBox/Servermode/WebRTCmultiplayerserver" method="_on_StartWebRTCmultiplayer_toggled"]
 [connection signal="toggled" from="VBox/TabContainer/VBox/TabContainer/WebSocketsignalling/VBox/Clientmode/WebRTCmultiplayerclient/StartWebRTCmultiplayer" to="VBox/TabContainer/VBox/TabContainer/WebSocketsignalling/VBox/Clientmode/WebRTCmultiplayerclient" method="_on_StartWebRTCmultiplayer_toggled"]
 [connection signal="button_down" from="VBox/TabContainer/MQTTsignalling/VBox/HBox/brokeraddress" to="." method="_on_brokeraddress_button_down"]
-[connection signal="toggled" from="VBox/TabContainer/MQTTsignalling/VBox/HBox2/StartMQTT" to="VBox/TabContainer/MQTTsignalling" method="_on_start_mqtt_toggled"]
-[connection signal="gui_input" from="VBox/TabContainer/MQTTsignalling/VBox/HBox2/mqttautoconnect" to="." method="_on_mqttautoconnect_gui_input"]
-[connection signal="mouse_entered" from="VBox/TabContainer/MQTTsignalling/VBox/HBox2/mqttautoconnect" to="." method="_on_mqttautoconnect_mouse_entered"]
-[connection signal="pressed" from="VBox/TabContainer/MQTTsignalling/VBox/HBox2/mqttautoconnect" to="." method="_on_mqttautoconnect_pressed"]
+[connection signal="toggled" from="VBox/TabContainer/MQTTsignalling/VBox/HBoxM/HSplitContainer/Msettings/HBox3/StartMQTT" to="VBox/TabContainer/MQTTsignalling" method="_on_start_mqtt_toggled"]
 [connection signal="toggled" from="VBox/TabContainer/MQTTsignalling/VBox/Servermode/WebRTCmultiplayerserver/StartWebRTCmultiplayer" to="VBox/TabContainer/MQTTsignalling/VBox/Servermode/WebRTCmultiplayerserver" method="_on_StartWebRTCmultiplayer_toggled"]
 [connection signal="toggled" from="VBox/TabContainer/MQTTsignalling/VBox/Clientmode/WebRTCmultiplayerclient/StartWebRTCmultiplayer" to="VBox/TabContainer/MQTTsignalling/VBox/Clientmode/WebRTCmultiplayerclient" method="_on_StartWebRTCmultiplayer_toggled"]
 [connection signal="broker_connected" from="VBox/TabContainer/MQTTsignalling/MQTT" to="VBox/TabContainer/MQTTsignalling" method="_on_mqtt_broker_connected"]
