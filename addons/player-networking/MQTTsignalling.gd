@@ -98,6 +98,7 @@ func processsubscribedstatus(mclientid, v):
 		if xclienttreeitems.has(mclientid):
 			if is_instance_valid(xclienttreeitems[mclientid]):
 				xclienttreeitems[mclientid].free()
+				$VBox/Servermode/WebRTCmultiplayerserver.server_client_disconnected(int(mclientid))
 			xclienttreeitems.erase(mclientid)
 		xclientclosedlist.append(mclientid)
 		if xclientstatuses.has(mclientid):
@@ -150,11 +151,20 @@ func _on_mqtt_received_message(topic, msg):
 				Roomplayertreecaboosereached = true
 				if selectasclient and not Hselectedserver:
 					choosefromopenservers_go()
-			if v["subject"] == "serveropen" and selectasclient and not Hselectedserver and Roomplayertreecaboosereached:
+			if Roomplayertreecaboosereached and v["subject"] == "serveropen" and selectasclient and not Hselectedserver:
 				choosefromopenservers_go()
 
 	if selectasserver:
-		$VBox/Servermode.Dreceived_mqtt(stopic, v)
+		if len(stopic) >= 4 and stopic[-2] == "packet" and stopic[-1] == $MQTT.client_id:
+			var sendingclientid = stopic[-3]
+			if v["subject"] == "request_connection":
+				var t = "%s/%s/packet/%s" % [roomname, $MQTT.client_id, sendingclientid]
+				$MQTT.publish(t, JSON.stringify({"subject":"connection_prepared", "wclientid":int(sendingclientid)}))
+				publishstatus("serveropen", "", 0)
+				$VBox/Servermode/WebRTCmultiplayerserver.server_client_connected(int(sendingclientid))
+			else:
+				$VBox/Servermode/WebRTCmultiplayerserver.server_packet_received(int(sendingclientid), v)
+		
 	if selectasclient:
 		#$VBox/Clientmode.Dreceived_mqtt(stopic, v)
 		if len(stopic) >= 4 and stopic[-2] == "packet" and stopic[-1] == $MQTT.client_id:
@@ -250,6 +260,13 @@ func sendpacket_toserver(v):
 	var t = "%s/%s/packet/%s" % [roomname, $MQTT.client_id, Hselectedserver]
 	$MQTT.publish(t, JSON.stringify(v))
 
+func sendpacket_toclient(wclientid, v):
+	assert (selectasserver)
+	var t = "%s/%s/packet/x%d" % [roomname, $MQTT.client_id, wclientid]
+	print(" >>> packet to client ", t, v)
+	$MQTT.publish(t, JSON.stringify(v))
+
+
 func choosefromopenservers_go():
 	print("choosefromopenservers_gochoosefromopenservers_go")
 	assert (not selectasserver)
@@ -271,11 +288,8 @@ func choosefromopenservers_go():
 
 
 func startwebrtc_server():
-	publishstatus("serveropen", "", len($VBox/Servermode.clientidtowclientid))
-	StartMQTTstatuslabel.text = "connected"
-	$VBox/Servermode/ClientsList.clear()
-	$VBox/Servermode/ClientsList.add_item($MQTT.client_id, 1)
-	$VBox/Servermode/ClientsList.selected = 0
+	publishstatus("serveropen", "", 0)
+	StartMQTTstatuslabel.text = "server"
 	
 	$VBox/Servermode/WebRTCmultiplayerserver/StartWebRTCmultiplayer.disabled = false
 	if $VBox/Servermode/autoconnect.button_pressed:

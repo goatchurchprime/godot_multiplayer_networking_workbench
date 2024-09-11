@@ -497,9 +497,6 @@ text = "StartWebrtc server"
 layout_mode = 2
 text = "null"
 
-[node name="ClientsList" type="OptionButton" parent="VBox/TabContainer/MQTTsignalling/VBox/Servermode"]
-layout_mode = 2
-
 [node name="autoconnect" type="CheckBox" parent="VBox/TabContainer/MQTTsignalling/VBox/Servermode"]
 layout_mode = 2
 button_pressed = true
