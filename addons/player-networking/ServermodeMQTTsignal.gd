@@ -39,7 +39,7 @@ func Dreceived_mqtt(stopic, v):
 					clientidtowclientid[sendingclientid] = wclientid
 					wclientidtoclientid[wclientid] = sendingclientid
 					var t = "%s/%s/packet/%s" % [MQTTsignalling.roomname, MQTT.client_id, sendingclientid]
-					MQTT.publish(t, JSON.stringify({"subject":"connection_established", "wclientid":wclientid}))
+					MQTT.publish(t, JSON.stringify({"subject":"connection_prepared", "wclientid":wclientid}))
 					MQTT.publish(MQTTsignalling.statustopic, JSON.stringify({"subject":"serveropen", "nconnections":len(clientidtowclientid)}), true)
 					MQTTsignalling.publishstatus("serveropen", "", len(clientidtowclientid))
 					emit_signal("mqttsig_client_connected", wclientid)
@@ -61,7 +61,7 @@ func Dreceived_mqtt(stopic, v):
 
 				if v["subject"] == "serveropen":
 					if stopic[1] == MQTT.client_id:
-						print("found openserver myself: ", stopic[1])
+						print("found openserver myself: ", stopic[1], v)
 
 			else:
 				print("Unrecognized topic ", stopic)

@@ -97,6 +97,8 @@ func processsubscribedstatus(mclientid, v):
 				xclienttreeitems[mclientid].free()
 			xclienttreeitems.erase(mclientid)
 		xclientclosedlist.append(mclientid)
+		if xclientstatuses.has(mclientid):
+			xclientstatuses[mclientid] = mstatus
 		return
 
 	xclientstatuses[mclientid] = mstatus
@@ -155,20 +157,18 @@ func _on_mqtt_received_message(topic, msg):
 		if len(stopic) >= 4 and stopic[-2] == "packet" and stopic[-1] == $MQTT.client_id:
 			var sendingserverid = stopic[-3]
 			if sendingserverid == Hselectedserver:
-				if v["subject"] == "connection_established":
+				if v["subject"] == "connection_prepared":
 					if not Hserverconnected:
 						Hserverconnected = true
 						wclientid = int(v["wclientid"])
-						emit_signal("mqttsig_connection_established", wclientid)
+						$VBox/Clientmode/WebRTCmultiplayerclient.client_connection_established(wclientid)
 						StartMQTTstatuslabel.text = "connected"
 						publishstatus("connected", Hselectedserver)
 						$VBox/Clientmode/WebRTCmultiplayerclient/StartWebRTCmultiplayer.disabled = false
 						if $VBox/Clientmode/autoconnect.button_pressed:
 							$VBox/Clientmode/WebRTCmultiplayerclient/StartWebRTCmultiplayer.button_pressed = true
 				else:
-					emit_signal("mqttsig_packet_received", v)
-
-
+					$VBox/Clientmode/WebRTCmultiplayerclient.client_packet_received(v)
 
 
 func _on_mqtt_broker_disconnected():
@@ -232,9 +232,10 @@ func _on_start_mqtt_toggled(toggled_on):
 			scmode.clientidtowclientid.clear()
 			scmode.wclientidtoclientid.clear()
 		if selectasclient:
+			$VBox/Clientmode/WebRTCmultiplayerclient.client_connection_closed()
 			Hselectedserver = ""
 			Hserverconnected = false
-			scmode.wclientid = 0
+			wclientid = -1
 
 func sendpacket_toserver(v):
 	assert (selectasclient)

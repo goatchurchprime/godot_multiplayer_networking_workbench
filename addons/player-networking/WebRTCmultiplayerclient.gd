@@ -69,16 +69,18 @@ func _on_StartWebRTCmultiplayer_toggled(button_pressed):
 
 		assert (get_tree().multiplayer_poll)
 		
-		clientsignalling.mqttsig_connection_established.connect(client_connection_established) 
-		clientsignalling.mqttsig_connection_closed.connect(client_connection_closed) 
-		clientsignalling.mqttsig_packet_received.connect(client_packet_received) 
+		if clientsignalling.has_signal("mqttsig_connection_closed"):
+			clientsignalling.mqttsig_connection_established.connect(client_connection_established) 
+			clientsignalling.mqttsig_connection_closed.connect(client_connection_closed) 
+			clientsignalling.mqttsig_packet_received.connect(client_packet_received) 
 		if clientsignalling.isconnectedtosignalserver():
 			clientsignalling.sendpacket_toserver({"subject":"request_offer"})
 		NetworkGateway.PlayerConnections.connectionlog("request offer")
 		$statuslabel.text = "request offer"
 		
 	else:
-		clientsignalling.mqttsig_connection_established.disconnect(client_connection_established) 
-		clientsignalling.mqttsig_connection_closed.disconnect(client_connection_closed) 
-		clientsignalling.mqttsig_packet_received.disconnect(client_packet_received) 
+		if clientsignalling.has_signal("mqttsig_connection_closed"):
+			clientsignalling.mqttsig_connection_established.disconnect(client_connection_established) 
+			clientsignalling.mqttsig_connection_closed.disconnect(client_connection_closed) 
+			clientsignalling.mqttsig_packet_received.disconnect(client_packet_received) 
 		NetworkGateway.PlayerConnections._server_disconnected()
