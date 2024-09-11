@@ -6,10 +6,11 @@ var playername = ""
 
 var selectasserver = false
 var selectasclient = false
-var selectasnecessary = false
 
 var Hselectedserver = ""
 var Hserverconnected = false
+
+var Wserveractive = false
 
 var xclientstatuses = { }
 var xclientopenservers = [ ]
@@ -50,7 +51,6 @@ func _on_NetworkOptionsMQTTWebRTC_item_selected(ns):
 	Dns = ns
 	selectasserver = (ns == NetworkGateway.NETWORK_OPTIONS_MQTT_WEBRTC.AS_SERVER)
 	selectasclient = (ns == NetworkGateway.NETWORK_OPTIONS_MQTT_WEBRTC.AS_CLIENT)
-
 	if ns == NetworkGateway.NETWORK_OPTIONS_MQTT_WEBRTC.NETWORK_OFF:
 		NetworkGateway.ProtocolOptions.disabled = false
 		stop_mqtt()
@@ -64,16 +64,14 @@ func _on_NetworkOptionsMQTTWebRTC_item_selected(ns):
 			NetworkGateway.selectandtrigger_networkoption(NetworkGateway.NETWORK_OPTIONS_MQTT_WEBRTC.NETWORK_OFF)
 			return
 
-	$VBox/Servermode.visible = selectasserver
 	$VBox/Clientmode.visible = selectasclient
 
 	statuschange_chooseserverifnecessary(false)
 
 	if selectasserver and StatusMQTT.selected == 2:
 		startwebrtc_server()
-	else:
-		$VBox/Servermode/WebRTCmultiplayerserver/StartWebRTCmultiplayer.button_pressed = false
-		$VBox/Servermode/WebRTCmultiplayerserver/StartWebRTCmultiplayer.disabled = true
+	if not selectasserver and Wserveractive:
+		stopwebrtc_server()
 	
 	if not selectasclient:
 		$VBox/Clientmode/WebRTCmultiplayerclient/StartWebRTCmultiplayer.button_pressed = false
@@ -95,6 +93,10 @@ func establishtreeitemparent(mclientid, par):
 			return
 		xclienttreeitems[mclientid].free()
 	xclienttreeitems[mclientid] = Roomplayertree.create_item(par)
+
+func clearclosedtopics():
+	while xclientclosedlist:
+		$MQTT.publish("%s/%s/status" % [Roomnametext.text, xclientclosedlist.pop_back()], "", true)
 
 func processothermclientstatus(mclientid, v):
 	var mstatus = v["subject"]
@@ -138,62 +140,6 @@ func processothermclientstatus(mclientid, v):
 		xclienttreeitems[mclientid].set_text(1, v["playername"])
 		
 
-func clearclosedtopics():
-	while xclientclosedlist:
-		$MQTT.publish("%s/%s/status" % [Roomnametext.text, xclientclosedlist.pop_back()], "", true)
-
-
-func _on_mqtt_received_message(topic, msg):
-	var stopic = topic.split("/")
-	if msg == "":
-		if len(stopic) >= 3 and stopic[-1] == "status":
-			var mclientid = stopic[-2]
-			if xclientstatuses.has(mclientid):
-				assert (xclientstatuses[mclientid] == "closed")
-				xclientstatuses.erase(mclientid)
-			return
-
-	var v = JSON.parse_string(msg)
-
-	if len(stopic) >= 3: 
-		if stopic[-1] == "status" and v.has("subject"):
-			var mclientid = stopic[-2]
-			processothermclientstatus(mclientid, v)
-			if mclientid == $MQTT.client_id:
-				Roomplayertreecaboosereached = true
-				statuschange_chooseserverifnecessary(true)
-			if v["subject"] == "serveropen":
-				statuschange_chooseserverifnecessary(false)
-
-	if selectasserver:
-		if len(stopic) >= 4 and stopic[-2] == "packet" and stopic[-1] == $MQTT.client_id:
-			var sendingclientid = stopic[-3]
-			if v["subject"] == "request_connection":
-				var t = "%s/%s/packet/%s" % [Roomnametext.text, $MQTT.client_id, sendingclientid]
-				$MQTT.publish(t, JSON.stringify({"subject":"connection_prepared", "wclientid":int(sendingclientid)}))
-				publishstatus("serveropen", "", 0)
-				$VBox/Servermode/WebRTCmultiplayerserver.server_client_connected(int(sendingclientid))
-			else:
-				$VBox/Servermode/WebRTCmultiplayerserver.server_packet_received(int(sendingclientid), v)
-		
-	if selectasclient:
-		#$VBox/Clientmode.Dreceived_mqtt(stopic, v)
-		if len(stopic) >= 4 and stopic[-2] == "packet" and stopic[-1] == $MQTT.client_id:
-			var sendingserverid = stopic[-3]
-			if sendingserverid == Hselectedserver:
-				if v["subject"] == "connection_prepared":
-					if not Hserverconnected:
-						Hserverconnected = true
-						$VBox/Clientmode/WebRTCmultiplayerclient.client_connection_established(v["wclientid"])
-						publishstatus("connected", Hselectedserver)
-						$VBox/Clientmode/WebRTCmultiplayerclient/StartWebRTCmultiplayer.disabled = false
-						assert (wclientid == v["wclientid"])
-						if $VBox/Clientmode/autoconnect.button_pressed:
-							$VBox/Clientmode/WebRTCmultiplayerclient/StartWebRTCmultiplayer.button_pressed = true
-				else:
-					$VBox/Clientmode/WebRTCmultiplayerclient.client_packet_received(v)
-
-
 func _on_mqtt_broker_disconnected():
 	StatusMQTT.select(0)
 	NetworkGateway.selectandtrigger_networkoption(NetworkGateway.NETWORK_OPTIONS_MQTT_WEBRTC.NETWORK_OFF)
@@ -204,15 +150,9 @@ func _on_mqtt_broker_connected():
 	StatusMQTT.select(2)
 	$MQTT.subscribe("%s/+/status" % Roomnametext.text)
 	$MQTT.subscribe("%s/+/packet/%s" % [Roomnametext.text, $MQTT.client_id])
-	publishstatus("unconnected")
-
+	publishstatus("unconnected")  # this becomes the caboose
 	if selectasserver:
 		startwebrtc_server()
-	if selectasclient:
-		if Hselectedserver != "":
-			publishstatus("connecting", Hselectedserver)
-		else:
-			publishstatus("unconnected")
 
 func start_mqtt():
 	if not Roomnametext.text:  # check validity
@@ -239,10 +179,6 @@ func stop_mqtt():
 	Roomnametext.editable = true
 	Clientidtext.text = ""
 	$VBox/HBox/brokeraddress.disabled = false
-	if selectasserver:
-		pass
-		#for s in scmode.clientidtowclientid:
-		#	$VBox/Servermode/WebRTCmultiplayerserver.server_client_disconnected(int(s))
 	if selectasclient:
 		$VBox/Clientmode/WebRTCmultiplayerclient.client_connection_closed()
 		Hselectedserver = ""
@@ -251,26 +187,23 @@ func stop_mqtt():
 func sendpacket_toserver(v):
 	assert (selectasclient)
 	assert (Hselectedserver != "")
-	print(";;; packt to server ", v)
 	var t = "%s/%s/packet/%s" % [Roomnametext.text, $MQTT.client_id, Hselectedserver]
 	$MQTT.publish(t, JSON.stringify(v))
 
 func sendpacket_toclient(wclientid, v):
 	assert (selectasserver)
 	var t = "%s/%s/packet/x%d" % [Roomnametext.text, $MQTT.client_id, wclientid]
-	print(" >>> packet to client ", t, v)
 	$MQTT.publish(t, JSON.stringify(v))
 
 
-
 func statuschange_chooseserverifnecessary(caboosejustreached):
-	if (Dns == NetworkGateway.NETWORK_OPTIONS_MQTT_WEBRTC.AS_NECESSARY):
+	if Dns == NetworkGateway.NETWORK_OPTIONS_MQTT_WEBRTC.AS_NECESSARY:
 		if Roomplayertreecaboosereached and xclientopenservers:
 			NetworkGateway.selectandtrigger_networkoption(NetworkGateway.NETWORK_OPTIONS_MQTT_WEBRTC.AS_CLIENT)
 		if caboosejustreached and not xclientopenservers:
 			NetworkGateway.selectandtrigger_networkoption(NetworkGateway.NETWORK_OPTIONS_MQTT_WEBRTC.AS_SERVER)
 	
-	if selectasclient and not Hselectedserver and xclientopenservers and Roomplayertreecaboosereached:
+	elif selectasclient and not Hselectedserver and xclientopenservers and Roomplayertreecaboosereached:
 		print("choosefromopenservers_gochoosefromopenservers_go")
 		assert (not selectasserver)
 		assert (Hselectedserver == "")
@@ -281,9 +214,118 @@ func statuschange_chooseserverifnecessary(caboosejustreached):
 			Hselectedserver = selxid if selxid and xclientopenservers.has(selxid) else xclientopenservers[-1]
 			sendpacket_toserver({"subject":"request_connection"})
 
+
+func _on_mqtt_received_message(topic, msg):
+	var stopic = topic.split("/")
+	if msg == "":
+		if len(stopic) >= 3 and stopic[-1] == "status":
+			var mclientid = stopic[-2]
+			if xclientstatuses.has(mclientid):
+				assert (xclientstatuses[mclientid] == "closed")
+				xclientstatuses.erase(mclientid)
+			return
+
+	var v = JSON.parse_string(msg)
+
+	if len(stopic) >= 3: 
+		if stopic[-1] == "status" and v.has("subject"):
+			var mclientid = stopic[-2]
+			processothermclientstatus(mclientid, v)
+			if mclientid == $MQTT.client_id:
+				Roomplayertreecaboosereached = true
+				statuschange_chooseserverifnecessary(true)
+			if v["subject"] == "serveropen":
+				statuschange_chooseserverifnecessary(false)
+
+	if len(stopic) >= 4 and stopic[-2] == "packet" and stopic[-1] == $MQTT.client_id:
+		var sendingclientid = stopic[-3]
+		if selectasserver:
+			server_packet_received(sendingclientid, v)
+		
+		if selectasclient:
+			if sendingclientid == Hselectedserver:
+				if v["subject"] == "connection_prepared":
+					if not Hserverconnected:
+						Hserverconnected = true
+						$VBox/Clientmode/WebRTCmultiplayerclient.client_connection_established(v["wclientid"])
+						publishstatus("connected", Hselectedserver)
+						$VBox/Clientmode/WebRTCmultiplayerclient/StartWebRTCmultiplayer.disabled = false
+						assert (wclientid == v["wclientid"])
+						if $VBox/Clientmode/autoconnect.button_pressed:
+							$VBox/Clientmode/WebRTCmultiplayerclient/StartWebRTCmultiplayer.button_pressed = true
+				else:
+					$VBox/Clientmode/WebRTCmultiplayerclient.client_packet_received(v)
+
+
+func stopwebrtc_server():
+	NetworkGateway.PlayerConnections._server_disconnected()
+	Wserveractive = false
+
 func startwebrtc_server():
 	publishstatus("serveropen", "", 0)
-	
-	$VBox/Servermode/WebRTCmultiplayerserver/StartWebRTCmultiplayer.disabled = false
-	if $VBox/Servermode/autoconnect.button_pressed:
-		$VBox/Servermode/WebRTCmultiplayerserver/StartWebRTCmultiplayer.button_pressed = true
+	var multiplayerpeer = WebRTCMultiplayerPeer.new()
+	var E = multiplayerpeer.create_server()
+	if E != OK:
+		$StartWebRTCmultiplayer.button_pressed = false
+		print("Failed ", error_string(E))
+		return
+	multiplayer.multiplayer_peer = multiplayerpeer
+	NetworkGateway.emit_signal("webrtc_multiplayerpeer_set", true)
+
+	assert(multiplayer.multiplayer_peer.is_server_relay_supported())
+	assert (multiplayer.server_relay)
+	assert (multiplayer.get_unique_id() == 1)
+	assert (get_tree().multiplayer_poll)
+	NetworkGateway.PlayerConnections._connected_to_server()
+	Wserveractive = true
+
+func server_ice_candidate_created(mid_name, index_name, sdp_name, id):
+	sendpacket_toclient(id, {"subject":"ice_candidate", "mid_name":mid_name, "index_name":index_name, "sdp_name":sdp_name})
+
+func server_session_description_created(type, data, id):
+	print("we got server_session_description_created ", type)
+	assert (type == "offer")
+	var peerconnection = multiplayer.multiplayer_peer.get_peer(id)
+	peerconnection["connection"].set_local_description(type, data)
+	sendpacket_toclient(id, {"subject":"offer", "data":data})
+	NetworkGateway.PlayerConnections.connectionlog("send offer %s" %id)
+
+func server_client_connected(id):
+	print("server client connected ", id)
+
+func server_client_disconnected(id):
+	print("server client_disconnected ", id)
+
+func Ddata_channel_created(channel):
+	print("DDDdata_channel_created ", channel)
+
+func server_packet_received(sendingclientid, v):
+	var id = int(sendingclientid)
+	if v["subject"] == "request_connection":
+		var t = "%s/%s/packet/%s" % [Roomnametext.text, $MQTT.client_id, sendingclientid]
+		$MQTT.publish(t, JSON.stringify({"subject":"connection_prepared", "wclientid":int(sendingclientid)}))
+		publishstatus("serveropen", "", 0)
+
+	elif v["subject"] == "request_offer":
+		var peerconnection = WebRTCPeerConnection.new()
+		peerconnection.session_description_created.connect(server_session_description_created.bind(id))
+		peerconnection.ice_candidate_created.connect(server_ice_candidate_created.bind(id))
+		peerconnection.data_channel_received.connect(Ddata_channel_created)
+		peerconnection.initialize({"iceServers": [ { "urls": ["stun:stun.l.google.com:19302"] } ] })
+		print("serverpacket peer.get_connection_state() ", peerconnection.get_connection_state())
+		multiplayer.multiplayer_peer.add_peer(peerconnection, id)
+		var webrtcpeererror = peerconnection.create_offer()
+		print("peer create offer ", peerconnection, "id ", id, " Error:", webrtcpeererror, " connstate")
+		NetworkGateway.PlayerConnections.connectionlog("create offer %s" %id)
+		
+	elif v["subject"] == "answer":
+		print("Check equal multiplayer ", multiplayer, " vs ", multiplayer)
+		assert (multiplayer.multiplayer_peer.is_class("WebRTCMultiplayerPeer"))
+		var peerconnection = multiplayer.multiplayer_peer.get_peer(id)
+		peerconnection["connection"].set_remote_description("answer", v["data"])
+		NetworkGateway.PlayerConnections.connectionlog("receive answer %s" %id)
+
+	elif v["subject"] == "ice_candidate":
+		var peerconnection = multiplayer.multiplayer_peer.get_peer(id)
+		peerconnection["connection"].add_ice_candidate(v["mid_name"], v["index_name"], v["sdp_name"])
+		NetworkGateway.PlayerConnections.connectionlog("receive ice_candidate %s" %id)

@@ -110,7 +110,6 @@ func _on_ProtocolOptions_item_selected(np):
 	ProtocolModes.get_node("TabContainer").current_tab = (1 if selectasmqttwebrtc else 0)
 	NetworkOptionsMQTTWebRTC.visible = selectasmqttwebrtc
 	MQTTsignalling.visible = selectasmqttwebrtc
-	MQTTsignalling.get_node("VBox/Servermode").visible = false
 	MQTTsignalling.get_node("VBox/Clientmode").visible = false
 	UDPipdiscovery.visible = NetworkOptions.visible and (not OS.has_feature("Server")) and (not OS.has_feature("HTML5"))
 
