@@ -2,7 +2,6 @@ extends Control
 
 @onready var NetworkGateway = find_parent("NetworkGateway")
 
-var statustopic = ""
 var playername = ""
 
 var selectasserver = false
@@ -22,19 +21,28 @@ func isconnectedtosignalserver():
 
 @onready var Roomplayertree = $VBox/HBoxM/HSplitContainer/Roomplayers/Tree
 var Roomplayertreecaboosereached = false
-var roomplayertreeitem_ME = null
 
 @onready var Roomnametext = $VBox/HBoxM/HSplitContainer/Msettings/HBox/roomname
 @onready var Clientidtext = $VBox/HBoxM/HSplitContainer/Msettings/HBox2/client_id
 @onready var StatusMQTT = $VBox/HBoxM/HSplitContainer/Msettings/HBox4/StatusMQTT
+@onready var StatusWebRTC = $VBox/HBoxM/HSplitContainer/Msettings/HBox5/StatusWebRTC
 
 @onready var treenodeicon1 = ImageTexture.create_from_image(Image.load_from_file("res://addons/player-networking/AudioStreamPlayer3D.svg"))
 
-
 var wclientid = -1
 
+func clearallstatuses():
+	Roomplayertree.clear()
+	Roomplayertree.create_item()
+	xclienttreeitems.clear()
+	xclientstatuses.clear()
+	xclientclosedlist.clear()
+	Roomplayertreecaboosereached = false
+	Hselectedserver = ""
+	Hserverconnected = false
+
 func _ready():
-	var root = Roomplayertree.create_item()
+	clearallstatuses()
 	StatusMQTT.select(0)
 
 var Dns = -1
@@ -42,10 +50,8 @@ func _on_NetworkOptionsMQTTWebRTC_item_selected(ns):
 	Dns = ns
 	selectasserver = (ns == NetworkGateway.NETWORK_OPTIONS_MQTT_WEBRTC.AS_SERVER)
 	selectasclient = (ns == NetworkGateway.NETWORK_OPTIONS_MQTT_WEBRTC.AS_CLIENT)
-	selectasnecessary = (ns == NetworkGateway.NETWORK_OPTIONS_MQTT_WEBRTC.AS_NECESSARY or ns == NetworkGateway.NETWORK_OPTIONS_MQTT_WEBRTC.AS_NECESSARY_MANUALCHANGE)
-	var selectasoff = (ns == NetworkGateway.NETWORK_OPTIONS.NETWORK_OFF)
 
-	if selectasoff:
+	if ns == NetworkGateway.NETWORK_OPTIONS_MQTT_WEBRTC.NETWORK_OFF:
 		NetworkGateway.ProtocolOptions.disabled = false
 		stop_mqtt()
 		return
@@ -54,7 +60,9 @@ func _on_NetworkOptionsMQTTWebRTC_item_selected(ns):
 	NetworkGateway.ProtocolOptions.disabled = true
 	NetworkGateway.PlayerConnections.clearconnectionlog()
 	if StatusMQTT.selected == 0:
-		start_mqtt()
+		if not start_mqtt():
+			NetworkGateway.selectandtrigger_networkoption(NetworkGateway.NETWORK_OPTIONS_MQTT_WEBRTC.NETWORK_OFF)
+			return
 
 	$VBox/Servermode.visible = selectasserver
 	$VBox/Clientmode.visible = selectasclient
@@ -72,12 +80,14 @@ func _on_NetworkOptionsMQTTWebRTC_item_selected(ns):
 		$VBox/Clientmode/WebRTCmultiplayerclient/StartWebRTCmultiplayer.disabled = true
 
 func publishstatus(status, Dselectedserver="", Dnconnections=null):
+	StatusWebRTC.text = status 
 	var v = {"subject":status, "playername":playername}
 	if Dselectedserver:
 		v["selectedserver"] = Dselectedserver
 	if Dnconnections != null:
 		v["nconnections"] = Dnconnections
-	$MQTT.publish(statustopic, JSON.stringify(v), true)
+	$MQTT.publish("%s/%s/status" % [Roomnametext.text, $MQTT.client_id], 
+				  JSON.stringify(v), true)
 
 func establishtreeitemparent(mclientid, par):
 	if xclienttreeitems.has(mclientid) and is_instance_valid(xclienttreeitems[mclientid]):
@@ -86,7 +96,7 @@ func establishtreeitemparent(mclientid, par):
 		xclienttreeitems[mclientid].free()
 	xclienttreeitems[mclientid] = Roomplayertree.create_item(par)
 
-func processsubscribedstatus(mclientid, v):
+func processothermclientstatus(mclientid, v):
 	var mstatus = v["subject"]
 
 	if xclientopenservers.has(mclientid) and mstatus != "serveropen":
@@ -144,10 +154,11 @@ func _on_mqtt_received_message(topic, msg):
 			return
 
 	var v = JSON.parse_string(msg)
+
 	if len(stopic) >= 3: 
-		var mclientid = stopic[-2]
 		if stopic[-1] == "status" and v.has("subject"):
-			processsubscribedstatus(mclientid, v)
+			var mclientid = stopic[-2]
+			processothermclientstatus(mclientid, v)
 			if mclientid == $MQTT.client_id:
 				Roomplayertreecaboosereached = true
 				statuschange_chooseserverifnecessary(true)
@@ -185,6 +196,8 @@ func _on_mqtt_received_message(topic, msg):
 
 func _on_mqtt_broker_disconnected():
 	StatusMQTT.select(0)
+	NetworkGateway.selectandtrigger_networkoption(NetworkGateway.NETWORK_OPTIONS_MQTT_WEBRTC.NETWORK_OFF)
+	clearallstatuses()
 
 func _on_mqtt_broker_connected():
 	assert (Roomnametext.text)
@@ -202,32 +215,27 @@ func _on_mqtt_broker_connected():
 			publishstatus("unconnected")
 
 func start_mqtt():
+	if not Roomnametext.text:  # check validity
+		return false
 	Roomnametext.editable = false
-	Roomplayertree.clear()
-	xclienttreeitems.clear()
-	xclientstatuses.clear()
-	xclientclosedlist.clear()
-	var root = Roomplayertree.create_item()
-	Roomplayertreecaboosereached = false
-	Hselectedserver = ""
-	Hserverconnected = false
+	clearallstatuses()
 	randomize()
 	$MQTT.client_id = "x%d" % (2 + (randi()%0x7ffffff8))
 	wclientid = int($MQTT.client_id)
 	Clientidtext.text = $MQTT.client_id
-	statustopic = "%s/%s/status" % [Roomnametext.text, $MQTT.client_id]
 	playername = NetworkGateway.PlayerConnections.LocalPlayer.playername()
 	StatusMQTT.select(1)
-	$MQTT.set_last_will(statustopic, JSON.stringify({"subject":"closed", "comment":"by_will"}), true)
+	$MQTT.set_last_will("%s/%s/status" % [Roomnametext.text, $MQTT.client_id], 
+						JSON.stringify({"subject":"closed", "comment":"by_will"}), true)
 	var brokerurl = $VBox/HBox/brokeraddress.text
 	$VBox/HBox/brokeraddress.disabled = true
 	$MQTT.connect_to_broker(brokerurl)
+	return true
 
 func stop_mqtt():
 	print("Disconnecting MQTT")
 	publishstatus("closed")
 	$MQTT.disconnect_from_server()
-	statustopic = ""
 	Roomnametext.editable = true
 	Clientidtext.text = ""
 	$VBox/HBox/brokeraddress.disabled = false
@@ -256,7 +264,7 @@ func sendpacket_toclient(wclientid, v):
 
 
 func statuschange_chooseserverifnecessary(caboosejustreached):
-	if selectasnecessary:
+	if (Dns == NetworkGateway.NETWORK_OPTIONS_MQTT_WEBRTC.AS_NECESSARY):
 		if Roomplayertreecaboosereached and xclientopenservers:
 			NetworkGateway.selectandtrigger_networkoption(NetworkGateway.NETWORK_OPTIONS_MQTT_WEBRTC.AS_CLIENT)
 		if caboosejustreached and not xclientopenservers:

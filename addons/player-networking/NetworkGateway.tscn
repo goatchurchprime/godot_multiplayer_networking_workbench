@@ -476,18 +476,11 @@ layout_mode = 2
 layout_mode = 2
 text = "WebRTC status:"
 
-[node name="StatusWebRTC" type="OptionButton" parent="VBox/TabContainer/MQTTsignalling/VBox/HBoxM/HSplitContainer/Msettings/HBox5"]
+[node name="StatusWebRTC" type="LineEdit" parent="VBox/TabContainer/MQTTsignalling/VBox/HBoxM/HSplitContainer/Msettings/HBox5"]
 layout_mode = 2
-disabled = true
-selected = 0
-item_count = 4
-popup/item_0/text = "Disconnected"
-popup/item_1/text = "Server"
-popup/item_1/id = 1
-popup/item_2/text = "Requesting"
-popup/item_2/id = 2
-popup/item_3/text = "Connected"
-popup/item_3/id = 3
+size_flags_horizontal = 3
+text = "off"
+editable = false
 
 [node name="Roomplayers" type="PanelContainer" parent="VBox/TabContainer/MQTTsignalling/VBox/HBoxM/HSplitContainer"]
 layout_mode = 2
