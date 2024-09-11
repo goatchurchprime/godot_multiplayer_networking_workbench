@@ -436,32 +436,58 @@ text = "Room:"
 [node name="roomname" type="LineEdit" parent="VBox/TabContainer/MQTTsignalling/VBox/HBoxM/HSplitContainer/Msettings/HBox"]
 layout_mode = 2
 size_flags_horizontal = 3
-text = "grapes"
+text = "lemon"
 
 [node name="HBox2" type="HBoxContainer" parent="VBox/TabContainer/MQTTsignalling/VBox/HBoxM/HSplitContainer/Msettings"]
 layout_mode = 2
 
 [node name="Label2" type="Label" parent="VBox/TabContainer/MQTTsignalling/VBox/HBoxM/HSplitContainer/Msettings/HBox2"]
 layout_mode = 2
-text = "mqtt clientid:"
+text = "MQTT clientid:"
 
 [node name="client_id" type="LineEdit" parent="VBox/TabContainer/MQTTsignalling/VBox/HBoxM/HSplitContainer/Msettings/HBox2"]
 layout_mode = 2
 size_flags_horizontal = 3
 editable = false
 
-[node name="HBox3" type="HBoxContainer" parent="VBox/TabContainer/MQTTsignalling/VBox/HBoxM/HSplitContainer/Msettings"]
+[node name="HBox4" type="HBoxContainer" parent="VBox/TabContainer/MQTTsignalling/VBox/HBoxM/HSplitContainer/Msettings"]
 layout_mode = 2
 
-[node name="StartMQTT" type="Button" parent="VBox/TabContainer/MQTTsignalling/VBox/HBoxM/HSplitContainer/Msettings/HBox3"]
+[node name="Label2" type="Label" parent="VBox/TabContainer/MQTTsignalling/VBox/HBoxM/HSplitContainer/Msettings/HBox4"]
 layout_mode = 2
-toggle_mode = true
-text = "Start mqtt"
+text = "MQTT status:"
 
-[node name="statuslabel" type="Label" parent="VBox/TabContainer/MQTTsignalling/VBox/HBoxM/HSplitContainer/Msettings/HBox3"]
+[node name="StatusMQTT" type="OptionButton" parent="VBox/TabContainer/MQTTsignalling/VBox/HBoxM/HSplitContainer/Msettings/HBox4"]
 layout_mode = 2
 size_flags_horizontal = 3
-text = "Off"
+disabled = true
+selected = 0
+item_count = 3
+popup/item_0/text = "Disconnected"
+popup/item_1/text = "Connecting"
+popup/item_1/id = 1
+popup/item_2/text = "Connected"
+popup/item_2/id = 2
+
+[node name="HBox5" type="HBoxContainer" parent="VBox/TabContainer/MQTTsignalling/VBox/HBoxM/HSplitContainer/Msettings"]
+layout_mode = 2
+
+[node name="Label2" type="Label" parent="VBox/TabContainer/MQTTsignalling/VBox/HBoxM/HSplitContainer/Msettings/HBox5"]
+layout_mode = 2
+text = "WebRTC status:"
+
+[node name="StatusWebRTC" type="OptionButton" parent="VBox/TabContainer/MQTTsignalling/VBox/HBoxM/HSplitContainer/Msettings/HBox5"]
+layout_mode = 2
+disabled = true
+selected = 0
+item_count = 4
+popup/item_0/text = "Disconnected"
+popup/item_1/text = "Server"
+popup/item_1/id = 1
+popup/item_2/text = "Requesting"
+popup/item_2/id = 2
+popup/item_3/text = "Connected"
+popup/item_3/id = 3
 
 [node name="Roomplayers" type="PanelContainer" parent="VBox/TabContainer/MQTTsignalling/VBox/HBoxM/HSplitContainer"]
 layout_mode = 2
@@ -690,7 +716,6 @@ layout_mode = 2
 [connection signal="toggled" from="VBox/TabContainer/VBox/TabContainer/WebSocketsignalling/VBox/Servermode/WebRTCmultiplayerserver/StartWebRTCmultiplayer" to="VBox/TabContainer/VBox/TabContainer/WebSocketsignalling/VBox/Servermode/WebRTCmultiplayerserver" method="_on_StartWebRTCmultiplayer_toggled"]
 [connection signal="toggled" from="VBox/TabContainer/VBox/TabContainer/WebSocketsignalling/VBox/Clientmode/WebRTCmultiplayerclient/StartWebRTCmultiplayer" to="VBox/TabContainer/VBox/TabContainer/WebSocketsignalling/VBox/Clientmode/WebRTCmultiplayerclient" method="_on_StartWebRTCmultiplayer_toggled"]
 [connection signal="button_down" from="VBox/TabContainer/MQTTsignalling/VBox/HBox/brokeraddress" to="." method="_on_brokeraddress_button_down"]
-[connection signal="toggled" from="VBox/TabContainer/MQTTsignalling/VBox/HBoxM/HSplitContainer/Msettings/HBox3/StartMQTT" to="VBox/TabContainer/MQTTsignalling" method="_on_start_mqtt_toggled"]
 [connection signal="toggled" from="VBox/TabContainer/MQTTsignalling/VBox/Servermode/WebRTCmultiplayerserver/StartWebRTCmultiplayer" to="VBox/TabContainer/MQTTsignalling/VBox/Servermode/WebRTCmultiplayerserver" method="_on_StartWebRTCmultiplayer_toggled"]
 [connection signal="toggled" from="VBox/TabContainer/MQTTsignalling/VBox/Clientmode/WebRTCmultiplayerclient/StartWebRTCmultiplayer" to="VBox/TabContainer/MQTTsignalling/VBox/Clientmode/WebRTCmultiplayerclient" method="_on_StartWebRTCmultiplayer_toggled"]
 [connection signal="broker_connected" from="VBox/TabContainer/MQTTsignalling/MQTT" to="VBox/TabContainer/MQTTsignalling" method="_on_mqtt_broker_connected"]
