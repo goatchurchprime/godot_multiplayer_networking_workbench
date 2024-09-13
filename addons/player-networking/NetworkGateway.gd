@@ -30,7 +30,6 @@ var Dconnectedplayerscount = 0
 @onready var PlayerConnections = find_child("PlayerConnections")
 @onready var DoppelgangerPanel = find_child("DoppelgangerPanel")
 
-signal resolved_as_necessary(asserver)
 signal webrtc_multiplayerpeer_set(asserver)
 
 enum NETWORK_PROTOCOL { ENET = 0, 

@@ -109,7 +109,8 @@ func _process(delta):
 func _ready():
 	$VoxThreshold.material.set_shader_parameter("voxthreshhold", voxthreshhold)
 	if $AudioStreamPlayerMicrophone.bus != "MicrophoneBus":
-		print("AudioStreamPlayerMicrophone doesn't use MicrophoneBus, disabling")
+		print("AudioStreamPlayerMicrophone doesn't use bus called MicrophoneBus, disabling")
+		$AudioStreamPlayerMicrophone.stop()
 		return
 	assert ($AudioStreamPlayerMicrophone.stream.is_class("AudioStreamMicrophone"))
 	var microphonebusidx = AudioServer.get_bus_index($AudioStreamPlayerMicrophone.bus)

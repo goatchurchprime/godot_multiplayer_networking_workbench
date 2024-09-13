@@ -491,7 +491,7 @@ columns = 3
 hide_root = true
 
 [node name="MQTT" parent="VBox/TabContainer/MQTTsignalling" instance=ExtResource("14_c5n2c")]
-verbose_level = 1
+verbose_level = 0
 
 [node name="PlayerConnections" type="PanelContainer" parent="VBox"]
 layout_mode = 2

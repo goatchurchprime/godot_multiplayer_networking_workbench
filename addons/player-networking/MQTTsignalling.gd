@@ -17,6 +17,8 @@ var xclientopenservers = [ ]
 var xclienttreeitems = { }
 var xclientclosedlist = [ ]
 
+signal xclientstatusesupdate
+signal messagereceived(msg, fromclientid)
 
 @onready var Roomplayertree = $VBox/HBoxM/HSplitContainer/Roomplayers/Tree
 var Roomplayertreecaboosereached = false
@@ -49,6 +51,8 @@ func _on_NetworkOptionsMQTTWebRTC_item_selected(ns):
 	selectasclient = (ns == NetworkGateway.NETWORK_OPTIONS_MQTT_WEBRTC.AS_CLIENT)
 	if ns == NetworkGateway.NETWORK_OPTIONS_MQTT_WEBRTC.NETWORK_OFF:
 		NetworkGateway.ProtocolOptions.disabled = false
+		if Wserveractive:
+			stopwebrtc_server()
 		stop_mqtt()
 		return
 		
@@ -104,9 +108,11 @@ func processothermclientstatus(mclientid, v):
 		xclientclosedlist.append(mclientid)
 		if xclientstatuses.has(mclientid):
 			xclientstatuses[mclientid] = mstatus
+			emit_signal("xclientstatusesupdate")
 		return
 
 	xclientstatuses[mclientid] = mstatus
+	
 
 	if mstatus == "unconnected":
 		establishtreeitemparent(mclientid, Roomplayertree.get_root())
@@ -114,6 +120,9 @@ func processothermclientstatus(mclientid, v):
 		pass
 	if mstatus == "connectto":
 		var mselectedserver = v["selectedserver"]
+		if not xclienttreeitems.has(mselectedserver):
+			print("Filling in missing mselectedserver ", mselectedserver, " due to out of order messages")
+			establishtreeitemparent(mselectedserver, Roomplayertree.get_root())
 		establishtreeitemparent(mclientid, xclienttreeitems[mselectedserver])
 
 	if mstatus == "serveropen":
@@ -129,6 +138,8 @@ func processothermclientstatus(mclientid, v):
 	if v.has("playername"):
 		xclienttreeitems[mclientid].set_text(1, v["playername"])
 		
+	emit_signal("xclientstatusesupdate")
+
 
 func _on_mqtt_broker_disconnected():
 	StatusMQTT.select(0)
@@ -140,6 +151,7 @@ func _on_mqtt_broker_connected():
 	StatusMQTT.select(2)
 	$MQTT.subscribe("%s/+/status" % Roomnametext.text)
 	$MQTT.subscribe("%s/+/packet/%s" % [Roomnametext.text, $MQTT.client_id])
+	$MQTT.subscribe("%s/+/message/%s" % [Roomnametext.text, $MQTT.client_id])
 	publishstatus("unconnected")  # this becomes the caboose
 	if selectasserver:
 		startwebrtc_server()
@@ -168,7 +180,12 @@ func stop_mqtt():
 		client_connection_closed()
 		Hselectedserver = ""
 		Hserverconnected = false
-	$MQTT.disconnect_from_server()
+		
+	# hack to make sure a hanging mqtt connection is seen to be reset
+	if $MQTT.brokerconnectmode != $MQTT.BCM_NOCONNECTION:
+		$MQTT.disconnect_from_server()
+		if $MQTT.brokerconnectmode != $MQTT.BCM_CONNECTED:
+			_on_mqtt_broker_disconnected()
 	Roomnametext.editable = true
 	Clientidtext.text = ""
 	$VBox/HBox/brokeraddress.disabled = false
@@ -179,11 +196,14 @@ func sendpacket_toserver(v):
 	var t = "%s/%s/packet/%s" % [Roomnametext.text, $MQTT.client_id, Hselectedserver]
 	$MQTT.publish(t, JSON.stringify(v))
 
-func sendpacket_toclient(wclientid, v):
+func sendpacket_towclient(wclientid, v):
 	assert (selectasserver)
 	var t = "%s/%s/packet/x%d" % [Roomnametext.text, $MQTT.client_id, wclientid]
 	$MQTT.publish(t, JSON.stringify(v))
 
+func sendmessage_toclient(clientid, msg):
+	var t = "%s/%s/message/%s" % [Roomnametext.text, $MQTT.client_id, clientid]
+	$MQTT.publish(t, msg)
 
 func statuschange_chooseserverifnecessary(caboosejustreached):
 	if Dns == NetworkGateway.NETWORK_OPTIONS_MQTT_WEBRTC.AS_NECESSARY:
@@ -214,6 +234,12 @@ func _on_mqtt_received_message(topic, msg):
 				xclientstatuses.erase(mclientid)
 			return
 
+	if len(stopic) >= 4 and stopic[-2] == "message" and stopic[-1] == $MQTT.client_id:
+		var sendingclientid = stopic[-3]
+		print("messagereceived ", msg, " from ", sendingclientid)
+		emit_signal("messagereceived", msg, sendingclientid)
+		return
+		
 	var v = JSON.parse_string(msg)
 
 	if len(stopic) >= 3: 
@@ -232,6 +258,8 @@ func _on_mqtt_received_message(topic, msg):
 			server_packet_received(sendingclientid, v)
 		if selectasclient and sendingclientid == Hselectedserver:
 			client_packet_received(v)
+
+
 
 func stopwebrtc_server():
 	NetworkGateway.PlayerConnections._server_disconnected()
@@ -256,14 +284,14 @@ func startwebrtc_server():
 	Wserveractive = true
 
 func server_ice_candidate_created(mid_name, index_name, sdp_name, id):
-	sendpacket_toclient(id, {"subject":"ice_candidate", "mid_name":mid_name, "index_name":index_name, "sdp_name":sdp_name})
+	sendpacket_towclient(id, {"subject":"ice_candidate", "mid_name":mid_name, "index_name":index_name, "sdp_name":sdp_name})
 
 func server_session_description_created(type, data, id):
 	print("we got server_session_description_created ", type)
 	assert (type == "offer")
 	var peerconnection = multiplayer.multiplayer_peer.get_peer(id)
 	peerconnection["connection"].set_local_description(type, data)
-	sendpacket_toclient(id, {"subject":"offer", "data":data})
+	sendpacket_towclient(id, {"subject":"offer", "data":data})
 	NetworkGateway.PlayerConnections.connectionlog("send offer %s" %id)
 
 func Ddata_channel_created(channel):
@@ -309,10 +337,10 @@ func client_session_description_created(type, data):
 	peer["connection"].set_local_description("answer", data)
 	sendpacket_toserver({"subject":"answer", "data":data})
 	NetworkGateway.PlayerConnections.connectionlog("answer")
-		
+
 
 func client_connection_closed():
-	if not (multiplayer.multiplayer_peer is OfflineMultiplayerPeer):
+	if is_instance_valid(multiplayer.multiplayer_peer) and not (multiplayer.multiplayer_peer is OfflineMultiplayerPeer):
 		var peer = multiplayer.multiplayer_peer.get_peer(1)
 		if peer:
 			peer["connection"].close()
@@ -324,7 +352,7 @@ func client_packet_received(v):
 			Hserverconnected = true
 			publishstatus("connectto", Hselectedserver)
 			startwebrtc_client()
-	
+
 	elif v["subject"] == "offer":
 		var peerconnection = WebRTCPeerConnection.new()
 		peerconnection.session_description_created.connect(client_session_description_created)

@@ -75,6 +75,9 @@ func PF_framedatatoavatar(fd):
 func playername():
 	return $Label.text 
 
+func setplayername(lname):
+	$Label.text = lname
+
 static func PF_changethinnedframedatafordoppelganger(fd, doppelnetoffset, isframe0):
 	fd[NCONSTANTS.CFI_TIMESTAMP] += doppelnetoffset
 	fd[NCONSTANTS.CFI_TIMESTAMPPREV] += doppelnetoffset
