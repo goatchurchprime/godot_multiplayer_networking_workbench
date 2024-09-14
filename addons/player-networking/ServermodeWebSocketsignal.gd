@@ -23,8 +23,6 @@ func sendpacket_toclient(id, v):
 	websocketclientsconnected[id].put_packet(var_to_bytes(v))
 	print("put packet ", len(var_to_bytes(v)), " to ", websocketclientsconnected[id])
 	
-func on_broker_disconnect():
-	$StartServer.button_pressed = false
 	
 func wss_client_disconnected(id: int):
 	emit_signal("mqttsig_client_disconnected", id)

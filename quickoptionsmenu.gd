@@ -5,13 +5,15 @@ extends HBoxContainer
 # Need to find how to map the clicks from the mouse to the window
 
 func _ready():
+	print(AudioServer.get_speaker_mode())
 	set_as_top_level(true)
 	$ShowNetworkGateway.set_pressed_no_signal(NetworkGateway.visible)
 	if OS.has_feature("Server"):
 		await get_tree().create_timer(1.5).timeout
 		NetworkGateway.selectandtrigger_networkoption(NetworkGateway.NETWORK_OPTIONS.AS_SERVER)
 	get_node("../SubViewportContainer/SubViewport").size = get_window().size
-	
+	get_node("../SubViewportContainer/SubViewport/Players/LocalPlayer/AudioListener2D").make_current()
+
 func _on_show_network_gateway_toggled(toggled_on):
 	NetworkGateway.visible = toggled_on
 

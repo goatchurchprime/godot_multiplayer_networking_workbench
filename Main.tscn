@@ -136,6 +136,7 @@ mouse_filter = 0
 
 [node name="SubViewport" type="SubViewport" parent="SubViewportContainer"]
 handle_input_locally = false
+audio_listener_enable_2d = true
 render_target_update_mode = 4
 
 [node name="Background" type="Sprite2D" parent="SubViewportContainer/SubViewport"]
@@ -168,7 +169,6 @@ drag_right_margin = 0.6
 drag_bottom_margin = 0.6
 
 [node name="AudioListener2D" type="AudioListener2D" parent="SubViewportContainer/SubViewport/Players/LocalPlayer"]
-current = true
 
 [node name="SyncObjects" type="Node2D" parent="SubViewportContainer/SubViewport"]
 z_index = 1

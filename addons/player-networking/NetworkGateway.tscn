@@ -1,4 +1,4 @@
-[gd_scene load_steps=34 format=3 uid="uid://cfmoahalri06d"]
+[gd_scene load_steps=32 format=3 uid="uid://cfmoahalri06d"]
 
 [ext_resource type="Script" path="res://addons/player-networking/NetworkGateway.gd" id="1"]
 [ext_resource type="Script" path="res://addons/player-networking/Enetmultiplayerserver.gd" id="3"]
@@ -9,13 +9,11 @@
 [ext_resource type="Script" path="res://addons/player-networking/Websocketmultiplayerserver.gd" id="8"]
 [ext_resource type="Script" path="res://addons/player-networking/ServermodeWebSocketsignal.gd" id="9"]
 [ext_resource type="Script" path="res://addons/player-networking/WebRTCmultiplayerserver.gd" id="10"]
-[ext_resource type="Script" path="res://addons/player-networking/ServermodeMQTTsignal.gd" id="11"]
 [ext_resource type="Script" path="res://addons/player-networking/Websocketmultiplayerclient.gd" id="12"]
 [ext_resource type="Script" path="res://addons/player-networking/MQTTsignalling.gd" id="12_dj107"]
 [ext_resource type="Script" path="res://addons/player-networking/ClientmodeWebSocketsignal.gd" id="13"]
 [ext_resource type="Script" path="res://addons/player-networking/WebRTCmultiplayerclient.gd" id="14"]
 [ext_resource type="PackedScene" uid="uid://ktm7k0co2o7l" path="res://addons/mqtt/mqtt.tscn" id="14_c5n2c"]
-[ext_resource type="Script" path="res://addons/player-networking/ClientmodeMQTTsignal.gd" id="15"]
 [ext_resource type="Script" path="res://addons/player-networking/RecordingFeature.gd" id="16_hf3ik"]
 [ext_resource type="Script" path="res://addons/player-networking/DoppelgangerPanel_ui.gd" id="16_i8v6k"]
 
@@ -416,87 +414,81 @@ placeholder_text = "User"
 layout_mode = 2
 placeholder_text = "Pass"
 
-[node name="HBox2" type="HBoxContainer" parent="VBox/TabContainer/MQTTsignalling/VBox"]
+[node name="HBoxM" type="HBoxContainer" parent="VBox/TabContainer/MQTTsignalling/VBox"]
+custom_minimum_size = Vector2(0, 100)
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="HSplitContainer" type="HSplitContainer" parent="VBox/TabContainer/MQTTsignalling/VBox/HBoxM"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Msettings" type="VBoxContainer" parent="VBox/TabContainer/MQTTsignalling/VBox/HBoxM/HSplitContainer"]
 layout_mode = 2
 
-[node name="Label3" type="Label" parent="VBox/TabContainer/MQTTsignalling/VBox/HBox2"]
+[node name="HBox" type="HBoxContainer" parent="VBox/TabContainer/MQTTsignalling/VBox/HBoxM/HSplitContainer/Msettings"]
 layout_mode = 2
-text = "Topic:"
 
-[node name="roomname" type="LineEdit" parent="VBox/TabContainer/MQTTsignalling/VBox/HBox2"]
+[node name="Label3" type="Label" parent="VBox/TabContainer/MQTTsignalling/VBox/HBoxM/HSplitContainer/Msettings/HBox"]
 layout_mode = 2
-text = "lettuce"
+text = "Room:"
 
-[node name="Label2" type="Label" parent="VBox/TabContainer/MQTTsignalling/VBox/HBox2"]
+[node name="roomname" type="LineEdit" parent="VBox/TabContainer/MQTTsignalling/VBox/HBoxM/HSplitContainer/Msettings/HBox"]
 layout_mode = 2
-text = "mqtt clientid:"
+size_flags_horizontal = 3
+text = "lemon"
 
-[node name="client_id" type="LineEdit" parent="VBox/TabContainer/MQTTsignalling/VBox/HBox2"]
+[node name="HBox2" type="HBoxContainer" parent="VBox/TabContainer/MQTTsignalling/VBox/HBoxM/HSplitContainer/Msettings"]
 layout_mode = 2
+
+[node name="Label2" type="Label" parent="VBox/TabContainer/MQTTsignalling/VBox/HBoxM/HSplitContainer/Msettings/HBox2"]
+layout_mode = 2
+text = "MQTT clientid:"
+
+[node name="client_id" type="LineEdit" parent="VBox/TabContainer/MQTTsignalling/VBox/HBoxM/HSplitContainer/Msettings/HBox2"]
+layout_mode = 2
+size_flags_horizontal = 3
 editable = false
 
-[node name="StartMQTT" type="Button" parent="VBox/TabContainer/MQTTsignalling/VBox/HBox2"]
-layout_mode = 2
-toggle_mode = true
-text = "Start mqtt"
-
-[node name="statuslabel" type="Label" parent="VBox/TabContainer/MQTTsignalling/VBox/HBox2"]
-layout_mode = 2
-text = "Off"
-
-[node name="mqttautoconnect" type="CheckBox" parent="VBox/TabContainer/MQTTsignalling/VBox/HBox2"]
-layout_mode = 2
-button_pressed = true
-action_mode = 0
-text = "autoconnect"
-
-[node name="Servermode" type="HBoxContainer" parent="VBox/TabContainer/MQTTsignalling/VBox"]
-visible = false
-layout_mode = 2
-script = ExtResource("11")
-
-[node name="WebRTCmultiplayerserver" type="HBoxContainer" parent="VBox/TabContainer/MQTTsignalling/VBox/Servermode"]
-layout_mode = 2
-script = ExtResource("10")
-
-[node name="StartWebRTCmultiplayer" type="Button" parent="VBox/TabContainer/MQTTsignalling/VBox/Servermode/WebRTCmultiplayerserver"]
-layout_mode = 2
-toggle_mode = true
-text = "StartWebrtc server"
-
-[node name="statuslabel" type="Label" parent="VBox/TabContainer/MQTTsignalling/VBox/Servermode/WebRTCmultiplayerserver"]
-layout_mode = 2
-text = "null"
-
-[node name="ClientsList" type="OptionButton" parent="VBox/TabContainer/MQTTsignalling/VBox/Servermode"]
+[node name="HBox4" type="HBoxContainer" parent="VBox/TabContainer/MQTTsignalling/VBox/HBoxM/HSplitContainer/Msettings"]
 layout_mode = 2
 
-[node name="autoconnect" type="CheckBox" parent="VBox/TabContainer/MQTTsignalling/VBox/Servermode"]
+[node name="Label2" type="Label" parent="VBox/TabContainer/MQTTsignalling/VBox/HBoxM/HSplitContainer/Msettings/HBox4"]
 layout_mode = 2
-button_pressed = true
-text = "autoconnect"
+text = "MQTT status:"
 
-[node name="Clientmode" type="HBoxContainer" parent="VBox/TabContainer/MQTTsignalling/VBox"]
+[node name="StatusMQTT" type="OptionButton" parent="VBox/TabContainer/MQTTsignalling/VBox/HBoxM/HSplitContainer/Msettings/HBox4"]
 layout_mode = 2
-script = ExtResource("15")
+size_flags_horizontal = 3
+disabled = true
+selected = 0
+item_count = 3
+popup/item_0/text = "disconnected"
+popup/item_1/text = "connecting"
+popup/item_1/id = 1
+popup/item_2/text = "connected"
+popup/item_2/id = 2
 
-[node name="WebRTCmultiplayerclient" type="HBoxContainer" parent="VBox/TabContainer/MQTTsignalling/VBox/Clientmode"]
+[node name="HBox5" type="HBoxContainer" parent="VBox/TabContainer/MQTTsignalling/VBox/HBoxM/HSplitContainer/Msettings"]
 layout_mode = 2
-script = ExtResource("14")
 
-[node name="StartWebRTCmultiplayer" type="Button" parent="VBox/TabContainer/MQTTsignalling/VBox/Clientmode/WebRTCmultiplayerclient"]
+[node name="Label2" type="Label" parent="VBox/TabContainer/MQTTsignalling/VBox/HBoxM/HSplitContainer/Msettings/HBox5"]
 layout_mode = 2
-toggle_mode = true
-text = "StartWebrtc client"
+text = "WebRTC status:"
 
-[node name="statuslabel" type="Label" parent="VBox/TabContainer/MQTTsignalling/VBox/Clientmode/WebRTCmultiplayerclient"]
+[node name="StatusWebRTC" type="LineEdit" parent="VBox/TabContainer/MQTTsignalling/VBox/HBoxM/HSplitContainer/Msettings/HBox5"]
 layout_mode = 2
-text = "null"
+size_flags_horizontal = 3
+text = "off"
+editable = false
 
-[node name="autoconnect" type="CheckBox" parent="VBox/TabContainer/MQTTsignalling/VBox/Clientmode"]
+[node name="Roomplayers" type="PanelContainer" parent="VBox/TabContainer/MQTTsignalling/VBox/HBoxM/HSplitContainer"]
 layout_mode = 2
-button_pressed = true
-text = "autoconnect"
+
+[node name="Tree" type="Tree" parent="VBox/TabContainer/MQTTsignalling/VBox/HBoxM/HSplitContainer/Roomplayers"]
+layout_mode = 2
+columns = 3
+hide_root = true
 
 [node name="MQTT" parent="VBox/TabContainer/MQTTsignalling" instance=ExtResource("14_c5n2c")]
 verbose_level = 0
@@ -545,6 +537,7 @@ script = ExtResource("16_hf3ik")
 [node name="AudioStreamPlayerMicrophone" type="AudioStreamPlayer" parent="VBox/PlayerConnections/VBox/RecordingFeature"]
 stream = SubResource("2")
 autoplay = true
+bus = &"MicrophoneBus"
 
 [node name="PTT" type="Button" parent="VBox/PlayerConnections/VBox/RecordingFeature"]
 layout_mode = 2
@@ -674,12 +667,9 @@ layout_mode = 2
 [connection signal="toggled" from="VBox/TabContainer/VBox/TabContainer/WebSocketsignalling/VBox/Servermode/WebRTCmultiplayerserver/StartWebRTCmultiplayer" to="VBox/TabContainer/VBox/TabContainer/WebSocketsignalling/VBox/Servermode/WebRTCmultiplayerserver" method="_on_StartWebRTCmultiplayer_toggled"]
 [connection signal="toggled" from="VBox/TabContainer/VBox/TabContainer/WebSocketsignalling/VBox/Clientmode/WebRTCmultiplayerclient/StartWebRTCmultiplayer" to="VBox/TabContainer/VBox/TabContainer/WebSocketsignalling/VBox/Clientmode/WebRTCmultiplayerclient" method="_on_StartWebRTCmultiplayer_toggled"]
 [connection signal="button_down" from="VBox/TabContainer/MQTTsignalling/VBox/HBox/brokeraddress" to="." method="_on_brokeraddress_button_down"]
-[connection signal="toggled" from="VBox/TabContainer/MQTTsignalling/VBox/HBox2/StartMQTT" to="VBox/TabContainer/MQTTsignalling/VBox/Servermode" method="_on_StartServer_toggled"]
-[connection signal="gui_input" from="VBox/TabContainer/MQTTsignalling/VBox/HBox2/mqttautoconnect" to="." method="_on_mqttautoconnect_gui_input"]
-[connection signal="mouse_entered" from="VBox/TabContainer/MQTTsignalling/VBox/HBox2/mqttautoconnect" to="." method="_on_mqttautoconnect_mouse_entered"]
-[connection signal="pressed" from="VBox/TabContainer/MQTTsignalling/VBox/HBox2/mqttautoconnect" to="." method="_on_mqttautoconnect_pressed"]
-[connection signal="toggled" from="VBox/TabContainer/MQTTsignalling/VBox/Servermode/WebRTCmultiplayerserver/StartWebRTCmultiplayer" to="VBox/TabContainer/MQTTsignalling/VBox/Servermode/WebRTCmultiplayerserver" method="_on_StartWebRTCmultiplayer_toggled"]
-[connection signal="toggled" from="VBox/TabContainer/MQTTsignalling/VBox/Clientmode/WebRTCmultiplayerclient/StartWebRTCmultiplayer" to="VBox/TabContainer/MQTTsignalling/VBox/Clientmode/WebRTCmultiplayerclient" method="_on_StartWebRTCmultiplayer_toggled"]
+[connection signal="broker_connected" from="VBox/TabContainer/MQTTsignalling/MQTT" to="VBox/TabContainer/MQTTsignalling" method="_on_mqtt_broker_connected"]
+[connection signal="broker_disconnected" from="VBox/TabContainer/MQTTsignalling/MQTT" to="VBox/TabContainer/MQTTsignalling" method="_on_mqtt_broker_disconnected"]
+[connection signal="received_message" from="VBox/TabContainer/MQTTsignalling/MQTT" to="VBox/TabContainer/MQTTsignalling" method="_on_mqtt_received_message"]
 [connection signal="item_selected" from="VBox/PlayerConnections/VBox/HBox/PlayerList" to="VBox/PlayerConnections" method="_on_PlayerList_item_selected"]
 [connection signal="value_changed" from="VBox/PlayerConnections/VBox/HBox/PlayerLagSlider" to="VBox/PlayerConnections" method="_on_PlayerLagSlider_value_changed"]
 [connection signal="toggled" from="VBox/PlayerConnections/VBox/RecordingFeature/Vox" to="VBox/PlayerConnections/VBox/RecordingFeature" method="_on_vox_toggled"]

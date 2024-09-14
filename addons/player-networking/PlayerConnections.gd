@@ -116,9 +116,13 @@ func _connected_to_server():
 			_peer_connected(id)
 
 	updateplayerlist()
+	if NetworkGateway.ProtocolOptions.selected == NetworkGateway.NETWORK_PROTOCOL.WEBRTC_MQTTSIGNAL:
+		NetworkGateway.MQTTsignalling.StatusWebRTC.text = "connected"
 
 func _connection_failed():
 	connectionlog("_connection failed\n")
+	if NetworkGateway.ProtocolOptions.selected == NetworkGateway.NETWORK_PROTOCOL.WEBRTC_MQTTSIGNAL:
+		NetworkGateway.MQTTsignalling.StatusWebRTC.text = "failed"
 	NetworkGateway.setnetworkoff()
 
 func _server_disconnected():
@@ -127,10 +131,9 @@ func _server_disconnected():
 		NetworkGateway.Dconnectedplayerscount -= 1
 		assert (NetworkGateway.Dconnectedplayerscount == 0)
 		return
-	var serverisself = multiplayer.is_server()
-	connectionlog("_server(self) disconnect\n" if serverisself else "_server disconnect\n")
+	connectionlog("_server(self) disconnect\n")
 	var ns = NetworkGateway.NetworkOptions.selected
-	print("(networkplayer_server_disconnected ", serverisself)
+	print("(networkplayer_server_disconnected ")
 	multiplayer.multiplayer_peer = OfflineMultiplayerPeer.new()
 	print("setnetworkpeer OfflineMultiplayerPeer")
 	LocalPlayer.get_node("PlayerFrame").networkID = 0
@@ -146,13 +149,10 @@ func _server_disconnected():
 		NetworkGateway.ENetMultiplayer.get_node("HBox/Servermode/StartENetmultiplayer").set_pressed_no_signal(false)
 		NetworkGateway.ENetMultiplayer.get_node("HBox/Clientmode/StartENetmultiplayer").set_pressed_no_signal(false)
 	if NetworkGateway.ProtocolOptions.selected == NetworkGateway.NETWORK_PROTOCOL.WEBRTC_MQTTSIGNAL:
-		NetworkGateway.MQTTsignalling.get_node("VBox/Servermode/WebRTCmultiplayerserver/StartWebRTCmultiplayer").set_pressed_no_signal(false)
-		NetworkGateway.MQTTsignalling.get_node("VBox/Clientmode/WebRTCmultiplayerclient/StartWebRTCmultiplayer").set_pressed_no_signal(false)
-		NetworkGateway.NetworkOptionsMQTTWebRTC.selected = NetworkGateway.NETWORK_OPTIONS.NETWORK_OFF
+		NetworkGateway.selectandtrigger_networkoption(NetworkGateway.NETWORK_OPTIONS_MQTT_WEBRTC.NETWORK_OFF)
 	else:
 		NetworkGateway.NetworkOptions.selected = NetworkGateway.NETWORK_OPTIONS.NETWORK_OFF
 		
-
 func updateplayerlist():
 	var plp = PlayerList.get_item_text(PlayerList.selected).split(" ")[0].replace("*", "").replace("&", "")
 	PlayerList.clear()

@@ -2,7 +2,11 @@ extends Control
 
 @onready var serversignalling = get_parent()
 @onready var NetworkGateway = find_parent("NetworkGateway")
+@onready var MQTTsignalling = find_parent("MQTTsignalling")
 
+func _ready():
+	if MQTTsignalling:
+		serversignalling = MQTTsignalling
 
 func _on_StartWebRTCmultiplayer_toggled(button_pressed):
 	if button_pressed:
@@ -21,14 +25,16 @@ func _on_StartWebRTCmultiplayer_toggled(button_pressed):
 		assert (get_tree().multiplayer_poll)
 		NetworkGateway.PlayerConnections._connected_to_server()
 
-		serversignalling.mqttsig_client_connected.connect(server_client_connected) 
-		serversignalling.mqttsig_client_disconnected.connect(server_client_disconnected) 
-		serversignalling.mqttsig_packet_received.connect(server_packet_received) 
+		if serversignalling.has_signal("mqttsig_client_connected"):
+			serversignalling.mqttsig_client_connected.connect(server_client_connected) 
+			serversignalling.mqttsig_client_disconnected.connect(server_client_disconnected) 
+			serversignalling.mqttsig_packet_received.connect(server_packet_received) 
 			
 	else:
-		serversignalling.mqttsig_client_connected.disconnect(server_client_connected) 
-		serversignalling.mqttsig_client_disconnected.disconnect(server_client_disconnected) 
-		serversignalling.mqttsig_packet_received.disconnect(server_packet_received) 
+		if serversignalling.has_signal("mqttsig_client_connected"):
+			serversignalling.mqttsig_client_connected.disconnect(server_client_connected) 
+			serversignalling.mqttsig_client_disconnected.disconnect(server_client_disconnected) 
+			serversignalling.mqttsig_packet_received.disconnect(server_packet_received) 
 		NetworkGateway.PlayerConnections._server_disconnected()
 
 

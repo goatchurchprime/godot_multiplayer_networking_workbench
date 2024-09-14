@@ -30,7 +30,6 @@ var Dconnectedplayerscount = 0
 @onready var PlayerConnections = find_child("PlayerConnections")
 @onready var DoppelgangerPanel = find_child("DoppelgangerPanel")
 
-signal resolved_as_necessary(asserver)
 signal webrtc_multiplayerpeer_set(asserver)
 
 enum NETWORK_PROTOCOL { ENET = 0, 
@@ -86,7 +85,7 @@ func initialstatemqttwebrtc(networkoption, roomname, brokeraddress):
 	if brokeraddress:
 		MQTTsignalling.get_node("VBox/HBox/brokeraddress").text = brokeraddress
 	if roomname:
-		MQTTsignalling.get_node("VBox/HBox2/roomname").text = roomname
+		MQTTsignalling.Roomnametext.text = roomname
 	NetworkOptionsMQTTWebRTC.selected = networkoption
 	_on_NetworkOptionsMQTTWebRTC_item_selected(NetworkOptionsMQTTWebRTC.selected)
 
@@ -110,8 +109,6 @@ func _on_ProtocolOptions_item_selected(np):
 	ProtocolModes.get_node("TabContainer").current_tab = (1 if selectasmqttwebrtc else 0)
 	NetworkOptionsMQTTWebRTC.visible = selectasmqttwebrtc
 	MQTTsignalling.visible = selectasmqttwebrtc
-	MQTTsignalling.get_node("VBox/Servermode").visible = false
-	MQTTsignalling.get_node("VBox/Clientmode").visible = false
 	UDPipdiscovery.visible = NetworkOptions.visible and (not OS.has_feature("Server")) and (not OS.has_feature("HTML5"))
 
 	ENetMultiplayer.visible = selectasenet
@@ -243,7 +240,7 @@ func is_disconnected():
 
 func simple_webrtc_connect(roomname):
 	if roomname:
-		MQTTsignalling.get_node("VBox/HBox2/roomname").text = roomname
+		MQTTsignalling.Roomnametext.text = roomname
 		selectandtrigger_networkoption(NETWORK_OPTIONS_MQTT_WEBRTC.AS_NECESSARY)
 		set_vox_on()
 	else:
@@ -252,25 +249,9 @@ func simple_webrtc_connect(roomname):
 
 
 
-# The button press signal isn't getting through from mouse click
-# Although mouse down is sent to the Viewport, a mouse move is received
-# works okay in VR though
-
-func _on_mqttautoconnect_pressed():
-	pass # print("---- _on_mqttautoconnect_pressedx")
-
-
-func _on_mqttautoconnect_mouse_entered():
-	pass # print("---- _on_mqttautoconnect_mouse_eneeeetered")
-
-
-func _on_mqttautoconnect_gui_input(event):
-	pass #print("input evengt ", event)
-
 
 func _on_brokeraddress_button_down():
 	pass # Replace with function body.
-
 
 func _on_gui_input(event):
 	if event is InputEventMouseButton:
