@@ -99,3 +99,16 @@ func _process(delta):
 					doppelgangernode.networkedavatarthinnedframedataANIM(vd)
 				else:
 					doppelgangernode.get_node("PlayerFrame").networkedavatarthinnedframedata(vd)
+
+func transmitaudiopacket(packet):
+	if networkID >= 1:
+		PlayerConnections.rpc("RPCincomingaudiopacket", packet)
+	if doppelgangernode != null:
+		var doppelnetoffset = NetworkGatewayForDoppelganger.DoppelgangerPanel.getnetoffset()
+		var doppelgangerdelay = NetworkGatewayForDoppelganger.getrandomdoppelgangerdelay()
+		if doppelgangerdelay != -1.0:
+			await get_tree().create_timer(doppelgangerdelay*0.001).timeout
+			if doppelgangernode != null:
+				doppelgangernode.get_node("PlayerFrame").incomingaudiopacket(packet)
+		else:
+			print("dropaudframe")

@@ -294,3 +294,7 @@ func _on_PlayerLagSlider_value_changed(value):
 	var player = PlayersNode.get_child(PlayerList.selected)
 	if player != LocalPlayer:
 		player.get_node("PlayerFrame").laglatency = value
+
+
+func _on_log_rec_toggled(toggled_on):
+	pass # Replace with function body.

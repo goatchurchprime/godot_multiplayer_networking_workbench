@@ -5,19 +5,6 @@ var chunkprefix : PackedByteArray = PackedByteArray([0,0])
 
 @onready var PlayerConnections = find_parent("PlayerConnections")
 
-func transmitaudiopacket(packet):
-	var PlayerFrame = PlayerConnections.LocalPlayer.get_node("PlayerFrame")
-	if PlayerFrame.networkID >= 1:
-		PlayerConnections.rpc("RPCincomingaudiopacket", packet)
-	if PlayerFrame.doppelgangernode != null:
-		var doppelnetoffset = PlayerFrame.NetworkGatewayForDoppelganger.DoppelgangerPanel.getnetoffset()
-		var doppelgangerdelay = PlayerFrame.NetworkGatewayForDoppelganger.getrandomdoppelgangerdelay()
-		if doppelgangerdelay != -1.0:
-			await get_tree().create_timer(doppelgangerdelay*0.001).timeout
-			if PlayerFrame.doppelgangernode != null:
-				PlayerFrame.doppelgangernode.get_node("PlayerFrame").incomingaudiopacket(packet)
-		else:
-			print("dropaudframe")
 
 
 var currentlytalking = false
@@ -49,7 +36,8 @@ func processtalkstreamends():
 								  "audiosamplerate":audioopuschunkedeffect.audiosamplerate, 
 								  "lenchunkprefix":len(chunkprefix), 
 								  "opusstreamcount":opusstreamcount }
-		transmitaudiopacket(JSON.stringify(audiopacketheader).to_ascii_buffer())
+		var PlayerFrame = PlayerConnections.LocalPlayer.get_node("PlayerFrame")
+		PlayerFrame.transmitaudiopacket(JSON.stringify(audiopacketheader).to_ascii_buffer())
 		opusframecount = 0
 		currentlytalking = true
 		if $AudioStreamPlayerMicrophone.playing != true:
@@ -57,7 +45,8 @@ func processtalkstreamends():
 			print("Set microphone playing again (switched off by system)")
 	elif not talking and currentlytalking:
 		currentlytalking = false
-		transmitaudiopacket(JSON.stringify({"opusframecount":opusframecount}).to_ascii_buffer())
+		var PlayerFrame = PlayerConnections.LocalPlayer.get_node("PlayerFrame")
+		PlayerFrame.transmitaudiopacket(JSON.stringify({"opusframecount":opusframecount}).to_ascii_buffer())
 		opusstreamcount += 1
 
 func processvox():
@@ -96,7 +85,8 @@ func processsendopuschunk():
 		if $Denoise.button_pressed:
 			audioopuschunkedeffect.denoise_resampled_chunk()
 		var opuspacket = audioopuschunkedeffect.read_opus_packet(chunkprefix)
-		transmitaudiopacket(opuspacket)
+		var PlayerFrame = PlayerConnections.LocalPlayer.get_node("PlayerFrame")
+		PlayerFrame.transmitaudiopacket(opuspacket)
 	audioopuschunkedeffect.drop_chunk()
 
 func _process(delta):
