@@ -397,14 +397,12 @@ text = "WebRTC with MQTT signalling:"
 
 [node name="brokeraddress" type="OptionButton" parent="VBox/TabContainer/MQTTsignalling/VBox/HBox"]
 layout_mode = 2
-item_count = 4
-popup/item_0/text = "mosquitto.doesliverpool.xyz"
+item_count = 3
+popup/item_0/text = "wss://mosquitto.doesliverpool.xyz"
 popup/item_1/text = "test.mosquitto.org"
 popup/item_1/id = 1
-popup/item_2/text = "broker.hivemq.com"
+popup/item_2/text = "ssl://broker.hivemq.com:8883"
 popup/item_2/id = 2
-popup/item_3/text = "5.161.75.32"
-popup/item_3/id = 3
 
 [node name="MQTTUser" type="LineEdit" parent="VBox/TabContainer/MQTTsignalling/VBox/HBox"]
 layout_mode = 2
@@ -668,6 +666,7 @@ layout_mode = 2
 [connection signal="toggled" from="VBox/TabContainer/VBox/TabContainer/WebSocketsignalling/VBox/Clientmode/WebRTCmultiplayerclient/StartWebRTCmultiplayer" to="VBox/TabContainer/VBox/TabContainer/WebSocketsignalling/VBox/Clientmode/WebRTCmultiplayerclient" method="_on_StartWebRTCmultiplayer_toggled"]
 [connection signal="button_down" from="VBox/TabContainer/MQTTsignalling/VBox/HBox/brokeraddress" to="." method="_on_brokeraddress_button_down"]
 [connection signal="broker_connected" from="VBox/TabContainer/MQTTsignalling/MQTT" to="VBox/TabContainer/MQTTsignalling" method="_on_mqtt_broker_connected"]
+[connection signal="broker_connection_failed" from="VBox/TabContainer/MQTTsignalling/MQTT" to="VBox/TabContainer/MQTTsignalling" method="_on_mqtt_broker_connection_failed"]
 [connection signal="broker_disconnected" from="VBox/TabContainer/MQTTsignalling/MQTT" to="VBox/TabContainer/MQTTsignalling" method="_on_mqtt_broker_disconnected"]
 [connection signal="received_message" from="VBox/TabContainer/MQTTsignalling/MQTT" to="VBox/TabContainer/MQTTsignalling" method="_on_mqtt_received_message"]
 [connection signal="item_selected" from="VBox/PlayerConnections/VBox/HBox/PlayerList" to="VBox/PlayerConnections" method="_on_PlayerList_item_selected"]

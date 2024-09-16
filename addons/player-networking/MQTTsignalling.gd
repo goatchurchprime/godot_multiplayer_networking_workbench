@@ -146,6 +146,9 @@ func _on_mqtt_broker_disconnected():
 	NetworkGateway.selectandtrigger_networkoption(NetworkGateway.NETWORK_OPTIONS_MQTT_WEBRTC.NETWORK_OFF)
 	clearallstatuses()
 
+func _on_mqtt_broker_connection_failed():
+	_on_mqtt_broker_disconnected()
+
 func _on_mqtt_broker_connected():
 	assert (Roomnametext.text)
 	StatusMQTT.select(2)
@@ -189,6 +192,7 @@ func stop_mqtt():
 	Roomnametext.editable = true
 	Clientidtext.text = ""
 	$VBox/HBox/brokeraddress.disabled = false
+	StatusMQTT.selected = 0
 
 func sendpacket_toserver(v):
 	assert (selectasclient)
