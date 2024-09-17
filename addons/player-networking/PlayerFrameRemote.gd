@@ -8,9 +8,13 @@ var initialframestate = 0
 var completedframe0 = { }
 
 var networkID = 0   # 0:unconnected, 1:server, -1:connecting, >1:connected to client
+var logrecfile = null
 
 		# we could make this tolerate out of order values
 func networkedavatarthinnedframedata(vd):
+	if logrecfile != null:
+		logrecfile.store_var({"t":Time.get_ticks_msec()*0.001, "vd":vd})
+	
 	assert (not vd.has(NCONSTANTS.CFI_TIMESTAMP_F0))
 	vd[NCONSTANTS.CFI_TIMESTAMP_RECIEVED] = Time.get_ticks_msec()*0.001
 	var timestampoffset = vd[NCONSTANTS.CFI_TIMESTAMP_RECIEVED] - vd[NCONSTANTS.CFI_TIMESTAMP]
@@ -98,6 +102,8 @@ var opusframecount = 0
 var outoforderchunkqueue = [ null, null, null, null ]
 var Dbatchinginitialpackets = false
 func incomingaudiopacket(packet):
+	if logrecfile != null:
+		logrecfile.store_var({"t":Time.get_ticks_msec()*0.001, "au":packet})
 	if audiostreamopuschunked == null:
 		return
 	if len(packet) <= 3:

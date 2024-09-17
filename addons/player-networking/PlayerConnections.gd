@@ -296,5 +296,30 @@ func _on_PlayerLagSlider_value_changed(value):
 		player.get_node("PlayerFrame").laglatency = value
 
 
+var playerbeingrecorded = null
 func _on_log_rec_toggled(toggled_on):
-	pass # Replace with function body.
+	if toggled_on:
+		assert (playerbeingrecorded == null and PlayerList.selected >= 0)
+		playerbeingrecorded = PlayersNode.get_child(PlayerList.selected)
+		var logrecfile = FileAccess.open("user://logrec.dat", FileAccess.WRITE)
+		print("logging to: ", logrecfile.get_path_absolute())
+		
+		#var avatardata = playerbeingrecorded.PF_datafornewconnectedplayer()
+		var pf = playerbeingrecorded.get_node("PlayerFrame")
+		var avatardata = { "avatarsceneresource":playerbeingrecorded.scene_file_path }
+		if pf.get("framedata0"):
+			avatardata["framedata0"] = pf.framedata0.duplicate()
+		else:
+			avatardata["framedata0"] = pf.completedframe0.duplicate()
+		avatardata["playername"] = playerbeingrecorded.playername()
+		avatardata["t"] = Time.get_ticks_msec()*0.001
+		logrecfile.store_var(avatardata)
+		playerbeingrecorded.get_node("PlayerFrame").logrecfile = logrecfile
+	else:
+		if playerbeingrecorded != null:
+			var pf = playerbeingrecorded.get_node("PlayerFrame")
+			assert (pf.logrecfile != null)
+			pf.logrecfile.store_var({ "t":Time.get_ticks_msec()*0.001, "END":true })
+			pf.logrecfile.close()
+			pf.logrecfile = null
+			playerbeingrecorded = null

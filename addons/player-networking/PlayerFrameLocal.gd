@@ -5,6 +5,7 @@ var NetworkGatewayForDoppelganger = null
 var PlayerConnections = null
 
 var networkID = 0   # 0:unconnected, 1:server, -1:connecting, >1:connected to client
+var logrecfile = null
 
 static func thinframedata_updatef0(fd0, fd, bnothinning):
 	var vd = { }
@@ -100,6 +101,9 @@ func _process(delta):
 				else:
 					doppelgangernode.get_node("PlayerFrame").networkedavatarthinnedframedata(vd)
 
+	if logrecfile != null:
+		logrecfile.store_var({"t":Time.get_ticks_msec()*0.001, "vd":vd})
+
 func transmitaudiopacket(packet):
 	if networkID >= 1:
 		PlayerConnections.rpc("RPCincomingaudiopacket", packet)
@@ -112,3 +116,5 @@ func transmitaudiopacket(packet):
 				doppelgangernode.get_node("PlayerFrame").incomingaudiopacket(packet)
 		else:
 			print("dropaudframe")
+	if logrecfile != null:
+		logrecfile.store_var({"t":Time.get_ticks_msec()*0.001, "au":packet})
