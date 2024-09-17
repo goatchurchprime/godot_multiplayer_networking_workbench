@@ -5,6 +5,7 @@ var NetworkGatewayForDoppelganger = null
 var PlayerConnections = null
 
 var networkID = 0   # 0:unconnected, 1:server, -1:connecting, >1:connected to client
+var logrecfile = null
 
 static func thinframedata_updatef0(fd0, fd, bnothinning):
 	var vd = { }
@@ -88,7 +89,7 @@ func _process(delta):
 		vd[NCONSTANTS.CFI_PLAYER_NODENAME] = get_parent().get_name()
 		PlayerConnections.rpc("RPCnetworkedavatarthinnedframedataPC", vd)
 		
-	if doppelgangernode != null:
+	if doppelgangernode != null and NetworkGatewayForDoppelganger != null:
 		var doppelnetoffset = NetworkGatewayForDoppelganger.DoppelgangerPanel.getnetoffset()
 		get_parent().PF_changethinnedframedatafordoppelganger(vd, doppelnetoffset, false)
 		var doppelgangerdelay = NetworkGatewayForDoppelganger.getrandomdoppelgangerdelay()
@@ -99,3 +100,21 @@ func _process(delta):
 					doppelgangernode.networkedavatarthinnedframedataANIM(vd)
 				else:
 					doppelgangernode.get_node("PlayerFrame").networkedavatarthinnedframedata(vd)
+
+	if logrecfile != null:
+		logrecfile.store_var({"t":Time.get_ticks_msec()*0.001, "vd":vd})
+
+func transmitaudiopacket(packet):
+	if networkID >= 1:
+		PlayerConnections.rpc("RPCincomingaudiopacket", packet)
+	if doppelgangernode != null and NetworkGatewayForDoppelganger != null:
+		var doppelnetoffset = NetworkGatewayForDoppelganger.DoppelgangerPanel.getnetoffset()
+		var doppelgangerdelay = NetworkGatewayForDoppelganger.getrandomdoppelgangerdelay()
+		if doppelgangerdelay != -1.0:
+			await get_tree().create_timer(doppelgangerdelay*0.001).timeout
+			if doppelgangernode != null:
+				doppelgangernode.get_node("PlayerFrame").incomingaudiopacket(packet)
+		else:
+			print("dropaudframe")
+	if logrecfile != null:
+		logrecfile.store_var({"t":Time.get_ticks_msec()*0.001, "au":packet})

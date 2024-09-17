@@ -54,7 +54,6 @@ func _on_new_card_pressed():
 	multiplayerauthority.rpc_id(sid, "spawn", data)
 
 
-
 var subviewpointcontainerhasmouse = false
 func _on_sub_viewport_container_mouse_entered():
 	subviewpointcontainerhasmouse = true

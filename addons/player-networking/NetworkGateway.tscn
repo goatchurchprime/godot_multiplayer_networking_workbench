@@ -525,6 +525,7 @@ step = 0.0
 
 [node name="LogRec" type="Button" parent="VBox/PlayerConnections/VBox/HBox"]
 layout_mode = 2
+toggle_mode = true
 text = "LogRec
 "
 
@@ -581,6 +582,14 @@ size_flags_horizontal = 0
 layout_mode = 2
 size_flags_horizontal = 4
 text = "DoppelgangerDD"
+
+[node name="chooselogrec" type="OptionButton" parent="VBox/DoppelgangerPanel/hbox/VBox_enable"]
+layout_mode = 2
+selected = 1
+item_count = 2
+popup/item_0/text = "me"
+popup/item_1/text = "logrec"
+popup/item_1/id = 1
 
 [node name="VSeparator" type="VSeparator" parent="VBox/DoppelgangerPanel/hbox"]
 layout_mode = 2
@@ -671,6 +680,7 @@ layout_mode = 2
 [connection signal="received_message" from="VBox/TabContainer/MQTTsignalling/MQTT" to="VBox/TabContainer/MQTTsignalling" method="_on_mqtt_received_message"]
 [connection signal="item_selected" from="VBox/PlayerConnections/VBox/HBox/PlayerList" to="VBox/PlayerConnections" method="_on_PlayerList_item_selected"]
 [connection signal="value_changed" from="VBox/PlayerConnections/VBox/HBox/PlayerLagSlider" to="VBox/PlayerConnections" method="_on_PlayerLagSlider_value_changed"]
+[connection signal="toggled" from="VBox/PlayerConnections/VBox/HBox/LogRec" to="VBox/PlayerConnections" method="_on_log_rec_toggled"]
 [connection signal="toggled" from="VBox/PlayerConnections/VBox/RecordingFeature/Vox" to="VBox/PlayerConnections/VBox/RecordingFeature" method="_on_vox_toggled"]
 [connection signal="gui_input" from="VBox/PlayerConnections/VBox/RecordingFeature/VoxThreshold" to="VBox/PlayerConnections/VBox/RecordingFeature" method="_on_vox_threshold_gui_input"]
 [connection signal="toggled" from="VBox/DoppelgangerPanel/hbox/VBox_enable/DoppelgangerEnable" to="VBox/PlayerConnections" method="_on_Doppelganger_toggled"]
