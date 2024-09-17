@@ -240,9 +240,9 @@ func _on_Doppelganger_toggled(button_pressed):
 			df.doppelgangerrecfile = null
 			df.doppelgangernextrec = null
 			df.NetworkGatewayForDoppelgangerReplay = null
+		removeremoteplayer(pf.doppelgangernode.get_name())
 		pf.doppelgangernode = null
 		pf.NetworkGatewayForDoppelganger = null
-		removeremoteplayer("Doppelganger")
 
 	updateplayerlist()
 
