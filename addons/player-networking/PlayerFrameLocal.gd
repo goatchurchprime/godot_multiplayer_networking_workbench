@@ -89,7 +89,7 @@ func _process(delta):
 		vd[NCONSTANTS.CFI_PLAYER_NODENAME] = get_parent().get_name()
 		PlayerConnections.rpc("RPCnetworkedavatarthinnedframedataPC", vd)
 		
-	if doppelgangernode != null:
+	if doppelgangernode != null and NetworkGatewayForDoppelganger != null:
 		var doppelnetoffset = NetworkGatewayForDoppelganger.DoppelgangerPanel.getnetoffset()
 		get_parent().PF_changethinnedframedatafordoppelganger(vd, doppelnetoffset, false)
 		var doppelgangerdelay = NetworkGatewayForDoppelganger.getrandomdoppelgangerdelay()
@@ -107,7 +107,7 @@ func _process(delta):
 func transmitaudiopacket(packet):
 	if networkID >= 1:
 		PlayerConnections.rpc("RPCincomingaudiopacket", packet)
-	if doppelgangernode != null:
+	if doppelgangernode != null and NetworkGatewayForDoppelganger != null:
 		var doppelnetoffset = NetworkGatewayForDoppelganger.DoppelgangerPanel.getnetoffset()
 		var doppelgangerdelay = NetworkGatewayForDoppelganger.getrandomdoppelgangerdelay()
 		if doppelgangerdelay != -1.0:

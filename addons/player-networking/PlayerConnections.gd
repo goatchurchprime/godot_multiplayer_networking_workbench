@@ -196,29 +196,54 @@ func _peer_disconnected(id):
 			
 
 func _on_Doppelganger_toggled(button_pressed):
+	var pf = LocalPlayer.get_node("PlayerFrame")
 	var DoppelgangerPanel = get_node("../DoppelgangerPanel")
 	if button_pressed:
 		#DoppelgangerPanel.visible = true
+		var rlogrecfile = null
+		print(DoppelgangerPanel.get_node("hbox/VBox_enable/chooselogrec").selected)
+		if DoppelgangerPanel.get_node("hbox/VBox_enable/chooselogrec").selected == 1:
+			rlogrecfile = FileAccess.open("user://logrec.dat", FileAccess.READ)
 		DoppelgangerPanel.seteditable(false)
-		var avatardata = LocalPlayer.PF_datafornewconnectedplayer()
-		avatardata["playernodename"] = "Doppelganger"
-		avatardata.erase("spawnframedata")
-		avatardata["networkid"] = LocalPlayer.get_node("PlayerFrame").networkID
-		var fd = LocalPlayer.get_node("PlayerFrame").framedata0.duplicate()
-		fd[NCONSTANTS.CFI_TIMESTAMP] = fd[NCONSTANTS.CFI_TIMESTAMP_F0]
-		fd.erase(NCONSTANTS.CFI_TIMESTAMP_F0)
-		var doppelnetoffset = get_node("../DoppelgangerPanel").getnetoffset()
-		LocalPlayer.PF_changethinnedframedatafordoppelganger(fd, doppelnetoffset, true)
-		avatardata["framedata0"] = fd
-		var doppelgangerdelay = NetworkGateway.getrandomdoppelgangerdelay(true)
-		await get_tree().create_timer(doppelgangerdelay*0.001).timeout
-		LocalPlayer.get_node("PlayerFrame").doppelgangernode = newremoteplayer(avatardata)
-		LocalPlayer.get_node("PlayerFrame").NetworkGatewayForDoppelganger = NetworkGateway
+		if rlogrecfile == null:
+			var avatardata = LocalPlayer.PF_datafornewconnectedplayer()
+			avatardata["playernodename"] = "Doppelganger"
+			avatardata.erase("spawnframedata")
+			avatardata["networkid"] = LocalPlayer.get_node("PlayerFrame").networkID
+			var fd = LocalPlayer.get_node("PlayerFrame").framedata0.duplicate()
+			fd[NCONSTANTS.CFI_TIMESTAMP] = fd[NCONSTANTS.CFI_TIMESTAMP_F0]
+			fd.erase(NCONSTANTS.CFI_TIMESTAMP_F0)
+			var doppelnetoffset = DoppelgangerPanel.getnetoffset()
+			LocalPlayer.PF_changethinnedframedatafordoppelganger(fd, doppelnetoffset, true)
+			avatardata["framedata0"] = fd
+			var doppelgangerdelay = NetworkGateway.getrandomdoppelgangerdelay(true)
+			await get_tree().create_timer(doppelgangerdelay*0.001).timeout
+			pf.doppelgangernode = newremoteplayer(avatardata)
+			pf.NetworkGatewayForDoppelganger = NetworkGateway
+		else:
+			var avatardata = rlogrecfile.get_var()
+			avatardata["playernodename"] = "Logrecreplay"
+			avatardata["networkid"] = LocalPlayer.get_node("PlayerFrame").networkID
+			avatardata["labeltext"] = avatardata["playername"]
+			pf.doppelgangernode = newremoteplayer(avatardata)
+			var df = pf.doppelgangernode.get_node("PlayerFrame")
+			df.doppelgangerrecfile = rlogrecfile
+			df.doppelgangernextrec = df.doppelgangerrecfile.get_var()
+			df.doppelgangerrectimeoffset = avatardata.t - Time.get_ticks_msec()*0.001
+			df.NetworkGatewayForDoppelgangerReplay = NetworkGateway
+
 	else:
 		DoppelgangerPanel.seteditable(true)
-		LocalPlayer.get_node("PlayerFrame").doppelgangernode = null
-		LocalPlayer.get_node("PlayerFrame").NetworkGatewayForDoppelganger = null
+		var df = pf.doppelgangernode.get_node("PlayerFrame")
+		if df.doppelgangerrecfile != null:
+			df.doppelgangerrecfile.close()
+			df.doppelgangerrecfile = null
+			df.doppelgangernextrec = null
+			df.NetworkGatewayForDoppelgangerReplay = null
+		pf.doppelgangernode = null
+		pf.NetworkGatewayForDoppelganger = null
 		removeremoteplayer("Doppelganger")
+
 	updateplayerlist()
 
 @rpc("any_peer", "call_remote", "reliable", 0)

@@ -10,6 +10,11 @@ var completedframe0 = { }
 var networkID = 0   # 0:unconnected, 1:server, -1:connecting, >1:connected to client
 var logrecfile = null
 
+var doppelgangerrecfile = null
+var doppelgangerrectimeoffset = 0
+var doppelgangernextrec = null
+var NetworkGatewayForDoppelgangerReplay = null
+
 		# we could make this tolerate out of order values
 func networkedavatarthinnedframedata(vd):
 	if logrecfile != null:
@@ -29,6 +34,21 @@ func networkedavatarthinnedframedata(vd):
 var Dframecount = 0
 var Dmaxarrivaldelay = 0
 func _process(delta):
+	var Ttime = Time.get_ticks_msec()*0.001
+	if doppelgangerrecfile != null and doppelgangernextrec != null:
+		if doppelgangerrectimeoffset + Ttime > doppelgangernextrec.t:
+			if doppelgangernextrec.has("vd"):
+				networkedavatarthinnedframedata(doppelgangernextrec["vd"])
+				doppelgangernextrec = doppelgangerrecfile.get_var()
+			elif doppelgangernextrec.has("au"):
+				incomingaudiopacket(doppelgangernextrec["au"])
+				doppelgangernextrec = doppelgangerrecfile.get_var()
+			else:
+				assert (doppelgangernextrec.has("END"))
+				doppelgangernextrec = null
+				print("logrec replay ended")
+				NetworkGatewayForDoppelgangerReplay.DoppelgangerPanel.get_node("hbox/VBox_enable/DoppelgangerEnable").button_pressed = false
+	
 	if initialframestate == 1 and len(framestack) > 0:
 		get_parent().PF_framedatatoavatar(framestack[0])
 		initialframestate = 2
@@ -41,7 +61,7 @@ func _process(delta):
 		else:
 			Dmaxarrivaldelay = max(Dmaxarrivaldelay, framestack[0][NCONSTANTS.CFI_ARRIVALDELAY])
 			
-	var t = Time.get_ticks_msec()*0.001 - mintimestampoffset - laglatency
+	var t = Ttime - mintimestampoffset - laglatency
 	var completedframeL = { }
 	while len(framestack) > 0 and t > framestack[0][NCONSTANTS.CFI_TIMESTAMP]:
 		var fd = framestack.pop_front()
