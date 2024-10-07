@@ -182,8 +182,11 @@ func _peer_connected(id):
 	rpc_id(id, "RPCspawnintoremoteplayer", avatardata)
 
 func _peer_disconnected(id):
+	if NetworkGateway.Dconnectedplayerscount == 0 and multiplayer.get_unique_id() == 1:
+		print("_peer_disconnected already called by _server_disconnected")
+		return
 	connectionlog("_remove playerid %d\n" % id)
-	prints("hhhh ", NetworkGateway.Dconnectedplayerscount, id, multiplayer.get_unique_id())
+	print("_peer_disconnected localid=", multiplayer.get_unique_id(), " playerid=", id, " cplayserscount=", NetworkGateway.Dconnectedplayerscount)
 	NetworkGateway.Dconnectedplayerscount -= 1
 	assert (NetworkGateway.Dconnectedplayerscount >= 1)
 	assert (remote_players_idstonodenames.has(id))
@@ -193,7 +196,6 @@ func _peer_disconnected(id):
 		removeremoteplayer(remoteplayernodename)
 	print("players_connected_list: ", remote_players_idstonodenames)
 	updateplayerlist()
-			
 
 func _on_Doppelganger_toggled(button_pressed):
 	var pf = LocalPlayer.get_node("PlayerFrame")

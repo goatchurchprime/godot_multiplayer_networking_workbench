@@ -17,7 +17,6 @@ var xclientopenservers = [ ]
 var xclienttreeitems = { }
 var xclientclosedlist = [ ]
 
-signal xclientstatusesupdate
 signal messagereceived(msg, fromclientid)
 
 @onready var Roomplayertree = $VBox/HBoxM/HSplitContainer/Roomplayers/Tree
@@ -34,6 +33,7 @@ func clearallstatuses():
 	Roomplayertree.clear()
 	Roomplayertree.create_item()
 	xclienttreeitems.clear()
+	xclientopenservers.clear()
 	xclientstatuses.clear()
 	xclientclosedlist.clear()
 	Roomplayertreecaboosereached = false
@@ -108,7 +108,7 @@ func processothermclientstatus(mclientid, v):
 		xclientclosedlist.append(mclientid)
 		if xclientstatuses.has(mclientid):
 			xclientstatuses[mclientid] = mstatus
-			emit_signal("xclientstatusesupdate")
+			NetworkGateway.emit_signal("xclientstatusesupdate")
 		return
 
 	xclientstatuses[mclientid] = mstatus
@@ -138,7 +138,7 @@ func processothermclientstatus(mclientid, v):
 	if v.has("playername"):
 		xclienttreeitems[mclientid].set_text(1, v["playername"])
 		
-	emit_signal("xclientstatusesupdate")
+	NetworkGateway.emit_signal("xclientstatusesupdate")
 
 
 func _on_mqtt_broker_disconnected():
@@ -165,6 +165,8 @@ func start_mqtt():
 	Roomnametext.editable = false
 	clearallstatuses()
 	randomize()
+	print($MQTT, get_children())
+	print($MQTT.client_id)
 	$MQTT.client_id = "x%d" % (2 + (randi()%0x7ffffff8))
 	Clientidtext.text = $MQTT.client_id
 	playername = NetworkGateway.PlayerConnections.LocalPlayer.playername()

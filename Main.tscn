@@ -109,8 +109,9 @@ text = "CC"
 layout_mode = 2
 
 [node name="Roomname" type="LineEdit" parent="QuickOptions"]
+custom_minimum_size = Vector2(75, 0)
 layout_mode = 2
-text = "lettuce"
+text = "cabbage"
 
 [node name="VSeparator3" type="VSeparator" parent="QuickOptions"]
 layout_mode = 2
@@ -193,13 +194,12 @@ libraries = {
 }
 
 [node name="NetworkGateway" parent="." instance=ExtResource("3")]
-visible = false
 z_index = 1000
 layout_mode = 0
 offset_left = 4.0
 offset_top = 44.0
-offset_right = 663.0
-offset_bottom = 423.0
+offset_right = 681.0
+offset_bottom = 428.0
 playersnodepath = NodePath("../SubViewportContainer/SubViewport/Players")
 localplayerscene = ""
 
