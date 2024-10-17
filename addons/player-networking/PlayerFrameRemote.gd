@@ -15,6 +15,15 @@ var doppelgangerrectimeoffset = 0
 var doppelgangernextrec = null
 var NetworkGatewayForDoppelgangerReplay = null
 
+
+var currentplayeranimation : Animation = null
+var currentanimationlibrary : AnimationLibrary = null
+var currentplayeranimationT0 = 0.0
+var currentplayeranimationLookup = { }
+
+var Danimatebyanimation = true
+var initialframe = null
+
 		# we could make this tolerate out of order values
 func networkedavatarthinnedframedata(vd):
 	if logrecfile != null:
@@ -28,8 +37,42 @@ func networkedavatarthinnedframedata(vd):
 		print("new mintimeoffset ", timestampoffset)
 		initialframestate = 1
 	vd[NCONSTANTS.CFI_ARRIVALDELAY] = vd[NCONSTANTS.CFI_TIMESTAMP_RECIEVED] - mintimestampoffset - vd[NCONSTANTS.CFI_TIMESTAMPPREV]
-	framestack.push_back(vd)
-	
+
+	if Danimatebyanimation:
+		if initialframe == null:
+			initialframe = vd
+
+		if currentplayeranimation == null:
+			currentplayeranimation = Animation.new()
+			currentplayeranimationT0 = vd[NCONSTANTS.CFI_TIMESTAMP]
+			currentplayeranimationLookup = { }
+			var currentplayeranimationlibrary = get_node("../AnimationPlayer").get_animation_library("")
+			currentplayeranimation.length = 1
+			currentplayeranimationlibrary.add_animation("cpa1", currentplayeranimation)
+			get_node("../AnimationPlayer").play("cpa1")
+			get_node("../AnimationPlayer").pause()
+
+		for k in vd:
+			var i = currentplayeranimationLookup.get(k, -1)
+			if i == -1:
+				if k == NCONSTANTS.CFI_RECT_POSITION:
+					i = currentplayeranimation.add_track(Animation.TYPE_VALUE)
+					currentplayeranimation.track_set_path(i, ".:position")
+				elif k == NCONSTANTS.CFI_VISIBLE:
+					i = currentplayeranimation.add_track(Animation.TYPE_VALUE)
+					currentplayeranimation.track_set_path(i, ".:visible")
+				elif k == NCONSTANTS.CFI_SPEAKING:
+					i = currentplayeranimation.add_track(Animation.TYPE_VALUE)
+					currentplayeranimation.track_set_path(i, "SpeakingIcon`:visible")
+				else:
+					continue
+				currentplayeranimationLookup[k] = i
+			var kt = vd[NCONSTANTS.CFI_TIMESTAMP] - currentplayeranimationT0
+			currentplayeranimation.track_insert_key(i, kt, vd[k])
+			if kt + 1 > currentplayeranimation.length:
+				currentplayeranimation.length = kt + 1
+	else:
+		framestack.push_back(vd)
 
 var Dframecount = 0
 var Dmaxarrivaldelay = 0
@@ -46,13 +89,26 @@ func _process(delta):
 			else:
 				assert (doppelgangernextrec.has("END"))
 				doppelgangernextrec = null
-				print("logrec replay ended")
+				print("logrec replay ended, removing doppelganger")
 				NetworkGatewayForDoppelgangerReplay.DoppelgangerPanel.get_node("hbox/VBox_enable/DoppelgangerEnable").button_pressed = false
-	
+				
+	if Danimatebyanimation:
+		if initialframestate == 1 and initialframe != null:
+			get_parent().PF_framedatatoavatar(initialframe)
+			initialframestate = 2
+
+		# mintimestampoffset = timestampreceived(~Ttime) - timestampsent
+		var t = Ttime - mintimestampoffset - laglatency
+		var kt = t - currentplayeranimationT0
+		var d = kt - get_node("../AnimationPlayer").current_animation_position
+		get_node("../AnimationPlayer").seek(kt, true)
+		return
+
 	if initialframestate == 1 and len(framestack) > 0:
 		get_parent().PF_framedatatoavatar(framestack[0])
 		initialframestate = 2
 		
+
 	if len(framestack) > 0:
 		Dframecount += 1
 		if (Dframecount%60) == 0:
