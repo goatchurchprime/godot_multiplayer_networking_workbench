@@ -165,7 +165,7 @@ func start_mqtt():
 	Roomnametext.editable = false
 	clearallstatuses()
 	randomize()
-	print($MQTT, get_children())
+	print($MQTT, get_children(), $MQTT.get_script())
 	print($MQTT.client_id)
 	$MQTT.client_id = "x%d" % (2 + (randi()%0x7ffffff8))
 	Clientidtext.text = $MQTT.client_id

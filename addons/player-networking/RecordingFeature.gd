@@ -99,7 +99,7 @@ func _process(delta):
 func _ready():
 	$VoxThreshold.material.set_shader_parameter("voxthreshhold", voxthreshhold)
 	if $AudioStreamPlayerMicrophone.bus != "MicrophoneBus":
-		print("AudioStreamPlayerMicrophone doesn't use bus called MicrophoneBus, disabling")
+		printerr("AudioStreamPlayerMicrophone doesn't use bus called MicrophoneBus, disabling")
 		$AudioStreamPlayerMicrophone.stop()
 		return
 	assert ($AudioStreamPlayerMicrophone.stream.is_class("AudioStreamMicrophone"))
@@ -110,9 +110,10 @@ func _ready():
 	if audioopuschunkedeffect == null and ClassDB.can_instantiate("AudioEffectOpusChunked"):
 		audioopuschunkedeffect = ClassDB.instantiate("AudioEffectOpusChunked")
 		AudioServer.add_bus_effect(microphonebusidx, audioopuschunkedeffect)
-	print("audioopuschunkedeffect ", audioopuschunkedeffect)
 	if audioopuschunkedeffect != null:
 		setupaudioshader()
+	else:
+		printerr("Unabled to find or instantiate AudioEffectOpusChunked on MicrophoneBus")
 	
 func _on_vox_toggled(toggled_on):
 	$PTT.toggle_mode = toggled_on
