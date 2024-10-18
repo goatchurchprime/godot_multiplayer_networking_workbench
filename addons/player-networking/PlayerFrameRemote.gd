@@ -24,6 +24,13 @@ var currentplayeranimationLookup = { }
 var Danimatebyanimation = true
 var initialframe = null
 
+func Dclearcachesig():
+	print("Dclearcachesig ", Time.get_ticks_msec())
+func Dmixer_applied():
+	print("Dmixerapplied ", Time.get_ticks_msec())
+func Dmixer_updated():
+	print("Dmixerupdated ", Time.get_ticks_msec())
+
 		# we could make this tolerate out of order values
 func networkedavatarthinnedframedata(vd):
 	if logrecfile != null:
@@ -51,7 +58,11 @@ func networkedavatarthinnedframedata(vd):
 			currentplayeranimationlibrary.add_animation("cpa1", currentplayeranimation)
 			get_node("../AnimationPlayer").play("cpa1")
 			get_node("../AnimationPlayer").pause()
+			get_node("../AnimationPlayer").caches_cleared.connect(Dclearcachesig)
+			get_node("../AnimationPlayer").mixer_applied.connect(Dmixer_applied)
+			get_node("../AnimationPlayer").mixer_updated.connect(Dmixer_updated)
 
+			
 		for k in vd:
 			var i = currentplayeranimationLookup.get(k, -1)
 			if i == -1:
@@ -68,7 +79,9 @@ func networkedavatarthinnedframedata(vd):
 					continue
 				currentplayeranimationLookup[k] = i
 			var kt = vd[NCONSTANTS.CFI_TIMESTAMP] - currentplayeranimationT0
+			print(kt, "insertkey ", k)
 			currentplayeranimation.track_insert_key(i, kt, vd[k])
+			print(" Dinsertkey ")
 			if kt + 1 > currentplayeranimation.length:
 				currentplayeranimation.length = kt + 1
 	else:
@@ -100,7 +113,6 @@ func _process(delta):
 		# mintimestampoffset = timestampreceived(~Ttime) - timestampsent
 		var t = Ttime - mintimestampoffset - laglatency
 		var kt = t - currentplayeranimationT0
-		var d = kt - get_node("../AnimationPlayer").current_animation_position
 		get_node("../AnimationPlayer").seek(kt, true)
 		return
 
