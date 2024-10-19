@@ -19,6 +19,7 @@ var currentplayeranimation : Animation = null
 var currentanimationlibrary : AnimationLibrary = null
 var currentplayeranimationT0 = 0.0
 var currentplayeranimationLookup = { }
+const animationtimerunoff = 1.0
 
 var Danimatebyanimation = true
 var initialframe = null
@@ -27,6 +28,33 @@ func Dclearcachesig():
 	print("Dclearcachesig ", Time.get_ticks_msec())
 func Dmixer_updated():
 	print("Dmixerupdated ", Time.get_ticks_msec())
+
+
+func setupanimationtracks(vd):
+	currentplayeranimation = Animation.new()
+	currentplayeranimationT0 = vd[NCONSTANTS.CFI_TIMESTAMP]
+	currentplayeranimationLookup = { }
+	var currentplayeranimationlibrary = $AnimationPlayer.get_animation_library("alib1")
+	currentplayeranimation.length = animationtimerunoff
+	currentplayeranimationlibrary.add_animation("cpa1", currentplayeranimation)
+	$AnimationPlayer.play("alib1/cpa1")
+	$AnimationPlayer.pause()
+	$AnimationPlayer.caches_cleared.connect(Dclearcachesig)
+	$AnimationPlayer.mixer_updated.connect(Dmixer_updated)
+	for k in vd:
+		var i = -1
+		if k == NCONSTANTS.CFI_RECT_POSITION:
+			i = currentplayeranimation.add_track(Animation.TYPE_VALUE)
+			currentplayeranimation.track_set_path(i, "..:position")
+		elif k == NCONSTANTS.CFI_VISIBLE:
+			i = currentplayeranimation.add_track(Animation.TYPE_VALUE)
+			currentplayeranimation.track_set_path(i, "..:visible")
+		elif k == NCONSTANTS.CFI_SPEAKING:
+			i = currentplayeranimation.add_track(Animation.TYPE_VALUE)
+			currentplayeranimation.track_set_path(i, "../SpeakingIcon:visible")
+		else:
+			continue
+		currentplayeranimationLookup[k] = i
 
 		# we could make this tolerate out of order values
 func networkedavatarthinnedframedata(vd):
@@ -42,46 +70,18 @@ func networkedavatarthinnedframedata(vd):
 		initialframestate = 1
 	vd[NCONSTANTS.CFI_ARRIVALDELAY] = vd[NCONSTANTS.CFI_TIMESTAMP_RECIEVED] - mintimestampoffset - vd[NCONSTANTS.CFI_TIMESTAMPPREV]
 
-	if Danimatebyanimation:
-		if initialframe == null:
-			initialframe = vd
-
-		if currentplayeranimation == null:
-			currentplayeranimation = Animation.new()
-			currentplayeranimationT0 = vd[NCONSTANTS.CFI_TIMESTAMP]
-			currentplayeranimationLookup = { }
-			var currentplayeranimationlibrary = get_node("../AnimationPlayer").get_animation_library("")
-			currentplayeranimation.length = 1
-			currentplayeranimationlibrary.add_animation("cpa1", currentplayeranimation)
-			get_node("../AnimationPlayer").play("cpa1")
-			get_node("../AnimationPlayer").pause()
-			get_node("../AnimationPlayer").caches_cleared.connect(Dclearcachesig)
-			get_node("../AnimationPlayer").mixer_updated.connect(Dmixer_updated)
-
-			
+	if currentplayeranimation == null:
+		setupanimationtracks(vd)
+	if currentplayeranimation != null:
 		for k in vd:
 			var i = currentplayeranimationLookup.get(k, -1)
-			if i == -1:
-				if k == NCONSTANTS.CFI_RECT_POSITION:
-					i = currentplayeranimation.add_track(Animation.TYPE_VALUE)
-					currentplayeranimation.track_set_path(i, ".:position")
-				elif k == NCONSTANTS.CFI_VISIBLE:
-					i = currentplayeranimation.add_track(Animation.TYPE_VALUE)
-					currentplayeranimation.track_set_path(i, ".:visible")
-				elif k == NCONSTANTS.CFI_SPEAKING:
-					i = currentplayeranimation.add_track(Animation.TYPE_VALUE)
-					currentplayeranimation.track_set_path(i, "SpeakingIcon`:visible")
-				else:
-					continue
-				currentplayeranimationLookup[k] = i
-			var kt = vd[NCONSTANTS.CFI_TIMESTAMP] - currentplayeranimationT0
-			print(kt, "insertkey ", k)
-			currentplayeranimation.track_insert_key(i, kt, vd[k])
-			print(" Dinsertkey ")
-			if kt + 1 > currentplayeranimation.length:
-				currentplayeranimation.length = kt + 1
-	else:
-		framestack.push_back(vd)
+			if i != -1:
+				var kt = vd[NCONSTANTS.CFI_TIMESTAMP] - currentplayeranimationT0
+				print(kt, "insertkey ", k)
+				currentplayeranimation.track_insert_key(i, kt, vd[k])
+				print(" Dinsertkey ")
+				if kt + animationtimerunoff > currentplayeranimation.length:
+					currentplayeranimation.length = kt + animationtimerunoff
 
 var Dframecount = 0
 var Dmaxarrivaldelay = 0
@@ -101,65 +101,10 @@ func _process(delta):
 				print("logrec replay ended, removing doppelganger")
 				NetworkGatewayForDoppelgangerReplay.DoppelgangerPanel.get_node("hbox/VBox_enable/DoppelgangerEnable").button_pressed = false
 				
-	if Danimatebyanimation:
-		if initialframestate == 1 and initialframe != null:
-			get_parent().PF_framedatatoavatar(initialframe)
-			initialframestate = 2
-
-		# mintimestampoffset = timestampreceived(~Ttime) - timestampsent
+	if currentplayeranimation != null:
 		var t = Ttime - mintimestampoffset - laglatency
 		var kt = t - currentplayeranimationT0
-		get_node("../AnimationPlayer").seek(kt, true)
-		return
-
-	if initialframestate == 1 and len(framestack) > 0:
-		get_parent().PF_framedatatoavatar(framestack[0])
-		initialframestate = 2
-		
-
-	if len(framestack) > 0:
-		Dframecount += 1
-		if (Dframecount%60) == 0:
-			print("Dmaxarrivaldelay ", Dmaxarrivaldelay)
-			Dmaxarrivaldelay = framestack[0][NCONSTANTS.CFI_ARRIVALDELAY]
-		else:
-			Dmaxarrivaldelay = max(Dmaxarrivaldelay, framestack[0][NCONSTANTS.CFI_ARRIVALDELAY])
-			
-	var t = Ttime - mintimestampoffset - laglatency
-	var completedframeL = { }
-	while len(framestack) > 0 and t > framestack[0][NCONSTANTS.CFI_TIMESTAMP]:
-		var fd = framestack.pop_front()
-		for k in fd:
-			completedframe0[k] = fd[k]
-			completedframeL[k] = fd[k]
-		if len(framestack) == 0:
-			get_parent().PF_framedatatoavatar(completedframeL)
-			
-	if len(framestack) > 0 and t > framestack[0][NCONSTANTS.CFI_TIMESTAMPPREV]:
-		var lam = inverse_lerp(framestack[0][NCONSTANTS.CFI_TIMESTAMPPREV], framestack[0][NCONSTANTS.CFI_TIMESTAMP], t)
-		var ld = { }
-		for k in framestack[0]:
-			if k > NCONSTANTS.CFI_ZERO and completedframe0.has(k):
-				var v1 = framestack[0][k]
-				var v0 = completedframe0[k]
-				var v = null
-				var ty = typeof(v1)
-				if ty == TYPE_BOOL:
-					continue # v = v0  (filled in by completedframeL)
-				elif ty == TYPE_INT:
-					continue # v = v0  (filled in by completedframeL)
-				elif ty == TYPE_QUATERNION:
-					v = v0.slerp(v1, lam)
-				else:
-					v = lerp(v0, v1, lam)
-				ld[k] = v
-				completedframeL.erase(k)
-		for k in completedframeL:
-			ld[k] = completedframeL[k]
-			
-		ld[NCONSTANTS.CFI_SPEAKING] = audiostreamopuschunked != null and audiostreamopuschunked.queue_length_frames() > 0
-
-		get_parent().PF_framedatatoavatar(ld)
+		$AnimationPlayer.seek(kt, true)
 
 
 var audiostreamopuschunked : AudioStream = null

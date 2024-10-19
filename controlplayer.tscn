@@ -1,4 +1,4 @@
-[gd_scene load_steps=11 format=3 uid="uid://dhd8tliyhvtiw"]
+[gd_scene load_steps=9 format=3 uid="uid://dhd8tliyhvtiw"]
 
 [ext_resource type="Script" path="res://controlplayer.gd" id="1"]
 [ext_resource type="Texture2D" uid="uid://b3ueu15i4oe2k" path="res://addons/player-networking/AudioStreamPlayer3D.svg" id="2_6jomj"]
@@ -26,50 +26,6 @@ fill_from = Vector2(0.5, 0.5)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_ah4bj"]
 size = Vector2(13, 13)
-
-[sub_resource type="Animation" id="Animation_b6cgp"]
-resource_name = "template"
-tracks/0/type = "value"
-tracks/0/imported = false
-tracks/0/enabled = true
-tracks/0/path = NodePath(".:position")
-tracks/0/interp = 1
-tracks/0/loop_wrap = true
-tracks/0/keys = {
-"times": PackedFloat32Array(),
-"transitions": PackedFloat32Array(),
-"update": 0,
-"values": []
-}
-tracks/1/type = "value"
-tracks/1/imported = false
-tracks/1/enabled = true
-tracks/1/path = NodePath(".:visible")
-tracks/1/interp = 1
-tracks/1/loop_wrap = true
-tracks/1/keys = {
-"times": PackedFloat32Array(),
-"transitions": PackedFloat32Array(),
-"update": 1,
-"values": []
-}
-tracks/2/type = "value"
-tracks/2/imported = false
-tracks/2/enabled = true
-tracks/2/path = NodePath("SpeakingIcon:visible")
-tracks/2/interp = 1
-tracks/2/loop_wrap = true
-tracks/2/keys = {
-"times": PackedFloat32Array(),
-"transitions": PackedFloat32Array(),
-"update": 1,
-"values": []
-}
-
-[sub_resource type="AnimationLibrary" id="AnimationLibrary_gqsx8"]
-_data = {
-"template": SubResource("Animation_b6cgp")
-}
 
 [node name="RemotePlayer" type="Area2D"]
 collision_layer = 4
@@ -107,8 +63,3 @@ texture_scale = 1.74
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 shape = SubResource("RectangleShape2D_ah4bj")
-
-[node name="AnimationPlayer" type="AnimationPlayer" parent="."]
-libraries = {
-"": SubResource("AnimationLibrary_gqsx8")
-}
