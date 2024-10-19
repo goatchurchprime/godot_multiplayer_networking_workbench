@@ -1,6 +1,5 @@
 extends Node
 
-
 var framestack = [ ]
 var mintimestampoffset: float = 0.0
 var laglatency = 0.2  # this needs to stay above almost all the arrivaldelay values
@@ -26,8 +25,6 @@ var initialframe = null
 
 func Dclearcachesig():
 	print("Dclearcachesig ", Time.get_ticks_msec())
-func Dmixer_applied():
-	print("Dmixerapplied ", Time.get_ticks_msec())
 func Dmixer_updated():
 	print("Dmixerupdated ", Time.get_ticks_msec())
 
@@ -59,7 +56,6 @@ func networkedavatarthinnedframedata(vd):
 			get_node("../AnimationPlayer").play("cpa1")
 			get_node("../AnimationPlayer").pause()
 			get_node("../AnimationPlayer").caches_cleared.connect(Dclearcachesig)
-			get_node("../AnimationPlayer").mixer_applied.connect(Dmixer_applied)
 			get_node("../AnimationPlayer").mixer_updated.connect(Dmixer_updated)
 
 			

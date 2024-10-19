@@ -11,8 +11,10 @@ extends Control
 # https://docs.godotengine.org/en/stable/classes/class_multiplayerapiextension.html
 
 @onready var NetworkGateway = find_parent("NetworkGateway")
-@onready var playerframelocalgdscriptfile = NetworkGateway.scene_file_path.get_base_dir() + "/PlayerFrameLocal.gd"
-@onready var playerframeremotegdscriptfile = NetworkGateway.scene_file_path.get_base_dir() + "/PlayerFrameRemote.gd"
+
+const PlayerFrameLocalScenePath = "res://addons/player-networking/PlayerFrameLocal.tscn"
+const PlayerFrameRemoteScenePath = "res://addons/player-networking/PlayerFrameRemote.tscn"
+
 
 var LocalPlayer = null    # Points into Players for my current self
 var ServerPlayer = null   # Should be myself if I am a server
@@ -53,20 +55,14 @@ func _ready():
 	if PlayersNode.get_child_count() == 1 and NetworkGateway.localplayerscene:
 		PlayersNode.get_child(0).free()
 	if PlayersNode.get_child_count() == 0:
-		var g = load(NetworkGateway.localplayerscene)
 		PlayersNode.add_child(load(NetworkGateway.localplayerscene).instantiate())
 	assert (PlayersNode.get_child_count() == 1) 
 
 	# Insert a player frame below the local player if necessary
 	LocalPlayer = PlayersNode.get_child(0)
 	if not LocalPlayer.has_node("PlayerFrame"):
-		var playerframe = Node.new()
-		playerframe.name = "PlayerFrame"
-		playerframe.set_script(load(playerframelocalgdscriptfile))
-		LocalPlayer.add_child(playerframe)
-	else:
-		print(LocalPlayer.get_node("PlayerFrame").get_script().resource_path)
-		assert (LocalPlayer.get_node("PlayerFrame").get_script().resource_path == playerframelocalgdscriptfile)
+		LocalPlayer.add_child(load(PlayerFrameLocalScenePath).instantiate())
+	assert (LocalPlayer.get_node("PlayerFrame").scene_file_path == PlayerFrameLocalScenePath)
 	LocalPlayer.get_node("PlayerFrame").PlayerConnections = self
 
 	LocalPlayer.PF_initlocalplayer()
@@ -286,10 +282,8 @@ func newremoteplayer(avatardata):
 	if remoteplayer == null:
 		remoteplayer = load(avatardata["avatarsceneresource"]).instantiate()
 		if not remoteplayer.has_node("PlayerFrame"):
-			var playerframe = Node.new()
-			playerframe.name = "PlayerFrame"
-			playerframe.set_script(load(playerframeremotegdscriptfile))
-			remoteplayer.add_child(playerframe)
+			remoteplayer.add_child(load(PlayerFrameRemoteScenePath).instantiate())
+		assert (remoteplayer.get_node("PlayerFrame").scene_file_path == PlayerFrameRemoteScenePath)
 		remoteplayer.set_name(avatardata["playernodename"])
 		remoteplayer.get_node("PlayerFrame").networkID = avatardata["networkid"]
 		remoteplayer.PF_startupdatafromconnectedplayer(avatardata, LocalPlayer)

@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://djehrm378cbde"]
+
+[ext_resource type="Script" path="res://addons/player-networking/PlayerFrameLocal.gd" id="1_vql7f"]
+
+[node name="PlayerFrame" type="Node"]
+script = ExtResource("1_vql7f")
