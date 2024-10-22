@@ -238,6 +238,11 @@ func _on_Doppelganger_toggled(button_pressed):
 			df.doppelgangerrecfile = null
 			df.doppelgangernextrec = null
 			df.NetworkGatewayForDoppelgangerReplay = null
+
+			var a = pf.doppelgangernode.get_node("PlayerAnimation").get_animation("playeral/playanim1")
+			ResourceSaver.save(a, "user://saveanimation.res")
+
+
 		removeremoteplayer(pf.doppelgangernode.get_name())
 		pf.doppelgangernode = null
 		pf.NetworkGatewayForDoppelganger = null

@@ -15,8 +15,8 @@ var doppelgangernextrec = null
 var NetworkGatewayForDoppelgangerReplay = null
 
 
+var PlayerAnimation : AnimationPlayer = null
 var currentplayeranimation : Animation = null
-var currentanimationlibrary : AnimationLibrary = null
 var currentplayeranimationT0 = 0.0
 var currentplayeranimationLookup = { }
 const animationtimerunoff = 1.0
@@ -25,37 +25,33 @@ var Danimatebyanimation = true
 var initialframe = null
 
 func Dclearcachesig():
-	print("Dclearcachesig ", Time.get_ticks_msec())
+	pass # print("Dclearcachesig ", Time.get_ticks_msec())
 func Dmixer_updated():
 	print("Dmixerupdated ", Time.get_ticks_msec())
 
 
 func setupanimationtracks(vd):
-	currentplayeranimation = Animation.new()
+	PlayerAnimation = get_node("../PlayerAnimation")
+	var currentplayeranimationlibrary = PlayerAnimation.get_animation_library("playeral")
+	var templateanimation : Animation = currentplayeranimationlibrary.get_animation("trackstemplate")
+	currentplayeranimation = templateanimation.duplicate()
 	currentplayeranimationT0 = vd[NCONSTANTS.CFI_TIMESTAMP]
 	currentplayeranimationLookup = { }
-	var currentplayeranimationlibrary = $AnimationPlayer.get_animation_library("alib1")
 	currentplayeranimation.length = animationtimerunoff
-	currentplayeranimationlibrary.add_animation("cpa1", currentplayeranimation)
-	$AnimationPlayer.play("alib1/cpa1")
-	$AnimationPlayer.pause()
-	$AnimationPlayer.caches_cleared.connect(Dclearcachesig)
-	$AnimationPlayer.mixer_updated.connect(Dmixer_updated)
-	for k in vd:
-		var i = -1
-		if k == NCONSTANTS.CFI_RECT_POSITION:
-			i = currentplayeranimation.add_track(Animation.TYPE_VALUE)
-			currentplayeranimation.track_set_path(i, "..:position")
-		elif k == NCONSTANTS.CFI_VISIBLE:
-			i = currentplayeranimation.add_track(Animation.TYPE_VALUE)
-			currentplayeranimation.track_set_path(i, "..:visible")
-		elif k == NCONSTANTS.CFI_SPEAKING:
-			i = currentplayeranimation.add_track(Animation.TYPE_VALUE)
-			currentplayeranimation.track_set_path(i, "../SpeakingIcon:visible")
-		else:
-			continue
-		currentplayeranimationLookup[k] = i
-
+	currentplayeranimationlibrary.add_animation("playanim1", currentplayeranimation)
+	PlayerAnimation.play("playeral/playanim1")
+	PlayerAnimation.pause()
+	PlayerAnimation.caches_cleared.connect(Dclearcachesig)
+	PlayerAnimation.mixer_updated.connect(Dmixer_updated)
+	for i in range(templateanimation.get_track_count()):
+		var x = templateanimation.track_get_path(i)
+		if x == ^".:position":
+			currentplayeranimationLookup[NCONSTANTS.CFI_RECT_POSITION] = i
+		elif x == ^".:visible":
+			currentplayeranimationLookup[NCONSTANTS.CFI_VISIBLE] = i
+		elif x == ^"SpeakingIcon:visible":
+			currentplayeranimationLookup[NCONSTANTS.CFI_SPEAKING] = i
+			
 		# we could make this tolerate out of order values
 func networkedavatarthinnedframedata(vd):
 	if logrecfile != null:
@@ -75,13 +71,16 @@ func networkedavatarthinnedframedata(vd):
 	if currentplayeranimation != null:
 		for k in vd:
 			var i = currentplayeranimationLookup.get(k, -1)
+			if k >= NCONSTANTS.CFI_ANIMTRACKS:
+				i = k - NCONSTANTS.CFI_ANIMTRACKS
 			if i != -1:
 				var kt = vd[NCONSTANTS.CFI_TIMESTAMP] - currentplayeranimationT0
-				print(kt, "insertkey ", k)
+				#print(kt, "insertkey ", k)
 				currentplayeranimation.track_insert_key(i, kt, vd[k])
-				print(" Dinsertkey ")
+				#print(" Dinsertkey ")
 				if kt + animationtimerunoff > currentplayeranimation.length:
 					currentplayeranimation.length = kt + animationtimerunoff
+
 
 var Dframecount = 0
 var Dmaxarrivaldelay = 0
@@ -98,13 +97,12 @@ func _process(delta):
 			else:
 				assert (doppelgangernextrec.has("END"))
 				doppelgangernextrec = null
-				print("logrec replay ended, removing doppelganger")
 				NetworkGatewayForDoppelgangerReplay.DoppelgangerPanel.get_node("hbox/VBox_enable/DoppelgangerEnable").button_pressed = false
 				
 	if currentplayeranimation != null:
 		var t = Ttime - mintimestampoffset - laglatency
 		var kt = t - currentplayeranimationT0
-		$AnimationPlayer.seek(kt, true)
+		PlayerAnimation.seek(kt, true)
 
 
 var audiostreamopuschunked : AudioStream = null

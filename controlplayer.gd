@@ -14,6 +14,7 @@ var maxmouseposition = Vector2(300 + 1800/2, 400 + 1500/2)
 # This same class is used for the local player and the remote players, 
 # so the send and receive data functions can be seen here in pairs
 
+
 # Startup initialization of ourself (before a connection has been made)
 var possibleusernames = ["Alice", "Beth", "Cath", "Dan", "Earl", "Fred", "George", "Harry", "Ivan", "John", "Kevin", "Larry", "Martin", "Oliver", "Peter", "Quentin", "Robert", "Samuel", "Thomas", "Ulrik", "Victor", "Wayne", "Xavier", "Youngs", "Zephir"]
 func PF_initlocalplayer():
@@ -43,6 +44,7 @@ func spawnpointfornewplayer():
 func spawnpointreceivedfromserver(sfd):
 	print("** spawnpointreceivedfromserver", sfd)
 	PF_framedatatoavatar(sfd)
+	get_node("PlayerFrame").bnextframerecordalltracks = true
 	clientawaitingspawnpoint = false
 	print("  gggsdff  spawnpointreceivedfromserver ", clientawaitingspawnpoint)
 	nextframeisfirst = true
@@ -61,7 +63,8 @@ func PF_datafornewconnectedplayer():
 	if not clientawaitingspawnpoint:
 		avatardata["framedata0"] = get_node("PlayerFrame").framedata0.duplicate()
 		avatardata["framedata0"].erase(NCONSTANTS.CFI_TIMESTAMP_F0)
-
+		get_node("PlayerFrame").bnextframerecordalltracks = true
+		
 	return avatardata
 
 # The receiver of the the above function after the scene 
@@ -88,6 +91,7 @@ func PF_processlocalavatarposition(delta):
 	return true
 	
 func PF_avatartoframedata():
+	
 	var fd = { NCONSTANTS.CFI_RECT_POSITION: position, 
 			   NCONSTANTS.CFI_VISIBLE: visible }
 	fd[NCONSTANTS.CFI_FIRE_KEY] = Input.is_key_pressed(KEY_SPACE)
@@ -96,6 +100,7 @@ func PF_avatartoframedata():
 		nextframeisfirst = false
 	return fd
 
+# Defunct
 func PF_framedatatoavatar(fd):
 	if fd.has(NCONSTANTS.CFI_RECT_POSITION):
 		position = fd[NCONSTANTS.CFI_RECT_POSITION]

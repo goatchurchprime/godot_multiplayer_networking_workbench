@@ -37,6 +37,7 @@ func PF_datafornewconnectedplayer():
 		avatardata["framedata0"] = get_node("PlayerFrame").framedata0.duplicate()
 		avatardata["framedata0"].erase(NCONSTANTS.CFI_TIMESTAMP_F0)
 
+	
 	return avatardata
 
 # The receiver of the the above function after the scene 
