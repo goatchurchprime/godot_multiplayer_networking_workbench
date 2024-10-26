@@ -1,6 +1,5 @@
 extends Area2D
 
-var batvelocity = 200
 var clientawaitingspawnpoint = false
 
 var minmouseposition = Vector2(300 - 1800/2, 400 - 1500/2)
@@ -67,8 +66,6 @@ func PF_startupdatafromconnectedplayer(avatardata, localplayer):
 	if "spawnframedata" in avatardata:
 		localplayer.spawnpointreceivedfromserver(avatardata["spawnframedata"])
 
-
-# Function called 
 func PF_processlocalavatarposition(delta):
 	if clientawaitingspawnpoint:
 		return false
@@ -90,4 +87,3 @@ static func PF_changethinnedframedatafordoppelganger(fd, doppelnetoffset, isfram
 	fd[NCONSTANTS.CFI_TIMESTAMPPREV] += doppelnetoffset
 	if fd.has(NCONSTANTS.CFI_ANIMTRACKS+0):
 		fd[NCONSTANTS.CFI_ANIMTRACKS+0].y = 339 - fd[NCONSTANTS.CFI_ANIMTRACKS+0].y
-	

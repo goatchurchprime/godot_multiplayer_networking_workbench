@@ -6,7 +6,7 @@ var laglatency = 0.2  # this needs to stay above almost all the arrivaldelay val
 var initialframestate = 0
 var completedframe0 = { }
 
-var networkID = 0   # 0:unconnected, 1:server, -1:connecting, >1:connected to client
+var networkID = 0   # 1:server, >1:connected as client
 var logrecfile = null
 
 var doppelgangerrecfile = null

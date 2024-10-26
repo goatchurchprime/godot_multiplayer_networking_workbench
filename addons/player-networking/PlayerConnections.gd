@@ -15,16 +15,11 @@ extends Control
 const PlayerFrameLocalScenePath = "res://addons/player-networking/PlayerFrameLocal.tscn"
 const PlayerFrameRemoteScenePath = "res://addons/player-networking/PlayerFrameRemote.tscn"
 
+var LocalPlayer = null
+var LocalPlayerFrame = null
+var ServerPlayer = null
 
-var LocalPlayer = null    # Points into Players for my current self
-var ServerPlayer = null   # Should be myself if I am a server
-
-# Temporary list of _peer_connected signals received (out of order) before the 
-# _connected_to_server signal.  Can only happen on a client
 var deferred_playerconnections = null
-
-# Mapping required by the _peer_disconnected function to know which 
-# player node to remove
 var remote_players_idstonodenames = { }
 
 @onready var PlayersNode = NetworkGateway.get_node_or_null(NetworkGateway.playersnodepath)
@@ -48,28 +43,24 @@ func connect_multiplayersignals():
 
 func _ready():
 	assert (PlayerList.item_count == 1)
-	if PlayerList.selected == -1:  PlayerList.selected = 0
+	if PlayerList.selected == -1:
+		PlayerList.selected = 0
 
-
-	# Overwrite the localplayer node if the local player scene is defined
 	if PlayersNode.get_child_count() == 1 and NetworkGateway.localplayerscene:
 		PlayersNode.get_child(0).free()
 	if PlayersNode.get_child_count() == 0:
 		PlayersNode.add_child(load(NetworkGateway.localplayerscene).instantiate())
 	assert (PlayersNode.get_child_count() == 1) 
 
-	# Insert a player frame below the local player if necessary
 	LocalPlayer = PlayersNode.get_child(0)
 	if not LocalPlayer.has_node("PlayerFrame"):
 		LocalPlayer.add_child(load(PlayerFrameLocalScenePath).instantiate())
-	assert (LocalPlayer.get_node("PlayerFrame").scene_file_path == PlayerFrameLocalScenePath)
-	LocalPlayer.get_node("PlayerFrame").PlayerConnections = self
+	LocalPlayerFrame = LocalPlayer.get_node("PlayerFrame")
+	assert (LocalPlayerFrame.scene_file_path == PlayerFrameLocalScenePath)
 
+	LocalPlayerFrame.PlayerConnections = self
 	LocalPlayer.PF_initlocalplayer()
-
-	LocalPlayer.get_node("PlayerFrame").networkID = 0
-	LocalPlayer.set_name("R%d" % LocalPlayer.get_node("PlayerFrame").networkID) 
-
+	LocalPlayerFrame.setlocalframenetworkidandname(0)
 
 var prevtxt = ""
 func clearconnectionlog():
@@ -94,17 +85,15 @@ func connectionlog(txt):
 func _connected_to_server():
 	var serverisself = multiplayer.is_server()
 	connectionlog("_server(self) connect\n" if serverisself else "_server connect\n")
-	if LocalPlayer:
-		LocalPlayer.get_node("PlayerFrame").networkID = multiplayer.get_unique_id()
-		assert (LocalPlayer.get_node("PlayerFrame").networkID >= 1)
-		LocalPlayer.set_name("R%d" % LocalPlayer.get_node("PlayerFrame").networkID)
-		connectionlog("_my networkid=%d\n" % LocalPlayer.get_node("PlayerFrame").networkID)
-		print("my playerid=", LocalPlayer.get_node("PlayerFrame").networkID)
-		LocalPlayer.PF_connectedtoserver()
+	LocalPlayerFrame.setlocalframenetworkidandname(multiplayer.get_unique_id())
+	assert (LocalPlayerFrame.networkID >= 1)
+
+	connectionlog("_my networkid=%d\n" % LocalPlayerFrame.networkID)
+	print("my playerid=", LocalPlayerFrame.networkID)
+	LocalPlayer.PF_connectedtoserver()
 	NetworkGateway.Dconnectedplayerscount += 1  
 	assert (NetworkGateway.Dconnectedplayerscount == 1)
 
-	# act on the prematurely received _peer_connected signals
 	if deferred_playerconnections != null:
 		var ldeferred_playerconnections = deferred_playerconnections
 		deferred_playerconnections = null
@@ -129,17 +118,12 @@ func _server_disconnected():
 		return
 	connectionlog("_server(self) disconnect\n")
 	var ns = NetworkGateway.NetworkOptions.selected
-	print("(networkplayer_server_disconnected ")
 	multiplayer.multiplayer_peer = OfflineMultiplayerPeer.new()
-	print("setnetworkpeer OfflineMultiplayerPeer")
-	LocalPlayer.get_node("PlayerFrame").networkID = 0
-	LocalPlayer.set_name("R%d" % LocalPlayer.get_node("PlayerFrame").networkID) 
 	for id in remote_players_idstonodenames.duplicate():
 		_peer_disconnected(id)
-	prints("svedisconnected ", NetworkGateway.Dconnectedplayerscount, multiplayer.get_unique_id())
+	LocalPlayerFrame.setlocalframenetworkidandname(0)
 	NetworkGateway.Dconnectedplayerscount -= 1
 	assert (NetworkGateway.Dconnectedplayerscount == 0)
-	print("*** _server_disconnected ", LocalPlayer.get_node("PlayerFrame").networkID)
 	updateplayerlist()
 	if NetworkGateway.ProtocolOptions.selected == NetworkGateway.NETWORK_PROTOCOL.ENET:
 		NetworkGateway.ENetMultiplayer.get_node("HBox/Servermode/StartENetmultiplayer").set_pressed_no_signal(false)

@@ -4,7 +4,7 @@ var doppelgangernode = null
 var NetworkGatewayForDoppelganger = null
 var PlayerConnections = null
 
-var networkID = 0   # 0:unconnected, 1:server, -1:connecting, >1:connected to client
+var networkID = 0   # 0:unconnected, 1:server, >1:connected as client
 var logrecfile = null
 
 var PlayerAnimation : AnimationPlayer = null
@@ -22,6 +22,10 @@ func setupanimationtrackrecorder():
 	currentrecordinganimation.length = animationtimerunoff
 	currentrecordinganimationlibrary.add_animation("recordanim1", currentrecordinganimation)
 	
+func setlocalframenetworkidandname(lnetworkID):
+	networkID = lnetworkID
+	get_parent().set_name("R%d" % networkID) 
+
 func trackpropertysignificantlychanged(v, v0):
 	var ty = typeof(v)
 	assert (ty == typeof(v0))
@@ -40,6 +44,8 @@ func trackpropertysignificantlychanged(v, v0):
 		return (v0 != v)
 	elif ty == TYPE_FLOAT:
 		return (abs(v0 - v) > 0.001)
+	elif ty == TYPE_STRING:
+		return (v0 != v)
 	else:
 		print("Unknown type ", ty)
 	return true
