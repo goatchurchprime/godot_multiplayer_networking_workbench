@@ -27,7 +27,7 @@ var Roomplayertreecaboosereached = false
 @onready var StatusMQTT = $VBox/HBoxM/HSplitContainer/Msettings/HBox4/StatusMQTT
 @onready var StatusWebRTC = $VBox/HBoxM/HSplitContainer/Msettings/HBox5/StatusWebRTC
 
-@onready var treenodeicon1 = ImageTexture.create_from_image(Image.load_from_file("res://addons/player-networking/AudioStreamPlayer3D.svg"))
+@onready var treenodeiconserver = ImageTexture.create_from_image(Image.load_from_file("res://addons/player-networking/icons/MultiplayerSpawner.svg"))
 
 func clearallstatuses():
 	Roomplayertree.clear()
@@ -130,7 +130,7 @@ func processothermclientstatus(mclientid, v):
 			xclientopenservers.append(mclientid)
 		clearclosedtopics()
 		establishtreeitemparent(mclientid, Roomplayertree.get_root())
-		xclienttreeitems[mclientid].set_icon(2, treenodeicon1)
+		xclienttreeitems[mclientid].set_icon(2, treenodeiconserver)
 	else:
 		xclienttreeitems[mclientid].set_icon(2, null)
 		
