@@ -13,6 +13,20 @@ var currentrecordinganimation : Animation = null
 var currentrecordinganimationT0 = 0.0
 const animationtimerunoff = 1.0
 
+var framedividerVal = 10
+var framedividerCount = framedividerVal
+var DframereportCount = 0
+var Dcumulativebytes = 0
+var Dframebytesprev = 0
+
+var heartbeatfullframeseconds = 5.0
+var minframeseconds = 0.1
+
+var timestampprev = 0.0
+
+var bnextframerecordalltracks = false
+var bawaitingspawnpoint = false
+
 func setupanimationtrackrecorder():
 	PlayerAnimation = get_node("../PlayerAnimation")
 	var currentrecordinganimationlibrary = PlayerAnimation.get_animation_library("playeral")
@@ -68,23 +82,8 @@ func recordthinnedanimation(t, brecordalltracks):
 	currentrecordinganimation.length = t + animationtimerunoff
 	return ad
 
-
-var framedividerVal = 10
-var framedividerCount = framedividerVal
-var DframereportCount = 0
-var Dcumulativebytes = 0
-var Dframebytesprev = 0
-
-var heartbeatfullframeseconds = 5.0
-var minframeseconds = 0.1
-
-var timestampprev = 0.0
-
-var bnextframerecordalltracks = false
-
 func _process(delta):
-	if not get_parent().PF_processlocalavatarposition(delta):
-		return
+	get_parent().PF_processlocalavatarposition(delta)
 
 	var tstamp = Time.get_ticks_msec()*0.001
 	var dft = tstamp - timestampprev
@@ -104,8 +103,8 @@ func _process(delta):
 		
 	vd[NCONSTANTS.CFI_TIMESTAMPPREV] = timestampprev
 	vd[NCONSTANTS.CFI_TIMESTAMP] = tstamp
-	timestampprev = tstamp
-	
+	timestampprev = tstamp	
+
 	Dcumulativebytes += len(var_to_bytes(vd))
 	DframereportCount += 1
 	if DframereportCount == 10:
@@ -114,6 +113,9 @@ func _process(delta):
 			Dframebytesprev = Dcumulativebytes
 		Dcumulativebytes= 0
 		DframereportCount = 0
+
+	if bawaitingspawnpoint:
+		return
 
 	if networkID >= 1:
 		vd[NCONSTANTS.CFI_PLAYER_NODENAME] = get_parent().get_name()
@@ -133,7 +135,6 @@ func _process(delta):
 
 	if logrecfile != null:
 		logrecfile.store_var({"t":Time.get_ticks_msec()*0.001, "vd":vd})
-
 
 
 func transmitaudiopacket(packet):

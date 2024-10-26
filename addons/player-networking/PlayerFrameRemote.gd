@@ -52,7 +52,6 @@ func networkedavatarthinnedframedata(vd):
 	if logrecfile != null:
 		logrecfile.store_var({"t":Time.get_ticks_msec()*0.001, "vd":vd})
 	
-	assert (not vd.has(NCONSTANTS.CFI_TIMESTAMP_F0))
 	vd[NCONSTANTS.CFI_TIMESTAMP_RECIEVED] = Time.get_ticks_msec()*0.001
 	var timestampoffset = vd[NCONSTANTS.CFI_TIMESTAMP_RECIEVED] - vd[NCONSTANTS.CFI_TIMESTAMP]
 	if initialframestate == 0 or timestampoffset < mintimestampoffset:

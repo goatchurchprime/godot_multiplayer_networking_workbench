@@ -1,7 +1,5 @@
 extends Area2D
 
-var clientawaitingspawnpoint = false
-
 var minmouseposition = Vector2(300 - 1800/2, 400 - 1500/2)
 var maxmouseposition = Vector2(300 + 1800/2, 400 + 1500/2)
 
@@ -20,12 +18,6 @@ func PF_initlocalplayer():
 	modulate = Color.YELLOW
 	$Label.text = possibleusernames[randi()%len(possibleusernames)]
 
-# Called on connection to server so we can get ready
-func PF_connectedtoserver():
-	if not multiplayer.is_server():
-		clientawaitingspawnpoint = true
-		print("  sdff  spawnpointreceivedfromserver ", clientawaitingspawnpoint)
-
 func spawnpointfornewplayer():
 	var pos = position
 	pos.y -= 20
@@ -42,39 +34,25 @@ func spawnpointfornewplayer():
 func spawnpointreceivedfromserver(sfd):
 	print("** spawnpointreceivedfromserver", sfd)
 	position = sfd[NCONSTANTS.CFI_ANIMTRACKS+0]
-	get_node("PlayerFrame").bnextframerecordalltracks = true
-	clientawaitingspawnpoint = false
-	print("  gggsdff  spawnpointreceivedfromserver ", clientawaitingspawnpoint)
 	
 # Data about ourself that is sent to the other players on connection
 func PF_datafornewconnectedplayer():
 	var avatardata = { "avatarsceneresource":scene_file_path, 
 						"labeltext":$Label.text
 					 }
-
-	# if we are the server then we should send them a spawn point
-	if multiplayer.is_server():
-		avatardata["spawnframedata"] = spawnpointfornewplayer()
-
 	return avatardata
 
 # The receiver of the the above function after the scene 
 # specified by avatarsceneresource has been instanced
-func PF_startupdatafromconnectedplayer(avatardata, localplayer):
+func PF_startupdatafromconnectedplayer(avatardata):
 	$Label.text = avatardata["labeltext"]
 	visible = false
-	if "spawnframedata" in avatardata:
-		localplayer.spawnpointreceivedfromserver(avatardata["spawnframedata"])
 
 func PF_processlocalavatarposition(delta):
-	if clientawaitingspawnpoint:
-		return false
-
 	if get_window().has_focus():
 		var quickoptions = get_node("../../../../QuickOptions")
 		if quickoptions.subviewpointcontainerhasmouse:
 			global_position = get_global_mouse_position().clamp(minmouseposition, maxmouseposition)
-	return true
 	
 func PF_setspeakingvolume(v):
 	$SpeakingBar.scale.x = v

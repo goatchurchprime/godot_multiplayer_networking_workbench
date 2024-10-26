@@ -90,7 +90,7 @@ func _connected_to_server():
 
 	connectionlog("_my networkid=%d\n" % LocalPlayerFrame.networkID)
 	print("my playerid=", LocalPlayerFrame.networkID)
-	LocalPlayer.PF_connectedtoserver()
+	LocalPlayerFrame.bawaitingspawnpoint = not serverisself
 	NetworkGateway.Dconnectedplayerscount += 1  
 	assert (NetworkGateway.Dconnectedplayerscount == 1)
 
@@ -150,16 +150,19 @@ func _peer_connected(id):
 	assert (NetworkGateway.Dconnectedplayerscount >= 1)
 	NetworkGateway.Dconnectedplayerscount += 1
 	connectionlog("_add playerid %d\n" % id)
-	var serverisself = multiplayer.is_server()
-	assert (LocalPlayer.get_node("PlayerFrame").networkID >= 1)
+	if multiplayer.is_server():
+		rpc_id(id, "RPCspawndatafromserver", LocalPlayer.spawnpointfornewplayer())
+	assert (LocalPlayerFrame.networkID >= 1)
 	assert (not remote_players_idstonodenames.has(id))
 	remote_players_idstonodenames[id] = null
 	print("players_connected_list: ", remote_players_idstonodenames)
 	var avatardata = LocalPlayer.PF_datafornewconnectedplayer()
 	avatardata["playernodename"] = LocalPlayer.get_name()
-	avatardata["networkid"] = LocalPlayer.get_node("PlayerFrame").networkID
-	print("calling spawnintoremoteplayer at ", id, " (from ", LocalPlayer.get_node("PlayerFrame").networkID, ") ", ("with spawndata" if serverisself else ""))
+	avatardata["networkid"] = LocalPlayerFrame.networkID
+	print("calling spawnintoremoteplayer at ", id, " (from ", LocalPlayerFrame.networkID, ") ")
 	rpc_id(id, "RPCspawnintoremoteplayer", avatardata)
+
+
 
 func _peer_disconnected(id):
 	if NetworkGateway.Dconnectedplayerscount == 0 and multiplayer.get_unique_id() == 1:
@@ -178,7 +181,6 @@ func _peer_disconnected(id):
 	updateplayerlist()
 
 func _on_Doppelganger_toggled(button_pressed):
-	var pf = LocalPlayer.get_node("PlayerFrame")
 	var DoppelgangerPanel = get_node("../DoppelgangerPanel")
 	if button_pressed:
 		#DoppelgangerPanel.visible = true
@@ -195,16 +197,16 @@ func _on_Doppelganger_toggled(button_pressed):
 			var doppelnetoffset = DoppelgangerPanel.getnetoffset()
 			var doppelgangerdelay = NetworkGateway.getrandomdoppelgangerdelay(true)
 			await get_tree().create_timer(doppelgangerdelay*0.001).timeout
-			pf.doppelgangernode = newremoteplayer(avatardata)
+			LocalPlayerFrame.doppelgangernode = newremoteplayer(avatardata)
 			LocalPlayer.get_node("PlayerFrame").bnextframerecordalltracks = true
-			pf.NetworkGatewayForDoppelganger = NetworkGateway
+			LocalPlayerFrame.NetworkGatewayForDoppelganger = NetworkGateway
 		else:
 			var avatardata = rlogrecfile.get_var()
 			avatardata["playernodename"] = "Logrecreplay"
 			avatardata["networkid"] = LocalPlayer.get_node("PlayerFrame").networkID
 			avatardata["labeltext"] = avatardata["playername"]
-			pf.doppelgangernode = newremoteplayer(avatardata)
-			var df = pf.doppelgangernode.get_node("PlayerFrame")
+			LocalPlayerFrame.doppelgangernode = newremoteplayer(avatardata)
+			var df = LocalPlayerFrame.doppelgangernode.get_node("PlayerFrame")
 			df.doppelgangerrecfile = rlogrecfile
 			df.doppelgangernextrec = df.doppelgangerrecfile.get_var()
 			df.doppelgangerrectimeoffset = avatardata.t - Time.get_ticks_msec()*0.001
@@ -212,7 +214,7 @@ func _on_Doppelganger_toggled(button_pressed):
 
 	else:
 		DoppelgangerPanel.seteditable(true)
-		var df = pf.doppelgangernode.get_node("PlayerFrame")
+		var df = LocalPlayerFrame.doppelgangernode.get_node("PlayerFrame")
 		if df.doppelgangerrecfile != null:
 			df.doppelgangerrecfile.close()
 			df.doppelgangerrecfile = null
@@ -223,9 +225,9 @@ func _on_Doppelganger_toggled(button_pressed):
 			#ResourceSaver.save(a, "user://saveanimation.res")
 
 
-		removeremoteplayer(pf.doppelgangernode.get_name())
-		pf.doppelgangernode = null
-		pf.NetworkGatewayForDoppelganger = null
+		removeremoteplayer(LocalPlayerFrame.doppelgangernode.get_name())
+		LocalPlayerFrame.doppelgangernode = null
+		LocalPlayerFrame.NetworkGatewayForDoppelganger = null
 
 	updateplayerlist()
 
@@ -241,8 +243,16 @@ func RPCspawnintoremoteplayer(avatardata):
 	assert (remote_players_idstonodenames[senderid] == null)
 	remote_players_idstonodenames[senderid] = remoteplayer.get_name()
 		# this doesn't seem the right place
-	LocalPlayer.get_node("PlayerFrame").bnextframerecordalltracks = true
+	LocalPlayerFrame.bnextframerecordalltracks = true
 	updateplayerlist()
+
+@rpc("any_peer", "call_remote", "reliable", 0)
+func RPCspawndatafromserver(sfd):
+	var rpcsenderid = multiplayer.get_remote_sender_id()
+	assert (rpcsenderid == 1)
+	LocalPlayer.spawnpointreceivedfromserver(sfd)
+	LocalPlayerFrame.bawaitingspawnpoint = false
+	LocalPlayerFrame.bnextframerecordalltracks = true
 
 @rpc("any_peer", "call_remote", "reliable", 0)
 func RPCnetworkedavatarthinnedframedataPC(vd):
@@ -273,7 +283,7 @@ func newremoteplayer(avatardata):
 		assert (remoteplayer.get_node("PlayerFrame").scene_file_path == PlayerFrameRemoteScenePath)
 		remoteplayer.set_name(avatardata["playernodename"])
 		remoteplayer.get_node("PlayerFrame").networkID = avatardata["networkid"]
-		remoteplayer.PF_startupdatafromconnectedplayer(avatardata, LocalPlayer)
+		remoteplayer.PF_startupdatafromconnectedplayer(avatardata)
 		PlayersNode.add_child(remoteplayer)
 		if remoteplayer.get_node("PlayerFrame").networkID == 1:
 			ServerPlayer = remoteplayer
