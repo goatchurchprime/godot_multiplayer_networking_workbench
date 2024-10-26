@@ -1,7 +1,6 @@
-[gd_scene load_steps=11 format=3 uid="uid://dhd8tliyhvtiw"]
+[gd_scene load_steps=12 format=3 uid="uid://dhd8tliyhvtiw"]
 
 [ext_resource type="Script" path="res://controlplayer.gd" id="1"]
-[ext_resource type="Texture2D" uid="uid://b3ueu15i4oe2k" path="res://addons/player-networking/AudioStreamPlayer3D.svg" id="2_6jomj"]
 
 [sub_resource type="Gradient" id="Gradient_s8w0r"]
 interpolation_mode = 2
@@ -55,13 +54,13 @@ tracks/1/keys = {
 tracks/2/type = "value"
 tracks/2/imported = false
 tracks/2/enabled = true
-tracks/2/path = NodePath("SpeakingIcon:visible")
+tracks/2/path = NodePath("SpeakingBar:scale")
 tracks/2/interp = 1
 tracks/2/loop_wrap = true
 tracks/2/keys = {
 "times": PackedFloat32Array(),
 "transitions": PackedFloat32Array(),
-"update": 1,
+"update": 0,
 "values": []
 }
 
@@ -69,6 +68,14 @@ tracks/2/keys = {
 _data = {
 "trackstemplate": SubResource("Animation_dusod")
 }
+
+[sub_resource type="Gradient" id="Gradient_38pll"]
+offsets = PackedFloat32Array(1)
+colors = PackedColorArray(1, 1, 0, 1)
+
+[sub_resource type="GradientTexture1D" id="GradientTexture1D_co1qp"]
+gradient = SubResource("Gradient_38pll")
+width = 60
 
 [node name="Player" type="Area2D"]
 position = Vector2(234, -359)
@@ -94,10 +101,6 @@ horizontal_alignment = 1
 stream = SubResource("AudioStreamOpusChunked_i52lg")
 max_distance = 600.0
 
-[node name="SpeakingIcon" type="Sprite2D" parent="."]
-position = Vector2(1, 16)
-texture = ExtResource("2_6jomj")
-
 [node name="PointLight2D" type="PointLight2D" parent="."]
 scale = Vector2(1.2, 1.2)
 color = Color(0.435294, 1, 1, 1)
@@ -112,3 +115,8 @@ shape = SubResource("RectangleShape2D_ah4bj")
 libraries = {
 "playeral": SubResource("AnimationLibrary_50vjc")
 }
+
+[node name="SpeakingBar" type="Sprite2D" parent="."]
+position = Vector2(0, 12)
+scale = Vector2(0.5, 4)
+texture = SubResource("GradientTexture1D_co1qp")

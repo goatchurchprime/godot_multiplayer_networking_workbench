@@ -208,15 +208,11 @@ func _on_Doppelganger_toggled(button_pressed):
 			avatardata["playernodename"] = "Doppelganger"
 			avatardata.erase("spawnframedata")
 			avatardata["networkid"] = LocalPlayer.get_node("PlayerFrame").networkID
-			var fd = LocalPlayer.get_node("PlayerFrame").framedata0.duplicate()
-			fd[NCONSTANTS.CFI_TIMESTAMP] = fd[NCONSTANTS.CFI_TIMESTAMP_F0]
-			fd.erase(NCONSTANTS.CFI_TIMESTAMP_F0)
 			var doppelnetoffset = DoppelgangerPanel.getnetoffset()
-			LocalPlayer.PF_changethinnedframedatafordoppelganger(fd, doppelnetoffset, true)
-			avatardata["framedata0"] = fd
 			var doppelgangerdelay = NetworkGateway.getrandomdoppelgangerdelay(true)
 			await get_tree().create_timer(doppelgangerdelay*0.001).timeout
 			pf.doppelgangernode = newremoteplayer(avatardata)
+			LocalPlayer.get_node("PlayerFrame").bnextframerecordalltracks = true
 			pf.NetworkGatewayForDoppelganger = NetworkGateway
 		else:
 			var avatardata = rlogrecfile.get_var()
@@ -260,6 +256,8 @@ func RPCspawnintoremoteplayer(avatardata):
 	remoteplayer.get_node("PlayerFrame").set_multiplayer_authority(senderid)
 	assert (remote_players_idstonodenames[senderid] == null)
 	remote_players_idstonodenames[senderid] = remoteplayer.get_name()
+		# this doesn't seem the right place
+	LocalPlayer.get_node("PlayerFrame").bnextframerecordalltracks = true
 	updateplayerlist()
 
 @rpc("any_peer", "call_remote", "reliable", 0)

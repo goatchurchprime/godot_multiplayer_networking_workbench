@@ -74,9 +74,12 @@ func processvox():
 		var audiosamples = audioopuschunkedeffect.read_chunk(false)
 		audiosampleframetextureimage.set_data(audioopuschunkedeffect.audiosamplesize, 1, false, Image.FORMAT_RGF, audiosamples.to_byte_array())
 		audiosampleframetexture.update(audiosampleframetextureimage)
+		return chunkmax
+
 	else:
 		$VoxThreshold.material.set_shader_parameter("chunktexenabled", false)
-	
+		return 0.0
+		
 func processsendopuschunk():
 	if currentlytalking:
 		chunkprefix.set(0, (opusframecount%256))  # 32768 frames is 10 minutes
@@ -93,7 +96,8 @@ func _process(delta):
 	if audioopuschunkedeffect != null:
 		processtalkstreamends()
 		while audioopuschunkedeffect.chunk_available():
-			processvox()
+			var speakingvolume = processvox()
+			PlayerConnections.LocalPlayer.PF_setspeakingvolume(speakingvolume)
 			processsendopuschunk()
 
 func _ready():

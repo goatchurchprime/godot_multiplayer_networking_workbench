@@ -37,7 +37,6 @@ func PF_datafornewconnectedplayer():
 		avatardata["framedata0"] = get_node("PlayerFrame").framedata0.duplicate()
 		avatardata["framedata0"].erase(NCONSTANTS.CFI_TIMESTAMP_F0)
 
-	
 	return avatardata
 
 # The receiver of the the above function after the scene 
@@ -56,14 +55,6 @@ func PF_processlocalavatarposition(delta):
 	if clientawaitingspawnpoint:
 		return false
 	return true
-	
-func PF_avatartoframedata():
-	var fd = { NCONSTANTS.CFI_RECT_POSITION: position, 
-			   NCONSTANTS.CFI_VISIBLE: visible }
-	if nextframeisfirst:
-		fd[NCONSTANTS.CFI_NOTHINFRAME] = 1
-		nextframeisfirst = false
-	return fd
 
 func PF_framedatatoavatar(fd):
 	if fd.has(NCONSTANTS.CFI_RECT_POSITION):
@@ -82,6 +73,6 @@ func setplayername(lname):
 static func PF_changethinnedframedatafordoppelganger(fd, doppelnetoffset, isframe0):
 	fd[NCONSTANTS.CFI_TIMESTAMP] += doppelnetoffset
 	fd[NCONSTANTS.CFI_TIMESTAMPPREV] += doppelnetoffset
-	if fd.has(NCONSTANTS.CFI_RECT_POSITION):
-		fd[NCONSTANTS.CFI_RECT_POSITION].y = 339 - fd[NCONSTANTS.CFI_RECT_POSITION].y
+	if fd.has(NCONSTANTS.CFI_ANIMTRACKS+0):
+		fd[NCONSTANTS.CFI_ANIMTRACKS+0].y = 339 - fd[NCONSTANTS.CFI_ANIMTRACKS+0].y
 	

@@ -2,7 +2,6 @@ extends Area2D
 
 var batvelocity = 200
 var clientawaitingspawnpoint = false
-var nextframeisfirst = false
 
 var minmouseposition = Vector2(300 - 1800/2, 400 - 1500/2)
 var maxmouseposition = Vector2(300 + 1800/2, 400 + 1500/2)
@@ -13,7 +12,6 @@ var maxmouseposition = Vector2(300 + 1800/2, 400 + 1500/2)
 
 # This same class is used for the local player and the remote players, 
 # so the send and receive data functions can be seen here in pairs
-
 
 # Startup initialization of ourself (before a connection has been made)
 var possibleusernames = ["Alice", "Beth", "Cath", "Dan", "Earl", "Fred", "George", "Harry", "Ivan", "John", "Kevin", "Larry", "Martin", "Oliver", "Peter", "Quentin", "Robert", "Samuel", "Thomas", "Ulrik", "Victor", "Wayne", "Xavier", "Youngs", "Zephir"]
@@ -30,24 +28,24 @@ func PF_connectedtoserver():
 		print("  sdff  spawnpointreceivedfromserver ", clientawaitingspawnpoint)
 
 func spawnpointfornewplayer():
-	var sfd = { NCONSTANTS.CFI_RECT_POSITION: position }
-	sfd[NCONSTANTS.CFI_RECT_POSITION].y -= 20
+	var pos = position
+	pos.y -= 20
 	while true:
 		for player in get_parent().get_children():
 			if player != self:
-				if abs(player.position.y - sfd[NCONSTANTS.CFI_RECT_POSITION].y) < 10 and abs(player.position.x - sfd[NCONSTANTS.CFI_RECT_POSITION].x) < 500:
-					sfd[NCONSTANTS.CFI_RECT_POSITION].y = player.position.y - 20
+				if abs(player.position.y - pos.y) < 10 and abs(player.position.x - pos.x) < 500:
+					pos.y = player.position.y - 20
 					continue
 		break
-	return sfd
+	var ipostrack = 0
+	return { NCONSTANTS.CFI_ANIMTRACKS+ipostrack: pos }
 
 func spawnpointreceivedfromserver(sfd):
 	print("** spawnpointreceivedfromserver", sfd)
-	PF_framedatatoavatar(sfd)
+	position = sfd[NCONSTANTS.CFI_ANIMTRACKS+0]
 	get_node("PlayerFrame").bnextframerecordalltracks = true
 	clientawaitingspawnpoint = false
 	print("  gggsdff  spawnpointreceivedfromserver ", clientawaitingspawnpoint)
-	nextframeisfirst = true
 	
 # Data about ourself that is sent to the other players on connection
 func PF_datafornewconnectedplayer():
@@ -59,22 +57,13 @@ func PF_datafornewconnectedplayer():
 	if multiplayer.is_server():
 		avatardata["spawnframedata"] = spawnpointfornewplayer()
 
-	# if we are already spawned then we should send our position
-	if not clientawaitingspawnpoint:
-		avatardata["framedata0"] = get_node("PlayerFrame").framedata0.duplicate()
-		avatardata["framedata0"].erase(NCONSTANTS.CFI_TIMESTAMP_F0)
-		get_node("PlayerFrame").bnextframerecordalltracks = true
-		
 	return avatardata
 
 # The receiver of the the above function after the scene 
 # specified by avatarsceneresource has been instanced
 func PF_startupdatafromconnectedplayer(avatardata, localplayer):
 	$Label.text = avatardata["labeltext"]
-	if "framedata0" in avatardata:
-		get_node("PlayerFrame").networkedavatarthinnedframedata(avatardata["framedata0"])
-	else:
-		visible = false
+	visible = false
 	if "spawnframedata" in avatardata:
 		localplayer.spawnpointreceivedfromserver(avatardata["spawnframedata"])
 
@@ -90,24 +79,8 @@ func PF_processlocalavatarposition(delta):
 			global_position = get_global_mouse_position().clamp(minmouseposition, maxmouseposition)
 	return true
 	
-func PF_avatartoframedata():
-	
-	var fd = { NCONSTANTS.CFI_RECT_POSITION: position, 
-			   NCONSTANTS.CFI_VISIBLE: visible }
-	fd[NCONSTANTS.CFI_FIRE_KEY] = Input.is_key_pressed(KEY_SPACE)
-	if nextframeisfirst:
-		fd[NCONSTANTS.CFI_NOTHINFRAME] = 1
-		nextframeisfirst = false
-	return fd
-
-# Defunct
-func PF_framedatatoavatar(fd):
-	if fd.has(NCONSTANTS.CFI_RECT_POSITION):
-		position = fd[NCONSTANTS.CFI_RECT_POSITION]
-	if fd.has(NCONSTANTS.CFI_VISIBLE):
-		visible = fd[NCONSTANTS.CFI_VISIBLE]
-	if fd.has(NCONSTANTS.CFI_SPEAKING):
-		$SpeakingIcon.visible = fd[NCONSTANTS.CFI_SPEAKING]
+func PF_setspeakingvolume(v):
+	$SpeakingBar.scale.x = v
 
 func playername():
 	return $Label.text 
@@ -115,7 +88,6 @@ func playername():
 static func PF_changethinnedframedatafordoppelganger(fd, doppelnetoffset, isframe0):
 	fd[NCONSTANTS.CFI_TIMESTAMP] += doppelnetoffset
 	fd[NCONSTANTS.CFI_TIMESTAMPPREV] += doppelnetoffset
-	if fd.has(NCONSTANTS.CFI_RECT_POSITION):
-		#fd[NCONSTANTS.CFI_RECT_POSITION].x = 500 - fd[NCONSTANTS.CFI_RECT_POSITION].x
-		fd[NCONSTANTS.CFI_RECT_POSITION].y = 339 - fd[NCONSTANTS.CFI_RECT_POSITION].y
+	if fd.has(NCONSTANTS.CFI_ANIMTRACKS+0):
+		fd[NCONSTANTS.CFI_ANIMTRACKS+0].y = 339 - fd[NCONSTANTS.CFI_ANIMTRACKS+0].y
 	
