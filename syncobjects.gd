@@ -13,9 +13,7 @@ func _ready():
 	Input.set_default_cursor_shape(Input.CURSOR_CROSS)
 	$MultiplayerSpawner.set_spawn_function(spawnfunction)
 	$MultiplayerSpawner.rpc_config("spawn", {"call_local":true, "rpc_mode":MultiplayerAPI.RPC_MODE_ANY_PEER})
-
-	print("Skipping the spawning of first toy")
-	#spawnnexttoy(Vector2i(300, 700))
+	spawnnexttoy(Vector2i(300, 700))
 
 
 var currentmousetoy = null

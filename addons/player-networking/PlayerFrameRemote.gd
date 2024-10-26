@@ -31,13 +31,19 @@ func Dmixer_updated():
 func setupanimationtracks(vd):
 	PlayerAnimation = get_node("../PlayerAnimation")
 	var currentplayeranimationlibrary = PlayerAnimation.get_animation_library("playeral")
+	assert (currentplayeranimationlibrary.resource_local_to_scene)  # Avoids crash, see below
 	var templateanimation : Animation = currentplayeranimationlibrary.get_animation("trackstemplate")
 	currentplayeranimation = templateanimation.duplicate()
 	currentplayeranimationT0 = vd[NCONSTANTS.CFI_TIMESTAMP]
 	currentplayeranimation.length = animationtimerunoff
-	currentplayeranimationlibrary.add_animation("playanim1", currentplayeranimation)
-	PlayerAnimation.play("playeral/playanim1")
+	#var animname = "anim%d" % networkID
+	var animname = "anim1"  # THIS CRASHES when 3 connections (2 animations same name)
+	# See https://github.com/godotengine/godot/issues/98565
+	#print(" -- DDDgetanimationlist adding ", animname, " to ", currentplayeranimationlibrary.get_animation_list(), "  ", networkID)
+	currentplayeranimationlibrary.add_animation(animname, currentplayeranimation)
+	PlayerAnimation.play("playeral/"+animname)
 	PlayerAnimation.pause()
+	#print("  -- DDDgetanimationlist added ", currentplayeranimationlibrary.get_animation_list(), "  ", networkID)
 	PlayerAnimation.caches_cleared.connect(Dclearcachesig)
 	PlayerAnimation.mixer_updated.connect(Dmixer_updated)
 

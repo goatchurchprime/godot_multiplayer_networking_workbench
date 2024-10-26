@@ -593,7 +593,7 @@ text = "DoppelgangerDD"
 
 [node name="chooselogrec" type="OptionButton" parent="VBox/DoppelgangerPanel/hbox/VBox_enable"]
 layout_mode = 2
-selected = 1
+selected = 0
 item_count = 2
 popup/item_0/text = "me"
 popup/item_1/text = "logrec"
