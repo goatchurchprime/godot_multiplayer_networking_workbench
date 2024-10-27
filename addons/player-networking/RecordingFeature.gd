@@ -74,9 +74,12 @@ func processvox():
 		var audiosamples = audioopuschunkedeffect.read_chunk(false)
 		audiosampleframetextureimage.set_data(audioopuschunkedeffect.audiosamplesize, 1, false, Image.FORMAT_RGF, audiosamples.to_byte_array())
 		audiosampleframetexture.update(audiosampleframetextureimage)
+		return chunkmax
+
 	else:
 		$VoxThreshold.material.set_shader_parameter("chunktexenabled", false)
-	
+		return 0.0
+		
 func processsendopuschunk():
 	if currentlytalking:
 		chunkprefix.set(0, (opusframecount%256))  # 32768 frames is 10 minutes
@@ -93,13 +96,14 @@ func _process(delta):
 	if audioopuschunkedeffect != null:
 		processtalkstreamends()
 		while audioopuschunkedeffect.chunk_available():
-			processvox()
+			var speakingvolume = processvox()
+			PlayerConnections.LocalPlayer.PF_setspeakingvolume(speakingvolume)
 			processsendopuschunk()
 
 func _ready():
 	$VoxThreshold.material.set_shader_parameter("voxthreshhold", voxthreshhold)
 	if $AudioStreamPlayerMicrophone.bus != "MicrophoneBus":
-		print("AudioStreamPlayerMicrophone doesn't use bus called MicrophoneBus, disabling")
+		printerr("AudioStreamPlayerMicrophone doesn't use bus called MicrophoneBus, disabling")
 		$AudioStreamPlayerMicrophone.stop()
 		return
 	assert ($AudioStreamPlayerMicrophone.stream.is_class("AudioStreamMicrophone"))
@@ -110,9 +114,10 @@ func _ready():
 	if audioopuschunkedeffect == null and ClassDB.can_instantiate("AudioEffectOpusChunked"):
 		audioopuschunkedeffect = ClassDB.instantiate("AudioEffectOpusChunked")
 		AudioServer.add_bus_effect(microphonebusidx, audioopuschunkedeffect)
-	print("audioopuschunkedeffect ", audioopuschunkedeffect)
 	if audioopuschunkedeffect != null:
 		setupaudioshader()
+	else:
+		printerr("Unabled to find or instantiate AudioEffectOpusChunked on MicrophoneBus")
 	
 func _on_vox_toggled(toggled_on):
 	$PTT.toggle_mode = toggled_on

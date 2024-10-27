@@ -1,7 +1,6 @@
-[gd_scene load_steps=9 format=3 uid="uid://dhd8tliyhvtiw"]
+[gd_scene load_steps=12 format=3 uid="uid://dhd8tliyhvtiw"]
 
 [ext_resource type="Script" path="res://controlplayer.gd" id="1"]
-[ext_resource type="Texture2D" uid="uid://b3ueu15i4oe2k" path="res://addons/player-networking/AudioStreamPlayer3D.svg" id="2_6jomj"]
 
 [sub_resource type="Gradient" id="Gradient_s8w0r"]
 interpolation_mode = 2
@@ -27,7 +26,72 @@ fill_from = Vector2(0.5, 0.5)
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_ah4bj"]
 size = Vector2(13, 13)
 
-[node name="RemotePlayer" type="Area2D"]
+[sub_resource type="Animation" id="Animation_dusod"]
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:position")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(),
+"transitions": PackedFloat32Array(),
+"update": 0,
+"values": []
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath(".:visible")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(),
+"transitions": PackedFloat32Array(),
+"update": 1,
+"values": []
+}
+tracks/2/type = "value"
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/path = NodePath("SpeakingBar:scale")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/keys = {
+"times": PackedFloat32Array(),
+"transitions": PackedFloat32Array(),
+"update": 0,
+"values": []
+}
+tracks/3/type = "value"
+tracks/3/imported = false
+tracks/3/enabled = true
+tracks/3/path = NodePath("Label:text")
+tracks/3/interp = 1
+tracks/3/loop_wrap = true
+tracks/3/keys = {
+"times": PackedFloat32Array(),
+"transitions": PackedFloat32Array(),
+"update": 1,
+"values": []
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_50vjc"]
+resource_local_to_scene = true
+_data = {
+"trackstemplate": SubResource("Animation_dusod")
+}
+
+[sub_resource type="Gradient" id="Gradient_38pll"]
+offsets = PackedFloat32Array(1)
+colors = PackedColorArray(1, 1, 0, 1)
+
+[sub_resource type="GradientTexture1D" id="GradientTexture1D_co1qp"]
+gradient = SubResource("Gradient_38pll")
+width = 60
+
+[node name="Player" type="Area2D"]
+position = Vector2(234, -359)
 collision_layer = 4
 script = ExtResource("1")
 
@@ -50,10 +114,6 @@ horizontal_alignment = 1
 stream = SubResource("AudioStreamOpusChunked_i52lg")
 max_distance = 600.0
 
-[node name="SpeakingIcon" type="Sprite2D" parent="."]
-position = Vector2(1, 16)
-texture = ExtResource("2_6jomj")
-
 [node name="PointLight2D" type="PointLight2D" parent="."]
 scale = Vector2(1.2, 1.2)
 color = Color(0.435294, 1, 1, 1)
@@ -63,3 +123,13 @@ texture_scale = 1.74
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 shape = SubResource("RectangleShape2D_ah4bj")
+
+[node name="PlayerAnimation" type="AnimationPlayer" parent="."]
+libraries = {
+"playeral": SubResource("AnimationLibrary_50vjc")
+}
+
+[node name="SpeakingBar" type="Sprite2D" parent="."]
+position = Vector2(0, 12)
+scale = Vector2(0.5, 4)
+texture = SubResource("GradientTexture1D_co1qp")

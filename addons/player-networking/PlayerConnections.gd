@@ -1,32 +1,25 @@
 extends Control
 
-
 ## PlayerConnections 
 ##
 ## This object receives and manages all networked multiplayer connections and 
 ## disconnections
 
-
-# We should implement this to log what passes through
-# https://docs.godotengine.org/en/stable/classes/class_multiplayerapiextension.html
-
 @onready var NetworkGateway = find_parent("NetworkGateway")
-@onready var playerframelocalgdscriptfile = NetworkGateway.scene_file_path.get_base_dir() + "/PlayerFrameLocal.gd"
-@onready var playerframeremotegdscriptfile = NetworkGateway.scene_file_path.get_base_dir() + "/PlayerFrameRemote.gd"
 
-var LocalPlayer = null    # Points into Players for my current self
-var ServerPlayer = null   # Should be myself if I am a server
+const PlayerFrameLocalScenePath = "res://addons/player-networking/PlayerFrameLocal.tscn"
+const PlayerFrameRemoteScenePath = "res://addons/player-networking/PlayerFrameRemote.tscn"
 
-# Temporary list of _peer_connected signals received (out of order) before the 
-# _connected_to_server signal.  Can only happen on a client
-var deferred_playerconnections = null
+var LocalPlayer = null
+var LocalPlayerFrame = null
 
-# Mapping required by the _peer_disconnected function to know which 
-# player node to remove
-var remote_players_idstonodenames = { }
+var premature_peerconnections = null
+var uninitialized_peerconnections = [ ]
+var RemotePlayers = [ ]
 
 @onready var PlayersNode = NetworkGateway.get_node_or_null(NetworkGateway.playersnodepath)
 @onready var PlayerList = $VBox/HBox/PlayerList
+
 
 var multiplayersignalsconnected = false
 func connect_multiplayersignals():
@@ -46,34 +39,27 @@ func connect_multiplayersignals():
 
 func _ready():
 	assert (PlayerList.item_count == 1)
-	if PlayerList.selected == -1:  PlayerList.selected = 0
+	if PlayerList.selected == -1:
+		PlayerList.selected = 0
 
-
-	# Overwrite the localplayer node if the local player scene is defined
 	if PlayersNode.get_child_count() == 1 and NetworkGateway.localplayerscene:
 		PlayersNode.get_child(0).free()
 	if PlayersNode.get_child_count() == 0:
-		var g = load(NetworkGateway.localplayerscene)
 		PlayersNode.add_child(load(NetworkGateway.localplayerscene).instantiate())
 	assert (PlayersNode.get_child_count() == 1) 
 
-	# Insert a player frame below the local player if necessary
 	LocalPlayer = PlayersNode.get_child(0)
 	if not LocalPlayer.has_node("PlayerFrame"):
-		var playerframe = Node.new()
-		playerframe.name = "PlayerFrame"
-		playerframe.set_script(load(playerframelocalgdscriptfile))
-		LocalPlayer.add_child(playerframe)
-	else:
-		print(LocalPlayer.get_node("PlayerFrame").get_script().resource_path)
-		assert (LocalPlayer.get_node("PlayerFrame").get_script().resource_path == playerframelocalgdscriptfile)
-	LocalPlayer.get_node("PlayerFrame").PlayerConnections = self
+		LocalPlayer.add_child(load(PlayerFrameLocalScenePath).instantiate())
+	LocalPlayerFrame = LocalPlayer.get_node("PlayerFrame")
+	assert (LocalPlayerFrame.scene_file_path == PlayerFrameLocalScenePath)
 
+	LocalPlayerFrame.PlayerConnections = self
 	LocalPlayer.PF_initlocalplayer()
+	LocalPlayerFrame.setlocalframenetworkidandname(0)
 
-	LocalPlayer.get_node("PlayerFrame").networkID = 0
-	LocalPlayer.set_name("R%d" % LocalPlayer.get_node("PlayerFrame").networkID) 
-
+static func playernamefromnetworkid(id):
+	return "R%d" % id
 
 var prevtxt = ""
 func clearconnectionlog():
@@ -98,21 +84,18 @@ func connectionlog(txt):
 func _connected_to_server():
 	var serverisself = multiplayer.is_server()
 	connectionlog("_server(self) connect\n" if serverisself else "_server connect\n")
-	if LocalPlayer:
-		LocalPlayer.get_node("PlayerFrame").networkID = multiplayer.get_unique_id()
-		assert (LocalPlayer.get_node("PlayerFrame").networkID >= 1)
-		LocalPlayer.set_name("R%d" % LocalPlayer.get_node("PlayerFrame").networkID)
-		connectionlog("_my networkid=%d\n" % LocalPlayer.get_node("PlayerFrame").networkID)
-		print("my playerid=", LocalPlayer.get_node("PlayerFrame").networkID)
-		LocalPlayer.PF_connectedtoserver()
+	LocalPlayerFrame.setlocalframenetworkidandname(multiplayer.get_unique_id())
+	assert (LocalPlayerFrame.networkID >= 1)
+
+	connectionlog("_connected_to_server(%d)\n" % LocalPlayerFrame.networkID)
+	LocalPlayerFrame.bawaitingspawninfofromserver = not serverisself
 	NetworkGateway.Dconnectedplayerscount += 1  
 	assert (NetworkGateway.Dconnectedplayerscount == 1)
 
-	# act on the prematurely received _peer_connected signals
-	if deferred_playerconnections != null:
-		var ldeferred_playerconnections = deferred_playerconnections
-		deferred_playerconnections = null
-		for id in ldeferred_playerconnections:
+	if premature_peerconnections != null:
+		var lpremature_peerconnections = premature_peerconnections
+		premature_peerconnections = null
+		for id in lpremature_peerconnections:
 			_peer_connected(id)
 
 	updateplayerlist()
@@ -126,24 +109,23 @@ func _connection_failed():
 	NetworkGateway.setnetworkoff()
 
 func _server_disconnected():
-	deferred_playerconnections = null
+	premature_peerconnections = null
 	if (multiplayer.multiplayer_peer is OfflineMultiplayerPeer):
 		NetworkGateway.Dconnectedplayerscount -= 1
 		assert (NetworkGateway.Dconnectedplayerscount == 0)
 		return
-	connectionlog("_server(self) disconnect\n")
+	connectionlog("_server_disconnected\n")
 	var ns = NetworkGateway.NetworkOptions.selected
-	print("(networkplayer_server_disconnected ")
 	multiplayer.multiplayer_peer = OfflineMultiplayerPeer.new()
-	print("setnetworkpeer OfflineMultiplayerPeer")
-	LocalPlayer.get_node("PlayerFrame").networkID = 0
-	LocalPlayer.set_name("R%d" % LocalPlayer.get_node("PlayerFrame").networkID) 
-	for id in remote_players_idstonodenames.duplicate():
+	for remoteplayer in RemotePlayers.duplicate():
+		_peer_disconnected(remoteplayer.get_node("PlayerFrame").networkID)
+	assert (len(RemotePlayers) == 0)
+	for id in uninitialized_peerconnections.duplicate():
 		_peer_disconnected(id)
-	prints("svedisconnected ", NetworkGateway.Dconnectedplayerscount, multiplayer.get_unique_id())
+	assert (len(uninitialized_peerconnections) == 0)
+	LocalPlayerFrame.setlocalframenetworkidandname(0)
 	NetworkGateway.Dconnectedplayerscount -= 1
 	assert (NetworkGateway.Dconnectedplayerscount == 0)
-	print("*** _server_disconnected ", LocalPlayer.get_node("PlayerFrame").networkID)
 	updateplayerlist()
 	if NetworkGateway.ProtocolOptions.selected == NetworkGateway.NETWORK_PROTOCOL.ENET:
 		NetworkGateway.ENetMultiplayer.get_node("HBox/Servermode/StartENetmultiplayer").set_pressed_no_signal(false)
@@ -158,77 +140,73 @@ func updateplayerlist():
 	PlayerList.clear()
 	PlayerList.selected = 0
 	for player in PlayersNode.get_children():
-		PlayerList.add_item(("*" if player == LocalPlayer else "") + ("&" if player == ServerPlayer else "") + (player.playername() if player.has_method("playername") else player.get_name()))
+		PlayerList.add_item(("*" if player == LocalPlayer else "") + ("&" if player.get_node("PlayerFrame").networkID == 1 else "") + (player.playername() if player.has_method("playername") else player.get_name()))
 		if plp == player.get_name():
 			PlayerList.selected = PlayerList.get_item_count() - 1
 
 func _peer_connected(id):
-	if deferred_playerconnections != null:
-		deferred_playerconnections.push_back(id)
-		connectionlog("_add playerid %d (defer)\n" % id)
+	if premature_peerconnections != null:
+		premature_peerconnections.push_back(id)
+		connectionlog("_deferred_peer_connected(%d)\n" % id)
 		return
+		
+	assert (LocalPlayerFrame.networkID >= 1)
 	assert (NetworkGateway.Dconnectedplayerscount >= 1)
 	NetworkGateway.Dconnectedplayerscount += 1
-	connectionlog("_add playerid %d\n" % id)
-	var serverisself = multiplayer.is_server()
-	assert (LocalPlayer.get_node("PlayerFrame").networkID >= 1)
-	assert (not remote_players_idstonodenames.has(id))
-	remote_players_idstonodenames[id] = null
-	print("players_connected_list: ", remote_players_idstonodenames)
-	var avatardata = LocalPlayer.PF_datafornewconnectedplayer()
-	avatardata["playernodename"] = LocalPlayer.get_name()
-	avatardata["networkid"] = LocalPlayer.get_node("PlayerFrame").networkID
-	print("calling spawnintoremoteplayer at ", id, " (from ", LocalPlayer.get_node("PlayerFrame").networkID, ") ", ("with spawndata" if serverisself else ""))
-	rpc_id(id, "RPCspawnintoremoteplayer", avatardata)
+	connectionlog("_peer_connected(%d)\n" % id)
+
+	assert (not uninitialized_peerconnections.has(id))
+	uninitialized_peerconnections.push_back(id)
+
+	if multiplayer.is_server():
+		rpc_id(id, "RPC_spawninfoforclientfromserver", LocalPlayer.PF_spawninfo_fornewplayer())
+
+	if not LocalPlayerFrame.bawaitingspawninfofromserver:
+		var avatardata = LocalPlayerFrame.datafornewconnectedplayer(false)
+		rpc_id(id, "RPC_createremoteplayer", avatardata)
 
 func _peer_disconnected(id):
 	if NetworkGateway.Dconnectedplayerscount == 0 and multiplayer.get_unique_id() == 1:
-		print("_peer_disconnected already called by _server_disconnected")
+		printerr("_peer_disconnected already called by _server_disconnected")
 		return
+		
+	if uninitialized_peerconnections.has(id):
+		uninitialized_peerconnections.erase(id)
+		return
+
 	connectionlog("_remove playerid %d\n" % id)
 	print("_peer_disconnected localid=", multiplayer.get_unique_id(), " playerid=", id, " cplayserscount=", NetworkGateway.Dconnectedplayerscount)
 	NetworkGateway.Dconnectedplayerscount -= 1
 	assert (NetworkGateway.Dconnectedplayerscount >= 1)
-	assert (remote_players_idstonodenames.has(id))
-	var remoteplayernodename = remote_players_idstonodenames[id]
-	remote_players_idstonodenames.erase(id)
+	var remoteplayernodename = playernamefromnetworkid(id)
+	var remoteplayer = PlayersNode.get_node(remoteplayernodename)
+	assert (RemotePlayers.has(remoteplayer))
+	RemotePlayers.erase(remoteplayer)
 	if remoteplayernodename != null:
 		removeremoteplayer(remoteplayernodename)
-	print("players_connected_list: ", remote_players_idstonodenames)
 	updateplayerlist()
 
+const doppelganger_networkID = -10
 func _on_Doppelganger_toggled(button_pressed):
-	var pf = LocalPlayer.get_node("PlayerFrame")
 	var DoppelgangerPanel = get_node("../DoppelgangerPanel")
 	if button_pressed:
-		#DoppelgangerPanel.visible = true
 		var rlogrecfile = null
 		print(DoppelgangerPanel.get_node("hbox/VBox_enable/chooselogrec").selected)
 		if DoppelgangerPanel.get_node("hbox/VBox_enable/chooselogrec").selected == 1:
 			rlogrecfile = FileAccess.open("user://logrec.dat", FileAccess.READ)
 		DoppelgangerPanel.seteditable(false)
 		if rlogrecfile == null:
-			var avatardata = LocalPlayer.PF_datafornewconnectedplayer()
-			avatardata["playernodename"] = "Doppelganger"
-			avatardata.erase("spawnframedata")
-			avatardata["networkid"] = LocalPlayer.get_node("PlayerFrame").networkID
-			var fd = LocalPlayer.get_node("PlayerFrame").framedata0.duplicate()
-			fd[NCONSTANTS.CFI_TIMESTAMP] = fd[NCONSTANTS.CFI_TIMESTAMP_F0]
-			fd.erase(NCONSTANTS.CFI_TIMESTAMP_F0)
+			var avatardata = LocalPlayerFrame.datafornewconnectedplayer(true)
 			var doppelnetoffset = DoppelgangerPanel.getnetoffset()
-			LocalPlayer.PF_changethinnedframedatafordoppelganger(fd, doppelnetoffset, true)
-			avatardata["framedata0"] = fd
 			var doppelgangerdelay = NetworkGateway.getrandomdoppelgangerdelay(true)
 			await get_tree().create_timer(doppelgangerdelay*0.001).timeout
-			pf.doppelgangernode = newremoteplayer(avatardata)
-			pf.NetworkGatewayForDoppelganger = NetworkGateway
+			LocalPlayerFrame.doppelgangernode = createnewremoteplayernode(avatardata, doppelganger_networkID, "Doppelganger")
+			LocalPlayerFrame.NetworkGatewayForDoppelganger = NetworkGateway
 		else:
 			var avatardata = rlogrecfile.get_var()
-			avatardata["playernodename"] = "Logrecreplay"
-			avatardata["networkid"] = LocalPlayer.get_node("PlayerFrame").networkID
 			avatardata["labeltext"] = avatardata["playername"]
-			pf.doppelgangernode = newremoteplayer(avatardata)
-			var df = pf.doppelgangernode.get_node("PlayerFrame")
+			LocalPlayerFrame.doppelgangernode = createnewremoteplayernode(avatardata, doppelganger_networkID, "Logrecreplay")
+			var df = LocalPlayerFrame.doppelgangernode.get_node("PlayerFrame")
 			df.doppelgangerrecfile = rlogrecfile
 			df.doppelgangernextrec = df.doppelgangerrecfile.get_var()
 			df.doppelgangerrectimeoffset = avatardata.t - Time.get_ticks_msec()*0.001
@@ -236,76 +214,81 @@ func _on_Doppelganger_toggled(button_pressed):
 
 	else:
 		DoppelgangerPanel.seteditable(true)
-		var df = pf.doppelgangernode.get_node("PlayerFrame")
+		var df = LocalPlayerFrame.doppelgangernode.get_node("PlayerFrame")
 		if df.doppelgangerrecfile != null:
 			df.doppelgangerrecfile.close()
 			df.doppelgangerrecfile = null
 			df.doppelgangernextrec = null
 			df.NetworkGatewayForDoppelgangerReplay = null
-		removeremoteplayer(pf.doppelgangernode.get_name())
-		pf.doppelgangernode = null
-		pf.NetworkGatewayForDoppelganger = null
+			#var a = pf.doppelgangernode.get_node("PlayerAnimation").get_animation("playeral/playanim1")
+			#ResourceSaver.save(a, "user://saveanimation.res")
+
+		removeremoteplayer(LocalPlayerFrame.doppelgangernode.get_name())
+		LocalPlayerFrame.doppelgangernode = null
+		LocalPlayerFrame.NetworkGatewayForDoppelganger = null
 
 	updateplayerlist()
 
 @rpc("any_peer", "call_remote", "reliable", 0)
-func RPCspawnintoremoteplayer(avatardata):
-	var senderid = avatardata["networkid"]
-	var rpcsenderid = multiplayer.get_remote_sender_id()
-	print("rec spawnintoremoteplayer from ", senderid)
-	connectionlog("spawn playerid %d\n" % senderid)
-	var remoteplayer = newremoteplayer(avatardata)
-	assert (senderid == avatardata["networkid"])
+func RPC_createremoteplayer(avatardata):
+	var senderid = multiplayer.get_remote_sender_id()
+	assert (senderid == avatardata["Dnetworkid"])
+	connectionlog("createremoteplayer(%d)\n" % senderid)
+	assert (uninitialized_peerconnections.has(senderid))
+	uninitialized_peerconnections.erase(senderid)
+	var playernodename = playernamefromnetworkid(senderid)
+	assert (playernodename == avatardata["Dplayernodename"])
+	var remoteplayer = createnewremoteplayernode(avatardata, senderid, playernodename)
 	remoteplayer.get_node("PlayerFrame").set_multiplayer_authority(senderid)
-	assert (remote_players_idstonodenames[senderid] == null)
-	remote_players_idstonodenames[senderid] = remoteplayer.get_name()
+	RemotePlayers.push_back(remoteplayer)
 	updateplayerlist()
 
 @rpc("any_peer", "call_remote", "reliable", 0)
-func RPCnetworkedavatarthinnedframedataPC(vd):
+func RPC_spawninfoforclientfromserver(sfd):
 	var rpcsenderid = multiplayer.get_remote_sender_id()
-	var remoteplayer = PlayersNode.get_node_or_null(String(vd[NCONSTANTS.CFI_PLAYER_NODENAME]))
-	if remoteplayer != null:
-		remoteplayer.get_node("PlayerFrame").networkedavatarthinnedframedata(vd)
-	else:
-		print("networkedavatarthinnedframedataPC called before spawning")
+	assert (rpcsenderid == 1)
+	assert (LocalPlayerFrame.bawaitingspawninfofromserver)
+	LocalPlayer.PF_spawninfo_receivedfromserver(sfd)
+	LocalPlayerFrame.bawaitingspawninfofromserver = false
+	var avatardata = LocalPlayerFrame.datafornewconnectedplayer(false)
+	rpc("RPC_createremoteplayer", avatardata)
+
+
+@rpc("any_peer", "call_remote", "reliable", 0)
+func RPC_networkedavatarthinnedframedata(vd):
+	var rpcsenderid = multiplayer.get_remote_sender_id()
+	if uninitialized_peerconnections.has(rpcsenderid) or (premature_peerconnections != null and premature_peerconnections.has(rpcsenderid)): 
+		return
+	var remoteplayernodename = playernamefromnetworkid(rpcsenderid)
+	var remoteplayer = PlayersNode.get_node(remoteplayernodename)
+	remoteplayer.get_node("PlayerFrame").networkedavatarthinnedframedata(vd)
 
 @rpc("any_peer", "call_remote", "unreliable", 0) 
-func RPCincomingaudiopacket(packet):
+func RPC_incomingaudiopacket(packet):
 	var rpcsenderid = multiplayer.get_remote_sender_id()
-	var remoteplayernodename = remote_players_idstonodenames[rpcsenderid]
-	var remoteplayer = PlayersNode.get_node_or_null(String(remoteplayernodename))
-	if remoteplayer != null:
-		remoteplayer.get_node("PlayerFrame").incomingaudiopacket(packet)
+	if uninitialized_peerconnections.has(rpcsenderid) or (premature_peerconnections != null and premature_peerconnections.has(rpcsenderid)): 
+		return
+	var remoteplayernodename = playernamefromnetworkid(rpcsenderid)
+	var remoteplayer = PlayersNode.get_node(remoteplayernodename)
+	remoteplayer.get_node("PlayerFrame").incomingaudiopacket(packet)
 	
-func newremoteplayer(avatardata):
-	print(avatardata)
-	print(avatardata["playernodename"])
-	print("::"+avatardata["playernodename"] + ";;")
-	var remoteplayer = PlayersNode.get_node_or_null(String(avatardata["playernodename"]))
-	if remoteplayer == null:
-		remoteplayer = load(avatardata["avatarsceneresource"]).instantiate()
-		if not remoteplayer.has_node("PlayerFrame"):
-			var playerframe = Node.new()
-			playerframe.name = "PlayerFrame"
-			playerframe.set_script(load(playerframeremotegdscriptfile))
-			remoteplayer.add_child(playerframe)
-		remoteplayer.set_name(avatardata["playernodename"])
-		remoteplayer.get_node("PlayerFrame").networkID = avatardata["networkid"]
-		remoteplayer.PF_startupdatafromconnectedplayer(avatardata, LocalPlayer)
-		PlayersNode.add_child(remoteplayer)
-		if remoteplayer.get_node("PlayerFrame").networkID == 1:
-			ServerPlayer = remoteplayer
-		print("Adding remoteplayer: ", avatardata["playernodename"])
-	else:
-		print("** remoteplayer already exists: ", avatardata["playernodename"])
+func createnewremoteplayernode(avatardata, networkID, playernodename):
+	assert (not PlayersNode.has_node(playernodename))
+	var remoteplayer = load(avatardata["avatarsceneresource"]).instantiate()
+	if not remoteplayer.has_node("PlayerFrame"):
+		remoteplayer.add_child(load(PlayerFrameRemoteScenePath).instantiate())
+	var rpf = remoteplayer.get_node("PlayerFrame")
+	assert (rpf.scene_file_path == PlayerFrameRemoteScenePath)
+	remoteplayer.set_name(playernodename)
+	rpf.networkID = networkID
+	PlayersNode.add_child(remoteplayer)
+	rpf.startupremoteplayer(avatardata)
+	print("Adding remoteplayer: ", playernodename)
 	return remoteplayer
 	
 func removeremoteplayer(playernodename):
 	var remoteplayer = PlayersNode.get_node_or_null(String(playernodename))
 	if remoteplayer != null:
-		if remoteplayer.get_node("PlayerFrame").networkID == 1:
-			ServerPlayer = null
 		PlayersNode.remove_child(remoteplayer)
 		remoteplayer.queue_free()
 		print("Removing remoteplayer: ", playernodename)
@@ -331,14 +314,8 @@ func _on_log_rec_toggled(toggled_on):
 		var logrecfile = FileAccess.open("user://logrec.dat", FileAccess.WRITE)
 		print("logging to: ", logrecfile.get_path_absolute())
 		
-		#var avatardata = playerbeingrecorded.PF_datafornewconnectedplayer()
 		var pf = playerbeingrecorded.get_node("PlayerFrame")
-		var avatardata = { "avatarsceneresource":playerbeingrecorded.scene_file_path }
-		if pf.get("framedata0"):
-			avatardata["framedata0"] = pf.framedata0.duplicate()
-		else:
-			avatardata["framedata0"] = pf.completedframe0.duplicate()
-		avatardata["playername"] = playerbeingrecorded.playername()
+		var avatardata = pf.datafornewconnectedplayer(true)
 		avatardata["t"] = Time.get_ticks_msec()*0.001
 		logrecfile.store_var(avatardata)
 		playerbeingrecorded.get_node("PlayerFrame").logrecfile = logrecfile

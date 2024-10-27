@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://b3ueu15i4oe2k"
-path="res://.godot/imported/AudioStreamPlayer3D.svg-a339e6e4eb497c978035a903cb33959d.ctex"
+uid="uid://ca7ouu33c3jbc"
+path="res://.godot/imported/MultiplayerSpawner.svg-9f619a78fa46b545cc90cd43a392c6fb.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://addons/player-networking/AudioStreamPlayer3D.svg"
-dest_files=["res://.godot/imported/AudioStreamPlayer3D.svg-a339e6e4eb497c978035a903cb33959d.ctex"]
+source_file="res://addons/player-networking/icons/MultiplayerSpawner.svg"
+dest_files=["res://.godot/imported/MultiplayerSpawner.svg-9f619a78fa46b545cc90cd43a392c6fb.ctex"]
 
 [params]
 

@@ -1,6 +1,61 @@
-[gd_scene load_steps=2 format=3 uid="uid://bw3irandh5ksv"]
+[gd_scene load_steps=4 format=3 uid="uid://bw3irandh5ksv"]
 
 [ext_resource type="Script" path="res://addons/player-networking/FallbackControlplayer.gd" id="1_yeg3u"]
+
+[sub_resource type="Animation" id="Animation_dusod"]
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:position")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(),
+"transitions": PackedFloat32Array(),
+"update": 0,
+"values": []
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath(".:visible")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(),
+"transitions": PackedFloat32Array(),
+"update": 1,
+"values": []
+}
+tracks/2/type = "value"
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/path = NodePath("SpeakingBar:scale")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/keys = {
+"times": PackedFloat32Array(),
+"transitions": PackedFloat32Array(),
+"update": 0,
+"values": []
+}
+tracks/3/type = "value"
+tracks/3/imported = false
+tracks/3/enabled = true
+tracks/3/path = NodePath("Label:text")
+tracks/3/interp = 1
+tracks/3/loop_wrap = true
+tracks/3/keys = {
+"times": PackedFloat32Array(),
+"transitions": PackedFloat32Array(),
+"update": 1,
+"values": []
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_50vjc"]
+_data = {
+"trackstemplate": SubResource("Animation_dusod")
+}
 
 [node name="FallbackControlplayer" type="Control"]
 layout_mode = 3
@@ -18,7 +73,12 @@ offset_bottom = 23.0
 
 [node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="."]
 
-[node name="SpeakingIcon" type="Control" parent="."]
+[node name="SpeakingBar" type="Control" parent="."]
 anchors_preset = 0
 offset_right = 40.0
 offset_bottom = 40.0
+
+[node name="PlayerAnimation" type="AnimationPlayer" parent="."]
+libraries = {
+"playeral": SubResource("AnimationLibrary_50vjc")
+}

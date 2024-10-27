@@ -1,13 +1,11 @@
 extends Node
 
-
 var framestack = [ ]
 var mintimestampoffset: float = 0.0
 var laglatency = 0.2  # this needs to stay above almost all the arrivaldelay values
 var initialframestate = 0
-var completedframe0 = { }
 
-var networkID = 0   # 0:unconnected, 1:server, -1:connecting, >1:connected to client
+var networkID = 0   # 1:server, >1:connected as client
 var logrecfile = null
 
 var doppelgangerrecfile = null
@@ -15,12 +13,49 @@ var doppelgangerrectimeoffset = 0
 var doppelgangernextrec = null
 var NetworkGatewayForDoppelgangerReplay = null
 
-		# we could make this tolerate out of order values
+
+var PlayerAnimation : AnimationPlayer = null
+var currentplayeranimation : Animation = null
+var currentplayeranimationT0 = 0.0
+const animationtimerunoff = 1.0
+
+
+func Dclearcachesig():
+	pass # print("Dclearcachesig ", Time.get_ticks_msec())
+func Dmixer_updated():
+	print("Dmixerupdated ", Time.get_ticks_msec())
+
+func setupanimationtracks(vd):
+	PlayerAnimation = get_node("../PlayerAnimation")
+	var currentplayeranimationlibrary = PlayerAnimation.get_animation_library("playeral")
+	var templateanimation : Animation = currentplayeranimationlibrary.get_animation("trackstemplate")
+	currentplayeranimation = templateanimation.duplicate()
+	currentplayeranimationT0 = vd[NCONSTANTS.CFI_TIMESTAMP]
+	currentplayeranimation.length = animationtimerunoff
+
+	for i in range(currentplayeranimation.get_track_count()):
+		currentplayeranimation.track_insert_key(i, 0, vd[NCONSTANTS.CFI_ANIMTRACKS + i])
+
+	assert (currentplayeranimationlibrary.resource_local_to_scene)  # Avoids crash, see below
+	#var animname = "anim%d" % networkID
+	var animname = "anim1"  # THIS CRASHES when 3 connections (2 animations same name)
+	# See https://github.com/godotengine/godot/issues/98565
+
+	currentplayeranimationlibrary.add_animation(animname, currentplayeranimation)
+	PlayerAnimation.play("playeral/"+animname)
+	PlayerAnimation.pause()
+	PlayerAnimation.caches_cleared.connect(Dclearcachesig)
+	PlayerAnimation.mixer_updated.connect(Dmixer_updated)
+
+func startupremoteplayer(avatardata):
+	get_parent().visible = false
+	setupanimationtracks(avatardata["snapshottracks"])
+
 func networkedavatarthinnedframedata(vd):
+		# we could make this tolerate out of order values
 	if logrecfile != null:
 		logrecfile.store_var({"t":Time.get_ticks_msec()*0.001, "vd":vd})
 	
-	assert (not vd.has(NCONSTANTS.CFI_TIMESTAMP_F0))
 	vd[NCONSTANTS.CFI_TIMESTAMP_RECIEVED] = Time.get_ticks_msec()*0.001
 	var timestampoffset = vd[NCONSTANTS.CFI_TIMESTAMP_RECIEVED] - vd[NCONSTANTS.CFI_TIMESTAMP]
 	if initialframestate == 0 or timestampoffset < mintimestampoffset:
@@ -28,8 +63,19 @@ func networkedavatarthinnedframedata(vd):
 		print("new mintimeoffset ", timestampoffset)
 		initialframestate = 1
 	vd[NCONSTANTS.CFI_ARRIVALDELAY] = vd[NCONSTANTS.CFI_TIMESTAMP_RECIEVED] - mintimestampoffset - vd[NCONSTANTS.CFI_TIMESTAMPPREV]
-	framestack.push_back(vd)
-	
+
+	assert (currentplayeranimation != null)
+	if currentplayeranimation != null:
+		for k in vd:
+			if k >= NCONSTANTS.CFI_ANIMTRACKS:
+				var i = k - NCONSTANTS.CFI_ANIMTRACKS
+				var kt = vd[NCONSTANTS.CFI_TIMESTAMP] - currentplayeranimationT0
+				#print(kt, "insertkey ", k)
+				currentplayeranimation.track_insert_key(i, kt, vd[k])
+				#print(" Dinsertkey ")
+				if kt + animationtimerunoff > currentplayeranimation.length:
+					currentplayeranimation.length = kt + animationtimerunoff
+
 
 var Dframecount = 0
 var Dmaxarrivaldelay = 0
@@ -46,56 +92,12 @@ func _process(delta):
 			else:
 				assert (doppelgangernextrec.has("END"))
 				doppelgangernextrec = null
-				print("logrec replay ended")
 				NetworkGatewayForDoppelgangerReplay.DoppelgangerPanel.get_node("hbox/VBox_enable/DoppelgangerEnable").button_pressed = false
-	
-	if initialframestate == 1 and len(framestack) > 0:
-		get_parent().PF_framedatatoavatar(framestack[0])
-		initialframestate = 2
-		
-	if len(framestack) > 0:
-		Dframecount += 1
-		if (Dframecount%60) == 0:
-			print("Dmaxarrivaldelay ", Dmaxarrivaldelay)
-			Dmaxarrivaldelay = framestack[0][NCONSTANTS.CFI_ARRIVALDELAY]
-		else:
-			Dmaxarrivaldelay = max(Dmaxarrivaldelay, framestack[0][NCONSTANTS.CFI_ARRIVALDELAY])
-			
-	var t = Ttime - mintimestampoffset - laglatency
-	var completedframeL = { }
-	while len(framestack) > 0 and t > framestack[0][NCONSTANTS.CFI_TIMESTAMP]:
-		var fd = framestack.pop_front()
-		for k in fd:
-			completedframe0[k] = fd[k]
-			completedframeL[k] = fd[k]
-		if len(framestack) == 0:
-			get_parent().PF_framedatatoavatar(completedframeL)
-			
-	if len(framestack) > 0 and t > framestack[0][NCONSTANTS.CFI_TIMESTAMPPREV]:
-		var lam = inverse_lerp(framestack[0][NCONSTANTS.CFI_TIMESTAMPPREV], framestack[0][NCONSTANTS.CFI_TIMESTAMP], t)
-		var ld = { }
-		for k in framestack[0]:
-			if k > NCONSTANTS.CFI_ZERO and completedframe0.has(k):
-				var v1 = framestack[0][k]
-				var v0 = completedframe0[k]
-				var v = null
-				var ty = typeof(v1)
-				if ty == TYPE_BOOL:
-					continue # v = v0  (filled in by completedframeL)
-				elif ty == TYPE_INT:
-					continue # v = v0  (filled in by completedframeL)
-				elif ty == TYPE_QUATERNION:
-					v = v0.slerp(v1, lam)
-				else:
-					v = lerp(v0, v1, lam)
-				ld[k] = v
-				completedframeL.erase(k)
-		for k in completedframeL:
-			ld[k] = completedframeL[k]
-			
-		ld[NCONSTANTS.CFI_SPEAKING] = audiostreamopuschunked != null and audiostreamopuschunked.queue_length_frames() > 0
-
-		get_parent().PF_framedatatoavatar(ld)
+				
+	if currentplayeranimation != null:
+		var t = Ttime - mintimestampoffset - laglatency
+		var kt = t - currentplayeranimationT0
+		PlayerAnimation.seek(kt, true)
 
 
 var audiostreamopuschunked : AudioStream = null
