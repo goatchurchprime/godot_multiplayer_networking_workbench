@@ -18,7 +18,7 @@ func PF_initlocalplayer():
 	modulate = Color.YELLOW
 	$Label.text = possibleusernames[randi()%len(possibleusernames)]
 
-func spawnpointfornewplayer():
+func spawninfofornewplayer():
 	var pos = position
 	pos.y -= 20
 	while true:
@@ -31,8 +31,8 @@ func spawnpointfornewplayer():
 	var ipostrack = 0
 	return { NCONSTANTS.CFI_ANIMTRACKS+ipostrack: pos }
 
-func spawnpointreceivedfromserver(sfd):
-	print("** spawnpointreceivedfromserver", sfd)
+func spawninforeceivedfromserver(sfd):
+	print("** spawninforeceivedfromserver", sfd)
 	position = sfd[NCONSTANTS.CFI_ANIMTRACKS+0]
 	
 # Data about ourself that is sent to the other players on connection

@@ -25,7 +25,7 @@ var minframeseconds = 0.1
 var timestampprev = 0.0
 
 var bnextframerecordalltracks = false
-var bawaitingspawnpoint = false
+var bawaitingspawninfofromserver = false
 
 func setupanimationtrackrecorder():
 	PlayerAnimation = get_node("../PlayerAnimation")
@@ -114,7 +114,7 @@ func _process(delta):
 		Dcumulativebytes= 0
 		DframereportCount = 0
 
-	if bawaitingspawnpoint:
+	if bawaitingspawninfofromserver:
 		return
 
 	if networkID >= 1:

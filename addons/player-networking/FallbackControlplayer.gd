@@ -6,10 +6,10 @@ func PF_initlocalplayer():
 	randomize()
 	$Label.text = possibleusernames[randi()%len(possibleusernames)]
 
-func spawnpointfornewplayer():
+func spawninfofornewplayer():
 	return { NCONSTANTS.CFI_ANIMTRACKS+0: position - Vector2(0,20*get_parent().get_child_count()) }
 
-func spawnpointreceivedfromserver(sfd):
+func spawninforeceivedfromserver(sfd):
 	position = sfd[NCONSTANTS.CFI_ANIMTRACKS+0]
 	
 # Data about ourself that is sent to the other players on connection

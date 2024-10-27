@@ -15,7 +15,7 @@ func _on_StartENetmultiplayer_toggled(button_pressed):
 			return
 		
 		multiplayer.multiplayer_peer = multiplayerpeer
-		NetworkGateway.PlayerConnections.deferred_playerconnections = [ ]
+		NetworkGateway.PlayerConnections.premature_peerconnections = [ ]
 		assert (get_tree().multiplayer_poll)
 
 

@@ -18,7 +18,7 @@ func _on_StartWebSocketmultiplayer_toggled(button_pressed):
 
 		multiplayer.multiplayer_peer = multiplayerpeer
 		
-		NetworkGateway.PlayerConnections.deferred_playerconnections = [ ]
+		NetworkGateway.PlayerConnections.premature_peerconnections = [ ]
 		assert (get_tree().multiplayer_poll)
 			
 	else:

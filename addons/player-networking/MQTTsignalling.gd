@@ -27,7 +27,7 @@ var Roomplayertreecaboosereached = false
 @onready var StatusMQTT = $VBox/HBoxM/HSplitContainer/Msettings/HBox4/StatusMQTT
 @onready var StatusWebRTC = $VBox/HBoxM/HSplitContainer/Msettings/HBox5/StatusWebRTC
 
-@onready var treenodeiconserver = ImageTexture.create_from_image(Image.load_from_file("res://addons/player-networking/icons/MultiplayerSpawner.svg"))
+@onready var treenodeiconserver = load("res://addons/player-networking/icons/MultiplayerSpawner.svg")
 
 func clearallstatuses():
 	Roomplayertree.clear()
