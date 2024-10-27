@@ -36,6 +36,10 @@ func setupanimationtracks(vd):
 	currentplayeranimation = templateanimation.duplicate()
 	currentplayeranimationT0 = vd[NCONSTANTS.CFI_TIMESTAMP]
 	currentplayeranimation.length = animationtimerunoff
+
+	for i in range(currentplayeranimation.get_track_count()):
+		currentplayeranimation.track_insert_key(i, 0, vd[NCONSTANTS.CFI_ANIMTRACKS + i])
+
 	#var animname = "anim%d" % networkID
 	var animname = "anim1"  # THIS CRASHES when 3 connections (2 animations same name)
 	# See https://github.com/godotengine/godot/issues/98565
@@ -46,6 +50,11 @@ func setupanimationtracks(vd):
 	#print("  -- DDDgetanimationlist added ", currentplayeranimationlibrary.get_animation_list(), "  ", networkID)
 	PlayerAnimation.caches_cleared.connect(Dclearcachesig)
 	PlayerAnimation.mixer_updated.connect(Dmixer_updated)
+	print("remmmote ", vd, get_parent().name)
+
+func startupremoteplayer(avatardata):
+	get_parent().visible = false
+	setupanimationtracks(avatardata["snapshottracks"])
 
 func networkedavatarthinnedframedata(vd):
 		# we could make this tolerate out of order values
@@ -60,8 +69,7 @@ func networkedavatarthinnedframedata(vd):
 		initialframestate = 1
 	vd[NCONSTANTS.CFI_ARRIVALDELAY] = vd[NCONSTANTS.CFI_TIMESTAMP_RECIEVED] - mintimestampoffset - vd[NCONSTANTS.CFI_TIMESTAMPPREV]
 
-	if currentplayeranimation == null:
-		setupanimationtracks(vd)
+	assert (currentplayeranimation != null)
 	if currentplayeranimation != null:
 		for k in vd:
 			if k >= NCONSTANTS.CFI_ANIMTRACKS:

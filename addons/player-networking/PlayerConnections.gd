@@ -149,6 +149,7 @@ func _peer_connected(id):
 		premature_peerconnections.push_back(id)
 		connectionlog("_add playerid %d (defer)\n" % id)
 		return
+		
 	assert (LocalPlayerFrame.networkID >= 1)
 	assert (NetworkGateway.Dconnectedplayerscount >= 1)
 	NetworkGateway.Dconnectedplayerscount += 1
@@ -194,12 +195,10 @@ func _on_Doppelganger_toggled(button_pressed):
 		DoppelgangerPanel.seteditable(false)
 		if rlogrecfile == null:
 			var avatardata = LocalPlayer.PF_datafornewconnectedplayer(true)
-			avatardata.erase("spawnframedata")
 			var doppelnetoffset = DoppelgangerPanel.getnetoffset()
 			var doppelgangerdelay = NetworkGateway.getrandomdoppelgangerdelay(true)
 			await get_tree().create_timer(doppelgangerdelay*0.001).timeout
 			LocalPlayerFrame.doppelgangernode = createnewremoteplayernode(avatardata, doppelganger_networkID, "Doppelganger")
-			LocalPlayer.get_node("PlayerFrame").bnextframerecordalltracks = true
 			LocalPlayerFrame.NetworkGatewayForDoppelganger = NetworkGateway
 		else:
 			var avatardata = rlogrecfile.get_var()
@@ -243,7 +242,6 @@ func RPC_createremoteplayer(avatardata):
 	assert (remote_players_idstonodenames[senderid] == null)
 	remote_players_idstonodenames[senderid] = remoteplayer.get_name()
 		# this doesn't seem the right place
-	LocalPlayerFrame.bnextframerecordalltracks = true
 	updateplayerlist()
 
 @rpc("any_peer", "call_remote", "reliable", 0)
@@ -253,7 +251,6 @@ func RPC_spawninfoforclientfromserver(sfd):
 	assert (LocalPlayerFrame.bawaitingspawninfofromserver)
 	LocalPlayer.spawninforeceivedfromserver(sfd)
 	LocalPlayerFrame.bawaitingspawninfofromserver = false
-	LocalPlayerFrame.bnextframerecordalltracks = true
 	var avatardata = LocalPlayer.PF_datafornewconnectedplayer(false)
 	rpc("RPC_createremoteplayer", avatardata)
 
@@ -280,11 +277,13 @@ func createnewremoteplayernode(avatardata, networkID, playernodename):
 	var remoteplayer = load(avatardata["avatarsceneresource"]).instantiate()
 	if not remoteplayer.has_node("PlayerFrame"):
 		remoteplayer.add_child(load(PlayerFrameRemoteScenePath).instantiate())
-	assert (remoteplayer.get_node("PlayerFrame").scene_file_path == PlayerFrameRemoteScenePath)
+	var rpf = remoteplayer.get_node("PlayerFrame")
+	assert (rpf.scene_file_path == PlayerFrameRemoteScenePath)
+
 	remoteplayer.set_name(playernodename)
-	remoteplayer.get_node("PlayerFrame").networkID = networkID
-	remoteplayer.PF_startupdatafromconnectedplayer(avatardata)
+	rpf.networkID = networkID
 	PlayersNode.add_child(remoteplayer)
+	rpf.startupremoteplayer(avatardata)
 	print("Adding remoteplayer: ", playernodename)
 	return remoteplayer
 	

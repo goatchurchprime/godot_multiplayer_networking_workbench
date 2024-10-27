@@ -11,7 +11,7 @@ var PlayerAnimation : AnimationPlayer = null
 var templateanimation : Animation = null
 var currentrecordinganimation : Animation = null
 var currentrecordinganimationT0 = 0.0
-const animationtimerunoff = 1.0
+const animationtimerunoff = 10.0
 
 var framedividerVal = 10
 var framedividerCount = framedividerVal
@@ -24,18 +24,24 @@ var minframeseconds = 0.1
 
 var timestampprev = 0.0
 
-var bnextframerecordalltracks = false
 var bawaitingspawninfofromserver = false
 
 func setupanimationtrackrecorder():
-	PlayerAnimation = get_node("../PlayerAnimation")
+	var ad = snapshotallanimatedtracks()
 	var currentrecordinganimationlibrary = PlayerAnimation.get_animation_library("playeral")
-	var templateanimation : Animation = currentrecordinganimationlibrary.get_animation("trackstemplate")
 	currentrecordinganimation = templateanimation.duplicate()
-	#currentrecordinganimationT0 = vd[NCONSTANTS.CFI_TIMESTAMP]
+	currentrecordinganimationT0 = ad[NCONSTANTS.CFI_TIMESTAMP]
 	currentrecordinganimation.length = animationtimerunoff
 	currentrecordinganimationlibrary.add_animation("recordanim1", currentrecordinganimation)
+	for i in range(currentrecordinganimation.get_track_count()):
+		currentrecordinganimation.track_insert_key(i, 0, ad[NCONSTANTS.CFI_ANIMTRACKS + i])
 	
+func _ready():
+	PlayerAnimation = get_node("../PlayerAnimation")
+	var currentrecordinganimationlibrary = PlayerAnimation.get_animation_library("playeral")
+	templateanimation = currentrecordinganimationlibrary.get_animation("trackstemplate")
+	call_deferred("setupanimationtrackrecorder")
+
 func setlocalframenetworkidandname(lnetworkID):
 	networkID = lnetworkID
 	get_parent().set_name("R%d" % networkID) 
@@ -64,6 +70,17 @@ func trackpropertysignificantlychanged(v, v0):
 		print("Unknown type ", ty)
 	return true
 
+func snapshotallanimatedtracks():
+	var ad = { }
+	for i in range(templateanimation.get_track_count()):
+		var nodepath = templateanimation.track_get_path(i)
+		var noderesource = PlayerAnimation.get_parent().get_node_and_resource(nodepath)
+		assert (noderesource[1] == null)
+		var propertyval = noderesource[0].get_indexed(noderesource[2])
+		ad[NCONSTANTS.CFI_ANIMTRACKS + i] = propertyval
+	ad[NCONSTANTS.CFI_TIMESTAMP] = Time.get_ticks_msec()*0.001
+	return ad
+	
 func recordthinnedanimation(t, brecordalltracks):
 	var ad = { }
 	for i in range(currentrecordinganimation.get_track_count()):
@@ -90,14 +107,11 @@ func _process(delta):
 	if dft < minframeseconds:
 		return
 
-	var brecordalltracks = bnextframerecordalltracks
-	if currentrecordinganimation == null:
-		setupanimationtrackrecorder()
-		currentrecordinganimationT0 = tstamp
-		brecordalltracks = true
 	#if dft >= heartbeatfullframeseconds:
 	#	brecordalltracks = true
-	var vd = recordthinnedanimation(tstamp - currentrecordinganimationT0, brecordalltracks)
+	if currentrecordinganimation == null:
+		return
+	var vd = recordthinnedanimation(tstamp - currentrecordinganimationT0, false)
 	if len(vd) == 0:
 		return
 		
@@ -148,6 +162,6 @@ func transmitaudiopacket(packet):
 			if doppelgangernode != null:
 				doppelgangernode.get_node("PlayerFrame").incomingaudiopacket(packet)
 		else:
-			print("dropaudframe")
+			print("dropaudioframe")
 	if logrecfile != null:
 		logrecfile.store_var({"t":Time.get_ticks_msec()*0.001, "au":packet})
