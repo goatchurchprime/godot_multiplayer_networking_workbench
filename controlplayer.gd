@@ -18,7 +18,7 @@ func PF_initlocalplayer():
 	modulate = Color.YELLOW
 	$Label.text = possibleusernames[randi()%len(possibleusernames)]
 
-func spawninfofornewplayer():
+func PF_spawninfo_fornewplayer():
 	var pos = position
 	pos.y -= 20
 	while true:
@@ -31,18 +31,8 @@ func spawninfofornewplayer():
 	var ipostrack = 0
 	return { NCONSTANTS.CFI_ANIMTRACKS+ipostrack: pos }
 
-func spawninforeceivedfromserver(sfd):
+func PF_spawninfo_receivedfromserver(sfd):
 	position = sfd[NCONSTANTS.CFI_ANIMTRACKS+0]
-	
-func PF_datafornewconnectedplayer(bfordoppelganger):
-	var avatardata = { "avatarsceneresource":scene_file_path, 
-					   "labeltext":$Label.text
-					 }
-	avatardata["snapshottracks"] = get_node("PlayerFrame").snapshotallanimatedtracks()
-	if not bfordoppelganger:
-		avatardata["Dplayernodename"] = get_name()
-		avatardata["Dnetworkid"] = get_node("PlayerFrame").networkID
-	return avatardata
 
 func PF_processlocalavatarposition(delta):
 	if get_window().has_focus():

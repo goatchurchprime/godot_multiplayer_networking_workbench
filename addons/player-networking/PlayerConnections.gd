@@ -159,10 +159,10 @@ func _peer_connected(id):
 	uninitialized_peerconnections.push_back(id)
 
 	if multiplayer.is_server():
-		rpc_id(id, "RPC_spawninfoforclientfromserver", LocalPlayer.spawninfofornewplayer())
+		rpc_id(id, "RPC_spawninfoforclientfromserver", LocalPlayer.PF_spawninfo_fornewplayer())
 
 	if not LocalPlayerFrame.bawaitingspawninfofromserver:
-		var avatardata = LocalPlayer.PF_datafornewconnectedplayer(false)
+		var avatardata = LocalPlayerFrame.datafornewconnectedplayer(false)
 		rpc_id(id, "RPC_createremoteplayer", avatardata)
 
 func _peer_disconnected(id):
@@ -196,7 +196,7 @@ func _on_Doppelganger_toggled(button_pressed):
 			rlogrecfile = FileAccess.open("user://logrec.dat", FileAccess.READ)
 		DoppelgangerPanel.seteditable(false)
 		if rlogrecfile == null:
-			var avatardata = LocalPlayer.PF_datafornewconnectedplayer(true)
+			var avatardata = LocalPlayerFrame.datafornewconnectedplayer(true)
 			var doppelnetoffset = DoppelgangerPanel.getnetoffset()
 			var doppelgangerdelay = NetworkGateway.getrandomdoppelgangerdelay(true)
 			await get_tree().create_timer(doppelgangerdelay*0.001).timeout
@@ -248,9 +248,9 @@ func RPC_spawninfoforclientfromserver(sfd):
 	var rpcsenderid = multiplayer.get_remote_sender_id()
 	assert (rpcsenderid == 1)
 	assert (LocalPlayerFrame.bawaitingspawninfofromserver)
-	LocalPlayer.spawninforeceivedfromserver(sfd)
+	LocalPlayer.PF_spawninfo_receivedfromserver(sfd)
 	LocalPlayerFrame.bawaitingspawninfofromserver = false
-	var avatardata = LocalPlayer.PF_datafornewconnectedplayer(false)
+	var avatardata = LocalPlayerFrame.datafornewconnectedplayer(false)
 	rpc("RPC_createremoteplayer", avatardata)
 
 
@@ -314,10 +314,8 @@ func _on_log_rec_toggled(toggled_on):
 		var logrecfile = FileAccess.open("user://logrec.dat", FileAccess.WRITE)
 		print("logging to: ", logrecfile.get_path_absolute())
 		
-		#var avatardata = playerbeingrecorded.PF_datafornewconnectedplayer()
 		var pf = playerbeingrecorded.get_node("PlayerFrame")
-		var avatardata = { "avatarsceneresource":playerbeingrecorded.scene_file_path }
-		avatardata["playername"] = playerbeingrecorded.playername()
+		var avatardata = pf.datafornewconnectedplayer(true)
 		avatardata["t"] = Time.get_ticks_msec()*0.001
 		logrecfile.store_var(avatardata)
 		playerbeingrecorded.get_node("PlayerFrame").logrecfile = logrecfile

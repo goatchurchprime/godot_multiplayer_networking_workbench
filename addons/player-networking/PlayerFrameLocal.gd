@@ -96,6 +96,16 @@ func recordthinnedanimation(t, brecordalltracks):
 	currentrecordinganimation.length = t + animationtimerunoff
 	return ad
 
+func datafornewconnectedplayer(bfordoppelganger):
+	var avatardata = { "avatarsceneresource":get_parent().scene_file_path
+					 }
+	avatardata["snapshottracks"] = snapshotallanimatedtracks()
+	if not bfordoppelganger:
+		avatardata["Dplayernodename"] = get_parent().get_name()
+		avatardata["Dnetworkid"] = networkID
+	return avatardata
+
+
 func _process(delta):
 	get_parent().PF_processlocalavatarposition(delta)
 

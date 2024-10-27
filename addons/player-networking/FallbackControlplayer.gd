@@ -6,22 +6,12 @@ func PF_initlocalplayer():
 	randomize()
 	$Label.text = possibleusernames[randi()%len(possibleusernames)]
 
-func spawninfofornewplayer():
+func PF_spawninfo_fornewplayer():
 	return { NCONSTANTS.CFI_ANIMTRACKS+0: position - Vector2(0,20*get_parent().get_child_count()) }
 
-func spawninforeceivedfromserver(sfd):
+func PF_spawninfo_receivedfromserver(sfd):
 	position = sfd[NCONSTANTS.CFI_ANIMTRACKS+0]
 	
-func PF_datafornewconnectedplayer(bfordoppelganger):
-	var avatardata = { "avatarsceneresource":scene_file_path, 
-					   "labeltext":$Label.text
-					 }
-	avatardata["snapshottracks"] = get_node("PlayerFrame").snapshotallanimatedtracks()
-	if not bfordoppelganger:
-		avatardata["Dplayernodename"] = get_name()
-		avatardata["Dnetworkid"] = get_node("PlayerFrame").networkID
-	return avatardata
-
 
 # The receiver of the the above function after the scene 
 # specified by avatarsceneresource has been instanced
