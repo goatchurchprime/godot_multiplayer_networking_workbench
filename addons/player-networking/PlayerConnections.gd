@@ -161,11 +161,11 @@ func _peer_connected(id):
 	if multiplayer.is_server():
 		rpc_id(id, "RPC_spawninfoforclientfromserver", LocalPlayer.spawninfofornewplayer())
 
-	var avatardata = LocalPlayer.PF_datafornewconnectedplayer()
-	avatardata["Dplayernodename"] = LocalPlayer.get_name()
-	avatardata["Dnetworkid"] = LocalPlayerFrame.networkID
-	rpc_id(id, "RPC_createremoteplayer", avatardata)
-
+	if not LocalPlayerFrame.bawaitingspawninfofromserver:
+		var avatardata = LocalPlayer.PF_datafornewconnectedplayer(false)
+		rpc_id(id, "RPC_createremoteplayer", avatardata)
+	else:
+		print("Delaying sending my data till received spawninfo")
 
 func _peer_disconnected(id):
 	if NetworkGateway.Dconnectedplayerscount == 0 and multiplayer.get_unique_id() == 1:
@@ -193,7 +193,7 @@ func _on_Doppelganger_toggled(button_pressed):
 			rlogrecfile = FileAccess.open("user://logrec.dat", FileAccess.READ)
 		DoppelgangerPanel.seteditable(false)
 		if rlogrecfile == null:
-			var avatardata = LocalPlayer.PF_datafornewconnectedplayer()
+			var avatardata = LocalPlayer.PF_datafornewconnectedplayer(true)
 			avatardata.erase("spawnframedata")
 			var doppelnetoffset = DoppelgangerPanel.getnetoffset()
 			var doppelgangerdelay = NetworkGateway.getrandomdoppelgangerdelay(true)
@@ -254,6 +254,9 @@ func RPC_spawninfoforclientfromserver(sfd):
 	LocalPlayer.spawninforeceivedfromserver(sfd)
 	LocalPlayerFrame.bawaitingspawninfofromserver = false
 	LocalPlayerFrame.bnextframerecordalltracks = true
+	var avatardata = LocalPlayer.PF_datafornewconnectedplayer(false)
+	rpc("RPC_createremoteplayer", avatardata)
+
 
 @rpc("any_peer", "call_remote", "reliable", 0)
 func RPCnetworkedavatarthinnedframedataPC(vd):

@@ -36,10 +36,13 @@ func spawninforeceivedfromserver(sfd):
 	position = sfd[NCONSTANTS.CFI_ANIMTRACKS+0]
 	
 # Data about ourself that is sent to the other players on connection
-func PF_datafornewconnectedplayer():
+func PF_datafornewconnectedplayer(bfordoppelganger):
 	var avatardata = { "avatarsceneresource":scene_file_path, 
 						"labeltext":$Label.text
 					 }
+	if not bfordoppelganger:
+		avatardata["Dplayernodename"] = get_name()
+		avatardata["Dnetworkid"] = get_node("PlayerFrame").networkID
 	return avatardata
 
 # The receiver of the the above function after the scene 
