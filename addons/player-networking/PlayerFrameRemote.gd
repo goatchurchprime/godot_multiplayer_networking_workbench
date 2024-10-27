@@ -4,7 +4,6 @@ var framestack = [ ]
 var mintimestampoffset: float = 0.0
 var laglatency = 0.2  # this needs to stay above almost all the arrivaldelay values
 var initialframestate = 0
-var completedframe0 = { }
 
 var networkID = 0   # 1:server, >1:connected as client
 var logrecfile = null
@@ -20,8 +19,6 @@ var currentplayeranimation : Animation = null
 var currentplayeranimationT0 = 0.0
 const animationtimerunoff = 1.0
 
-var Danimatebyanimation = true
-var initialframe = null
 
 func Dclearcachesig():
 	pass # print("Dclearcachesig ", Time.get_ticks_msec())
@@ -31,7 +28,6 @@ func Dmixer_updated():
 func setupanimationtracks(vd):
 	PlayerAnimation = get_node("../PlayerAnimation")
 	var currentplayeranimationlibrary = PlayerAnimation.get_animation_library("playeral")
-	assert (currentplayeranimationlibrary.resource_local_to_scene)  # Avoids crash, see below
 	var templateanimation : Animation = currentplayeranimationlibrary.get_animation("trackstemplate")
 	currentplayeranimation = templateanimation.duplicate()
 	currentplayeranimationT0 = vd[NCONSTANTS.CFI_TIMESTAMP]
@@ -40,14 +36,15 @@ func setupanimationtracks(vd):
 	for i in range(currentplayeranimation.get_track_count()):
 		currentplayeranimation.track_insert_key(i, 0, vd[NCONSTANTS.CFI_ANIMTRACKS + i])
 
+	assert (currentplayeranimationlibrary.resource_local_to_scene)  # Avoids crash, see below
 	#var animname = "anim%d" % networkID
 	var animname = "anim1"  # THIS CRASHES when 3 connections (2 animations same name)
 	# See https://github.com/godotengine/godot/issues/98565
-	#print(" -- DDDgetanimationlist adding ", animname, " to ", currentplayeranimationlibrary.get_animation_list(), "  ", networkID)
+
 	currentplayeranimationlibrary.add_animation(animname, currentplayeranimation)
 	PlayerAnimation.play("playeral/"+animname)
 	PlayerAnimation.pause()
-	#print("  -- DDDgetanimationlist added ", currentplayeranimationlibrary.get_animation_list(), "  ", networkID)
+
 	PlayerAnimation.caches_cleared.connect(Dclearcachesig)
 	PlayerAnimation.mixer_updated.connect(Dmixer_updated)
 	print("remmmote ", vd, get_parent().name)

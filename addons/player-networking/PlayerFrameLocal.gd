@@ -13,8 +13,6 @@ var currentrecordinganimation : Animation = null
 var currentrecordinganimationT0 = 0.0
 const animationtimerunoff = 10.0
 
-var framedividerVal = 10
-var framedividerCount = framedividerVal
 var DframereportCount = 0
 var Dcumulativebytes = 0
 var Dframebytesprev = 0
@@ -107,11 +105,12 @@ func _process(delta):
 	if dft < minframeseconds:
 		return
 
+	var brecordalltracks = false
 	#if dft >= heartbeatfullframeseconds:
 	#	brecordalltracks = true
 	if currentrecordinganimation == null:
 		return
-	var vd = recordthinnedanimation(tstamp - currentrecordinganimationT0, false)
+	var vd = recordthinnedanimation(tstamp - currentrecordinganimationT0, brecordalltracks)
 	if len(vd) == 0:
 		return
 		

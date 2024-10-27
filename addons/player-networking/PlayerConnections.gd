@@ -20,6 +20,9 @@ var LocalPlayerFrame = null
 
 var premature_peerconnections = null
 var uninitialized_peerconnections = [ ]
+var RemotePlayers = [ ]  # will supercede the dictionary below
+
+# this to work out how to abolish
 var remote_players_idstonodenames = { }
 
 @onready var PlayersNode = NetworkGateway.get_node_or_null(NetworkGateway.playersnodepath)
@@ -318,10 +321,6 @@ func _on_log_rec_toggled(toggled_on):
 		#var avatardata = playerbeingrecorded.PF_datafornewconnectedplayer()
 		var pf = playerbeingrecorded.get_node("PlayerFrame")
 		var avatardata = { "avatarsceneresource":playerbeingrecorded.scene_file_path }
-		if pf.get("framedata0"):
-			avatardata["framedata0"] = pf.framedata0.duplicate()
-		else:
-			avatardata["framedata0"] = pf.completedframe0.duplicate()
 		avatardata["playername"] = playerbeingrecorded.playername()
 		avatardata["t"] = Time.get_ticks_msec()*0.001
 		logrecfile.store_var(avatardata)
