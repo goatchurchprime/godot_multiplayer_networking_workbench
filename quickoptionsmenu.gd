@@ -5,7 +5,7 @@ extends HBoxContainer
 # Need to find how to map the clicks from the mouse to the window
 
 func _ready():
-	print(AudioServer.get_speaker_mode())
+	print("AudioServer.get_speaker_mode ", AudioServer.get_speaker_mode())
 	set_as_top_level(true)
 	$ShowNetworkGateway.set_pressed_no_signal(NetworkGateway.visible)
 	if OS.has_feature("Server"):
@@ -60,9 +60,7 @@ func _on_sub_viewport_container_mouse_entered():
 func _on_sub_viewport_container_mouse_exited():
 	subviewpointcontainerhasmouse = false
 
-
 func _on_physics_toggled(toggled_on):
 	var spawnobjects = get_node("../SubViewportContainer/SubViewport/SyncObjects/SpawnedObjects")
 	for c in spawnobjects.get_children():
 		c.freeze = not toggled_on
-	pass # Replace with function body.

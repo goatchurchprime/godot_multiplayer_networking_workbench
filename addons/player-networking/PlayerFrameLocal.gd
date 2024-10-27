@@ -19,7 +19,6 @@ var Dframebytesprev = 0
 
 var heartbeatfullframeseconds = 5.0
 var minframeseconds = 0.1
-
 var timestampprev = 0.0
 
 var bawaitingspawninfofromserver = false
@@ -42,7 +41,7 @@ func _ready():
 
 func setlocalframenetworkidandname(lnetworkID):
 	networkID = lnetworkID
-	get_parent().set_name("R%d" % networkID) 
+	get_parent().set_name(PlayerConnections.playernamefromnetworkid(networkID)) 
 
 func trackpropertysignificantlychanged(v, v0):
 	var ty = typeof(v)
@@ -131,8 +130,7 @@ func _process(delta):
 		return
 
 	if networkID >= 1:
-		vd[NCONSTANTS.CFI_PLAYER_NODENAME] = get_parent().get_name()
-		PlayerConnections.rpc("RPCnetworkedavatarthinnedframedataPC", vd)
+		PlayerConnections.rpc("RPC_networkedavatarthinnedframedata", vd)
 		
 	if doppelgangernode != null and NetworkGatewayForDoppelganger != null:
 		var doppelnetoffset = NetworkGatewayForDoppelganger.DoppelgangerPanel.getnetoffset()
@@ -152,7 +150,7 @@ func _process(delta):
 
 func transmitaudiopacket(packet):
 	if networkID >= 1:
-		PlayerConnections.rpc("RPCincomingaudiopacket", packet)
+		PlayerConnections.rpc("RPC_incomingaudiopacket", packet)
 	if doppelgangernode != null and NetworkGatewayForDoppelganger != null:
 		var doppelnetoffset = NetworkGatewayForDoppelganger.DoppelgangerPanel.getnetoffset()
 		var doppelgangerdelay = NetworkGatewayForDoppelganger.getrandomdoppelgangerdelay()

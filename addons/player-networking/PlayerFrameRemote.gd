@@ -44,10 +44,8 @@ func setupanimationtracks(vd):
 	currentplayeranimationlibrary.add_animation(animname, currentplayeranimation)
 	PlayerAnimation.play("playeral/"+animname)
 	PlayerAnimation.pause()
-
 	PlayerAnimation.caches_cleared.connect(Dclearcachesig)
 	PlayerAnimation.mixer_updated.connect(Dmixer_updated)
-	print("remmmote ", vd, get_parent().name)
 
 func startupremoteplayer(avatardata):
 	get_parent().visible = false

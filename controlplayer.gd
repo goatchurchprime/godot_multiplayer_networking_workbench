@@ -32,10 +32,8 @@ func spawninfofornewplayer():
 	return { NCONSTANTS.CFI_ANIMTRACKS+ipostrack: pos }
 
 func spawninforeceivedfromserver(sfd):
-	print("** spawninforeceivedfromserver", sfd)
 	position = sfd[NCONSTANTS.CFI_ANIMTRACKS+0]
 	
-# Data about ourself that is sent to the other players on connection
 func PF_datafornewconnectedplayer(bfordoppelganger):
 	var avatardata = { "avatarsceneresource":scene_file_path, 
 					   "labeltext":$Label.text
@@ -45,7 +43,6 @@ func PF_datafornewconnectedplayer(bfordoppelganger):
 		avatardata["Dplayernodename"] = get_name()
 		avatardata["Dnetworkid"] = get_node("PlayerFrame").networkID
 	return avatardata
-
 
 func PF_processlocalavatarposition(delta):
 	if get_window().has_focus():
