@@ -28,7 +28,7 @@ the directory `addons/webrtc`.  (Although the WebRTC classes are in the core of 
 the implementation is kept separate to save 20Mbs for all the people not using this feature.) 
 
 If you record and send opus-compressed voice packets over the net, you also need to 
-install the [TwoVoip v3.0+](https://godotengine.org/asset-library/asset/3169) addon.
+install the [TwoVoip v3.4+](https://godotengine.org/asset-library/asset/3169) addon.
 Try the [two-voip-godot-4](https://github.com/goatchurchprime/two-voip-godot-4) demo project directly 
 which if there are any snags.
 

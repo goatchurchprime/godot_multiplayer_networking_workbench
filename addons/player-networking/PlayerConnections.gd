@@ -248,7 +248,9 @@ func RPC_spawninfoforclientfromserver(sfd):
 	var rpcsenderid = multiplayer.get_remote_sender_id()
 	assert (rpcsenderid == 1)
 	assert (LocalPlayerFrame.bawaitingspawninfofromserver)
-	LocalPlayer.PF_spawninfo_receivedfromserver(sfd)
+	LocalPlayer.PF_spawninfo_receivedfromserver(sfd, self)
+
+func spawninfoforclientprocessed():
 	LocalPlayerFrame.bawaitingspawninfofromserver = false
 	var avatardata = LocalPlayerFrame.datafornewconnectedplayer(false)
 	rpc("RPC_createremoteplayer", avatardata)

@@ -26,9 +26,19 @@ func Dmixer_updated():
 	print("Dmixerupdated ", Time.get_ticks_msec())
 
 func setupanimationtracks(vd):
-	PlayerAnimation = get_node("../PlayerAnimation")
+	PlayerAnimation = get_node_or_null("../PlayerAnimation")
+	if PlayerAnimation == null or not PlayerAnimation.is_class("AnimationMixer"):
+		printerr("PlayerScene must have PlayerAnimation:AnimationMixer")
 	var currentplayeranimationlibrary = PlayerAnimation.get_animation_library("playeral")
+	if currentplayeranimationlibrary == null:
+		printerr("PlayerScene.PlayerAnimation must have animation library 'playeral'")
+	if not currentplayeranimationlibrary.resource_local_to_scene:  # Avoids crash, see below
+		printerr("PlayerScene.PlayerAnimation library 'playeral' must be local to scene")
+		assert (false)
+		
 	var templateanimation : Animation = currentplayeranimationlibrary.get_animation("trackstemplate")
+	if templateanimation == null:
+		printerr("PlayerScene.PlayerAnimation library 'playeral' must have 'trackstemplate' animation")
 	currentplayeranimation = templateanimation.duplicate()
 	currentplayeranimationT0 = vd[NCONSTANTS.CFI_TIMESTAMP]
 	currentplayeranimation.length = animationtimerunoff
@@ -36,7 +46,6 @@ func setupanimationtracks(vd):
 	for i in range(currentplayeranimation.get_track_count()):
 		currentplayeranimation.track_insert_key(i, 0, vd[NCONSTANTS.CFI_ANIMTRACKS + i])
 
-	assert (currentplayeranimationlibrary.resource_local_to_scene)  # Avoids crash, see below
 	#var animname = "anim%d" % networkID
 	var animname = "anim1"  # THIS CRASHES when 3 connections (2 animations same name)
 	# See https://github.com/godotengine/godot/issues/98565

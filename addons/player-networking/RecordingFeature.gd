@@ -26,6 +26,7 @@ func setupaudioshader():
 	audiosampleframetextureimage = Image.create_from_data(audioopuschunkedeffect.audiosamplesize, 1, false, Image.FORMAT_RGF, audiosampleframedata.to_byte_array())
 	audiosampleframetexture = ImageTexture.create_from_image(audiosampleframetextureimage)
 	$VoxThreshold.material.set_shader_parameter("chunktexture", audiosampleframetexture)
+	#$AudioStreamPlayerMicrophone.finished.connect(func a(): $AudioStreamPlayerMicrophone.playing = true)
 
 func processtalkstreamends():
 	var talking = $PTT.button_pressed

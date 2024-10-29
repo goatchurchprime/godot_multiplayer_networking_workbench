@@ -32,6 +32,7 @@ func setupanimationtrackrecorder():
 	currentrecordinganimationlibrary.add_animation("recordanim1", currentrecordinganimation)
 	for i in range(currentrecordinganimation.get_track_count()):
 		currentrecordinganimation.track_insert_key(i, 0, ad[NCONSTANTS.CFI_ANIMTRACKS + i])
+
 	
 func _ready():
 	PlayerAnimation = get_node("../PlayerAnimation")
@@ -67,24 +68,49 @@ func trackpropertysignificantlychanged(v, v0):
 		print("Unknown type ", ty)
 	return true
 
+
+func getnodepropertyvaluefortrack(anim : Animation, animparent : Node, i: int):
+	var nodepath = anim.track_get_path(i)
+	var tt = anim.track_get_type(i)
+	var noderesource = animparent.get_node_and_resource(nodepath)
+	if noderesource[0] == null:
+		var skelnode : Skeleton3D = animparent.get_node(NodePath(nodepath.get_concatenated_names()))
+		var j = skelnode.find_bone(nodepath.get_concatenated_subnames())
+		if tt == Animation.TYPE_POSITION_3D:
+			return skelnode.get_bone_pose_position(j)
+		if tt == Animation.TYPE_ROTATION_3D:
+			return skelnode.get_bone_pose_rotation(j)
+		if tt == Animation.TYPE_SCALE_3D:
+			return skelnode.get_bone_pose_scale(j)
+		assert (false)
+		return null
+	assert (noderesource[1] == null)
+	if tt == Animation.TYPE_VALUE:
+		return noderesource[0].get_indexed(noderesource[2])
+	assert (noderesource[2] == ^"")
+	if tt == Animation.TYPE_POSITION_3D:
+		return noderesource[0].position
+	if tt == Animation.TYPE_ROTATION_3D:
+		return noderesource[0].quaternion
+	if tt == Animation.TYPE_SCALE_3D:
+		return noderesource[0].scale
+	assert (false)
+	return null
+	
+
 func snapshotallanimatedtracks():
 	var ad = { }
 	for i in range(templateanimation.get_track_count()):
-		var nodepath = templateanimation.track_get_path(i)
-		var noderesource = PlayerAnimation.get_parent().get_node_and_resource(nodepath)
-		assert (noderesource[1] == null)
-		var propertyval = noderesource[0].get_indexed(noderesource[2])
+		var propertyval = getnodepropertyvaluefortrack(templateanimation, PlayerAnimation.get_parent(), i)
 		ad[NCONSTANTS.CFI_ANIMTRACKS + i] = propertyval
 	ad[NCONSTANTS.CFI_TIMESTAMP] = Time.get_ticks_msec()*0.001
+	#print(templateanimation.get_track_count(), ad)
 	return ad
 	
 func recordthinnedanimation(t, brecordalltracks):
 	var ad = { }
 	for i in range(currentrecordinganimation.get_track_count()):
-		var nodepath = currentrecordinganimation.track_get_path(i)
-		var noderesource = PlayerAnimation.get_parent().get_node_and_resource(nodepath)
-		assert (noderesource[1] == null)
-		var propertyval = noderesource[0].get_indexed(noderesource[2])
+		var propertyval = getnodepropertyvaluefortrack(currentrecordinganimation, PlayerAnimation.get_parent(), i)
 		var binsertkey = brecordalltracks
 		if not brecordalltracks:
 			var kn = currentrecordinganimation.track_get_key_count(i)
@@ -144,7 +170,7 @@ func _process(delta):
 		
 	if doppelgangernode != null and NetworkGatewayForDoppelganger != null:
 		var doppelnetoffset = NetworkGatewayForDoppelganger.DoppelgangerPanel.getnetoffset()
-		get_parent().PF_changethinnedframedatafordoppelganger(vd, doppelnetoffset, false)
+		get_parent().PF_changethinnedframedatafordoppelganger(vd, doppelnetoffset)
 		var doppelgangerdelay = NetworkGatewayForDoppelganger.getrandomdoppelgangerdelay()
 		if doppelgangerdelay != -1.0:
 			await get_tree().create_timer(doppelgangerdelay*0.001).timeout

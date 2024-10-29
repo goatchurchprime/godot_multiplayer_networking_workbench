@@ -9,8 +9,9 @@ func PF_initlocalplayer():
 func PF_spawninfo_fornewplayer():
 	return { NCONSTANTS.CFI_ANIMTRACKS+0: position - Vector2(0,20*get_parent().get_child_count()) }
 
-func PF_spawninfo_receivedfromserver(sfd):
+func PF_spawninfo_receivedfromserver(sfd, PlayerConnection):
 	position = sfd[NCONSTANTS.CFI_ANIMTRACKS+0]
+	PlayerConnection.spawninfoforclientprocessed()
 	
 
 # The receiver of the the above function after the scene 
@@ -28,7 +29,7 @@ func PF_setspeakingvolume(v):
 func playername():
 	return $Label.text 
 
-static func PF_changethinnedframedatafordoppelganger(fd, doppelnetoffset, isframe0):
+static func PF_changethinnedframedatafordoppelganger(fd, doppelnetoffset):
 	fd[NCONSTANTS.CFI_TIMESTAMP] += doppelnetoffset
 	fd[NCONSTANTS.CFI_TIMESTAMPPREV] += doppelnetoffset
 	if fd.has(NCONSTANTS.CFI_ANIMTRACKS+0):

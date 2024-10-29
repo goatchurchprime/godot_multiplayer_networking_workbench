@@ -53,6 +53,7 @@ tracks/3/keys = {
 }
 
 [sub_resource type="AnimationLibrary" id="AnimationLibrary_50vjc"]
+resource_local_to_scene = true
 _data = {
 "trackstemplate": SubResource("Animation_dusod")
 }

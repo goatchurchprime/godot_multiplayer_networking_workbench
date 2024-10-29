@@ -31,8 +31,9 @@ func PF_spawninfo_fornewplayer():
 	var ipostrack = 0
 	return { NCONSTANTS.CFI_ANIMTRACKS+ipostrack: pos }
 
-func PF_spawninfo_receivedfromserver(sfd):
+func PF_spawninfo_receivedfromserver(sfd, PlayerConnection):
 	position = sfd[NCONSTANTS.CFI_ANIMTRACKS+0]
+	PlayerConnection.spawninfoforclientprocessed()
 
 func PF_processlocalavatarposition(delta):
 	if get_window().has_focus():
