@@ -141,9 +141,9 @@ func setrecopusvalues(opussamplerate, opusframesize):
 	var audiosamplerate = AudioServer.get_mix_rate()
 	audiostreamopuschunked.opusframesize = opusframesize
 	audiostreamopuschunked.opussamplerate = opussamplerate
-	audiostreamopuschunked.audiosamplerate = AudioServer.get_mix_rate()
+	audiostreamopuschunked.audiosamplerate = 44100 # AudioServer.get_mix_rate()
 	audiostreamopuschunked.audiosamplesize = int(audiostreamopuschunked.audiosamplerate*opusframeduration)
-	audiostreamopuschunked.mix_rate = AudioServer.get_mix_rate()
+	audiostreamopuschunked.mix_rate = 44100 # AudioServer.get_mix_rate()
 
 func incomingaudiopacket(packet):
 	if logrecfile != null:
