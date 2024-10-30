@@ -4,21 +4,35 @@ var audioopuschunkedeffect : AudioEffect = null
 var chunkprefix : PackedByteArray = PackedByteArray([0,0]) 
 
 @onready var PlayerConnections = find_parent("PlayerConnections")
+# Opus compression settings
+var opussamplerate_default = 48000 # 8, 12, 16, 24, 48 KHz
+var opusframedurationms_default = 20 # 2.5, 5, 10, 20 40, 60
+var opusbitrate_default = 10000  # 3000, 6000, 10000, 12000, 24000
 
-
+var leadtime : float = 0.1
+var hangtime : float  = 1.2
+var voxthreshhold = 0.2
 
 var currentlytalking = false
 var opusframecount = 0
 var opusstreamcount = 0
-var voxthreshhold = 0.2
-var samplescountdown = 0
-var samplesrunon = 25
+
+var hangframes = 25
+var hangframescountup = 0
 var chunkmaxpersist = 0.0
 
 var audiosampleframetextureimage : Image
 var audiosampleframetexture : ImageTexture
 
-func setupaudioshader():
+func setopusvalues(opussamplerate, opusframedurationms, opusbitrate):
+	assert (not currentlytalking)
+	audioopuschunkedeffect.opussamplerate = opussamplerate
+	audioopuschunkedeffect.opusframesize = int(opussamplerate*opusframedurationms/1000.0)
+	audioopuschunkedeffect.opusbitrate = opusbitrate
+
+	audioopuschunkedeffect.audiosamplerate = AudioServer.get_mix_rate()
+	audioopuschunkedeffect.audiosamplesize = int(audioopuschunkedeffect.audiosamplerate*opusframedurationms/1000.0)
+
 	var audiosampleframedata = PackedVector2Array()
 	audiosampleframedata.resize(audioopuschunkedeffect.audiosamplesize)
 	for j in range(audioopuschunkedeffect.audiosamplesize):
@@ -31,23 +45,36 @@ func setupaudioshader():
 func processtalkstreamends():
 	var talking = $PTT.button_pressed
 	if talking and not currentlytalking:
-		var audiopacketheader = { "opusframesize":audioopuschunkedeffect.opusframesize, 
-								  "audiosamplesize":audioopuschunkedeffect.audiosamplesize, 
-								  "opussamplerate":audioopuschunkedeffect.opussamplerate, 
-								  "audiosamplerate":audioopuschunkedeffect.audiosamplerate, 
-								  "lenchunkprefix":len(chunkprefix), 
-								  "opusstreamcount":opusstreamcount }
-		var PlayerFrame = PlayerConnections.LocalPlayer.get_node("PlayerFrame")
-		PlayerFrame.transmitaudiopacket(JSON.stringify(audiopacketheader).to_ascii_buffer())
+		var frametimesecs = audioopuschunkedeffect.opusframesize*1.0/audioopuschunkedeffect.opussamplerate
+		var talkingtimestart = Time.get_ticks_msec()*0.001
+		var leadframes = leadtime/frametimesecs
+		hangframes = hangtime/frametimesecs
+		while leadframes > 0.0 and audioopuschunkedeffect.undrop_chunk():
+			leadframes -= 1
+			talkingtimestart -= frametimesecs
+		var audiostreampacketheader = { 
+			"opusframesize":audioopuschunkedeffect.opusframesize, 
+			"opussamplerate":audioopuschunkedeffect.opussamplerate, 
+			"lenchunkprefix":len(chunkprefix), 
+			"opusstreamcount":opusstreamcount, 
+			"talkingtimestart":talkingtimestart 
+		}
+		audioopuschunkedeffect.flush_opus_encoder(false)
+		PlayerConnections.LocalPlayerFrame.transmitaudiopacket(JSON.stringify(audiostreampacketheader).to_ascii_buffer())
 		opusframecount = 0
 		currentlytalking = true
 		if $AudioStreamPlayerMicrophone.playing != true:
 			$AudioStreamPlayerMicrophone.playing = true
 			print("Set microphone playing again (switched off by system)")
+
 	elif not talking and currentlytalking:
 		currentlytalking = false
 		var PlayerFrame = PlayerConnections.LocalPlayer.get_node("PlayerFrame")
-		PlayerFrame.transmitaudiopacket(JSON.stringify({"opusframecount":opusframecount}).to_ascii_buffer())
+		var audiopacketstreamfooter = {
+			"opusframecount":opusframecount,
+			"timestart":Time.get_ticks_msec()*0.001 
+		}
+		PlayerFrame.transmitaudiopacket(JSON.stringify(audiopacketstreamfooter).to_ascii_buffer())
 		opusstreamcount += 1
 
 func processvox():
@@ -58,17 +85,17 @@ func processvox():
 	if chunkmax >= voxthreshhold:
 		if $Vox.button_pressed and not $PTT.button_pressed:
 			$PTT.set_pressed(true)
-		samplescountdown = samplesrunon
+		hangframescountup = 0
 		if chunkmax > chunkmaxpersist:
 			chunkmaxpersist = chunkmax
 			$VoxThreshold.material.set_shader_parameter("chunkmaxpersist", chunkmaxpersist)
-	elif samplescountdown > 0:
-		samplescountdown -= 1
-		if samplescountdown == 0:
+	else:
+		if hangframescountup == hangframes:
 			if $Vox.button_pressed:
 				$PTT.set_pressed(false)
 			chunkmaxpersist = 0.0
 			$VoxThreshold.material.set_shader_parameter("chunkmaxpersist", chunkmaxpersist)
+		hangframescountup += 1
 
 	if $PTT.button_pressed:
 		$VoxThreshold.material.set_shader_parameter("chunktexenabled", true)
@@ -89,8 +116,7 @@ func processsendopuschunk():
 		if $Denoise.button_pressed:
 			audioopuschunkedeffect.denoise_resampled_chunk()
 		var opuspacket = audioopuschunkedeffect.read_opus_packet(chunkprefix)
-		var PlayerFrame = PlayerConnections.LocalPlayer.get_node("PlayerFrame")
-		PlayerFrame.transmitaudiopacket(opuspacket)
+		PlayerConnections.LocalPlayerFrame.transmitaudiopacket(opuspacket)
 	audioopuschunkedeffect.drop_chunk()
 
 func _process(delta):
@@ -98,8 +124,9 @@ func _process(delta):
 		processtalkstreamends()
 		while audioopuschunkedeffect.chunk_available():
 			var speakingvolume = processvox()
-			PlayerConnections.LocalPlayer.PF_setspeakingvolume(speakingvolume)
 			processsendopuschunk()
+			PlayerConnections.LocalPlayer.PF_setspeakingvolume(speakingvolume if currentlytalking else 0.0)
+	$MicNotPlayingWarning.visible = not $AudioStreamPlayerMicrophone.playing
 
 func _ready():
 	$VoxThreshold.material.set_shader_parameter("voxthreshhold", voxthreshhold)
@@ -116,10 +143,11 @@ func _ready():
 		audioopuschunkedeffect = ClassDB.instantiate("AudioEffectOpusChunked")
 		AudioServer.add_bus_effect(microphonebusidx, audioopuschunkedeffect)
 	if audioopuschunkedeffect != null:
-		setupaudioshader()
+		setopusvalues(opussamplerate_default, opusframedurationms_default, opusbitrate_default)
 	else:
 		printerr("Unabled to find or instantiate AudioEffectOpusChunked on MicrophoneBus")
-	
+		
+
 func _on_vox_toggled(toggled_on):
 	$PTT.toggle_mode = toggled_on
 
@@ -127,3 +155,7 @@ func _on_vox_threshold_gui_input(event):
 	if event is InputEventMouseButton and event.pressed:
 		voxthreshhold = event.position.x/$VoxThreshold.size.x
 		$VoxThreshold.material.set_shader_parameter("voxthreshhold", voxthreshhold)
+
+func _on_audio_stream_player_microphone_finished():
+	print("*** _on_audio_stream_player_microphone_finished")
+	$MicFinishedWarning.visible = true

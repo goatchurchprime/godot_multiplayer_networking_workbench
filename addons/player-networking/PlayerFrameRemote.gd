@@ -19,6 +19,8 @@ var currentplayeranimation : Animation = null
 var currentplayeranimationT0 = 0.0
 const animationtimerunoff = 1.0
 
+#frametimems = opusframesize*1000.0/opusframesize
+
 
 func Dclearcachesig():
 	pass # print("Dclearcachesig ", Time.get_ticks_msec())
@@ -119,6 +121,7 @@ func _ready():
 			audiostreamplayer.stream = ClassDB.instantiate("AudioStreamOpusChunked")
 		if audiostreamplayer.stream != null and audiostreamplayer.stream.is_class("AudioStreamOpusChunked"):
 			audiostreamopuschunked = audiostreamplayer.stream
+			setrecopusvalues(48000, 960)
 		elif audiostreamplayer.stream != null:
 			print("AudioStreamPlayer.stream must be type AudioStreamOpusChunked ", audiostreamplayer.stream)
 	else:
@@ -132,6 +135,16 @@ var opusstreamcount = 0
 var opusframecount = 0
 var outoforderchunkqueue = [ null, null, null, null ]
 var Dbatchinginitialpackets = false
+
+func setrecopusvalues(opussamplerate, opusframesize):
+	var opusframeduration = opusframesize*1.0/opussamplerate
+	var audiosamplerate = AudioServer.get_mix_rate()
+	audiostreamopuschunked.opusframesize = opusframesize
+	audiostreamopuschunked.opussamplerate = opussamplerate
+	audiostreamopuschunked.audiosamplerate = AudioServer.get_mix_rate()
+	audiostreamopuschunked.audiosamplesize = int(audiostreamopuschunked.audiosamplerate*opusframeduration)
+	audiostreamopuschunked.mix_rate = AudioServer.get_mix_rate()
+
 func incomingaudiopacket(packet):
 	if logrecfile != null:
 		logrecfile.store_var({"t":Time.get_ticks_msec()*0.001, "au":packet})
@@ -146,11 +159,8 @@ func incomingaudiopacket(packet):
 			get_node("../AudioStreamPlayer").playing = true
 			if h.has("opusframesize"):
 				if audiostreamopuschunked.opusframesize != h["opusframesize"] or \
-				   audiostreamopuschunked.audiosamplesize != h["audiosamplesize"]:
-					audiostreamopuschunked.opusframesize = h["opusframesize"]
-					audiostreamopuschunked.audiosamplesize = h["audiosamplesize"]
-					audiostreamopuschunked.opussamplerate = h["opussamplerate"]
-					audiostreamopuschunked.audiosamplerate = h["audiosamplerate"]
+						audiostreamopuschunked.opussamplerate != h["opussamplerate"]:
+					setrecopusvalues(h["opussamplerate"], h["opusframesize"])
 				lenchunkprefix = int(h["lenchunkprefix"])
 				opusstreamcount = int(h["opusstreamcount"])
 				opusframecount = -1

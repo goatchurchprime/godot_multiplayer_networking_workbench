@@ -5,6 +5,7 @@ resource_name = "StereoEnhance"
 pan_pullout = 2.36
 
 [sub_resource type="AudioEffectOpusChunked" id="AudioEffectOpusChunked_0no4y"]
+opusbitrate = 10000
 resource_name = "OpusChunked"
 
 [resource]
