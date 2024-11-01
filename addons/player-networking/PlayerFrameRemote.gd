@@ -133,17 +133,25 @@ const asciiclosebrace = 125 # "}".to_ascii_buffer()[0]
 var lenchunkprefix = 0
 var opusstreamcount = 0
 var opusframecount = 0
-var outoforderchunkqueue = [ null, null, null, null ]
-var Dbatchinginitialpackets = false
+const Noutoforderqueue = 4
+const Npacketinitialbatching = 3
+var outoforderchunkqueue = [ ]
 
 func setrecopusvalues(opussamplerate, opusframesize):
 	var opusframeduration = opusframesize*1.0/opussamplerate
 	var audiosamplerate = AudioServer.get_mix_rate()
 	audiostreamopuschunked.opusframesize = opusframesize
 	audiostreamopuschunked.opussamplerate = opussamplerate
-	audiostreamopuschunked.audiosamplerate = 44100 # AudioServer.get_mix_rate()
+	
+	
+# This crashes!!!	
+	audiostreamopuschunked.audiosamplerate = 48000 # AudioServer.get_mix_rate()
+	audiostreamopuschunked.mix_rate = 48000 # AudioServer.get_mix_rate()
+
+	#audiostreamopuschunked.audiosamplerate = AudioServer.get_mix_rate()
+	#audiostreamopuschunked.mix_rate = AudioServer.get_mix_rate()
+
 	audiostreamopuschunked.audiosamplesize = int(audiostreamopuschunked.audiosamplerate*opusframeduration)
-	audiostreamopuschunked.mix_rate = 44100 # AudioServer.get_mix_rate()
 
 func incomingaudiopacket(packet):
 	if logrecfile != null:
@@ -157,17 +165,24 @@ func incomingaudiopacket(packet):
 		if h != null:
 			print("audio json packet ", h)
 			get_node("../AudioStreamPlayer").playing = true
-			if h.has("opusframesize"):
+			if h.has("talkingtimestart"):
 				if audiostreamopuschunked.opusframesize != h["opusframesize"] or \
 						audiostreamopuschunked.opussamplerate != h["opussamplerate"]:
 					setrecopusvalues(h["opussamplerate"], h["opusframesize"])
 				lenchunkprefix = int(h["lenchunkprefix"])
 				opusstreamcount = int(h["opusstreamcount"])
-				opusframecount = -1
-				Dbatchinginitialpackets = (opusframecount != 0)
-				outoforderchunkqueue = [ null, null, null, null ]
+
+				opusframecount = 0
+				outoforderchunkqueue.clear()
+				for i in range(Noutoforderqueue):
+					outoforderchunkqueue.push_back(null)
+				assert (Npacketinitialbatching < Noutoforderqueue)
 				
+	elif lenchunkprefix == 0:
+		audiostreamopuschunked.push_opus_packet(packet, lenchunkprefix, 0)
+		
 	elif packet[1]&128 == (opusstreamcount%2)*128:
+		assert (lenchunkprefix == 2)
 		var opusframecountI = packet[0] + (packet[1]&127)*256
 		var opusframecountR = opusframecountI - opusframecount
 		if opusframecountR < 0:
@@ -175,11 +190,8 @@ func incomingaudiopacket(packet):
 			opusframecount = opusframecountI
 			opusframecountR = 0
 		if opusframecountR >= 0:
-			while opusframecountR >= len(outoforderchunkqueue):
-				if not Dbatchinginitialpackets:
-					print("shifting outoforderqueue ", opusframecountR, " ", ("null" if outoforderchunkqueue[0] == null else len(outoforderchunkqueue[0])))
-				else:
-					Dbatchinginitialpackets = false
+			while opusframecountR >= Noutoforderqueue:
+				print("shifting outoforderqueue ", opusframecountR, " ", ("null" if outoforderchunkqueue[0] == null else len(outoforderchunkqueue[0])))
 				if outoforderchunkqueue[0] != null:
 					audiostreamopuschunked.push_opus_packet(outoforderchunkqueue[0], lenchunkprefix, 0)
 				elif outoforderchunkqueue[1] != null:
@@ -189,7 +201,7 @@ func incomingaudiopacket(packet):
 				opusframecountR -= 1
 				opusframecount += 1
 			outoforderchunkqueue[opusframecountR] = packet
-			while outoforderchunkqueue[0] != null:
+			while outoforderchunkqueue[0] != null and opusframecountI >= Npacketinitialbatching:
 				audiostreamopuschunked.push_opus_packet(outoforderchunkqueue.pop_front(), lenchunkprefix, 0)
 				outoforderchunkqueue.push_back(null)
 				opusframecount += 1

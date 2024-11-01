@@ -1,13 +1,17 @@
 extends HBoxContainer
 
 var audioopuschunkedeffect : AudioEffect = null
-var chunkprefix : PackedByteArray = PackedByteArray([0,0]) 
+
+#var chunkprefix : PackedByteArray = PackedByteArray([0,0]) 
+var chunkprefix : PackedByteArray = PackedByteArray() 
 
 @onready var PlayerConnections = find_parent("PlayerConnections")
 # Opus compression settings
 var opussamplerate_default = 48000 # 8, 12, 16, 24, 48 KHz
 var opusframedurationms_default = 20 # 2.5, 5, 10, 20 40, 60
 var opusbitrate_default = 10000  # 3000, 6000, 10000, 12000, 24000
+var opuscomplexity_default = 5 # 0-10
+var opusoptimizeforvoice_default = true
 
 var leadtime : float = 0.1
 var hangtime : float  = 1.2
@@ -24,11 +28,13 @@ var chunkmaxpersist = 0.0
 var audiosampleframetextureimage : Image
 var audiosampleframetexture : ImageTexture
 
-func setopusvalues(opussamplerate, opusframedurationms, opusbitrate):
+func setopusvalues(opussamplerate, opusframedurationms, opusbitrate, opuscomplexity, opusoptimizeforvoice):
 	assert (not currentlytalking)
 	audioopuschunkedeffect.opussamplerate = opussamplerate
 	audioopuschunkedeffect.opusframesize = int(opussamplerate*opusframedurationms/1000.0)
 	audioopuschunkedeffect.opusbitrate = opusbitrate
+	audioopuschunkedeffect.opuscomplexity = opuscomplexity
+	audioopuschunkedeffect.opusoptimizeforvoice = opusoptimizeforvoice
 
 	audioopuschunkedeffect.audiosamplerate = AudioServer.get_mix_rate()
 	audioopuschunkedeffect.audiosamplesize = int(audioopuschunkedeffect.audiosamplerate*opusframedurationms/1000.0)
@@ -42,11 +48,12 @@ func setopusvalues(opussamplerate, opusframedurationms, opusbitrate):
 	$VoxThreshold.material.set_shader_parameter("chunktexture", audiosampleframetexture)
 	#$AudioStreamPlayerMicrophone.finished.connect(func a(): $AudioStreamPlayerMicrophone.playing = true)
 
+var talkingtimestart = 0
 func processtalkstreamends():
 	var talking = $PTT.button_pressed
 	if talking and not currentlytalking:
 		var frametimesecs = audioopuschunkedeffect.opusframesize*1.0/audioopuschunkedeffect.opussamplerate
-		var talkingtimestart = Time.get_ticks_msec()*0.001
+		talkingtimestart = Time.get_ticks_msec()*0.001
 		var leadframes = leadtime/frametimesecs
 		hangframes = hangtime/frametimesecs
 		while leadframes > 0.0 and audioopuschunkedeffect.undrop_chunk():
@@ -70,9 +77,12 @@ func processtalkstreamends():
 	elif not talking and currentlytalking:
 		currentlytalking = false
 		var PlayerFrame = PlayerConnections.LocalPlayer.get_node("PlayerFrame")
+		var talkingtimeend = Time.get_ticks_msec()*0.001
 		var audiopacketstreamfooter = {
+			"opusstreamcount":opusstreamcount, 
 			"opusframecount":opusframecount,
-			"timestart":Time.get_ticks_msec()*0.001 
+			"talkingtimeduration":talkingtimeend - talkingtimestart,
+			"talkingtimeend":talkingtimeend 
 		}
 		PlayerFrame.transmitaudiopacket(JSON.stringify(audiopacketstreamfooter).to_ascii_buffer())
 		opusstreamcount += 1
@@ -110,8 +120,11 @@ func processvox():
 		
 func processsendopuschunk():
 	if currentlytalking:
-		chunkprefix.set(0, (opusframecount%256))  # 32768 frames is 10 minutes
-		chunkprefix.set(1, (int(opusframecount/256)&127) + (opusstreamcount%2)*128)
+		if len(chunkprefix) == 2:
+			chunkprefix.set(0, (opusframecount%256))  # 32768 frames is 10 minutes
+			chunkprefix.set(1, (int(opusframecount/256)&127) + (opusstreamcount%2)*128)
+		else:
+			assert (len(chunkprefix) == 0)
 		opusframecount += 1
 		if $Denoise.button_pressed:
 			audioopuschunkedeffect.denoise_resampled_chunk()
@@ -143,7 +156,7 @@ func _ready():
 		audioopuschunkedeffect = ClassDB.instantiate("AudioEffectOpusChunked")
 		AudioServer.add_bus_effect(microphonebusidx, audioopuschunkedeffect)
 	if audioopuschunkedeffect != null:
-		setopusvalues(opussamplerate_default, opusframedurationms_default, opusbitrate_default)
+		setopusvalues(opussamplerate_default, opusframedurationms_default, opusbitrate_default, opuscomplexity_default, opusoptimizeforvoice_default)
 	else:
 		printerr("Unabled to find or instantiate AudioEffectOpusChunked on MicrophoneBus")
 		
