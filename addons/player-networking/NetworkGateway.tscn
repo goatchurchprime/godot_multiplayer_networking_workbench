@@ -18,12 +18,12 @@
 [ext_resource type="Script" path="res://addons/player-networking/DoppelgangerPanel_ui.gd" id="16_i8v6k"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_5i8wh"]
-bg_color = Color(0.296469, 0.496474, 0.299525, 1)
+bg_color = Color(0.429093, 0.357723, 0.216268, 1)
 
 [sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_o112m"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_638ev"]
-bg_color = Color(0.682353, 0.584314, 0.392157, 1)
+bg_color = Color(0.298039, 0.996078, 0.298039, 1)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_e1vu8"]
 bg_color = Color(0.345364, 0.0930718, 0.645071, 1)
@@ -242,11 +242,10 @@ script = ExtResource("6")
 [node name="TabContainer" type="TabContainer" parent="VBox/TabContainer/VBox"]
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_638ev")
-current_tab = 2
+current_tab = 0
 tabs_visible = false
 
 [node name="ENetMultiplayer" type="PanelContainer" parent="VBox/TabContainer/VBox/TabContainer"]
-visible = false
 layout_mode = 2
 metadata/_tab_index = 0
 
@@ -319,6 +318,7 @@ toggle_mode = true
 text = "Start WebSocket client"
 
 [node name="WebSocketsignalling" type="PanelContainer" parent="VBox/TabContainer/VBox/TabContainer"]
+visible = false
 layout_mode = 2
 metadata/_tab_index = 2
 
@@ -546,11 +546,23 @@ stream = SubResource("2")
 autoplay = true
 bus = &"MicrophoneBus"
 
+[node name="MicNotPlayingWarning" type="ColorRect" parent="VBox/PlayerConnections/VBox/RecordingFeature"]
+visible = false
+custom_minimum_size = Vector2(2, 0)
+layout_mode = 2
+color = Color(0.921569, 0, 0.0196078, 1)
+
 [node name="PTT" type="Button" parent="VBox/PlayerConnections/VBox/RecordingFeature"]
 layout_mode = 2
 theme_override_colors/font_pressed_color = Color(0.992157, 0.984314, 0.00392157, 1)
 theme_override_styles/pressed = SubResource("StyleBoxFlat_3abk2")
 text = "PTT"
+
+[node name="MicFinishedWarning" type="ColorRect" parent="VBox/PlayerConnections/VBox/RecordingFeature"]
+visible = false
+custom_minimum_size = Vector2(2, 0)
+layout_mode = 2
+color = Color(0.921569, 0, 0.0196078, 1)
 
 [node name="Vox" type="Button" parent="VBox/PlayerConnections/VBox/RecordingFeature"]
 layout_mode = 2
@@ -689,6 +701,7 @@ layout_mode = 2
 [connection signal="item_selected" from="VBox/PlayerConnections/VBox/HBox/PlayerList" to="VBox/PlayerConnections" method="_on_PlayerList_item_selected"]
 [connection signal="value_changed" from="VBox/PlayerConnections/VBox/HBox/PlayerLagSlider" to="VBox/PlayerConnections" method="_on_PlayerLagSlider_value_changed"]
 [connection signal="toggled" from="VBox/PlayerConnections/VBox/HBox/LogRec" to="VBox/PlayerConnections" method="_on_log_rec_toggled"]
+[connection signal="finished" from="VBox/PlayerConnections/VBox/RecordingFeature/AudioStreamPlayerMicrophone" to="VBox/PlayerConnections/VBox/RecordingFeature" method="_on_audio_stream_player_microphone_finished"]
 [connection signal="toggled" from="VBox/PlayerConnections/VBox/RecordingFeature/Vox" to="VBox/PlayerConnections/VBox/RecordingFeature" method="_on_vox_toggled"]
 [connection signal="gui_input" from="VBox/PlayerConnections/VBox/RecordingFeature/VoxThreshold" to="VBox/PlayerConnections/VBox/RecordingFeature" method="_on_vox_threshold_gui_input"]
 [connection signal="toggled" from="VBox/DoppelgangerPanel/hbox/VBox_enable/DoppelgangerEnable" to="VBox/PlayerConnections" method="_on_Doppelganger_toggled"]
