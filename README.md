@@ -3,17 +3,17 @@
 This utility wraps the workings of the three [highlevel multiplayer](https://docs.godotengine.org/en/stable/tutorials/networking/high_level_multiplayer.html)
 networking protocols (**ENet**, **Websockets**, and **WebRTC**) into a plugin 
 that can be dropped into any Godot project to enable it to be networked.
-There are hooks to enable VR players to compress, transmit, unpack and interpolate their avatar movements across the network.
+There are hooks to enable VR players to compress, transmit, unpack and interpolate their avatar movements across the network by sharing keyframes into the Animation system.
 
-**WebRTC** enables peer to peer networking across the internet without a server.  
+**WebRTC** enables peer to peer networking across the internet without a server.
 The signalling (the exchange of a small amount of network routing data between the peers) 
 is done using a light-weight MQTT server, of which public versions are available.
 
-![image](https://github.com/goatchurchprime/godot_multiplayer_networking_workbench/assets/677254/b49e2b09-b5cd-46a7-9a75-16d3dd5cf8d9)
+![image](https://github.com/user-attachments/assets/ce09a0c1-3b8e-43f7-b58e-cdb54f3733fb)
 
 ## Installation
 
-This should run in Godot 4.2 or higher.  The reusable component is in `addons/player-networking`  
+This should run in Godot 4.3 or higher.  The reusable component is in `addons/player-networking`  
 The system logic is embedded in a control panel that you can make invisible and operate externally with a 
 restricted set of options tuned to your application, but it is exposed for the purpose of 
 experimentation and debugging.
@@ -29,30 +29,39 @@ the implementation is kept separate to save 20Mbs for all the people not using t
 
 If you record and send opus-compressed voice packets over the net, you also need to 
 install the [TwoVoip v3.4+](https://godotengine.org/asset-library/asset/3169) addon.
-Try the [two-voip-godot-4](https://github.com/goatchurchprime/two-voip-godot-4) demo project directly 
-which if there are any snags.
+There is an **example** demo project in [two-voip-godot-4](https://github.com/goatchurchprime/two-voip-godot-4) 
+demo project with that plugin for isolating the many VoIP related snags at this point.
 
 ## Operation
 
 The **NetworkGateway** scene runs the entire process and is composed of a tree of UI Control nodes 
 that can be used directly to visualize the state for debugging, or hidden behind another conventional multiplayer UI
-such as a lobby.
+such as a lobby (or "plaza", a term used to refer to players who can see one another on the MQTT server 
+but have not partied-up into their chosen groups).
 
-The main script **NetworkGateway.gd** manages the choice of protocol and the connections, while **PlayerConnections.gd** manages 
-the players spawning and removal.
+The main script **NetworkGateway.gd** manages the choice of protocol and the connections, while 
+**PlayerConnections.gd** manages the players spawning and removal.
 
-### Network connecting
+### Demo project
 
-The toy example included is an ineffective pong game with the network provisioning code in the `JoystickControls.gd` script.
-We connect using WebRTC at startup so it works out of the box.  This is done with the call to `NetworkGateway.initialstatemqttwebrtc()`
+The toy example in this repo lets you show and hide the NetworkGateway panel, and \[Connect\] to the 
+default WebRTC gateway.  This lets you talk to other players and see them move around their cursor.
+![image](https://github.com/user-attachments/assets/190e8908-c553-4a67-bdcf-e296a033a6aa)
 
-Signalling is all done through the the public broker connected to [test.mosquitto.org](http://test.mosquitto.org/) and you can sniff 
-out all the signals if you run the command:
+The lettered cards (make more with \[New Card\]) are synchronized by the `MultiplayerSpawner` and `MultiplayerSynchronizer`
+nodes.  As you can see, they are out of sync with the players, who are moved by the Animation system.
 
-> mosquitto_sub -h test.mosquitto.org -t "lettuce/#" -v
+Signalling is all done through the the public broker connected to [test.mosquitto.org](http://test.mosquitto.org/) and you can sniff out all the signals if you run the command:
 
-This dumps everything in the room `lettuce` to the command line.  You can choose other rooms, so that connection 
+> mosquitto_sub -h mosquitto.doesliverpool.xyz -t "cabbage/#" -v
+
+This dumps everything in the room `cabbage` to the command line.  You can choose other rooms, so that connection 
 can be like meet.jit.si.  
+
+If you don't have WebRTC, you can connect using \[CS\] for Create ENET Server and \[CC\] for Connect as ENET client 
+and it should all work on a local area network using UDP packet discovery.
+
+## Out of date docs below here
 
 The use of a public MQTT broker to initiate the connections means we can set the connection to "As necessary", which means 
 that if there's live server on the channel it starts out as a server, otherwise it starts as a client and connects to it.
