@@ -2,8 +2,8 @@ extends HBoxContainer
 
 var audioopuschunkedeffect : AudioEffect = null
 
-#var chunkprefix : PackedByteArray = PackedByteArray([0,0]) 
-var chunkprefix : PackedByteArray = PackedByteArray() 
+var chunkprefix : PackedByteArray = PackedByteArray([0,0]) 
+#var chunkprefix : PackedByteArray = PackedByteArray() 
 
 @onready var PlayerConnections = find_parent("PlayerConnections")
 # Opus compression settings

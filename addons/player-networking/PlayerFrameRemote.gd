@@ -130,27 +130,20 @@ func _ready():
 
 const asciiopenbrace = 123 # "{".to_ascii_buffer()[0]
 const asciiclosebrace = 125 # "}".to_ascii_buffer()[0]
-var lenchunkprefix = 0
+var lenchunkprefix = -1
 var opusstreamcount = 0
 var opusframecount = 0
 const Noutoforderqueue = 4
-const Npacketinitialbatching = 3
+const Npacketinitialbatching = 2
 var outoforderchunkqueue = [ ]
+var opusframequeuecount = 0
 
 func setrecopusvalues(opussamplerate, opusframesize):
 	var opusframeduration = opusframesize*1.0/opussamplerate
-	var audiosamplerate = AudioServer.get_mix_rate()
 	audiostreamopuschunked.opusframesize = opusframesize
 	audiostreamopuschunked.opussamplerate = opussamplerate
-	
-	
-# This crashes!!!	
-	audiostreamopuschunked.audiosamplerate = 48000 # AudioServer.get_mix_rate()
-	audiostreamopuschunked.mix_rate = 48000 # AudioServer.get_mix_rate()
-
-	#audiostreamopuschunked.audiosamplerate = AudioServer.get_mix_rate()
-	#audiostreamopuschunked.mix_rate = AudioServer.get_mix_rate()
-
+	audiostreamopuschunked.audiosamplerate = AudioServer.get_mix_rate()
+	audiostreamopuschunked.mix_rate = AudioServer.get_mix_rate()
 	audiostreamopuschunked.audiosamplesize = int(audiostreamopuschunked.audiosamplerate*opusframeduration)
 
 func incomingaudiopacket(packet):
@@ -176,8 +169,12 @@ func incomingaudiopacket(packet):
 				outoforderchunkqueue.clear()
 				for i in range(Noutoforderqueue):
 					outoforderchunkqueue.push_back(null)
+				opusframequeuecount = 0
 				assert (Npacketinitialbatching < Noutoforderqueue)
 				
+	elif lenchunkprefix == -1:
+		pass
+
 	elif lenchunkprefix == 0:
 		audiostreamopuschunked.push_opus_packet(packet, lenchunkprefix, 0)
 		
@@ -200,11 +197,23 @@ func incomingaudiopacket(packet):
 				outoforderchunkqueue.push_back(null)
 				opusframecountR -= 1
 				opusframecount += 1
-			outoforderchunkqueue[opusframecountR] = packet
-			while outoforderchunkqueue[0] != null and opusframecountI >= Npacketinitialbatching:
-				audiostreamopuschunked.push_opus_packet(outoforderchunkqueue.pop_front(), lenchunkprefix, 0)
-				outoforderchunkqueue.push_back(null)
+				opusframequeuecount -= 1
+				assert (opusframequeuecount >= 0)
+		
+			if false and opusframecount != 0 and opusframequeuecount == 0:
+				# optimize case to avoid using queue
+				audiostreamopuschunked.push_opus_packet(packet, lenchunkprefix, 0)
 				opusframecount += 1
+
+			else:
+				outoforderchunkqueue[opusframecountR] = packet
+				opusframequeuecount += 1
+				while outoforderchunkqueue[0] != null and opusframecount + opusframequeuecount >= Npacketinitialbatching:
+					audiostreamopuschunked.push_opus_packet(outoforderchunkqueue.pop_front(), lenchunkprefix, 0)
+					outoforderchunkqueue.push_back(null)
+					opusframecount += 1
+					opusframequeuecount -= 1
+					assert (opusframequeuecount >= 0)
 			
 	else:
 		print("dropping frame with opusstream number mismatch")
