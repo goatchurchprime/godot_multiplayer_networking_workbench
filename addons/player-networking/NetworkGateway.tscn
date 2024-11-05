@@ -1,4 +1,4 @@
-[gd_scene load_steps=32 format=3 uid="uid://cfmoahalri06d"]
+[gd_scene load_steps=33 format=3 uid="uid://cfmoahalri06d"]
 
 [ext_resource type="Script" path="res://addons/player-networking/NetworkGateway.gd" id="1"]
 [ext_resource type="Script" path="res://addons/player-networking/Enetmultiplayerserver.gd" id="3"]
@@ -27,6 +27,9 @@ bg_color = Color(0.298039, 0.996078, 0.298039, 1)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_e1vu8"]
 bg_color = Color(0.345364, 0.0930718, 0.645071, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_4i5jn"]
+bg_color = Color(0, 0, 0, 1)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_wj0xm"]
 bg_color = Color(0.12111, 0.1611, 0.691235, 1)
@@ -399,6 +402,13 @@ layout_mode = 2
 layout_mode = 2
 text = "WebRTC with MQTT signalling:"
 
+[node name="WarningLabel" type="Label" parent="VBox/TabContainer/MQTTsignalling/VBox/HBox/Label"]
+visible = false
+layout_mode = 0
+theme_override_colors/font_color = Color(0.972549, 0, 0, 1)
+theme_override_styles/normal = SubResource("StyleBoxFlat_4i5jn")
+text = "Warning: WebRTC not found"
+
 [node name="brokeraddress" type="OptionButton" parent="VBox/TabContainer/MQTTsignalling/VBox/HBox"]
 layout_mode = 2
 item_count = 3
@@ -581,6 +591,13 @@ material = SubResource("ShaderMaterial_c0q00")
 layout_mode = 2
 size_flags_horizontal = 3
 color = Color(0.104768, 0.249346, 0.350987, 1)
+
+[node name="OpusWarningLabel" type="Label" parent="VBox/PlayerConnections/VBox/RecordingFeature"]
+visible = false
+layout_mode = 2
+theme_override_colors/font_color = Color(0.972549, 0, 0, 1)
+theme_override_styles/normal = SubResource("StyleBoxFlat_4i5jn")
+text = "Warning: addons/twovoip not found"
 
 [node name="ConnectionLog" type="TextEdit" parent="VBox/PlayerConnections/VBox"]
 custom_minimum_size = Vector2(0, 30)

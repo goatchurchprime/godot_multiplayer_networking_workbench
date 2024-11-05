@@ -164,8 +164,10 @@ func incomingaudiopacket(packet):
 					setrecopusvalues(h["opussamplerate"], h["opusframesize"])
 				lenchunkprefix = int(h["lenchunkprefix"])
 				opusstreamcount = int(h["opusstreamcount"])
-
 				opusframecount = 0
+				if h.has("opusframecount"):
+					print("Mid speech header!!! ", h["opusframecount"])
+					opusframecount = h["opusframecount"]
 				outoforderchunkqueue.clear()
 				for i in range(Noutoforderqueue):
 					outoforderchunkqueue.push_back(null)
@@ -191,13 +193,13 @@ func incomingaudiopacket(packet):
 				print("shifting outoforderqueue ", opusframecountR, " ", ("null" if outoforderchunkqueue[0] == null else len(outoforderchunkqueue[0])))
 				if outoforderchunkqueue[0] != null:
 					audiostreamopuschunked.push_opus_packet(outoforderchunkqueue[0], lenchunkprefix, 0)
+					opusframequeuecount -= 1
 				elif outoforderchunkqueue[1] != null:
 					audiostreamopuschunked.push_opus_packet(outoforderchunkqueue[1], lenchunkprefix, 1)
 				outoforderchunkqueue.pop_front()
 				outoforderchunkqueue.push_back(null)
 				opusframecountR -= 1
 				opusframecount += 1
-				opusframequeuecount -= 1
 				assert (opusframequeuecount >= 0)
 		
 			if false and opusframecount != 0 and opusframequeuecount == 0:

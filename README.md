@@ -18,19 +18,23 @@ The system logic is embedded in a control panel that you can make invisible and 
 restricted set of options tuned to your application, but it is exposed for the purpose of 
 experimentation and debugging.
 
-The pure GDScript **MQTT** addon is distributed with this application.  
-A Godot project you can use to familiarize yourself with this protocol 
-can be found [here](https://github.com/goatchurchprime/godot-mqtt?tab=readme-ov-file#mqtt)
+### Addons
 
-If you want to use WebRTC you will need to use the \[AssetLib\] tab to install 
-the [WebRTC plugin - Godot 4.1+](https://godotengine.org/asset-library/asset/2103) into 
-the directory `addons/webrtc`.  (Although the WebRTC classes are in the core of GodotEngine, 
-the implementation is kept separate to save 20Mbs for all the people not using this feature.) 
+Addons that are missing can be downloaded from the **AssetLib** tab once you open the project.
 
-If you record and send opus-compressed voice packets over the net, you also need to 
-install the [TwoVoip v3.4+](https://godotengine.org/asset-library/asset/3169) addon.
-There is an **example** demo project in [two-voip-godot-4](https://github.com/goatchurchprime/two-voip-godot-4) 
-demo project with that plugin for isolating the many VoIP related snags at this point.
+* [mqtt-client](https://godotengine.org/asset-library/asset/1993) v1.2 is already included because it is very small and pure GDScript
+
+* [TwoVoip](https://godotengine.org/asset-library/asset/3169) v3.4 is required to compress your audio stream 
+from the microphone using the Opus library.  It can be used on its own for testing from [two-voip-godot-4](https://github.com/goatchurchprime/two-voip-godot-4)
+The asset is 100Mb, so is not included with the project
+
+* [WebRTC plugin - Godot 4.1+](https://godotengine.org/asset-library/asset/2103) is required to implement the WebRTC protocol and 
+is also about 100Mb in size (because it has the implementation for all platforms).  
+Make sure you set its download directory to `addons/webrtc`.  
+
+* **addons/player-networking** is the addon that this project is a demo for.  It is not yet ready to be 
+released as an addon it its own right.
+ 
 
 ## Operation
 

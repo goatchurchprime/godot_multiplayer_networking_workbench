@@ -43,6 +43,7 @@ func clearallstatuses():
 func _ready():
 	clearallstatuses()
 	StatusMQTT.select(0)
+	$VBox/HBox/Label/WarningLabel.visible = not DirAccess.open("res://").dir_exists("res://addons/webrtc")
 
 var Dns = -1
 func _on_NetworkOptionsMQTTWebRTC_item_selected(ns):

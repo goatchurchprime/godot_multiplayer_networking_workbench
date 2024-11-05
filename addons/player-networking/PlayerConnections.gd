@@ -16,6 +16,7 @@ var LocalPlayerFrame = null
 var premature_peerconnections = null
 var uninitialized_peerconnections = [ ]
 var RemotePlayers = [ ]
+var peerconnections_possiblymissingaudioheaders = [ ]
 
 @onready var PlayersNode = NetworkGateway.get_node_or_null(NetworkGateway.playersnodepath)
 @onready var PlayerList = $VBox/HBox/PlayerList
@@ -157,6 +158,7 @@ func _peer_connected(id):
 
 	assert (not uninitialized_peerconnections.has(id))
 	uninitialized_peerconnections.push_back(id)
+	peerconnections_possiblymissingaudioheaders.push_back(id)
 
 	if multiplayer.is_server():
 		rpc_id(id, "RPC_spawninfoforclientfromserver", LocalPlayer.PF_spawninfo_fornewplayer())
@@ -170,6 +172,8 @@ func _peer_disconnected(id):
 		printerr("_peer_disconnected already called by _server_disconnected")
 		return
 		
+	peerconnections_possiblymissingaudioheaders.erase(id)
+
 	if uninitialized_peerconnections.has(id):
 		uninitialized_peerconnections.erase(id)
 		return

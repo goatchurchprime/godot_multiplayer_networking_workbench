@@ -68,6 +68,7 @@ func processtalkstreamends():
 		}
 		audioopuschunkedeffect.flush_opus_encoder(false)
 		PlayerConnections.LocalPlayerFrame.transmitaudiopacket(JSON.stringify(audiostreampacketheader).to_ascii_buffer())
+		PlayerConnections.peerconnections_possiblymissingaudioheaders.clear()
 		opusframecount = 0
 		currentlytalking = true
 		if $AudioStreamPlayerMicrophone.playing != true:
@@ -86,6 +87,20 @@ func processtalkstreamends():
 		}
 		PlayerFrame.transmitaudiopacket(JSON.stringify(audiopacketstreamfooter).to_ascii_buffer())
 		opusstreamcount += 1
+
+	elif talking and PlayerConnections.peerconnections_possiblymissingaudioheaders:
+		var audiostreampacketheadermiddle = { 
+			"opusframesize":audioopuschunkedeffect.opusframesize, 
+			"opussamplerate":audioopuschunkedeffect.opussamplerate, 
+			"lenchunkprefix":len(chunkprefix), 
+			"opusstreamcount":opusstreamcount, 
+			"talkingtimestart":talkingtimestart, 
+			"opusframecount":opusframecount
+		}
+		for id in PlayerConnections.peerconnections_possiblymissingaudioheaders:
+			PlayerConnections.rpc_id(id, "RPC_incomingaudiopacket", JSON.stringify(audiostreampacketheadermiddle).to_ascii_buffer())
+		PlayerConnections.peerconnections_possiblymissingaudioheaders.clear()
+
 
 func processvox():
 	if $Denoise.button_pressed:
@@ -159,7 +174,7 @@ func _ready():
 		setopusvalues(opussamplerate_default, opusframedurationms_default, opusbitrate_default, opuscomplexity_default, opusoptimizeforvoice_default)
 	else:
 		printerr("Unabled to find or instantiate AudioEffectOpusChunked on MicrophoneBus")
-		
+		$OpusWarningLabel.visible = true
 
 func _on_vox_toggled(toggled_on):
 	$PTT.toggle_mode = toggled_on
