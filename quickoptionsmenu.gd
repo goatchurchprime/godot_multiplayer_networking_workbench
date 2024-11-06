@@ -43,6 +43,8 @@ func _on_cc_button_toggled(toggled_on):
 func _process(delta):
 	$PlayerCount.value = NetworkGateway.Dconnectedplayerscount
 	#print(get_viewport().canvas_transform.origin, get_viewport().global_canvas_transform.origin)
+	var v = get_node("../SubViewportContainer/SubViewport/KNode2D/Sprite2D").global_position - NetworkGateway.PlayerConnections.LocalPlayer.global_position
+	AudioServer.set_bus_effect_enabled(0, 0, (max(abs(v.x), abs(v.y)) < 60))
 
 func _on_new_card_pressed():
 	var multiplayerauthority = NetworkGateway.get_node(NetworkGateway.playersnodepath).get_node("../SyncObjects/MultiplayerSpawner")

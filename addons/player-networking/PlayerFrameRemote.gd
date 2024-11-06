@@ -1,6 +1,5 @@
 extends Node
 
-var framestack = [ ]
 var mintimestampoffset: float = 0.0
 var laglatency = 0.2  # this needs to stay above almost all the arrivaldelay values
 var initialframestate = 0
