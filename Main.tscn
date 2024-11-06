@@ -1,4 +1,4 @@
-[gd_scene load_steps=14 format=3 uid="uid://denbhipr26x6c"]
+[gd_scene load_steps=11 format=3 uid="uid://denbhipr26x6c"]
 
 [ext_resource type="Script" path="res://quickoptionsmenu.gd" id="1_8ecn3"]
 [ext_resource type="PackedScene" uid="uid://dhd8tliyhvtiw" path="res://controlplayer.tscn" id="2"]
@@ -16,48 +16,14 @@ normal_texture = ExtResource("3_1a6vp")
 specular_shininess = 0.0
 
 [sub_resource type="Gradient" id="Gradient_tb38i"]
+colors = PackedColorArray(0, 0, 0, 0.388235, 1, 1, 1, 0.47451)
 
 [sub_resource type="GradientTexture2D" id="GradientTexture2D_d7327"]
 gradient = SubResource("Gradient_tb38i")
+width = 120
+height = 120
 fill = 1
 fill_from = Vector2(0.5, 0.5)
-
-[sub_resource type="Animation" id="Animation_dy77l"]
-length = 0.001
-tracks/0/type = "value"
-tracks/0/imported = false
-tracks/0/enabled = true
-tracks/0/path = NodePath("Sprite2D:position")
-tracks/0/interp = 1
-tracks/0/loop_wrap = true
-tracks/0/keys = {
-"times": PackedFloat32Array(0),
-"transitions": PackedFloat32Array(1),
-"update": 0,
-"values": [Vector2(400, 400)]
-}
-
-[sub_resource type="Animation" id="Animation_dswac"]
-resource_name = "adaptive"
-length = 4.0
-tracks/0/type = "value"
-tracks/0/imported = false
-tracks/0/enabled = true
-tracks/0/path = NodePath("Sprite2D:position")
-tracks/0/interp = 1
-tracks/0/loop_wrap = true
-tracks/0/keys = {
-"times": PackedFloat32Array(0.5, 2.16667, 3.33333),
-"transitions": PackedFloat32Array(1, 0.0743254, 1),
-"update": 0,
-"values": [Vector2(200, 400), Vector2(400, 400), Vector2(500, 500)]
-}
-
-[sub_resource type="AnimationLibrary" id="AnimationLibrary_m8t5j"]
-_data = {
-"RESET": SubResource("Animation_dy77l"),
-"adaptive": SubResource("Animation_dswac")
-}
 
 [node name="Main" type="Control"]
 layout_mode = 3
@@ -178,16 +144,12 @@ spawn_path = NodePath("../SpawnedObjects")
 
 [node name="SpawnedObjects" type="Node2D" parent="SubViewportContainer/SubViewport/SyncObjects"]
 
-[node name="Node2D" type="Node2D" parent="SubViewportContainer/SubViewport/SyncObjects"]
+[node name="KNode2D" type="Node2D" parent="SubViewportContainer/SubViewport"]
+position = Vector2(-0.000152588, 0)
 
-[node name="Sprite2D" type="Sprite2D" parent="SubViewportContainer/SubViewport/SyncObjects/Node2D"]
+[node name="Sprite2D" type="Sprite2D" parent="SubViewportContainer/SubViewport/KNode2D"]
 position = Vector2(400, 400)
 texture = SubResource("GradientTexture2D_d7327")
-
-[node name="AnimationPlayer" type="AnimationPlayer" parent="SubViewportContainer/SubViewport/SyncObjects/Node2D"]
-libraries = {
-"": SubResource("AnimationLibrary_m8t5j")
-}
 
 [node name="NetworkGateway" parent="." instance=ExtResource("3")]
 visible = false

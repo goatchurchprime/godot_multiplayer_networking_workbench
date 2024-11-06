@@ -11,7 +11,7 @@ var PlayerAnimation : AnimationPlayer = null
 var templateanimation : Animation = null
 var currentrecordinganimation : Animation = null
 var currentrecordinganimationT0 = 0.0
-const animationtimerunoff = 10.0
+const animationtimerunoff = 5.0
 
 var DframereportCount = 0
 var Dcumulativebytes = 0

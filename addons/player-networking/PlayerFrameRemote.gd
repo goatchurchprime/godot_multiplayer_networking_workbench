@@ -1,6 +1,5 @@
 extends Node
 
-var framestack = [ ]
 var mintimestampoffset: float = 0.0
 var laglatency = 0.2  # this needs to stay above almost all the arrivaldelay values
 var initialframestate = 0
@@ -17,9 +16,15 @@ var NetworkGatewayForDoppelgangerReplay = null
 var PlayerAnimation : AnimationPlayer = null
 var currentplayeranimation : Animation = null
 var currentplayeranimationT0 = 0.0
-const animationtimerunoff = 1.0
+const animationtimerunoff = 5.0
 
 #frametimems = opusframesize*1000.0/opusframesize
+var audioserveroutputlatency = 0.015
+var audiobufferregulationtimeLow = 0.6
+var audiobufferregulationtime = 1.2
+var audiobufferregulationpitchlow = 1.4
+var audiobufferregulationpitch = 2.0
+var audiobufferpitchscale = 1.0
 
 
 func Dclearcachesig():
@@ -88,6 +93,7 @@ func networkedavatarthinnedframedata(vd):
 					currentplayeranimation.length = kt + animationtimerunoff
 
 
+
 var Dframecount = 0
 var Dmaxarrivaldelay = 0
 func _process(delta):
@@ -110,10 +116,25 @@ func _process(delta):
 		var kt = t - currentplayeranimationT0
 		PlayerAnimation.seek(kt, true)
 
+	if audiostreamopuschunked != null and audiostreamplayer != null:
+		var bufferlengthtime = audioserveroutputlatency + audiostreamopuschunked.queue_length_frames()*1.0/audiostreamopuschunked.audiosamplerate
+		if bufferlengthtime < audiobufferregulationtime:
+			if audiobufferpitchscale != 1.0:
+				if bufferlengthtime < audiobufferregulationtimeLow:
+					audiobufferpitchscale = 1.0
+					audiostreamplayer.pitch_scale = audiobufferpitchscale
+					print("SETTING audiobufferpitchscale ", audiobufferpitchscale)
+		else:
+			var w = inverse_lerp(audiobufferregulationtime, audioserveroutputlatency + audiobuffersize/audiostreamopuschunked.audiosamplerate, bufferlengthtime)
+			audiobufferpitchscale = lerp(audiobufferregulationpitchlow, audiobufferregulationpitch, w)
+			audiostreamplayer.pitch_scale = audiobufferpitchscale
+			print("SETTING audiobufferpitchscale ", audiobufferpitchscale)
 
 var audiostreamopuschunked : AudioStream = null
+var audiostreamplayer = null
+
 func _ready():
-	var audiostreamplayer = get_node_or_null("../AudioStreamPlayer")
+	audiostreamplayer = get_node_or_null("../AudioStreamPlayer")
 	if audiostreamplayer != null:
 		audiostreamplayer.playing = true
 		audiostreamopuschunked = audiostreamplayer.stream
@@ -137,6 +158,7 @@ const Noutoforderqueue = 4
 const Npacketinitialbatching = 2
 var outoforderchunkqueue = [ ]
 var opusframequeuecount = 0
+var audiobuffersize = 50*882
 
 func setrecopusvalues(opussamplerate, opusframesize):
 	var opusframeduration = opusframesize*1.0/opussamplerate
@@ -145,6 +167,8 @@ func setrecopusvalues(opussamplerate, opusframesize):
 	audiostreamopuschunked.audiosamplerate = AudioServer.get_mix_rate()
 	audiostreamopuschunked.mix_rate = AudioServer.get_mix_rate()
 	audiostreamopuschunked.audiosamplesize = int(audiostreamopuschunked.audiosamplerate*opusframeduration)
+	audiobuffersize = audiostreamopuschunked.audiosamplesize*audiostreamopuschunked.audiosamplechunks
+
 
 func incomingaudiopacket(packet):
 	if logrecfile != null:
@@ -211,6 +235,9 @@ func incomingaudiopacket(packet):
 				outoforderchunkqueue[opusframecountR] = packet
 				opusframequeuecount += 1
 				while outoforderchunkqueue[0] != null and opusframecount + opusframequeuecount >= Npacketinitialbatching:
+					if not audiostreamopuschunked.chunk_space_available():
+						print("!!! chunk space filled up")
+						break
 					audiostreamopuschunked.push_opus_packet(outoforderchunkqueue.pop_front(), lenchunkprefix, 0)
 					outoforderchunkqueue.push_back(null)
 					opusframecount += 1

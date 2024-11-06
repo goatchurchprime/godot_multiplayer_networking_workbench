@@ -13,7 +13,7 @@ var opusbitrate_default = 10000  # 3000, 6000, 10000, 12000, 24000
 var opuscomplexity_default = 5 # 0-10
 var opusoptimizeforvoice_default = true
 
-var leadtime : float = 0.1
+var leadtime : float = 0.15
 var hangtime : float  = 1.2
 var voxthreshhold = 0.2
 
