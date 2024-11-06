@@ -13,6 +13,7 @@ fill = 2
 fill_from = Vector2(0.5, 0.5)
 
 [sub_resource type="AudioStreamOpusChunked" id="AudioStreamOpusChunked_i52lg"]
+audiosamplechunks = 100
 
 [sub_resource type="Gradient" id="Gradient_y7cr2"]
 offsets = PackedFloat32Array(0, 0.645714, 1)

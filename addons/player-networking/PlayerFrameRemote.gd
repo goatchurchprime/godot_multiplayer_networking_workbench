@@ -16,9 +16,15 @@ var NetworkGatewayForDoppelgangerReplay = null
 var PlayerAnimation : AnimationPlayer = null
 var currentplayeranimation : Animation = null
 var currentplayeranimationT0 = 0.0
-const animationtimerunoff = 1.0
+const animationtimerunoff = 5.0
 
 #frametimems = opusframesize*1000.0/opusframesize
+var audioserveroutputlatency = 0.015
+var audiobufferregulationtimeLow = 0.6
+var audiobufferregulationtime = 1.2
+var audiobufferregulationpitchlow = 1.4
+var audiobufferregulationpitch = 2.0
+var audiobufferpitchscale = 1.0
 
 
 func Dclearcachesig():
@@ -87,10 +93,6 @@ func networkedavatarthinnedframedata(vd):
 					currentplayeranimation.length = kt + animationtimerunoff
 
 
-var audioserveroutputlatency = 0.015
-var audiobufferregulationtime = 0.7
-var audiobufferregulationpitch = 1.4
-var audiobufferpitchscale = 1.0
 
 var Dframecount = 0
 var Dmaxarrivaldelay = 0
@@ -114,22 +116,25 @@ func _process(delta):
 		var kt = t - currentplayeranimationT0
 		PlayerAnimation.seek(kt, true)
 
-	if audiostreamopuschunked != null:
+	if audiostreamopuschunked != null and audiostreamplayer != null:
 		var bufferlengthtime = audioserveroutputlatency + audiostreamopuschunked.queue_length_frames()*1.0/audiostreamopuschunked.audiosamplerate
 		if bufferlengthtime < audiobufferregulationtime:
 			if audiobufferpitchscale != 1.0:
-				audiobufferpitchscale = 1.0
-				$AudioStreamPlayer.pitch_scale = audiobufferpitchscale
+				if bufferlengthtime < audiobufferregulationtimeLow:
+					audiobufferpitchscale = 1.0
+					audiostreamplayer.pitch_scale = audiobufferpitchscale
+					print("SETTING audiobufferpitchscale ", audiobufferpitchscale)
 		else:
 			var w = inverse_lerp(audiobufferregulationtime, audioserveroutputlatency + audiobuffersize/audiostreamopuschunked.audiosamplerate, bufferlengthtime)
-			audiobufferpitchscale = lerp(1.0, audiobufferregulationpitch, w)
-			$AudioStreamPlayer.pitch_scale = audiobufferpitchscale
+			audiobufferpitchscale = lerp(audiobufferregulationpitchlow, audiobufferregulationpitch, w)
+			audiostreamplayer.pitch_scale = audiobufferpitchscale
 			print("SETTING audiobufferpitchscale ", audiobufferpitchscale)
 
 var audiostreamopuschunked : AudioStream = null
+var audiostreamplayer = null
 
 func _ready():
-	var audiostreamplayer = get_node_or_null("../AudioStreamPlayer")
+	audiostreamplayer = get_node_or_null("../AudioStreamPlayer")
 	if audiostreamplayer != null:
 		audiostreamplayer.playing = true
 		audiostreamopuschunked = audiostreamplayer.stream
