@@ -87,6 +87,11 @@ func networkedavatarthinnedframedata(vd):
 					currentplayeranimation.length = kt + animationtimerunoff
 
 
+var audioserveroutputlatency = 0.015
+var audiobufferregulationtime = 0.7
+var audiobufferregulationpitch = 1.4
+var audiobufferpitchscale = 1.0
+
 var Dframecount = 0
 var Dmaxarrivaldelay = 0
 func _process(delta):
@@ -109,8 +114,20 @@ func _process(delta):
 		var kt = t - currentplayeranimationT0
 		PlayerAnimation.seek(kt, true)
 
+	if audiostreamopuschunked != null:
+		var bufferlengthtime = audioserveroutputlatency + audiostreamopuschunked.queue_length_frames()*1.0/audiostreamopuschunked.audiosamplerate
+		if bufferlengthtime < audiobufferregulationtime:
+			if audiobufferpitchscale != 1.0:
+				audiobufferpitchscale = 1.0
+				$AudioStreamPlayer.pitch_scale = audiobufferpitchscale
+		else:
+			var w = inverse_lerp(audiobufferregulationtime, audioserveroutputlatency + audiobuffersize/audiostreamopuschunked.audiosamplerate, bufferlengthtime)
+			audiobufferpitchscale = lerp(1.0, audiobufferregulationpitch, w)
+			$AudioStreamPlayer.pitch_scale = audiobufferpitchscale
+			print("SETTING audiobufferpitchscale ", audiobufferpitchscale)
 
 var audiostreamopuschunked : AudioStream = null
+
 func _ready():
 	var audiostreamplayer = get_node_or_null("../AudioStreamPlayer")
 	if audiostreamplayer != null:
@@ -136,6 +153,7 @@ const Noutoforderqueue = 4
 const Npacketinitialbatching = 2
 var outoforderchunkqueue = [ ]
 var opusframequeuecount = 0
+var audiobuffersize = 50*882
 
 func setrecopusvalues(opussamplerate, opusframesize):
 	var opusframeduration = opusframesize*1.0/opussamplerate
@@ -144,6 +162,8 @@ func setrecopusvalues(opussamplerate, opusframesize):
 	audiostreamopuschunked.audiosamplerate = AudioServer.get_mix_rate()
 	audiostreamopuschunked.mix_rate = AudioServer.get_mix_rate()
 	audiostreamopuschunked.audiosamplesize = int(audiostreamopuschunked.audiosamplerate*opusframeduration)
+	audiobuffersize = audiostreamopuschunked.audiosamplesize*audiostreamopuschunked.audiosamplechunks
+
 
 func incomingaudiopacket(packet):
 	if logrecfile != null:

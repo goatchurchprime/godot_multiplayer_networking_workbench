@@ -150,10 +150,14 @@ func processsendopuschunk():
 func _process(delta):
 	if audioopuschunkedeffect != null:
 		processtalkstreamends()
+		var Dchunksbatch = 0
 		while audioopuschunkedeffect.chunk_available():
 			var speakingvolume = processvox()
 			processsendopuschunk()
 			PlayerConnections.LocalPlayer.PF_setspeakingvolume(speakingvolume if currentlytalking else 0.0)
+			Dchunksbatch += 1
+		if currentlytalking and Dchunksbatch > 1:
+			print("Dchunksbatch ", Dchunksbatch)
 	$MicNotPlayingWarning.visible = not $AudioStreamPlayerMicrophone.playing
 
 func _ready():
