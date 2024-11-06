@@ -543,6 +543,14 @@ toggle_mode = true
 text = "LogRec
 "
 
+[node name="LogAud" type="Button" parent="VBox/PlayerConnections/VBox/HBox"]
+layout_mode = 2
+tooltip_text = "Log Remote Audio 
+for detecting crackles"
+toggle_mode = true
+text = "LogAud
+"
+
 [node name="VSeparator" type="VSeparator" parent="VBox/PlayerConnections/VBox/HBox"]
 visibility_layer = 0
 layout_mode = 2
@@ -718,6 +726,7 @@ layout_mode = 2
 [connection signal="item_selected" from="VBox/PlayerConnections/VBox/HBox/PlayerList" to="VBox/PlayerConnections" method="_on_PlayerList_item_selected"]
 [connection signal="value_changed" from="VBox/PlayerConnections/VBox/HBox/PlayerLagSlider" to="VBox/PlayerConnections" method="_on_PlayerLagSlider_value_changed"]
 [connection signal="toggled" from="VBox/PlayerConnections/VBox/HBox/LogRec" to="VBox/PlayerConnections" method="_on_log_rec_toggled"]
+[connection signal="toggled" from="VBox/PlayerConnections/VBox/HBox/LogAud" to="VBox/PlayerConnections" method="_on_log_aud_toggled"]
 [connection signal="finished" from="VBox/PlayerConnections/VBox/RecordingFeature/AudioStreamPlayerMicrophone" to="VBox/PlayerConnections/VBox/RecordingFeature" method="_on_audio_stream_player_microphone_finished"]
 [connection signal="toggled" from="VBox/PlayerConnections/VBox/RecordingFeature/Vox" to="VBox/PlayerConnections/VBox/RecordingFeature" method="_on_vox_toggled"]
 [connection signal="gui_input" from="VBox/PlayerConnections/VBox/RecordingFeature/VoxThreshold" to="VBox/PlayerConnections/VBox/RecordingFeature" method="_on_vox_threshold_gui_input"]

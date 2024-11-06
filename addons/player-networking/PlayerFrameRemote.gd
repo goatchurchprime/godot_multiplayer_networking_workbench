@@ -210,6 +210,9 @@ func incomingaudiopacket(packet):
 				outoforderchunkqueue[opusframecountR] = packet
 				opusframequeuecount += 1
 				while outoforderchunkqueue[0] != null and opusframecount + opusframequeuecount >= Npacketinitialbatching:
+					if not audiostreamopuschunked.chunk_space_available():
+						print("!!! chunk space filled up")
+						break
 					audiostreamopuschunked.push_opus_packet(outoforderchunkqueue.pop_front(), lenchunkprefix, 0)
 					outoforderchunkqueue.push_back(null)
 					opusframecount += 1

@@ -208,7 +208,7 @@ func _on_Doppelganger_toggled(button_pressed):
 			LocalPlayerFrame.NetworkGatewayForDoppelganger = NetworkGateway
 		else:
 			var avatardata = rlogrecfile.get_var()
-			avatardata["labeltext"] = avatardata["playername"]
+			avatardata["labeltext"] = "logrec"
 			LocalPlayerFrame.doppelgangernode = createnewremoteplayernode(avatardata, doppelganger_networkID, "Logrecreplay")
 			var df = LocalPlayerFrame.doppelgangernode.get_node("PlayerFrame")
 			df.doppelgangerrecfile = rlogrecfile
@@ -276,7 +276,16 @@ func RPC_incomingaudiopacket(packet):
 		return
 	var remoteplayernodename = playernamefromnetworkid(rpcsenderid)
 	var remoteplayer = PlayersNode.get_node(remoteplayernodename)
-	remoteplayer.get_node("PlayerFrame").incomingaudiopacket(packet)
+	var remoteplayerframe = remoteplayer.get_node("PlayerFrame")
+	remoteplayerframe.incomingaudiopacket(packet)
+
+	if reflectaudiopacketto != -1 and reflectaudiopacketto == rpcsenderid:
+		var reflectedaudiopacket = [
+			Time.get_ticks_msec()*0.001, 
+			remoteplayerframe.audiostreamopuschunked.queue_length_frames(),
+			packet 
+		]
+		rpc_id(reflectaudiopacketto, "RPC_reflectedaudiopacket", reflectedaudiopacket)
 	
 func createnewremoteplayernode(avatardata, networkID, playernodename):
 	assert (not PlayersNode.has_node(playernodename))
@@ -321,6 +330,8 @@ func _on_log_rec_toggled(toggled_on):
 		print("logging to: ", logrecfile.get_path_absolute())
 		
 		var pf = playerbeingrecorded.get_node("PlayerFrame")
+		if not pf.has_method("datafornewconnectedplayer"):
+			pf = LocalPlayerFrame
 		var avatardata = pf.datafornewconnectedplayer(true)
 		avatardata["t"] = Time.get_ticks_msec()*0.001
 		logrecfile.store_var(avatardata)
@@ -333,3 +344,31 @@ func _on_log_rec_toggled(toggled_on):
 			pf.logrecfile.close()
 			pf.logrecfile = null
 			playerbeingrecorded = null
+
+var logremoteaudiofile = null
+var reflectaudiopacketto = -1
+var reflectorsenderid = -1
+@rpc("any_peer", "call_remote", "reliable", 0) 
+func RPC_reflectaudiopacketto(id):
+	reflectaudiopacketto = id
+@rpc("any_peer", "call_remote", "reliable", 0) 
+func RPC_reflectedaudiopacket(reflectaudiopacket):
+	var rpcsenderid = multiplayer.get_remote_sender_id()
+	if reflectorsenderid == -1:
+		reflectorsenderid = rpcsenderid
+	if logremoteaudiofile != null and reflectorsenderid == rpcsenderid:
+		prints("audpacket", reflectaudiopacket[0], reflectaudiopacket[1])
+		logremoteaudiofile.store_var(reflectaudiopacket)
+
+func _on_log_aud_toggled(toggled_on):
+	if toggled_on:
+		logremoteaudiofile = FileAccess.open("user://logaudremote.dat", FileAccess.WRITE)
+		reflectorsenderid = -1
+		print("logging audio to: ", logremoteaudiofile.get_path_absolute())
+		rpc("RPC_reflectaudiopacketto", LocalPlayerFrame.networkID)
+	elif logremoteaudiofile != null:
+		print("end logging audio to: ", logremoteaudiofile.get_path_absolute())
+		rpc("RPC_reflectaudiopacketto", -1)
+		logremoteaudiofile.close()
+		logremoteaudiofile = null
+		
