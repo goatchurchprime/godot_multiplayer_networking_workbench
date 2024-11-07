@@ -12,13 +12,6 @@ func PF_spawninfo_fornewplayer():
 func PF_spawninfo_receivedfromserver(sfd, PlayerConnection):
 	position = sfd[NCONSTANTS.CFI_ANIMTRACKS+0]
 	PlayerConnection.spawninfoforclientprocessed()
-	
-
-# The receiver of the the above function after the scene 
-# specified by avatarsceneresource has been instanced
-func PF_startupdatafromconnectedplayer(avatardata):
-	$Label.text = avatardata["labeltext"]
-	visible = false
 
 func PF_processlocalavatarposition(delta):
 	pass
