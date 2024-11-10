@@ -5,6 +5,9 @@ networking protocols (**ENet**, **Websockets**, and **WebRTC**) into a plugin
 that can be dropped into any Godot project to enable it to be networked.
 There are hooks to enable VR players to compress, transmit, unpack and interpolate their avatar movements across the network by sharing keyframes into the Animation system.
 
+### Lightning talk at GodotCon2024
+[![image](https://github.com/user-attachments/assets/b8a64026-3cf3-42bd-a080-d45eeeefba05)](https://www.youtube.com/watch?v=iyRvLdhATFo)
+
 **WebRTC** enables peer to peer networking across the internet without a server.
 The signalling (the exchange of a small amount of network routing data between the peers) 
 is done using a light-weight MQTT server, of which public versions are available.
