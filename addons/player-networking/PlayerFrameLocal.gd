@@ -69,7 +69,22 @@ func trackpropertysignificantlychanged(v, v0):
 	return true
 
 
-func getnodepropertyvaluefortrack(anim : Animation, animparent : Node, i: int):
+static func getnodepropertynamefortrack(anim : Animation, animparent : Node, i: int):
+	var nodepath = anim.track_get_path(i)
+	var tt = anim.track_get_type(i)
+	var res = nodepath.get_concatenated_names()
+	var cc = nodepath.get_concatenated_subnames()
+	if cc:
+		res += ":"+cc
+	if tt == Animation.TYPE_POSITION_3D:
+		res += ":position"
+	if tt == Animation.TYPE_ROTATION_3D:
+		res += ":rotation"
+	if tt == Animation.TYPE_SCALE_3D:
+		res += ":scale"
+	return res
+	
+static func getnodepropertyvaluefortrack(anim : Animation, animparent : Node, i: int):
 	var nodepath = anim.track_get_path(i)
 	var tt = anim.track_get_type(i)
 	var noderesource = animparent.get_node_and_resource(nodepath)
@@ -126,7 +141,10 @@ func datafornewconnectedplayer(bfordoppelganger):
 	var avatardata = { "avatarsceneresource":get_parent().scene_file_path
 					 }
 	avatardata["snapshottracks"] = snapshotallanimatedtracks()
-	if not bfordoppelganger:
+	if bfordoppelganger:
+		var doppelnetoffset = NetworkGatewayForDoppelganger.DoppelgangerPanel.getnetoffset()
+		get_parent().PF_changethinnedframedatafordoppelganger(avatardata["snapshottracks"], doppelnetoffset)
+	else:
 		avatardata["Dplayernodename"] = get_parent().get_name()
 		avatardata["Dnetworkid"] = networkID
 	return avatardata
@@ -175,10 +193,7 @@ func _process(delta):
 		if doppelgangerdelay != -1.0:
 			await get_tree().create_timer(doppelgangerdelay*0.001).timeout
 			if doppelgangernode != null:
-				if doppelgangernode.has_method("networkedavatarthinnedframedataANIM"):
-					doppelgangernode.networkedavatarthinnedframedataANIM(vd)
-				else:
-					doppelgangernode.get_node("PlayerFrame").networkedavatarthinnedframedata(vd)
+				doppelgangernode.get_node("PlayerFrame").networkedavatarthinnedframedata(vd)
 
 	if logrecfile != null:
 		logrecfile.store_var({"t":Time.get_ticks_msec()*0.001, "vd":vd})

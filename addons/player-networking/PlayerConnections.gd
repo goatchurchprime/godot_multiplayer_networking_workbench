@@ -200,12 +200,12 @@ func _on_Doppelganger_toggled(button_pressed):
 			rlogrecfile = FileAccess.open("user://logrec.dat", FileAccess.READ)
 		DoppelgangerPanel.seteditable(false)
 		if rlogrecfile == null:
+			LocalPlayerFrame.NetworkGatewayForDoppelganger = NetworkGateway
 			var avatardata = LocalPlayerFrame.datafornewconnectedplayer(true)
 			var doppelnetoffset = DoppelgangerPanel.getnetoffset()
 			var doppelgangerdelay = NetworkGateway.getrandomdoppelgangerdelay(true)
 			await get_tree().create_timer(doppelgangerdelay*0.001).timeout
 			LocalPlayerFrame.doppelgangernode = createnewremoteplayernode(avatardata, doppelganger_networkID, "Doppelganger")
-			LocalPlayerFrame.NetworkGatewayForDoppelganger = NetworkGateway
 		else:
 			var avatardata = rlogrecfile.get_var()
 			avatardata["labeltext"] = "logrec"

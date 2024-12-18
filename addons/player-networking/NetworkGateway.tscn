@@ -411,12 +411,14 @@ text = "Warning: WebRTC not found"
 
 [node name="brokeraddress" type="OptionButton" parent="VBox/TabContainer/MQTTsignalling/VBox/HBox"]
 layout_mode = 2
-item_count = 3
+item_count = 4
 popup/item_0/text = "wss://mosquitto.doesliverpool.xyz"
 popup/item_1/text = "test.mosquitto.org"
 popup/item_1/id = 1
 popup/item_2/text = "ssl://broker.hivemq.com:8883"
 popup/item_2/id = 2
+popup/item_3/text = "wss://mqtt.flespi.io:443"
+popup/item_3/id = 3
 
 [node name="MQTTUser" type="LineEdit" parent="VBox/TabContainer/MQTTsignalling/VBox/HBox"]
 layout_mode = 2
