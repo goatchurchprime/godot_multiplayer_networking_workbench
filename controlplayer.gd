@@ -35,11 +35,19 @@ func PF_spawninfo_receivedfromserver(sfd, PlayerConnection):
 	position = sfd[NCONSTANTS.CFI_ANIMTRACKS+0]
 	PlayerConnection.spawninfoforclientprocessed()
 
+var mousedraggingplayer = true
+func _input(event):
+	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
+		if not event.pressed and get_node("../../SyncObjects").currentmousetoy == null:
+			print(event)
+			mousedraggingplayer = not mousedraggingplayer
+		
 func PF_processlocalavatarposition(delta):
 	if get_window().has_focus():
 		var quickoptions = get_node("../../../../QuickOptions")
-		if quickoptions.subviewpointcontainerhasmouse:
+		if quickoptions.subviewpointcontainerhasmouse and mousedraggingplayer:
 			global_position = get_global_mouse_position().clamp(minmouseposition, maxmouseposition)
+
 	
 func PF_setspeakingvolume(v):
 	$SpeakingBar.scale.x = v

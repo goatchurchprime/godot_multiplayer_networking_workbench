@@ -29,6 +29,19 @@ var Roomplayertreecaboosereached = false
 
 @onready var treenodeiconserver = load("res://addons/player-networking/icons/MultiplayerSpawner.svg")
 
+# Use https://webrtc.github.io/samples/src/content/peerconnection/trickle-ice/
+# to tell whether a given iceserver is working.  
+# There needs to be a non .local iceCandidate in the list
+
+var iceservers = [ { "urls": ["stun:stun.l.google.com:19302"] } ]
+var DDiceservers = [ {
+	"urls": [ 'turn:turn.anyfirewall.com:443?transport=tcp' ],
+	"credential": 'webrtc',
+	"username": 'webrtc'
+} ]
+#var iceservers = { "urls":['turn:turn.defenestrate.it:3478'] } 
+
+
 func clearallstatuses():
 	Roomplayertree.clear()
 	Roomplayertree.create_item()
@@ -174,6 +187,10 @@ func start_mqtt():
 	StatusMQTT.select(1)
 	$MQTT.set_last_will("%s/%s/status" % [Roomnametext.text, $MQTT.client_id], 
 						JSON.stringify({"subject":"closed", "comment":"by_will"}), true)
+	if $VBox/HBox/MQTTUser.text:
+		$MQTT.set_user_pass($VBox/HBox/MQTTUser.text, $VBox/HBox/MQTTPass.text)
+	else:
+		$MQTT.set_user_pass(null, null)
 	var brokerurl = $VBox/HBox/brokeraddress.text
 	$VBox/HBox/brokeraddress.disabled = true
 	$MQTT.connect_to_broker(brokerurl)
@@ -316,7 +333,7 @@ func server_packet_received(sendingclientid, v):
 		peerconnection.session_description_created.connect(server_session_description_created.bind(id))
 		peerconnection.ice_candidate_created.connect(server_ice_candidate_created.bind(id))
 		peerconnection.data_channel_received.connect(Ddata_channel_created)
-		peerconnection.initialize({"iceServers": [ { "urls": ["stun:stun.l.google.com:19302"] } ] })
+		peerconnection.initialize({"iceServers":iceservers })
 		print("serverpacket peer.get_connection_state() ", peerconnection.get_connection_state())
 		multiplayer.multiplayer_peer.add_peer(peerconnection, id)
 		var webrtcpeererror = peerconnection.create_offer()
@@ -365,7 +382,7 @@ func client_packet_received(v):
 		peerconnection.session_description_created.connect(client_session_description_created)
 		peerconnection.ice_candidate_created.connect(client_ice_candidate_created)
 
-		peerconnection.initialize({"iceServers": [ { "urls": ["stun:stun.l.google.com:19302"] } ] })
+		peerconnection.initialize({"iceServers":iceservers})
 		var E = multiplayer.multiplayer_peer.add_peer(peerconnection, 1)
 		if E != 0:	print("Errrr3 ", E)
 		E = peerconnection.set_remote_description("offer", v["data"])

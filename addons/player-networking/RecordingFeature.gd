@@ -66,7 +66,7 @@ func processtalkstreamends():
 			"opusstreamcount":opusstreamcount, 
 			"talkingtimestart":talkingtimestart 
 		}
-		audioopuschunkedeffect.flush_opus_encoder(false)
+		audioopuschunkedeffect.resetencoder()
 		PlayerConnections.LocalPlayerFrame.transmitaudiopacket(JSON.stringify(audiostreampacketheader).to_ascii_buffer())
 		PlayerConnections.peerconnections_possiblymissingaudioheaders.clear()
 		opusframecount = 0

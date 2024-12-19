@@ -197,6 +197,7 @@ func incomingaudiopacket(packet):
 					outoforderchunkqueue.push_back(null)
 				opusframequeuecount = 0
 				assert (Npacketinitialbatching < Noutoforderqueue)
+				audiostreamopuschunked.resetdecoder()
 				
 	elif lenchunkprefix == -1:
 		pass
