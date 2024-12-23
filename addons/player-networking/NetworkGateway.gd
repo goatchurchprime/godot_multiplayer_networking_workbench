@@ -240,6 +240,11 @@ func set_vox_on():
 func is_disconnected():
 	return Dconnectedplayerscount == 0
 
+func change_connectedplayerscount(v, reason):
+	assert (v == 1 or v == -1)
+	Dconnectedplayerscount += v
+	prints("change_connectedplayerscount", v, reason, Dconnectedplayerscount)
+
 func simple_webrtc_connect(roomname):
 	if roomname:
 		MQTTsignalling.Roomnametext.text = roomname

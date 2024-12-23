@@ -13,6 +13,8 @@ func _ready():
 		NetworkGateway.selectandtrigger_networkoption(NetworkGateway.NETWORK_OPTIONS.AS_SERVER)
 	get_node("../SubViewportContainer/SubViewport").size = get_window().size
 	get_node("../SubViewportContainer/SubViewport/Players/LocalPlayer/AudioListener2D").make_current()
+	await get_tree().process_frame
+	NetworkGateway.MQTTsignalling.Roomnametext.text = $Roomname.text
 
 func _on_show_network_gateway_toggled(toggled_on):
 	NetworkGateway.visible = toggled_on

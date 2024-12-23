@@ -1,9 +1,9 @@
 extends HBoxContainer
 
 var audioopuschunkedeffect : AudioEffect = null
+var audiostreamplaybackmicrophone : AudioStreamPlayback = null
 
 var chunkprefix : PackedByteArray = PackedByteArray([0,0]) 
-#var chunkprefix : PackedByteArray = PackedByteArray() 
 
 @onready var PlayerConnections = find_parent("PlayerConnections")
 # Opus compression settings
@@ -27,6 +27,7 @@ var chunkmaxpersist = 0.0
 
 var audiosampleframetextureimage : Image
 var audiosampleframetexture : ImageTexture
+
 
 func setopusvalues(opussamplerate, opusframedurationms, opusbitrate, opuscomplexity, opusoptimizeforvoice):
 	assert (not currentlytalking)
@@ -66,12 +67,12 @@ func processtalkstreamends():
 			"opusstreamcount":opusstreamcount, 
 			"talkingtimestart":talkingtimestart 
 		}
-		audioopuschunkedeffect.resetencoder()
+		audioopuschunkedeffect.resetencoder(false)
 		PlayerConnections.LocalPlayerFrame.transmitaudiopacket(JSON.stringify(audiostreampacketheader).to_ascii_buffer())
 		PlayerConnections.peerconnections_possiblymissingaudioheaders.clear()
 		opusframecount = 0
 		currentlytalking = true
-		if $AudioStreamPlayerMicrophone.playing != true:
+		if audiostreamplaybackmicrophone == null and not $AudioStreamPlayerMicrophone.playing != true:
 			$AudioStreamPlayerMicrophone.playing = true
 			print("Set microphone playing again (switched off by system)")
 
@@ -89,7 +90,7 @@ func processtalkstreamends():
 		opusstreamcount += 1
 
 	elif talking and PlayerConnections.peerconnections_possiblymissingaudioheaders:
-		var audiostreampacketheadermiddle = { 
+		var audiostreampacketheader_middle = { 
 			"opusframesize":audioopuschunkedeffect.opusframesize, 
 			"opussamplerate":audioopuschunkedeffect.opussamplerate, 
 			"lenchunkprefix":len(chunkprefix), 
@@ -98,9 +99,8 @@ func processtalkstreamends():
 			"opusframecount":opusframecount
 		}
 		for id in PlayerConnections.peerconnections_possiblymissingaudioheaders:
-			PlayerConnections.rpc_id(id, "RPC_incomingaudiopacket", JSON.stringify(audiostreampacketheadermiddle).to_ascii_buffer())
+			PlayerConnections.rpc_id(id, "RPC_incomingaudiopacket", JSON.stringify(audiostreampacketheader_middle).to_ascii_buffer())
 		PlayerConnections.peerconnections_possiblymissingaudioheaders.clear()
-
 
 func processvox():
 	if $Denoise.button_pressed:
@@ -148,28 +148,59 @@ func processsendopuschunk():
 	audioopuschunkedeffect.drop_chunk()
 
 func _process(delta):
+	if audiostreamplaybackmicrophone != null:
+		if audiostreamplaybackmicrophone != null and audiostreamplaybackmicrophone.is_microphone_playing():
+			var microphonesamples = audiostreamplaybackmicrophone.get_microphone_buffer(audioopuschunkedeffect.audiosamplesize)
+			if len(microphonesamples) != 0:
+				audioopuschunkedeffect.push_chunk(microphonesamples)
 	if audioopuschunkedeffect != null:
 		processtalkstreamends()
 		while audioopuschunkedeffect.chunk_available():
 			var speakingvolume = processvox()
+			processtalkstreamends()
 			processsendopuschunk()
 			PlayerConnections.LocalPlayer.PF_setspeakingvolume(speakingvolume if currentlytalking else 0.0)
-	$MicNotPlayingWarning.visible = not $AudioStreamPlayerMicrophone.playing
+	if audiostreamplaybackmicrophone == null:
+		$MicNotPlayingWarning.visible = not $AudioStreamPlayerMicrophone.playing
+	else:
+		$MicNotPlayingWarning.visible = not audiostreamplaybackmicrophone.is_microphone_playing()
 
 func _ready():
+	if ClassDB.can_instantiate("AudioStreamPlaybackMicrophone"):
+		audiostreamplaybackmicrophone = ClassDB.instantiate("AudioStreamPlaybackMicrophone")
+	
 	$VoxThreshold.material.set_shader_parameter("voxthreshhold", voxthreshhold)
-	if $AudioStreamPlayerMicrophone.bus != "MicrophoneBus":
-		printerr("AudioStreamPlayerMicrophone doesn't use bus called MicrophoneBus, disabling")
+
+	if audiostreamplaybackmicrophone != null:
+		audiostreamplaybackmicrophone.start_microphone()
+		$MicStreamPlayerNotice.visible = true
 		$AudioStreamPlayerMicrophone.stop()
-		return
-	assert ($AudioStreamPlayerMicrophone.stream.is_class("AudioStreamMicrophone"))
-	var microphonebusidx = AudioServer.get_bus_index($AudioStreamPlayerMicrophone.bus)
-	for i in range(AudioServer.get_bus_effect_count(microphonebusidx)):
-		if AudioServer.get_bus_effect(microphonebusidx, i).is_class("AudioEffectOpusChunked"):
-			audioopuschunkedeffect = AudioServer.get_bus_effect(microphonebusidx, i)
-	if audioopuschunkedeffect == null and ClassDB.can_instantiate("AudioEffectOpusChunked"):
-		audioopuschunkedeffect = ClassDB.instantiate("AudioEffectOpusChunked")
-		AudioServer.add_bus_effect(microphonebusidx, audioopuschunkedeffect)
+		if ClassDB.can_instantiate("AudioEffectOpusChunked"):
+			audioopuschunkedeffect = ClassDB.instantiate("AudioEffectOpusChunked")
+		else:
+			$MicNotPlayingWarning.visible = true
+
+		for busidx in range(AudioServer.bus_count):
+			for i in range(AudioServer.get_bus_effect_count(busidx)):
+				if AudioServer.get_bus_effect(busidx, i).is_class("AudioEffectOpusChunked"):
+					if AudioServer.is_bus_effect_enabled(busidx, i):
+						print("Disabling AudioEffectOpusChunked on bus ", AudioServer.get_bus_name(busidx))
+						AudioServer.set_bus_effect_enabled(busidx, i, false)
+	
+	else:
+		if $AudioStreamPlayerMicrophone.bus != "MicrophoneBus":
+			printerr("AudioStreamPlayerMicrophone doesn't use bus called MicrophoneBus, disabling")
+			$AudioStreamPlayerMicrophone.stop()
+			return
+		assert ($AudioStreamPlayerMicrophone.stream.is_class("AudioStreamMicrophone"))
+		var microphonebusidx = AudioServer.get_bus_index($AudioStreamPlayerMicrophone.bus)
+		for i in range(AudioServer.get_bus_effect_count(microphonebusidx)):
+			if AudioServer.get_bus_effect(microphonebusidx, i).is_class("AudioEffectOpusChunked"):
+				audioopuschunkedeffect = AudioServer.get_bus_effect(microphonebusidx, i)
+		if audioopuschunkedeffect == null and ClassDB.can_instantiate("AudioEffectOpusChunked"):
+			audioopuschunkedeffect = ClassDB.instantiate("AudioEffectOpusChunked")
+			AudioServer.add_bus_effect(microphonebusidx, audioopuschunkedeffect)
+
 	if audioopuschunkedeffect != null:
 		setopusvalues(opussamplerate_default, opusframedurationms_default, opusbitrate_default, opuscomplexity_default, opusoptimizeforvoice_default)
 	else:
