@@ -1,6 +1,6 @@
 [gd_scene load_steps=4 format=3 uid="uid://bw3irandh5ksv"]
 
-[ext_resource type="Script" path="res://addons/player-networking/FallbackControlplayer.gd" id="1_yeg3u"]
+[ext_resource type="Script" uid="uid://dgdmnxdxr3dko" path="res://addons/player-networking/FallbackControlplayer.gd" id="1_yeg3u"]
 
 [sub_resource type="Animation" id="Animation_dusod"]
 tracks/0/type = "value"
@@ -55,7 +55,7 @@ tracks/3/keys = {
 [sub_resource type="AnimationLibrary" id="AnimationLibrary_50vjc"]
 resource_local_to_scene = true
 _data = {
-"trackstemplate": SubResource("Animation_dusod")
+&"trackstemplate": SubResource("Animation_dusod")
 }
 
 [node name="FallbackControlplayer" type="Control"]
@@ -81,5 +81,5 @@ offset_bottom = 40.0
 
 [node name="PlayerAnimation" type="AnimationPlayer" parent="."]
 libraries = {
-"playeral": SubResource("AnimationLibrary_50vjc")
+&"playeral": SubResource("AnimationLibrary_50vjc")
 }

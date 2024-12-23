@@ -1,21 +1,21 @@
-[gd_scene load_steps=33 format=3 uid="uid://cfmoahalri06d"]
+[gd_scene load_steps=34 format=3 uid="uid://cfmoahalri06d"]
 
-[ext_resource type="Script" path="res://addons/player-networking/NetworkGateway.gd" id="1"]
-[ext_resource type="Script" path="res://addons/player-networking/Enetmultiplayerserver.gd" id="3"]
-[ext_resource type="Script" path="res://addons/player-networking/PlayerConnections.gd" id="4"]
-[ext_resource type="Script" path="res://addons/player-networking/UDPdiscoveryserver.gd" id="5"]
-[ext_resource type="Script" path="res://addons/player-networking/UDPdiscoveryclient.gd" id="6"]
-[ext_resource type="Script" path="res://addons/player-networking/Enetmultiplayerclient.gd" id="7"]
-[ext_resource type="Script" path="res://addons/player-networking/Websocketmultiplayerserver.gd" id="8"]
-[ext_resource type="Script" path="res://addons/player-networking/ServermodeWebSocketsignal.gd" id="9"]
-[ext_resource type="Script" path="res://addons/player-networking/WebRTCmultiplayerserver.gd" id="10"]
-[ext_resource type="Script" path="res://addons/player-networking/Websocketmultiplayerclient.gd" id="12"]
-[ext_resource type="Script" path="res://addons/player-networking/MQTTsignalling.gd" id="12_dj107"]
-[ext_resource type="Script" path="res://addons/player-networking/ClientmodeWebSocketsignal.gd" id="13"]
-[ext_resource type="Script" path="res://addons/player-networking/WebRTCmultiplayerclient.gd" id="14"]
+[ext_resource type="Script" uid="uid://dk1cdf7oaqcxu" path="res://addons/player-networking/NetworkGateway.gd" id="1"]
+[ext_resource type="Script" uid="uid://ddfg67ye8bg6s" path="res://addons/player-networking/Enetmultiplayerserver.gd" id="3"]
+[ext_resource type="Script" uid="uid://dusyya86gk3yn" path="res://addons/player-networking/PlayerConnections.gd" id="4"]
+[ext_resource type="Script" uid="uid://d2torg2f1nsy" path="res://addons/player-networking/UDPdiscoveryserver.gd" id="5"]
+[ext_resource type="Script" uid="uid://d0wcmb20t8741" path="res://addons/player-networking/UDPdiscoveryclient.gd" id="6"]
+[ext_resource type="Script" uid="uid://4hq266fmgnme" path="res://addons/player-networking/Enetmultiplayerclient.gd" id="7"]
+[ext_resource type="Script" uid="uid://chtq3g4hpvecp" path="res://addons/player-networking/Websocketmultiplayerserver.gd" id="8"]
+[ext_resource type="Script" uid="uid://dhsrhevq4f4d6" path="res://addons/player-networking/ServermodeWebSocketsignal.gd" id="9"]
+[ext_resource type="Script" uid="uid://108helqnfu2y" path="res://addons/player-networking/WebRTCmultiplayerserver.gd" id="10"]
+[ext_resource type="Script" uid="uid://c8spwbrk6bl21" path="res://addons/player-networking/Websocketmultiplayerclient.gd" id="12"]
+[ext_resource type="Script" uid="uid://bs70rcei0dsmw" path="res://addons/player-networking/MQTTsignalling.gd" id="12_dj107"]
+[ext_resource type="Script" uid="uid://dgclncu5sr6np" path="res://addons/player-networking/ClientmodeWebSocketsignal.gd" id="13"]
+[ext_resource type="Script" uid="uid://ckwh8um88fprv" path="res://addons/player-networking/WebRTCmultiplayerclient.gd" id="14"]
 [ext_resource type="PackedScene" uid="uid://ktm7k0co2o7l" path="res://addons/mqtt/mqtt.tscn" id="14_c5n2c"]
-[ext_resource type="Script" path="res://addons/player-networking/RecordingFeature.gd" id="16_hf3ik"]
-[ext_resource type="Script" path="res://addons/player-networking/DoppelgangerPanel_ui.gd" id="16_i8v6k"]
+[ext_resource type="Script" uid="uid://b4ywxdff8udo6" path="res://addons/player-networking/RecordingFeature.gd" id="16_hf3ik"]
+[ext_resource type="Script" uid="uid://bc0egyeyk7u4f" path="res://addons/player-networking/DoppelgangerPanel_ui.gd" id="16_i8v6k"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_5i8wh"]
 bg_color = Color(0.429093, 0.357723, 0.216268, 1)
@@ -41,6 +41,9 @@ bg_color = Color(0.724983, 0.581581, 0.136597, 1)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_mpv2x"]
 bg_color = Color(0.171442, 0.57024, 0.941742, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_qm0og"]
+bg_color = Color(0.297912, 0.254302, 0.00969122, 1)
 
 [sub_resource type="Shader" id="Shader_fh7cl"]
 code = "shader_type canvas_item;
@@ -132,6 +135,7 @@ text = "Protocol:"
 layout_mode = 2
 item_count = 4
 popup/item_0/text = "ENet"
+popup/item_0/id = 0
 popup/item_1/text = "WebSocket"
 popup/item_1/id = 1
 popup/item_2/text = "WebRTC (websocket signal)"
@@ -156,6 +160,7 @@ metadata/_tab_index = 0
 layout_mode = 2
 item_count = 3
 popup/item_0/text = "Network off"
+popup/item_0/id = 0
 popup/item_1/text = "As server"
 popup/item_1/id = 1
 popup/item_2/text = "Local network"
@@ -175,6 +180,7 @@ visible = false
 layout_mode = 2
 item_count = 5
 popup/item_0/text = "Network off"
+popup/item_0/id = 0
 popup/item_1/text = "As server"
 popup/item_1/id = 1
 popup/item_2/text = "As client"
@@ -413,6 +419,7 @@ text = "Warning: WebRTC not found"
 layout_mode = 2
 item_count = 4
 popup/item_0/text = "wss://mosquitto.doesliverpool.xyz"
+popup/item_0/id = 0
 popup/item_1/text = "test.mosquitto.org"
 popup/item_1/id = 1
 popup/item_2/text = "ssl://broker.hivemq.com:8883"
@@ -478,6 +485,7 @@ disabled = true
 selected = 0
 item_count = 3
 popup/item_0/text = "disconnected"
+popup/item_0/id = 0
 popup/item_1/text = "connecting"
 popup/item_1/id = 1
 popup/item_2/text = "connected"
@@ -527,6 +535,7 @@ layout_mode = 2
 size_flags_horizontal = 2
 item_count = 1
 popup/item_0/text = "me"
+popup/item_0/id = 0
 
 [node name="Label2" type="Label" parent="VBox/PlayerConnections/VBox/HBox"]
 layout_mode = 2
@@ -567,6 +576,12 @@ volume_db = 10.0
 autoplay = true
 bus = &"MicrophoneBus"
 
+[node name="MicStreamPlayerNotice" type="ColorRect" parent="VBox/PlayerConnections/VBox/RecordingFeature"]
+visible = false
+custom_minimum_size = Vector2(2, 0)
+layout_mode = 2
+color = Color(0.305882, 0.952941, 0.196078, 1)
+
 [node name="MicNotPlayingWarning" type="ColorRect" parent="VBox/PlayerConnections/VBox/RecordingFeature"]
 visible = false
 custom_minimum_size = Vector2(2, 0)
@@ -593,6 +608,8 @@ text = "Vox"
 
 [node name="Denoise" type="Button" parent="VBox/PlayerConnections/VBox/RecordingFeature"]
 layout_mode = 2
+theme_override_constants/align_to_largest_stylebox = 1
+theme_override_styles/pressed = SubResource("StyleBoxFlat_qm0og")
 toggle_mode = true
 button_pressed = true
 text = "Denoise"
@@ -636,6 +653,7 @@ layout_mode = 2
 selected = 0
 item_count = 2
 popup/item_0/text = "me"
+popup/item_0/id = 0
 popup/item_1/text = "logrec"
 popup/item_1/id = 1
 

@@ -90,7 +90,7 @@ func _connected_to_server():
 
 	connectionlog("_connected_to_server(%d)\n" % LocalPlayerFrame.networkID)
 	LocalPlayerFrame.bawaitingspawninfofromserver = not serverisself
-	NetworkGateway.Dconnectedplayerscount += 1  
+	NetworkGateway.change_connectedplayerscount(1, "connected_to_server")
 	assert (NetworkGateway.Dconnectedplayerscount == 1)
 
 	if premature_peerconnections != null:
@@ -112,7 +112,7 @@ func _connection_failed():
 func _server_disconnected():
 	premature_peerconnections = null
 	if (multiplayer.multiplayer_peer is OfflineMultiplayerPeer):
-		NetworkGateway.Dconnectedplayerscount -= 1
+		NetworkGateway.change_connectedplayerscount(-1, "disconnect_server_offlinepeer")
 		assert (NetworkGateway.Dconnectedplayerscount == 0)
 		return
 	connectionlog("_server_disconnected\n")
@@ -125,7 +125,7 @@ func _server_disconnected():
 		_peer_disconnected(id)
 	assert (len(uninitialized_peerconnections) == 0)
 	LocalPlayerFrame.setlocalframenetworkidandname(0)
-	NetworkGateway.Dconnectedplayerscount -= 1
+	NetworkGateway.change_connectedplayerscount(-1, "disconnect_server_normal")
 	assert (NetworkGateway.Dconnectedplayerscount == 0)
 	updateplayerlist()
 	if NetworkGateway.ProtocolOptions.selected == NetworkGateway.NETWORK_PROTOCOL.ENET:
@@ -153,7 +153,7 @@ func _peer_connected(id):
 		
 	assert (LocalPlayerFrame.networkID >= 1)
 	assert (NetworkGateway.Dconnectedplayerscount >= 1)
-	NetworkGateway.Dconnectedplayerscount += 1
+	NetworkGateway.change_connectedplayerscount(1, "peer_connected")
 	connectionlog("_peer_connected(%d)\n" % id)
 
 	assert (not uninitialized_peerconnections.has(id))
@@ -180,7 +180,7 @@ func _peer_disconnected(id):
 
 	connectionlog("_remove playerid %d\n" % id)
 	print("_peer_disconnected localid=", multiplayer.get_unique_id(), " playerid=", id, " cplayserscount=", NetworkGateway.Dconnectedplayerscount)
-	NetworkGateway.Dconnectedplayerscount -= 1
+	NetworkGateway.change_connectedplayerscount(-1, "peer_disconnect")
 	assert (NetworkGateway.Dconnectedplayerscount >= 1)
 	var remoteplayernodename = playernamefromnetworkid(id)
 	var remoteplayer = PlayersNode.get_node(remoteplayernodename)
