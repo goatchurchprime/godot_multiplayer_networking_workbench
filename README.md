@@ -1,9 +1,9 @@
 # Godot4 Multiplayer networking workbench
 
 This utility wraps the workings of the three [highlevel multiplayer](https://docs.godotengine.org/en/stable/tutorials/networking/high_level_multiplayer.html)
-networking protocols (**ENet**, **Websockets**, and **WebRTC**) into a plugin 
-that can be dropped into any Godot project to enable it to be networked.
-There are hooks to enable VR players to compress, transmit, unpack and interpolate their avatar movements across the network by sharing keyframes into the Animation system.
+networking protocols (**ENet**, **Websockets**, and **WebRTC**) into a plugin that can be dropped into any Godot project to enable it to be networked.
+
+The plugin is optimized for use for Virtual Reality (VR/XR) players and their avatars, but it can be a starting point for any multiplayer application.  Multiplayer game design is a very wide field, and this plugin is for exploring game mechanics and technical requirements as quickly as possible so as to inform early game design-- _and how you are going to avoid depending on realtime interactive physics if you know what is good for you!_
 
 ### Lightning talk at GodotCon2024
 [![image](https://github.com/user-attachments/assets/b8a64026-3cf3-42bd-a080-d45eeeefba05)](https://www.youtube.com/watch?v=iyRvLdhATFo)
@@ -27,9 +27,10 @@ Addons that are missing can be downloaded from the **AssetLib** tab once you ope
 
 * [mqtt-client](https://godotengine.org/asset-library/asset/1993) v1.2 is already included because it is very small and pure GDScript
 
-* [TwoVoip](https://godotengine.org/asset-library/asset/3169) v3.4 is required to compress your audio stream 
+* [TwoVoip](https://godotengine.org/asset-library/asset/3169) v3.6 is required to compress your audio stream 
 from the microphone using the Opus library.  It can be used on its own for testing from [two-voip-godot-4](https://github.com/goatchurchprime/two-voip-godot-4)
-The asset is 100Mb, so is not included with the project
+The asset is 100Mb, so is not included with the project.  **A version of the Godot Engine compiled with
+[Pull Request#100508](https://github.com/godotengine/godot/pull/100508) is recommended for a more reliable implementation of the microphone input.**
 
 * [WebRTC plugin - Godot 4.1+](https://godotengine.org/asset-library/asset/2103) is required to implement the WebRTC protocol and 
 is also about 100Mb in size (because it has the implementation for all platforms).  
@@ -68,17 +69,32 @@ can be like meet.jit.si.
 If you don't have WebRTC, you can connect using \[CS\] for Create ENET Server and \[CC\] for Connect as ENET client 
 and it should all work on a local area network using UDP packet discovery.
 
-## Out of date docs below here
+## The plaza area
 
-The use of a public MQTT broker to initiate the connections means we can set the connection to "As necessary", which means 
-that if there's live server on the channel it starts out as a server, otherwise it starts as a client and connects to it.
-(Automatic handover code for when the server drops out is partly working, but unreliable, and could be finished if 
-there is a sufficient use-case.)
+The on-boarding, match-making, authentication and lobby systems provided by many third-party multiplayer management services 
+is usually very specialized and complex.  This plugin is designed to get to the point without any unnecessary hassle, accounts 
+or external servers.  
 
-You can select a different protocol (ENet or Websockets) when the Network is off, and then select server or client.
-There will be UDP packets sent by the server to help any clients on the same router network to find and connect to it 
-without needing to look up the local IP number.  (Or you can set this running on a external server with a fixed IP number 
-on the internet)
+Any number of players can connect to a given room/topic on an MQTT server provided they each pick a random `client_id`.  
+The initial state us `unconnected` to any Game server (though connected to the MQTT server in a way that lets them see 
+where all the players in that room are in relation to other game servers.  You can enter this state by selecting 
+`As necessary manual`.  
+
+The MQTT interface gives an easy platform on which to exchange text messages and identity tokens you can use to .
+verify who your friends are should it be necessary.
+
+![image](https://github.com/user-attachments/assets/cd83f90f-643f-4755-944e-0e64723ece3f)
+
+Any player in a room can assign themselves `As server` in a room.  They are then deemed to have connected to themself as a Game server.  
+Any other player can select a player who is a Game server and assign themselves `As client` to that server.
+The option `As necessary` is to automate the process of checking if there is a player who is a Game server in a room, and assigning 
+themselve as a client, or upgrading themselves to a Game server if no suitable one exists.
+
+Once a Game server player has accepted another player as a client, the WebRTC connection between them is established through 
+which VoIP and [High Level Multiplayer operations](https://docs.godotengine.org/en/stable/tutorials/networking/high_level_multiplayer.html) 
+can proceed.  This Multiplayer Workbench addon manages the player connections and on-boarding to provide you with 
+an even higher level multiplayer interface that can be dropped into any game with a minimum of hassle.
+
 
 ### Players
 
@@ -87,42 +103,30 @@ as the **LocalPlayer**.
 
 The LocalPlayer gets a **PlayerFrame** node the the **PlayerFrameLocal.gd** script associated to it.  
 Any remote players that are created are included with the same, but with the **PlayerFrameRemote.gd** script attached to it.
-These are the scripts which receive the player motions generated locally and unpack and animate the 
-player motions remotely. 
+These are the scripts that interpret player motions locally, sends the data to a remote player where it is 
+unpacked and injected into an AnimationPlayer that animates the player. 
 
-These PlayerFrame nodes are what all the rpc() calls are made against.  The Player nodes are given consistent names 
-across the network based on the networkID so that these rpc() calls, which depend on finding the same node in the tree across different 
-instances in the game, are able to work.
+A player must have an `AnimationPlayer` node called `PlayerAnimation` that lists all the tracks that are to be replicated across the network by calling the function `PlayerFrameLocal.recordthinnedanimation()`.  This has a lot of similarities to the `MultiplayerSyncronizer` type node which lists the properties that are to 
+be syncronized.  The difference here is that since an `AnimationPlayer` can interpolate between keyframes we do not need to transmit 
+everything about the player in each frame, and can thin out the values.
 
-The script attached to the Player (the node containing the PlayerFrame that visualizes the avatar) must have the following functions:
+The script attached to the LocalPlayer (the node containing the LocalPlayerFrame) must have at least the following functions:
 
-* func PAV_initavatarlocal(): Called at startup on the LocalPlayer
+* **PF_initlocalplayer()**: Called at startup on the LocalPlayer from `PlayerConnections._ready()`
 
-* func PAV_initavatarremote(avatardata): Called when a new RemotePlayer is created in the Players node
+* **PF_processlocalavatarposition(delta)**: Called by `PlayerFrameLocal._process()` to ensure that the local player's position can be processed as soon as it is updated.
 
-* func PAV_avatarinitdata() -> avatardata: The dict of data called on the LocalPlayer and sent to the function above
+* **PF_setspeakingvolume(v)**: Called by `RecordingFeature.process()` to give some indication of voice activity.  In the future this might be a set of visemes.
 
-* func playername(): Used in the Networking UI to list the players
+* **PF_spawninfo_receivedfromserver()**: Called by `PlayerConnections.RPC_spawninfoforclientfromserver()` to set the position of the remote player before joining the server (for management of spawn points).
 
-* func PAV_processlocalavatarposition(delta):  Called directly from the PlayerFrameLocal \_process() function before it reads the position
+* **PF_changethinnedframedatafordoppelganger(vd)**: Called by `PlayerFrameLocal._process()` with the current position of the the player so it can be transformed so that the doppelganger can be seen and not be coinciding with the player.
 
-* func PAV_avatartoframedata() -> fd: dict of local player position state generated at each frame
+The node representing the `RemotePlayer` (the node containing the `RemotePlayerFrame`) must have at least an `AnimationPlayer` node called `PlayerAnimation`.  
 
-* func PAV_framedatatoavatar(fd):  The unpacking of the remote player position state from the frame data.
+By default the LocalPlayer and RemotePlayer scenes are the same scenes, and transmitted as the data `avatarsceneresource`.  They differ by having a PlayerFrame(Local|Remote) as a child.  
 
-* func PAV_createspawnpoint():  The server generates a span point for each client
-
-* func PAV_receivespawnpoint(sfd): The spawn point as received from the server after connection
-
-
-* static func changethinnedframedatafordoppelganger(fd, doppelnetoffset): A function used to distort the set of frame data so it can be used as a player doppelganger 
-to see how the motions would look on the other side of a network in real time.
-
-To avoid a huge load on the network, the PlayerFrameLocal.gd and PlayerFrameRemote.gd scripts automatically thins down the 
-data generated by avatartoframedata() and interpolates the gaps in the data for framedatatoavatar() respectively.
-This depends on timestamps and estimates of network latency etc and is where the hard work needs to be done.
-
-## Audio
+### Audio
 
 The audio chunks are 20ms long and are compressed to about 30bytes each to give roughly a 1.5kB/second audio data channel.
 It's either operated by PTT (Push-to-talk) or VoX (Voice operated switch), so it's not intended to be a continuous stream.
