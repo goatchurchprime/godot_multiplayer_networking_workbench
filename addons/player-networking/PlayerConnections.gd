@@ -332,7 +332,7 @@ func _on_log_rec_toggled(toggled_on):
 		var pf = playerbeingrecorded.get_node("PlayerFrame")
 		if not pf.has_method("datafornewconnectedplayer"):
 			pf = LocalPlayerFrame
-		var avatardata = pf.datafornewconnectedplayer(true)
+		var avatardata = pf.datafornewconnectedplayer(false)
 		avatardata["t"] = Time.get_ticks_msec()*0.001
 		logrecfile.store_var(avatardata)
 		playerbeingrecorded.get_node("PlayerFrame").logrecfile = logrecfile

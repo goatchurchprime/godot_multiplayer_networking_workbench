@@ -80,12 +80,14 @@ func processtalkstreamends():
 		currentlytalking = false
 		var PlayerFrame = PlayerConnections.LocalPlayer.get_node("PlayerFrame")
 		var talkingtimeend = Time.get_ticks_msec()*0.001
+		var talkingtimeduration = talkingtimeend - talkingtimestart
 		var audiopacketstreamfooter = {
 			"opusstreamcount":opusstreamcount, 
 			"opusframecount":opusframecount,
-			"talkingtimeduration":talkingtimeend - talkingtimestart,
+			"talkingtimeduration":talkingtimeduration,
 			"talkingtimeend":talkingtimeend 
 		}
+		print("My voice chunktime=", talkingtimeduration/opusframecount, " over ", talkingtimeduration, " seconds")
 		PlayerFrame.transmitaudiopacket(JSON.stringify(audiopacketstreamfooter).to_ascii_buffer())
 		opusstreamcount += 1
 
@@ -150,9 +152,12 @@ func processsendopuschunk():
 func _process(delta):
 	if audiostreamplaybackmicrophone != null:
 		if audiostreamplaybackmicrophone != null and audiostreamplaybackmicrophone.is_microphone_playing():
-			var microphonesamples = audiostreamplaybackmicrophone.get_microphone_buffer(audioopuschunkedeffect.audiosamplesize)
-			if len(microphonesamples) != 0:
-				audioopuschunkedeffect.push_chunk(microphonesamples)
+			while true:
+				var microphonesamples = audiostreamplaybackmicrophone.get_microphone_buffer(audioopuschunkedeffect.audiosamplesize)
+				if len(microphonesamples) != 0:
+					audioopuschunkedeffect.push_chunk(microphonesamples)
+				else:
+					break
 	if audioopuschunkedeffect != null:
 		processtalkstreamends()
 		while audioopuschunkedeffect.chunk_available():
@@ -167,8 +172,8 @@ func _process(delta):
 
 func _ready():
 	if ClassDB.can_instantiate("AudioStreamPlaybackMicrophone"):
+		print("Using AudioStreamPlaybackMicrophone")
 		audiostreamplaybackmicrophone = ClassDB.instantiate("AudioStreamPlaybackMicrophone")
-	
 	$VoxThreshold.material.set_shader_parameter("voxthreshhold", voxthreshhold)
 
 	if audiostreamplaybackmicrophone != null:

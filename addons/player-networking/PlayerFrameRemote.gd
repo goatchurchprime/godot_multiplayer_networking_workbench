@@ -116,35 +116,35 @@ func _process(delta):
 		var kt = t - currentplayeranimationT0
 		PlayerAnimation.seek(kt, true)
 
-	if audiostreamopuschunked != null and audiostreamplayer != null:
+	if audiostreamopuschunked != null and player_audiostreamplayer != null:
 		var bufferlengthtime = audioserveroutputlatency + audiostreamopuschunked.queue_length_frames()*1.0/audiostreamopuschunked.audiosamplerate
 		if bufferlengthtime < audiobufferregulationtime:
 			if audiobufferpitchscale != 1.0:
 				if bufferlengthtime < audiobufferregulationtimeLow:
 					audiobufferpitchscale = 1.0
-					audiostreamplayer.pitch_scale = audiobufferpitchscale
+					player_audiostreamplayer.pitch_scale = audiobufferpitchscale
 					print("SETTING audiobufferpitchscale ", audiobufferpitchscale)
 		else:
 			var w = inverse_lerp(audiobufferregulationtime, audioserveroutputlatency + audiobuffersize/audiostreamopuschunked.audiosamplerate, bufferlengthtime)
 			audiobufferpitchscale = lerp(audiobufferregulationpitchlow, audiobufferregulationpitch, w)
-			audiostreamplayer.pitch_scale = audiobufferpitchscale
+			player_audiostreamplayer.pitch_scale = audiobufferpitchscale
 			print("SETTING audiobufferpitchscale ", audiobufferpitchscale)
 
 var audiostreamopuschunked : AudioStream = null
-var audiostreamplayer = null
+var player_audiostreamplayer = null
 
 func _ready():
-	audiostreamplayer = get_node_or_null("../AudioStreamPlayer")
-	if audiostreamplayer != null:
-		audiostreamplayer.playing = true
-		audiostreamopuschunked = audiostreamplayer.stream
-		if audiostreamplayer.stream == null and ClassDB.can_instantiate("AudioStreamOpusChunked"):
-			audiostreamplayer.stream = ClassDB.instantiate("AudioStreamOpusChunked")
-		if audiostreamplayer.stream != null and audiostreamplayer.stream.is_class("AudioStreamOpusChunked"):
-			audiostreamopuschunked = audiostreamplayer.stream
+	player_audiostreamplayer = get_node("..").find_child("AudioStreamPlayer")
+	if player_audiostreamplayer != null:
+		player_audiostreamplayer.playing = true
+		audiostreamopuschunked = player_audiostreamplayer.stream
+		if player_audiostreamplayer.stream == null and ClassDB.can_instantiate("AudioStreamOpusChunked"):
+			player_audiostreamplayer.stream = ClassDB.instantiate("AudioStreamOpusChunked")
+		if player_audiostreamplayer.stream != null and player_audiostreamplayer.stream.is_class("AudioStreamOpusChunked"):
+			audiostreamopuschunked = player_audiostreamplayer.stream
 			setrecopusvalues(48000, 960)
-		elif audiostreamplayer.stream != null:
-			print("AudioStreamPlayer.stream must be type AudioStreamOpusChunked ", audiostreamplayer.stream)
+		elif player_audiostreamplayer.stream != null:
+			print("AudioStreamPlayer.stream must be type AudioStreamOpusChunked ", player_audiostreamplayer.stream)
 	else:
 		print("Need an AudioStreamPlayer node in RemotePlayer to do voip")
 
@@ -181,7 +181,7 @@ func incomingaudiopacket(packet):
 		var h = JSON.parse_string(packet.get_string_from_ascii())
 		if h != null:
 			print("audio json packet ", h)
-			get_node("../AudioStreamPlayer").playing = true
+			player_audiostreamplayer.playing = true
 			if h.has("talkingtimestart"):
 				if audiostreamopuschunked.opusframesize != h["opusframesize"] or \
 						audiostreamopuschunked.opussamplerate != h["opussamplerate"]:
