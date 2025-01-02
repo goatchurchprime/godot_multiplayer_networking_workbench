@@ -1,4 +1,4 @@
-[gd_scene load_steps=12 format=3 uid="uid://dhd8tliyhvtiw"]
+[gd_scene load_steps=11 format=3 uid="uid://dhd8tliyhvtiw"]
 
 [ext_resource type="Script" uid="uid://bsetsw3b7qvrk" path="res://controlplayer.gd" id="1"]
 
@@ -11,9 +11,6 @@ colors = PackedColorArray(0, 0, 0, 1, 0.902003, 0.902003, 0.902003, 1, 0.658823,
 gradient = SubResource("Gradient_s8w0r")
 fill = 2
 fill_from = Vector2(0.5, 0.5)
-
-[sub_resource type="AudioStreamOpusChunked" id="AudioStreamOpusChunked_i52lg"]
-audiosamplechunks = 100
 
 [sub_resource type="Gradient" id="Gradient_y7cr2"]
 offsets = PackedFloat32Array(0, 0.645714, 1)
@@ -112,7 +109,6 @@ text = "Remoteplayer"
 horizontal_alignment = 1
 
 [node name="AudioStreamPlayer" type="AudioStreamPlayer2D" parent="."]
-stream = SubResource("AudioStreamOpusChunked_i52lg")
 max_distance = 600.0
 
 [node name="PointLight2D" type="PointLight2D" parent="."]
