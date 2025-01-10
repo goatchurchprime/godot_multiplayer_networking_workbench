@@ -44,10 +44,11 @@ func _ready():
 		PlayerList.selected = 0
 
 	if PlayersNode.get_child_count() == 1 and NetworkGateway.localplayerscene:
+		print("Overwriting PlayersNode.get_child(0) with ", NetworkGateway.localplayerscene)
 		PlayersNode.get_child(0).free()
 	if PlayersNode.get_child_count() == 0:
 		PlayersNode.add_child(load(NetworkGateway.localplayerscene).instantiate())
-	assert (PlayersNode.get_child_count() == 1) 
+	#assert (PlayersNode.get_child_count() == 1) 
 
 	LocalPlayer = PlayersNode.get_child(0)
 	if not LocalPlayer.has_node("PlayerFrame"):
@@ -141,9 +142,10 @@ func updateplayerlist():
 	PlayerList.clear()
 	PlayerList.selected = 0
 	for player in PlayersNode.get_children():
-		PlayerList.add_item(("*" if player == LocalPlayer else "") + ("&" if player.get_node("PlayerFrame").networkID == 1 else "") + (player.playername() if player.has_method("playername") else player.get_name()))
-		if plp == player.get_name():
-			PlayerList.selected = PlayerList.get_item_count() - 1
+		if player.has_node("PlayerFrame"):
+			PlayerList.add_item(("*" if player == LocalPlayer else "") + ("&" if player.get_node("PlayerFrame").networkID == 1 else "") + (player.playername() if player.has_method("playername") else player.get_name()))
+			if plp == player.get_name():
+				PlayerList.selected = PlayerList.get_item_count() - 1
 
 func _peer_connected(id):
 	if premature_peerconnections != null:

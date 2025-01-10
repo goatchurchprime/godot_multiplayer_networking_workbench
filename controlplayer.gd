@@ -55,8 +55,9 @@ func PF_setspeakingvolume(v):
 func playername():
 	return $Label.text 
 
-static func PF_changethinnedframedatafordoppelganger(fd, doppelnetoffset, isframe0):
+static func PF_changethinnedframedatafordoppelganger(fd, doppelnetoffset):
 	fd[NCONSTANTS.CFI_TIMESTAMP] += doppelnetoffset
-	fd[NCONSTANTS.CFI_TIMESTAMPPREV] += doppelnetoffset
+	if fd.has(NCONSTANTS.CFI_TIMESTAMPPREV):
+		fd[NCONSTANTS.CFI_TIMESTAMPPREV] += doppelnetoffset
 	if fd.has(NCONSTANTS.CFI_ANIMTRACKS+0):
 		fd[NCONSTANTS.CFI_ANIMTRACKS+0].y = 339 - fd[NCONSTANTS.CFI_ANIMTRACKS+0].y

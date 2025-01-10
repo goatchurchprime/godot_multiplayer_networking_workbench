@@ -114,17 +114,19 @@ The script attached to the LocalPlayer (the node containing the LocalPlayerFrame
 
 * **PF_initlocalplayer()**: Called at startup on the LocalPlayer from `PlayerConnections._ready()`
 
+* **PF_spawninfo_fornewplayer**: Called by `PlayerConnections._peer_connected()` on the server
+
+* **PF_spawninfo_receivedfromserver()**: Called by `PlayerConnections.RPC_spawninfoforclientfromserver()` to set the position of the remote player before joining the server (for management of spawn points).
+
 * **PF_processlocalavatarposition(delta)**: Called by `PlayerFrameLocal._process()` to ensure that the local player's position can be processed as soon as it is updated.
 
 * **PF_setspeakingvolume(v)**: Called by `RecordingFeature.process()` to give some indication of voice activity.  In the future this might be a set of visemes.
 
-* **PF_spawninfo_receivedfromserver()**: Called by `PlayerConnections.RPC_spawninfoforclientfromserver()` to set the position of the remote player before joining the server (for management of spawn points).
+* **PF_changethinnedframedatafordoppelganger(vd, doppelnetoffset)**: Called by `PlayerFrameLocal._process()` with the current position of the the player so it can be transformed so that the doppelganger can be seen and not be coinciding with the player.
 
-* **PF_changethinnedframedatafordoppelganger(vd)**: Called by `PlayerFrameLocal._process()` with the current position of the the player so it can be transformed so that the doppelganger can be seen and not be coinciding with the player.
+* **PlayerAnimation**: Not a function, but a child node of type `AnimationPlayer` containing tracks that reference the parameters that are to be shared across the network to animate the remote player instance.
 
-The node representing the `RemotePlayer` (the node containing the `RemotePlayerFrame`) must have at least an `AnimationPlayer` node called `PlayerAnimation`.  
-
-By default the LocalPlayer and RemotePlayer scenes are the same scenes, and transmitted as the data `avatarsceneresource`.  They differ by having a PlayerFrame(Local|Remote) as a child.  
+By default the **LocalPlayer** and **RemotePlayer** instances of the same scene whose file reference is `avatarsceneresource`.  They differ by having a **PlayerFrameLocal** or **PlayerFrameRemote** added as a child.  
 
 ### Audio
 
