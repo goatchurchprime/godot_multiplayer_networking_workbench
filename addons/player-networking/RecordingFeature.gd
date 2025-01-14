@@ -149,6 +149,8 @@ func processsendopuschunk():
 		PlayerConnections.LocalPlayerFrame.transmitaudiopacket(opuspacket)
 	audioopuschunkedeffect.drop_chunk()
 
+var microphoneaudiosamplescountSeconds = 0.0
+var microphoneaudiosamplescount = 0
 func _process(delta):
 	if audiostreamplaybackmicrophone != null:
 		if audiostreamplaybackmicrophone != null and audiostreamplaybackmicrophone.is_microphone_playing():
@@ -156,8 +158,14 @@ func _process(delta):
 				var microphonesamples = audiostreamplaybackmicrophone.get_microphone_buffer(audioopuschunkedeffect.audiosamplesize)
 				if len(microphonesamples) != 0:
 					audioopuschunkedeffect.push_chunk(microphonesamples)
+					microphoneaudiosamplescount += len(microphonesamples)
 				else:
 					break
+			microphoneaudiosamplescountSeconds += delta
+			if microphoneaudiosamplescountSeconds > 10:
+				print("measured mic audiosamples rate ", microphoneaudiosamplescount/microphoneaudiosamplescountSeconds)
+				microphoneaudiosamplescount = 0
+				microphoneaudiosamplescountSeconds = 0.0
 	if audioopuschunkedeffect != null:
 		processtalkstreamends()
 		while audioopuschunkedeffect.chunk_available():
@@ -177,9 +185,11 @@ func _ready():
 	$VoxThreshold.material.set_shader_parameter("voxthreshhold", voxthreshhold)
 
 	if audiostreamplaybackmicrophone != null:
+		if $AudioStreamPlayerMicrophone.autoplay or $AudioStreamPlayerMicrophone.playing:
+			printerr("AudioStreamMicrophone better without autoplay which starts the microphone too soon which is buggy")
+
 		audiostreamplaybackmicrophone.start_microphone()
 		$MicStreamPlayerNotice.visible = true
-		$AudioStreamPlayerMicrophone.stop()
 		if ClassDB.can_instantiate("AudioEffectOpusChunked"):
 			audioopuschunkedeffect = ClassDB.instantiate("AudioEffectOpusChunked")
 		else:
@@ -223,3 +233,9 @@ func _on_vox_threshold_gui_input(event):
 func _on_audio_stream_player_microphone_finished():
 	print("*** _on_audio_stream_player_microphone_finished")
 	$MicFinishedWarning.visible = true
+
+func _input(event):
+	if event is InputEventKey and event.pressed and event.keycode == KEY_K:
+		audiostreamplaybackmicrophone.stop_microphone()
+		await get_tree().create_timer(0.5).timeout
+		audiostreamplaybackmicrophone.start_microphone()
