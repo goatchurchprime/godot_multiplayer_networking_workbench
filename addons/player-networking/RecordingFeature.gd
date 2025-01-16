@@ -178,6 +178,17 @@ func _process(delta):
 	else:
 		$MicNotPlayingWarning.visible = not audiostreamplaybackmicrophone.is_microphone_playing()
 
+func startmicafterpermissions(permission: String, granted: bool):
+	if permission == "android.permission.RECORD_AUDIO":
+		if granted:
+			print("Starting mic after permissions granted")
+			audiostreamplaybackmicrophone.start_microphone()
+			print("Starting mic after permissions granted ", audiostreamplaybackmicrophone.is_playing())
+		else:
+			printerr("You have not granted microphone permissions")
+	else:
+		printerr("Unknown permissions ", permission)
+	
 func _ready():
 	if ClassDB.can_instantiate("AudioStreamPlaybackMicrophone"):
 		print("Using AudioStreamPlaybackMicrophone")
@@ -188,7 +199,13 @@ func _ready():
 		if $AudioStreamPlayerMicrophone.autoplay or $AudioStreamPlayerMicrophone.playing:
 			printerr("AudioStreamMicrophone better without autoplay which starts the microphone too soon which is buggy")
 
-		audiostreamplaybackmicrophone.start_microphone()
+		if OS.request_permission("RECORD_AUDIO"):
+			audiostreamplaybackmicrophone.start_microphone()
+			print("Record audio permission already granted ", audiostreamplaybackmicrophone.is_playing())
+			get_tree().on_request_permissions_result.connect(startmicafterpermissions)
+		else:
+			get_tree().on_request_permissions_result.connect(startmicafterpermissions)
+
 		$MicStreamPlayerNotice.visible = true
 		if ClassDB.can_instantiate("AudioEffectOpusChunked"):
 			audioopuschunkedeffect = ClassDB.instantiate("AudioEffectOpusChunked")
