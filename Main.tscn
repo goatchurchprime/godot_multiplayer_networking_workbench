@@ -89,6 +89,7 @@ layout_mode = 2
 text = "New Card"
 
 [node name="Physics" type="Button" parent="QuickOptions"]
+visible = false
 layout_mode = 2
 toggle_mode = true
 text = "Physics"

@@ -16,7 +16,8 @@ is done using a light-weight MQTT server, of which public versions are available
 
 ## Installation
 
-This should run in Godot 4.3 or higher.  The reusable component is in `addons/player-networking`  
+This is targeting Godot 4.4 (now in beta release) due to a PR for a microphone bug.  
+The reusable component is in `addons/player-networking`  
 The system logic is embedded in a control panel that you can make invisible and operate externally with a 
 restricted set of options tuned to your application, but it is exposed for the purpose of 
 experimentation and debugging.

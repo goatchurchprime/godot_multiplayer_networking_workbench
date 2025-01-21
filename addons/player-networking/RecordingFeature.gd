@@ -190,9 +190,9 @@ func startmicafterpermissions(permission: String, granted: bool):
 		printerr("Unknown permissions ", permission)
 	
 func _ready():
-	if ClassDB.can_instantiate("AudioStreamPlaybackMicrophone"):
-		print("Using AudioStreamPlaybackMicrophone")
+	if ClassDB.class_has_method("AudioStreamPlaybackMicrophone", "start_microphone", true):
 		audiostreamplaybackmicrophone = ClassDB.instantiate("AudioStreamPlaybackMicrophone")
+		print("Using AudioStreamPlaybackMicrophone post PR#100508")  # https://github.com/godotengine/godot/pull/100508
 	$VoxThreshold.material.set_shader_parameter("voxthreshhold", voxthreshhold)
 
 	if audiostreamplaybackmicrophone != null:
@@ -221,11 +221,21 @@ func _ready():
 	
 	else:
 		if $AudioStreamPlayerMicrophone.bus != "MicrophoneBus":
-			printerr("AudioStreamPlayerMicrophone doesn't use bus called MicrophoneBus, disabling")
-			$AudioStreamPlayerMicrophone.stop()
-			return
+			var lmicrophonebusidx = AudioServer.get_bus_index("MicrophoneBus")
+			if lmicrophonebusidx == -1:
+				print("Warning: Adding a MicrophoneBus")
+				lmicrophonebusidx = AudioServer.get_bus_count() - 1
+				AudioServer.set_bus_name(lmicrophonebusidx, "MicrophoneBus")
+				AudioServer.set_bus_mute(lmicrophonebusidx, true)
+			print("Warning: Setting AudioStreamPlayerMicrophone to the MicrophoneBus")
+			$AudioStreamPlayerMicrophone.bus = "MicrophoneBus"
+			#printerr("AudioStreamPlayerMicrophone doesn't use bus called MicrophoneBus, disabling")
+			#$AudioStreamPlayerMicrophone.stop()
+			#return
 		assert ($AudioStreamPlayerMicrophone.stream.is_class("AudioStreamMicrophone"))
 		var microphonebusidx = AudioServer.get_bus_index($AudioStreamPlayerMicrophone.bus)
+		if not AudioServer.is_bus_mute(microphonebusidx):
+			printerr("Warning: MicrophoneBus not mute")
 		for i in range(AudioServer.get_bus_effect_count(microphonebusidx)):
 			if AudioServer.get_bus_effect(microphonebusidx, i).is_class("AudioEffectOpusChunked"):
 				audioopuschunkedeffect = AudioServer.get_bus_effect(microphonebusidx, i)
@@ -238,6 +248,11 @@ func _ready():
 	else:
 		printerr("Unabled to find or instantiate AudioEffectOpusChunked on MicrophoneBus")
 		$OpusWarningLabel.visible = true
+
+	await get_tree().create_timer(2.0).timeout
+	print("Setting AudioStreamPlayerMicrophone to play")
+	$AudioStreamPlayerMicrophone.play()
+
 
 func _on_vox_toggled(toggled_on):
 	$PTT.toggle_mode = toggled_on

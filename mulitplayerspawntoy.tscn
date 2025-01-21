@@ -1,6 +1,6 @@
 [gd_scene load_steps=6 format=3 uid="uid://bngiijug5ydb4"]
 
-[ext_resource type="Script" uid="uid://b7gs84tw3eul1" path="res://mulitplayerspawntoy.gd" id="1_idxh0"]
+[ext_resource type="Script" uid="uid://2kod4qi57vkj" path="res://mulitplayerspawntoy.gd" id="1_idxh0"]
 
 [sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_5t88t"]
 properties/0/path = NodePath(".:position")
