@@ -243,15 +243,17 @@ func _ready():
 			audioopuschunkedeffect = ClassDB.instantiate("AudioEffectOpusChunked")
 			AudioServer.add_bus_effect(microphonebusidx, audioopuschunkedeffect)
 
+		await get_tree().create_timer(2.0).timeout
+		print("Setting AudioStreamPlayerMicrophone to play")
+		$AudioStreamPlayerMicrophone.play()
+
+
 	if audioopuschunkedeffect != null:
 		setopusvalues(opussamplerate_default, opusframedurationms_default, opusbitrate_default, opuscomplexity_default, opusoptimizeforvoice_default)
 	else:
 		printerr("Unabled to find or instantiate AudioEffectOpusChunked on MicrophoneBus")
 		$OpusWarningLabel.visible = true
 
-	await get_tree().create_timer(2.0).timeout
-	print("Setting AudioStreamPlayerMicrophone to play")
-	$AudioStreamPlayerMicrophone.play()
 
 
 func _on_vox_toggled(toggled_on):

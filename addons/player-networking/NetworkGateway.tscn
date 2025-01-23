@@ -573,8 +573,6 @@ script = ExtResource("16_hf3ik")
 [node name="AudioStreamPlayerMicrophone" type="AudioStreamPlayer" parent="VBox/PlayerConnections/VBox/RecordingFeature"]
 stream = SubResource("2")
 volume_db = 10.0
-autoplay = true
-bus = &"MicrophoneBus"
 
 [node name="MicStreamPlayerNotice" type="ColorRect" parent="VBox/PlayerConnections/VBox/RecordingFeature"]
 visible = false
