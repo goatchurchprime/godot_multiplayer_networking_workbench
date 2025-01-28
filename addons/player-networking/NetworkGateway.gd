@@ -94,7 +94,6 @@ func selectandtrigger_networkoption(networkoption):
 	if ProtocolOptions.selected == NETWORK_PROTOCOL.WEBRTC_MQTTSIGNAL:
 		if NetworkOptionsMQTTWebRTC.selected != networkoption:
 			NetworkOptionsMQTTWebRTC.selected = networkoption
-			prints("oooo", NetworkOptionsMQTTWebRTC.selected, networkoption)
 			_on_NetworkOptionsMQTTWebRTC_item_selected(networkoption)
 	else:
 		if NetworkOptions.selected != networkoption:
@@ -257,6 +256,18 @@ func simple_webrtc_connect(roomname):
 	else:
 		selectandtrigger_networkoption(NETWORK_OPTIONS.NETWORK_OFF)
 
+func simple_webrtc_status():
+	match MQTTsignalling.ns_previousitemselected:
+		NETWORK_OPTIONS_MQTT_WEBRTC.AS_CLIENT:
+			return "client"
+		NETWORK_OPTIONS_MQTT_WEBRTC.AS_SERVER:
+			return "server"
+		NETWORK_OPTIONS_MQTT_WEBRTC.AS_NECESSARY:
+			return "asnecessary"
+		NETWORK_OPTIONS_MQTT_WEBRTC.AS_NECESSARY_MANUALCHANGE:
+			return "asnecessary_manual"
+		NETWORK_OPTIONS_MQTT_WEBRTC.NETWORK_OFF:
+			return "unconnected"
 
 
 
