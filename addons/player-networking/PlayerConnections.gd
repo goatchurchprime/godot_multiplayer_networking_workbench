@@ -23,7 +23,7 @@ var peerconnections_possiblymissingaudioheaders = [ ]
 
 
 var multiplayersignalsconnected = false
-func connect_multiplayersignals():
+func ensure_multiplayersignals_connected():
 	if not multiplayersignalsconnected:
 		# Signals received on behalf of any other player in the network 
 		# including the server.  These are are sent by a new player to 
@@ -114,7 +114,7 @@ func _server_disconnected():
 	premature_peerconnections = null
 	if (multiplayer.multiplayer_peer is OfflineMultiplayerPeer):
 		NetworkGateway.change_connectedplayerscount(-1, "disconnect_server_offlinepeer")
-		assert (NetworkGateway.Dconnectedplayerscount == 0)
+		assert (NetworkGateway.Dconnectedplayerscount == 0, NetworkGateway.Dconnectedplayerscount)
 		return
 	connectionlog("_server_disconnected\n")
 	var ns = NetworkGateway.NetworkOptions.selected

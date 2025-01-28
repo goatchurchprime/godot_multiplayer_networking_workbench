@@ -22,7 +22,6 @@ driver/enable_input=true
 
 [debug]
 
-settings/stdout/verbose_stdout=true
 gdscript/warnings/unused_variable=false
 gdscript/warnings/return_value_discarded=false
 gdscript/warnings/unused_argument=false

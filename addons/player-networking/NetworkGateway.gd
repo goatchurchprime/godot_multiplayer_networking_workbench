@@ -94,6 +94,7 @@ func selectandtrigger_networkoption(networkoption):
 	if ProtocolOptions.selected == NETWORK_PROTOCOL.WEBRTC_MQTTSIGNAL:
 		if NetworkOptionsMQTTWebRTC.selected != networkoption:
 			NetworkOptionsMQTTWebRTC.selected = networkoption
+			prints("oooo", NetworkOptionsMQTTWebRTC.selected, networkoption)
 			_on_NetworkOptionsMQTTWebRTC_item_selected(networkoption)
 	else:
 		if NetworkOptions.selected != networkoption:
@@ -127,7 +128,7 @@ func _on_ProtocolOptions_item_selected(np):
 	
 func _on_NetworkOptions_item_selected(ns):
 	print("_on_OptionButton_item_selected_on_OptionButton_item_selected_on_OptionButton_item_selected ", ns)
-	PlayerConnections.connect_multiplayersignals()
+	PlayerConnections.ensure_multiplayersignals_connected()
 	var selectasoff = (ns == NETWORK_OPTIONS.NETWORK_OFF)
 	if not selectasoff:
 		PlayerConnections.clearconnectionlog()
@@ -212,9 +213,12 @@ func _on_udpenabled_toggled(button_pressed):
 	NetworkOptions.set_item_disabled(NETWORK_OPTIONS.LOCAL_NETWORK, not button_pressed)
 
 func _on_NetworkOptionsMQTTWebRTC_item_selected(ns):
-	PlayerConnections.connect_multiplayersignals()
+	PlayerConnections.ensure_multiplayersignals_connected()
+	if ns == NETWORK_OPTIONS_MQTT_WEBRTC.AS_NECESSARY or ns == NETWORK_OPTIONS_MQTT_WEBRTC.AS_NECESSARY_MANUALCHANGE:
+		if MQTTsignalling.ns_previousitemselected == NETWORK_OPTIONS_MQTT_WEBRTC.AS_CLIENT or MQTTsignalling.ns_previousitemselected == NETWORK_OPTIONS_MQTT_WEBRTC.AS_SERVER:
+			print("Incompatible network options state transition, switching off before enabling")
+			selectandtrigger_networkoption(NETWORK_OPTIONS_MQTT_WEBRTC.NETWORK_OFF)
 	MQTTsignalling._on_NetworkOptionsMQTTWebRTC_item_selected(ns)
-
 
 func getrandomdoppelgangerdelay(disabledropout=false):
 	if not disabledropout and rng.randf_range(0, 100) < float(DoppelgangerPanel.get_node("hbox/VBox_netdrop/netdroppc").text):

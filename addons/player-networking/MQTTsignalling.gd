@@ -58,9 +58,10 @@ func _ready():
 	StatusMQTT.select(0)
 	$VBox/HBox/Label/WarningLabel.visible = not DirAccess.open("res://").dir_exists("res://addons/webrtc")
 
-var Dns = -1
+@onready var ns_previousitemselected = NetworkGateway.NETWORK_OPTIONS_MQTT_WEBRTC.NETWORK_OFF
 func _on_NetworkOptionsMQTTWebRTC_item_selected(ns):
-	Dns = ns
+	assert (not (ns == NetworkGateway.NETWORK_OPTIONS_MQTT_WEBRTC.AS_NECESSARY or ns == NetworkGateway.NETWORK_OPTIONS_MQTT_WEBRTC.AS_NECESSARY_MANUALCHANGE) or (ns_previousitemselected != NetworkGateway.NETWORK_OPTIONS_MQTT_WEBRTC.AS_CLIENT and ns_previousitemselected != NetworkGateway.NETWORK_OPTIONS_MQTT_WEBRTC.AS_SERVER))
+	ns_previousitemselected = ns
 	selectasserver = (ns == NetworkGateway.NETWORK_OPTIONS_MQTT_WEBRTC.AS_SERVER)
 	selectasclient = (ns == NetworkGateway.NETWORK_OPTIONS_MQTT_WEBRTC.AS_CLIENT)
 	if ns == NetworkGateway.NETWORK_OPTIONS_MQTT_WEBRTC.NETWORK_OFF:
@@ -230,7 +231,7 @@ func sendmessage_toclient(clientid, msg):
 	$MQTT.publish(t, msg)
 
 func statuschange_chooseserverifnecessary(caboosejustreached):
-	if Dns == NetworkGateway.NETWORK_OPTIONS_MQTT_WEBRTC.AS_NECESSARY:
+	if ns_previousitemselected == NetworkGateway.NETWORK_OPTIONS_MQTT_WEBRTC.AS_NECESSARY:
 		if Roomplayertreecaboosereached and xclientopenservers:
 			NetworkGateway.selectandtrigger_networkoption(NetworkGateway.NETWORK_OPTIONS_MQTT_WEBRTC.AS_CLIENT)
 		if caboosejustreached and not xclientopenservers:
