@@ -113,7 +113,7 @@ func _connection_failed():
 func _server_disconnected():
 	premature_peerconnections = null
 	if (multiplayer.multiplayer_peer is OfflineMultiplayerPeer):
-		NetworkGateway.change_connectedplayerscount(-1, "disconnect_server_offlinepeer")
+		#NetworkGateway.change_connectedplayerscount(-1, "disconnect_server_offlinepeer")
 		assert (NetworkGateway.Dconnectedplayerscount == 0, NetworkGateway.Dconnectedplayerscount)
 		return
 	connectionlog("_server_disconnected\n")
@@ -135,7 +135,7 @@ func _server_disconnected():
 	if NetworkGateway.ProtocolOptions.selected == NetworkGateway.NETWORK_PROTOCOL.WEBRTC_MQTTSIGNAL:
 		NetworkGateway.selectandtrigger_networkoption(NetworkGateway.NETWORK_OPTIONS_MQTT_WEBRTC.NETWORK_OFF)
 	else:
-		NetworkGateway.NetworkOptions.selected = NetworkGateway.NETWORK_OPTIONS.NETWORK_OFF
+		NetworkGateway.selectandtrigger_networkoption(NetworkGateway.NETWORK_OPTIONS.NETWORK_OFF)
 		
 func updateplayerlist():
 	var plp = PlayerList.get_item_text(PlayerList.selected).split(" ")[0].replace("*", "").replace("&", "")

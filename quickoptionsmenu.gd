@@ -20,7 +20,11 @@ func _on_show_network_gateway_toggled(toggled_on):
 	NetworkGateway.visible = toggled_on
 
 func _on_connect_toggled(toggled_on):
-	NetworkGateway.simple_webrtc_connect($Roomname.text if toggled_on else "")
+	if toggled_on and NetworkGateway.ProtocolOptions.selected != NetworkGateway.NETWORK_PROTOCOL.WEBRTC_MQTTSIGNAL:
+		$Connect.set_pressed_no_signal(false)
+		return
+	assert (NetworkGateway.ProtocolOptions.selected == NetworkGateway.NETWORK_PROTOCOL.WEBRTC_MQTTSIGNAL)
+	NetworkGateway.simple_webrtc_connect($Roomname.text if toggled_on else null)
 
 func _on_cs_button_toggled(toggled_on):
 	if toggled_on:

@@ -151,6 +151,7 @@ func processsendopuschunk():
 
 var microphoneaudiosamplescountSeconds = 0.0
 var microphoneaudiosamplescount = 0
+var microphoneaudiosamplescountSecondsSampleWindow = 10.0
 func _process(delta):
 	if audiostreamplaybackmicrophone != null:
 		if audiostreamplaybackmicrophone != null and audiostreamplaybackmicrophone.is_microphone_playing():
@@ -162,10 +163,11 @@ func _process(delta):
 				else:
 					break
 			microphoneaudiosamplescountSeconds += delta
-			if microphoneaudiosamplescountSeconds > 10:
+			if microphoneaudiosamplescountSeconds > microphoneaudiosamplescountSecondsSampleWindow:
 				print("measured mic audiosamples rate ", microphoneaudiosamplescount/microphoneaudiosamplescountSeconds)
 				microphoneaudiosamplescount = 0
 				microphoneaudiosamplescountSeconds = 0.0
+				microphoneaudiosamplescountSecondsSampleWindow *= 1.5
 	if audioopuschunkedeffect != null:
 		processtalkstreamends()
 		while audioopuschunkedeffect.chunk_available():

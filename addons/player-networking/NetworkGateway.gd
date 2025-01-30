@@ -88,7 +88,7 @@ func initialstatemqttwebrtc(networkoption, roomname, brokeraddress):
 	if roomname:
 		MQTTsignalling.Roomnametext.text = roomname
 	selectandtrigger_networkoption(networkoption)
-	set_vox_on()
+	#set_vox_on()
 
 func selectandtrigger_networkoption(networkoption):
 	if ProtocolOptions.selected == NETWORK_PROTOCOL.WEBRTC_MQTTSIGNAL:
@@ -99,7 +99,7 @@ func selectandtrigger_networkoption(networkoption):
 		if NetworkOptions.selected != networkoption:
 			NetworkOptions.selected = networkoption
 			_on_NetworkOptions_item_selected(networkoption)
-	set_vox_on()
+	#set_vox_on()
 
 func _on_ProtocolOptions_item_selected(np):
 	assert (NetworkOptions.selected == NETWORK_OPTIONS.NETWORK_OFF or NetworkOptions.selected == -1)
