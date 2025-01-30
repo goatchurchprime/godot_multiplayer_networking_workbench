@@ -21,7 +21,6 @@ var peerconnections_possiblymissingaudioheaders = [ ]
 @onready var PlayersNode = NetworkGateway.get_node_or_null(NetworkGateway.playersnodepath)
 @onready var PlayerList = $VBox/HBox/PlayerList
 
-
 var multiplayersignalsconnected = false
 func ensure_multiplayersignals_connected():
 	if not multiplayersignalsconnected:
@@ -85,7 +84,7 @@ func connectionlog(txt):
 
 func _connected_to_server():
 	var serverisself = multiplayer.is_server()
-	connectionlog("_server(self) connect\n" if serverisself else "_server connect\n")
+	print("_server(self) connect\n" if serverisself else "_server connect\n")
 	LocalPlayerFrame.setlocalframenetworkidandname(multiplayer.get_unique_id())
 	assert (LocalPlayerFrame.networkID >= 1)
 
@@ -117,6 +116,8 @@ func _server_disconnected():
 		assert (NetworkGateway.Dconnectedplayerscount == 0, NetworkGateway.Dconnectedplayerscount)
 		return
 	connectionlog("_server_disconnected\n")
+	# multiplayer.is_server() is erroneously true here on a genuine trigger of _server_disconnected)
+	print("_server disconnected  selfname=", LocalPlayer.get_name(), " Disserver=", multiplayer.is_server())
 	var ns = NetworkGateway.NetworkOptions.selected
 	multiplayer.multiplayer_peer = OfflineMultiplayerPeer.new()
 	for remoteplayer in RemotePlayers.duplicate():

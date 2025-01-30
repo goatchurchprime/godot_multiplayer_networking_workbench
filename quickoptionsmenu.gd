@@ -15,6 +15,7 @@ func _ready():
 	get_node("../SubViewportContainer/SubViewport/Players/LocalPlayer/AudioListener2D").make_current()
 	await get_tree().process_frame
 	NetworkGateway.MQTTsignalling.Roomnametext.text = $Roomname.text
+	multiplayer.server_disconnected.connect(func(): $Connect.button_pressed = false)
 
 func _on_show_network_gateway_toggled(toggled_on):
 	NetworkGateway.visible = toggled_on
