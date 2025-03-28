@@ -34,6 +34,10 @@ window/stretch/mode="viewport"
 window/stretch/aspect="expand"
 window/handheld/orientation=1
 
+[editor_plugins]
+
+enabled=PackedStringArray("res://addons/gd-plug-ui/plugin.cfg")
+
 [gdnative]
 
 singletons=["res://webrtc/webrtc.tres"]

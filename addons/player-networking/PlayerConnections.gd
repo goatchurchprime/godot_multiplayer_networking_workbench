@@ -84,7 +84,7 @@ func connectionlog(txt):
 
 func _connected_to_server():
 	var serverisself = multiplayer.is_server()
-	print("_server(self) connect\n" if serverisself else "_server connect\n")
+	print("_server(self) connect" if serverisself else "_server connect")
 	LocalPlayerFrame.setlocalframenetworkidandname(multiplayer.get_unique_id())
 	assert (LocalPlayerFrame.networkID >= 1)
 

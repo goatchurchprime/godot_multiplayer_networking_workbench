@@ -26,7 +26,6 @@ var audiobufferregulationpitchlow = 1.4
 var audiobufferregulationpitch = 2.0
 var audiobufferpitchscale = 1.0
 
-
 func Dclearcachesig():
 	pass # print("Dclearcachesig ", Time.get_ticks_msec())
 func Dmixer_updated():
@@ -80,7 +79,7 @@ func networkedavatarthinnedframedata(vd):
 		initialframestate = 1
 	vd[NCONSTANTS.CFI_ARRIVALDELAY] = vd[NCONSTANTS.CFI_TIMESTAMP_RECIEVED] - mintimestampoffset - vd[NCONSTANTS.CFI_TIMESTAMPPREV]
 
-	assert (currentplayeranimation != null)
+	#assert (currentplayeranimation != null)
 	if currentplayeranimation != null:
 		for k in vd:
 			if k >= NCONSTANTS.CFI_ANIMTRACKS:
@@ -116,37 +115,36 @@ func _process(delta):
 		var kt = t - currentplayeranimationT0
 		PlayerAnimation.seek(kt, true)
 
-	if audiostreamopuschunked != null and player_audiostreamplayer != null:
+	if audiostreamopuschunked != null:
 		var bufferlengthtime = audioserveroutputlatency + audiostreamopuschunked.queue_length_frames()*1.0/audiostreamopuschunked.audiosamplerate
 		if bufferlengthtime < audiobufferregulationtime:
 			if audiobufferpitchscale != 1.0:
 				if bufferlengthtime < audiobufferregulationtimeLow:
 					audiobufferpitchscale = 1.0
-					player_audiostreamplayer.pitch_scale = audiobufferpitchscale
+					get_parent().PF_setvoicespeedup(audiobufferpitchscale)
 					print("SETTING audiobufferpitchscale ", audiobufferpitchscale)
 		else:
 			var w = inverse_lerp(audiobufferregulationtime, audioserveroutputlatency + audiobuffersize/audiostreamopuschunked.audiosamplerate, bufferlengthtime)
 			audiobufferpitchscale = lerp(audiobufferregulationpitchlow, audiobufferregulationpitch, w)
-			player_audiostreamplayer.pitch_scale = audiobufferpitchscale
+			get_parent().PF_setvoicespeedup(audiobufferpitchscale)
 			print("SETTING audiobufferpitchscale ", audiobufferpitchscale)
 
 var audiostreamopuschunked : AudioStream = null
-var player_audiostreamplayer = null
+#var player_audiostreamplayer = null
 
 func _ready():
-	player_audiostreamplayer = get_node("..").find_child("AudioStreamPlayer")
-	if player_audiostreamplayer != null:
-		player_audiostreamplayer.playing = true
-		audiostreamopuschunked = player_audiostreamplayer.stream
-		if player_audiostreamplayer.stream == null and ClassDB.can_instantiate("AudioStreamOpusChunked"):
-			player_audiostreamplayer.stream = ClassDB.instantiate("AudioStreamOpusChunked")
-		if player_audiostreamplayer.stream != null and player_audiostreamplayer.stream.is_class("AudioStreamOpusChunked"):
-			audiostreamopuschunked = player_audiostreamplayer.stream
+	if get_parent().has_method("PF_playvoicestream"):
+		get_parent().PF_playvoicestream()
+		if get_parent().PF_getvoicestream() == null and ClassDB.can_instantiate("AudioStreamOpusChunked"):
+			audiostreamopuschunked = ClassDB.instantiate("AudioStreamOpusChunked")
+			get_parent().PF_setvoicestream(audiostreamopuschunked)
+		if get_parent().PF_getvoicestream() != null and get_parent().PF_getvoicestream().is_class("AudioStreamOpusChunked"):
+			audiostreamopuschunked = get_parent().PF_getvoicestream()
 			setrecopusvalues(48000, 960)
-		elif player_audiostreamplayer.stream != null:
-			print("AudioStreamPlayer.stream must be type AudioStreamOpusChunked ", player_audiostreamplayer.stream)
+		elif get_parent().PF_getvoicestream() != null:
+			print("AudioStreamPlayer.stream must be type AudioStreamOpusChunked ", get_parent().PF_getvoicestream())
 	else:
-		print("Need an AudioStreamPlayer node in RemotePlayer to do voip")
+		print("Need an PF_playvoicestream for an AudioStreamPlayer node in RemotePlayer to do voip")
 
 
 const asciiopenbrace = 123 # "{".to_ascii_buffer()[0]
@@ -180,7 +178,7 @@ func incomingaudiopacket(packet):
 		var h = JSON.parse_string(packet.get_string_from_ascii())
 		if h != null:
 			print("audio json packet ", h)
-			player_audiostreamplayer.playing = true
+			get_parent().PF_playvoicestream()
 			if h.has("talkingtimestart"):
 				if audiostreamopuschunked.opusframesize != h["opusframesize"] or \
 						audiostreamopuschunked.opussamplerate != h["opussamplerate"]:
