@@ -130,3 +130,7 @@ libraries = {
 position = Vector2(0, 12)
 scale = Vector2(0.5, 4)
 texture = SubResource("GradientTexture1D_co1qp")
+
+[node name="SteamAudioPlayer" type="SteamAudioPlayer" parent="."]
+unit_size = 0.1
+panning_strength = 0.0

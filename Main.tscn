@@ -105,6 +105,8 @@ handle_input_locally = false
 audio_listener_enable_2d = true
 render_target_update_mode = 4
 
+[node name="SteamAudioConfig" type="SteamAudioConfig" parent="SubViewportContainer/SubViewport"]
+
 [node name="Background" type="Sprite2D" parent="SubViewportContainer/SubViewport"]
 modulate = Color(0.592157, 0.592157, 0.592157, 1)
 z_index = -100
@@ -130,6 +132,8 @@ drag_left_margin = 0.7
 drag_top_margin = 0.6
 drag_right_margin = 0.6
 drag_bottom_margin = 0.6
+
+[node name="SteamAudioListener" type="SteamAudioListener" parent="SubViewportContainer/SubViewport/Players/LocalPlayer"]
 
 [node name="AudioListener2D" type="AudioListener2D" parent="SubViewportContainer/SubViewport/Players/LocalPlayer"]
 
