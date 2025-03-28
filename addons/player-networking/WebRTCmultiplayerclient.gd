@@ -40,8 +40,8 @@ func client_packet_received(v):
 		var peerconnection = WebRTCPeerConnection.new()
 		peerconnection.session_description_created.connect(client_session_description_created)
 		peerconnection.ice_candidate_created.connect(client_ice_candidate_created)
-
-		peerconnection.initialize({"iceServers": [ { "urls": ["stun:stun.l.google.com:19302"] } ] })
+		var iceservers = get_node("../../../../../../MQTTsignalling").iceservers
+		peerconnection.initialize({"iceServers":iceservers})
 		var E = multiplayer.multiplayer_peer.add_peer(peerconnection, 1)
 		if E != 0:	print("Errrr3 ", E)
 		E = peerconnection.set_remote_description("offer", v["data"])

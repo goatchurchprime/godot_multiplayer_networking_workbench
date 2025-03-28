@@ -57,6 +57,11 @@ func _ready():
 	clearallstatuses()
 	StatusMQTT.select(0)
 	$VBox/HBox/Label/WarningLabel.visible = not DirAccess.open("res://").dir_exists("res://addons/webrtc")
+	var content = FileAccess.get_file_as_string("res://iceservers.json")
+	var parsed_json = JSON.parse_string(content)
+	if parsed_json:
+		iceservers = parsed_json["v"]["iceServers"]
+		print("iceservers ", iceservers)
 
 @onready var ns_previousitemselected = NetworkGateway.NETWORK_OPTIONS_MQTT_WEBRTC.NETWORK_OFF
 func _on_NetworkOptionsMQTTWebRTC_item_selected(ns):
@@ -309,6 +314,7 @@ func startwebrtc_server():
 	Wserveractive = true
 
 func server_ice_candidate_created(mid_name, index_name, sdp_name, id):
+	print("sdp_name ", sdp_name)
 	sendpacket_towclient(id, {"subject":"ice_candidate", "mid_name":mid_name, "index_name":index_name, "sdp_name":sdp_name})
 
 func server_session_description_created(type, data, id):

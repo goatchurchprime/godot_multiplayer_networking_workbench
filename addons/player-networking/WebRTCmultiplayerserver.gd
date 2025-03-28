@@ -59,14 +59,15 @@ func Ddata_channel_created(channel):
 	print("DDDdata_channel_created ", channel)
 
 func server_packet_received(id, v):
+	# this is the WebSocket case, not the MQTT case
 	#print("server packet_received ", id, v["subject"])
 	if v["subject"] == "request_offer":
 		var peerconnection = WebRTCPeerConnection.new()
 		peerconnection.session_description_created.connect(server_session_description_created.bind(id))
 		peerconnection.ice_candidate_created.connect(server_ice_candidate_created.bind(id))
 		peerconnection.data_channel_received.connect(Ddata_channel_created)
-
-		peerconnection.initialize({"iceServers": [ { "urls": ["stun:stun.l.google.com:19302"] } ] })
+		var iceservers = get_node("../../../../../../MQTTsignalling").iceservers
+		peerconnection.initialize({"iceServers":iceservers})
 		print("serverpacket peer.get_connection_state() ", peerconnection.get_connection_state())
 		multiplayer.multiplayer_peer.add_peer(peerconnection, id)
 		var webrtcpeererror = peerconnection.create_offer()
