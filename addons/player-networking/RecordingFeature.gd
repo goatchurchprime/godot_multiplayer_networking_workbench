@@ -2,6 +2,7 @@ extends HBoxContainer
 
 var audioopuschunkedeffect : AudioEffect = null
 var audiostreamplaybackmicrophone : AudioStreamPlayback = null
+@onready var inputmicfeature = Input.has_method("get_microphone_buffer")
 
 var chunkprefix : PackedByteArray = PackedByteArray([0,0]) 
 
@@ -27,7 +28,6 @@ var chunkmaxpersist = 0.0
 
 var audiosampleframetextureimage : Image
 var audiosampleframetexture : ImageTexture
-
 
 func setopusvalues(opussamplerate, opusframedurationms, opusbitrate, opuscomplexity, opusoptimizeforvoice):
 	assert (not currentlytalking)
@@ -75,6 +75,7 @@ func processtalkstreamends():
 		if audiostreamplaybackmicrophone == null and not $AudioStreamPlayerMicrophone.playing != true:
 			$AudioStreamPlayerMicrophone.playing = true
 			print("Set microphone playing again (switched off by system)")
+		
 
 	elif not talking and currentlytalking:
 		currentlytalking = false
@@ -168,7 +169,22 @@ func _process(delta):
 				microphoneaudiosamplescount = 0
 				microphoneaudiosamplescountSeconds = 0.0
 				microphoneaudiosamplescountSecondsSampleWindow *= 1.5
-	if audioopuschunkedeffect != null:
+	elif inputmicfeature:
+		while true:
+			var microphonesamples = Input.get_microphone_buffer(audioopuschunkedeffect.audiosamplesize)
+			if len(microphonesamples) != 0:
+				audioopuschunkedeffect.push_chunk(microphonesamples)
+				microphoneaudiosamplescount += len(microphonesamples)
+			else:
+				break
+		microphoneaudiosamplescountSeconds += delta
+		if microphoneaudiosamplescountSeconds > microphoneaudiosamplescountSecondsSampleWindow:
+			print("measured mic audiosamples rate ", microphoneaudiosamplescount/microphoneaudiosamplescountSeconds)
+			microphoneaudiosamplescount = 0
+			microphoneaudiosamplescountSeconds = 0.0
+			microphoneaudiosamplescountSecondsSampleWindow *= 1.5
+		
+	if audioopuschunkedeffect != null or inputmicfeature:
 		processtalkstreamends()
 		while audioopuschunkedeffect.chunk_available():
 			var speakingvolume = processvox()
@@ -184,7 +200,10 @@ func startmicafterpermissions(permission: String, granted: bool):
 	if permission == "android.permission.RECORD_AUDIO":
 		if granted:
 			print("Starting mic after permissions granted")
-			audiostreamplaybackmicrophone.start_microphone()
+			if audiostreamplaybackmicrophone:
+				audiostreamplaybackmicrophone.start_microphone()
+			elif inputmicfeature:
+				Input.start_microphone()
 			print("Starting mic after permissions granted ", audiostreamplaybackmicrophone.is_playing())
 		else:
 			printerr("You have not granted microphone permissions")
@@ -195,6 +214,9 @@ func _ready():
 	if ClassDB.class_has_method("AudioStreamPlaybackMicrophone", "start_microphone", true):
 		audiostreamplaybackmicrophone = ClassDB.instantiate("AudioStreamPlaybackMicrophone")
 		print("Using AudioStreamPlaybackMicrophone post PR#100508")  # https://github.com/godotengine/godot/pull/100508
+	elif inputmicfeature:
+		print("Using Input.microphone_buffer feature post PR#?????")
+
 	$VoxThreshold.material.set_shader_parameter("voxthreshhold", voxthreshhold)
 
 	if audiostreamplaybackmicrophone != null:
@@ -221,6 +243,19 @@ func _ready():
 						print("Disabling AudioEffectOpusChunked on bus ", AudioServer.get_bus_name(busidx))
 						AudioServer.set_bus_effect_enabled(busidx, i, false)
 	
+	elif inputmicfeature:
+		if OS.request_permission("RECORD_AUDIO"):
+			Input.start_microphone()
+			print("Record audio permission already granted ")
+			get_tree().on_request_permissions_result.connect(startmicafterpermissions)
+		else:
+			get_tree().on_request_permissions_result.connect(startmicafterpermissions)
+		$MicStreamPlayerNotice.visible = true
+		if ClassDB.can_instantiate("AudioEffectOpusChunked"):
+			audioopuschunkedeffect = ClassDB.instantiate("AudioEffectOpusChunked")
+		else:
+			$MicNotPlayingWarning.visible = true
+
 	else:
 		if $AudioStreamPlayerMicrophone.bus != "MicrophoneBus":
 			var lmicrophonebusidx = AudioServer.get_bus_index("MicrophoneBus")
@@ -251,6 +286,8 @@ func _ready():
 
 
 	if audioopuschunkedeffect != null:
+		setopusvalues(opussamplerate_default, opusframedurationms_default, opusbitrate_default, opuscomplexity_default, opusoptimizeforvoice_default)
+	elif inputmicfeature:
 		setopusvalues(opussamplerate_default, opusframedurationms_default, opusbitrate_default, opuscomplexity_default, opusoptimizeforvoice_default)
 	else:
 		printerr("Unabled to find or instantiate AudioEffectOpusChunked on MicrophoneBus")
