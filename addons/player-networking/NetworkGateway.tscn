@@ -112,6 +112,7 @@ spacing_bottom = -3
 
 [node name="NetworkGateway" type="MarginContainer"]
 self_modulate = Color(0.32549, 0.317647, 0.317647, 1)
+anchors_preset = -1
 offset_top = -1.0
 offset_right = 676.0
 offset_bottom = 383.0

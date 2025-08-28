@@ -91,8 +91,6 @@ func networkedavatarthinnedframedata(vd):
 				if kt + animationtimerunoff > currentplayeranimation.length:
 					currentplayeranimation.length = kt + animationtimerunoff
 
-
-
 var Dframecount = 0
 var Dmaxarrivaldelay = 0
 func _process(delta):
@@ -187,7 +185,7 @@ func incomingaudiopacket(packet):
 				opusstreamcount = int(h["opusstreamcount"])
 				opusframecount = 0
 				if h.has("opusframecount"):
-					print("Mid speech header!!! ", h["opusframecount"])
+					prints("Mid speech header!!! ", networkID, h["opusframecount"])
 					opusframecount = h["opusframecount"]
 				outoforderchunkqueue.clear()
 				for i in range(Noutoforderqueue):

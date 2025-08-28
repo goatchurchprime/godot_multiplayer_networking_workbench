@@ -59,6 +59,9 @@ func _ready():
 	LocalPlayer.PF_initlocalplayer()
 	LocalPlayerFrame.setlocalframenetworkidandname(0)
 
+	$VBox/RecordingFeature.callabletransmitaudiopacket = Callable(LocalPlayerFrame, "transmitaudiopacket")
+	$VBox/RecordingFeature.callabletransmitaudiojsonpacket = Callable(LocalPlayerFrame, "transmitaudiojsonpacket")
+
 static func playernamefromnetworkid(id):
 	return "R%d" % id
 
@@ -162,6 +165,7 @@ func _peer_connected(id):
 	assert (not uninitialized_peerconnections.has(id))
 	uninitialized_peerconnections.push_back(id)
 	peerconnections_possiblymissingaudioheaders.push_back(id)
+	print("adding peerconnections_possiblymissingaudioheaders ", id)
 
 	if multiplayer.is_server():
 		rpc_id(id, "RPC_spawninfoforclientfromserver", LocalPlayer.PF_spawninfo_fornewplayer())
