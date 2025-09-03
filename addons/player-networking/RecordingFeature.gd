@@ -22,9 +22,14 @@ func _ready():
 		$OpusWarningLabel.visible = true
 
 func _on_vox_toggled(toggled_on):
-	$PTT.toggle_mode = toggled_on
-	$TwoVoipMic.voxenabled = toggled_on
-	#$TwoVoipMic.pttpressed = false
+	if toggled_on:
+		$TwoVoipMic.voxenabled = true
+		$PTT.toggle_mode = true
+		$TwoVoipMic.pttpressed = false
+	else:
+		$TwoVoipMic.voxenabled = false
+		$PTT.toggle_mode = false
+		$TwoVoipMic.pttpressed = $PTT.button_pressed
 
 func _process(delta):
 	if $TwoVoipMic.voxenabled:
@@ -43,12 +48,6 @@ func _on_vox_threshold_gui_input(event):
 func _on_audio_stream_player_microphone_finished():
 	print("*** _on_audio_stream_player_microphone_finished")
 	$MicFinishedWarning.visible = true
-
-func _input(event):
-	if event is InputEventKey and event.pressed and event.keycode == KEY_K:
-		$TwoVoipMic.microphonefeed.set_active(false)
-		await get_tree().create_timer(0.5).timeout
-		$TwoVoipMic.microphonefeed.set_active(false)
 
 func micaudiowarning(name, value):
 	get_node(name).visible = value

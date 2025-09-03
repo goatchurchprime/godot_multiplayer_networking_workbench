@@ -28,6 +28,10 @@ var voxenabled = false
 var denoiseenabled = false
 var pttpressed = false
 
+var microphoneaudiosamplescountSeconds = 0.0
+var microphoneaudiosamplescount = 0
+var microphoneaudiosamplescountSecondsSampleWindow = 10.0
+
 func setopusvalues(opussamplerate, opusframedurationms, opusbitrate, opuscomplexity, opusoptimizeforvoice):
 	assert (not currentlytalking)
 	audioopuschunkedeffect.opussamplerate = opussamplerate
@@ -128,7 +132,7 @@ func processtalkstreamends():
 		get_parent().PlayerConnections.peerconnections_possiblymissingaudioheaders.clear()
 		opusframecount = 0
 		currentlytalking = true
-		if microphonefeed == null and not $AudioStreamPlayerMicrophone.playing != true:
+		if microphonefeed == null and not $AudioStreamPlayerMicrophone.playing:
 			$AudioStreamPlayerMicrophone.playing = true
 			print("Set microphone playing again (switched off by system)")
 
@@ -191,9 +195,6 @@ func processsendopuschunk():
 		opusframecount += 1
 	audioopuschunkedeffect.drop_chunk()
 
-var microphoneaudiosamplescountSeconds = 0.0
-var microphoneaudiosamplescount = 0
-var microphoneaudiosamplescountSecondsSampleWindow = 10.0
 func _process(delta):
 	if microphonefeed != null and microphonefeed.is_active():
 		while true:

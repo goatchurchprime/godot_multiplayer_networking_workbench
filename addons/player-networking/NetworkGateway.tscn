@@ -576,7 +576,7 @@ script = ExtResource("16_7s5vv")
 
 [node name="AudioStreamPlayerMicrophone" type="AudioStreamPlayer" parent="VBox/PlayerConnections/VBox/RecordingFeature/TwoVoipMic"]
 stream = SubResource("2")
-volume_db = 10.0
+bus = &"MicrophoneBus"
 
 [node name="MicStreamPlayerNotice" type="ColorRect" parent="VBox/PlayerConnections/VBox/RecordingFeature"]
 visible = false
