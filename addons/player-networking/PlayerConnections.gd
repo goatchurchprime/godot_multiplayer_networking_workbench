@@ -59,8 +59,8 @@ func _ready():
 	LocalPlayer.PF_initlocalplayer()
 	LocalPlayerFrame.setlocalframenetworkidandname(0)
 
-	$VBox/RecordingFeature.callabletransmitaudiopacket = Callable(LocalPlayerFrame, "transmitaudiopacket")
-	$VBox/RecordingFeature.callabletransmitaudiojsonpacket = Callable(LocalPlayerFrame, "transmitaudiojsonpacket")
+	$VBox/RecordingFeature.transmitaudiopacket.connect(LocalPlayerFrame.transmitaudiopacket)
+	$VBox/RecordingFeature.transmitaudiojsonpacket.connect(LocalPlayerFrame.transmitaudiojsonpacket)
 
 static func playernamefromnetworkid(id):
 	return "R%d" % id

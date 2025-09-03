@@ -8,8 +8,9 @@ var chunkprefix : PackedByteArray = PackedByteArray([0,0])
 
 @onready var PlayerConnections = find_parent("PlayerConnections")
 
-var callabletransmitaudiopacket = Callable()
-var callabletransmitaudiojsonpacket = Callable()
+
+signal transmitaudiopacket(opuspacket, opusframecount)
+signal transmitaudiojsonpacket(audiostreampacketheader)
 
 # Opus compression settings
 var opussamplerate_default = 48000 # 8, 12, 16, 24, 48 KHz
@@ -32,7 +33,6 @@ var chunkmaxpersist = 0.0
 
 var audiosampleframetextureimage : Image
 var audiosampleframetexture : ImageTexture
-
 
 func setopusvalues(opussamplerate, opusframedurationms, opusbitrate, opuscomplexity, opusoptimizeforvoice):
 	assert (not currentlytalking)
@@ -73,7 +73,7 @@ func processtalkstreamends():
 			"talkingtimestart":talkingtimestart 
 		}
 		audioopuschunkedeffect.resetencoder(false)
-		callabletransmitaudiojsonpacket.call(audiostreampacketheader)
+		transmitaudiojsonpacket.emit(audiostreampacketheader)
 		PlayerConnections.peerconnections_possiblymissingaudioheaders.clear()
 		opusframecount = 0
 		currentlytalking = true
@@ -92,7 +92,7 @@ func processtalkstreamends():
 			"talkingtimeend":talkingtimeend 
 		}
 		print("My voice chunktime=", talkingtimeduration/opusframecount, " over ", talkingtimeduration, " seconds")
-		callabletransmitaudiojsonpacket.call(audiopacketstreamfooter)
+		transmitaudiojsonpacket.emit(audiopacketstreamfooter)
 		opusstreamcount += 1
 
 func processvox():
@@ -136,7 +136,7 @@ func processsendopuschunk():
 		if $Denoise.button_pressed:
 			audioopuschunkedeffect.denoise_resampled_chunk()
 		var opuspacket = audioopuschunkedeffect.read_opus_packet(chunkprefix)
-		callabletransmitaudiopacket.call(opuspacket, opusframecount)
+		transmitaudiopacket.emit(opuspacket, opusframecount)
 		opusframecount += 1
 	audioopuschunkedeffect.drop_chunk()
 
