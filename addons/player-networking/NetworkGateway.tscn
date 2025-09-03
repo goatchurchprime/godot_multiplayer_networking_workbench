@@ -1,4 +1,4 @@
-[gd_scene load_steps=34 format=3 uid="uid://cfmoahalri06d"]
+[gd_scene load_steps=35 format=3 uid="uid://cfmoahalri06d"]
 
 [ext_resource type="Script" uid="uid://dk1cdf7oaqcxu" path="res://addons/player-networking/NetworkGateway.gd" id="1"]
 [ext_resource type="Script" uid="uid://ddfg67ye8bg6s" path="res://addons/player-networking/Enetmultiplayerserver.gd" id="3"]
@@ -14,6 +14,7 @@
 [ext_resource type="Script" uid="uid://dgclncu5sr6np" path="res://addons/player-networking/ClientmodeWebSocketsignal.gd" id="13"]
 [ext_resource type="Script" uid="uid://ckwh8um88fprv" path="res://addons/player-networking/WebRTCmultiplayerclient.gd" id="14"]
 [ext_resource type="PackedScene" uid="uid://ktm7k0co2o7l" path="res://addons/mqtt/mqtt.tscn" id="14_c5n2c"]
+[ext_resource type="Script" uid="uid://ckct5jm036axl" path="res://addons/player-networking/twovoipr/two_voip_mic.gd" id="16_7s5vv"]
 [ext_resource type="Script" uid="uid://b4ywxdff8udo6" path="res://addons/player-networking/RecordingFeature.gd" id="16_hf3ik"]
 [ext_resource type="Script" uid="uid://bc0egyeyk7u4f" path="res://addons/player-networking/DoppelgangerPanel_ui.gd" id="16_i8v6k"]
 
@@ -112,7 +113,6 @@ spacing_bottom = -3
 
 [node name="NetworkGateway" type="MarginContainer"]
 self_modulate = Color(0.32549, 0.317647, 0.317647, 1)
-anchors_preset = -1
 offset_top = -1.0
 offset_right = 676.0
 offset_bottom = 383.0
@@ -571,7 +571,10 @@ layout_mode = 2
 layout_mode = 2
 script = ExtResource("16_hf3ik")
 
-[node name="AudioStreamPlayerMicrophone" type="AudioStreamPlayer" parent="VBox/PlayerConnections/VBox/RecordingFeature"]
+[node name="TwoVoipMic" type="Node" parent="VBox/PlayerConnections/VBox/RecordingFeature"]
+script = ExtResource("16_7s5vv")
+
+[node name="AudioStreamPlayerMicrophone" type="AudioStreamPlayer" parent="VBox/PlayerConnections/VBox/RecordingFeature/TwoVoipMic"]
 stream = SubResource("2")
 volume_db = 10.0
 
@@ -748,7 +751,7 @@ layout_mode = 2
 [connection signal="value_changed" from="VBox/PlayerConnections/VBox/HBox/PlayerLagSlider" to="VBox/PlayerConnections" method="_on_PlayerLagSlider_value_changed"]
 [connection signal="toggled" from="VBox/PlayerConnections/VBox/HBox/LogRec" to="VBox/PlayerConnections" method="_on_log_rec_toggled"]
 [connection signal="toggled" from="VBox/PlayerConnections/VBox/HBox/LogAud" to="VBox/PlayerConnections" method="_on_log_aud_toggled"]
-[connection signal="finished" from="VBox/PlayerConnections/VBox/RecordingFeature/AudioStreamPlayerMicrophone" to="VBox/PlayerConnections/VBox/RecordingFeature" method="_on_audio_stream_player_microphone_finished"]
+[connection signal="finished" from="VBox/PlayerConnections/VBox/RecordingFeature/TwoVoipMic/AudioStreamPlayerMicrophone" to="VBox/PlayerConnections/VBox/RecordingFeature" method="_on_audio_stream_player_microphone_finished"]
 [connection signal="toggled" from="VBox/PlayerConnections/VBox/RecordingFeature/Vox" to="VBox/PlayerConnections/VBox/RecordingFeature" method="_on_vox_toggled"]
 [connection signal="gui_input" from="VBox/PlayerConnections/VBox/RecordingFeature/VoxThreshold" to="VBox/PlayerConnections/VBox/RecordingFeature" method="_on_vox_threshold_gui_input"]
 [connection signal="toggled" from="VBox/DoppelgangerPanel/hbox/VBox_enable/DoppelgangerEnable" to="VBox/PlayerConnections" method="_on_Doppelganger_toggled"]

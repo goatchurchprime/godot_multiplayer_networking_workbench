@@ -237,7 +237,7 @@ func set_vox_on():
 	var RecordingFeature = PlayerConnections.get_node("VBox/RecordingFeature")
 	RecordingFeature.get_node("Vox").button_pressed = true
 	var voxthreshold = 0.06
-	RecordingFeature.voxthreshhold = voxthreshold
+	RecordingFeature.get_node("TwoVoipMic").voxthreshhold = voxthreshold
 	RecordingFeature.get_node("VoxThreshold").material.set_shader_parameter("voxthreshhold", voxthreshold)
 
 func is_disconnected():

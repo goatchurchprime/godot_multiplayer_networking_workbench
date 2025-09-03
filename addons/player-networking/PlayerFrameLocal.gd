@@ -202,6 +202,7 @@ var audiopacketstreamjsonheader = null
 func transmitaudiojsonpacket(jsonpacket):
 	if jsonpacket.has("talkingtimestart"):
 		audiopacketstreamjsonheader = jsonpacket
+		PlayerConnections.peerconnections_possiblymissingaudioheaders.clear()
 	if jsonpacket.has("talkingtimeend"):
 		audiopacketstreamjsonheader = null
 	transmitaudiopacket(JSON.stringify(jsonpacket).to_ascii_buffer(), 0)
