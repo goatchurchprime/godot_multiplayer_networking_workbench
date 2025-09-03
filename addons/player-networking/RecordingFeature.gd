@@ -20,9 +20,13 @@ func _ready():
 		printerr("Unabled to find or instantiate AudioEffectOpusChunked on MicrophoneBus")
 		$OpusWarningLabel.visible = true
 
-
 func _on_vox_toggled(toggled_on):
 	$PTT.toggle_mode = toggled_on
+	$TwoVoipMic.voxenabled = toggled_on
+	#$TwoVoipMic.pttpressed = false
+
+func _on_denoise_toggled(toggled_on):
+	$TwoVoipMic.denoiseenabled = toggled_on
 
 func _on_vox_threshold_gui_input(event):
 	if event is InputEventMouseButton and event.pressed:

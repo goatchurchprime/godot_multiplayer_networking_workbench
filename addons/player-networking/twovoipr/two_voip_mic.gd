@@ -23,6 +23,9 @@ var audiosampleframematerial = null
 signal transmitaudiopacket(opuspacket, opusframecount)
 signal transmitaudiojsonpacket(audiostreampacketheader)
 
+var voxenabled = false
+var denoiseenabled = false
+
 func setopusvalues(opussamplerate, opusframedurationms, opusbitrate, opuscomplexity, opusoptimizeforvoice):
 	assert (not currentlytalking)
 	audioopuschunkedeffect.opussamplerate = opussamplerate
@@ -141,13 +144,13 @@ func processtalkstreamends(pttpressed):
 		transmitaudiojsonpacket.emit(audiopacketstreamfooter)
 		opusstreamcount += 1
 
-func processvox(pttbutton, denoisepressed, voxpressed):
-	if denoisepressed:
+func processvox(pttbutton):
+	if denoiseenabled:
 		audioopuschunkedeffect.denoise_resampled_chunk()
-	var chunkmax = audioopuschunkedeffect.chunk_max(false, denoisepressed)
+	var chunkmax = audioopuschunkedeffect.chunk_max(false, denoiseenabled)
 	audiosampleframematerial.set_shader_parameter("chunkmax", chunkmax)
 	if chunkmax >= voxthreshhold:
-		if voxpressed and not pttbutton.button_pressed:
+		if voxenabled and not pttbutton.button_pressed:
 			pttbutton.set_pressed(true)
 		hangframescountup = 0
 		if chunkmax > chunkmaxpersist:
@@ -155,7 +158,7 @@ func processvox(pttbutton, denoisepressed, voxpressed):
 			audiosampleframematerial.set_shader_parameter("chunkmaxpersist", chunkmaxpersist)
 	else:
 		if hangframescountup == hangframes:
-			if voxpressed:
+			if voxenabled:
 				pttbutton.set_pressed(false)
 			chunkmaxpersist = 0.0
 			audiosampleframematerial.set_shader_parameter("chunkmaxpersist", chunkmaxpersist)
@@ -172,14 +175,14 @@ func processvox(pttbutton, denoisepressed, voxpressed):
 		audiosampleframematerial.set_shader_parameter("chunktexenabled", false)
 		return 0.0
 
-func processsendopuschunk(denoisepressed):
+func processsendopuschunk():
 	if currentlytalking:
 		if len(chunkprefix) == 2:
 			chunkprefix.set(0, (opusframecount%256))  # 32768 frames is 10 minutes
 			chunkprefix.set(1, (int(opusframecount/256)&127) + (opusstreamcount%2)*128)
 		else:
 			assert (len(chunkprefix) == 0)
-		if denoisepressed:
+		if denoiseenabled:
 			audioopuschunkedeffect.denoise_resampled_chunk()
 		var opuspacket = audioopuschunkedeffect.read_opus_packet(chunkprefix)
 		transmitaudiopacket.emit(opuspacket, opusframecount)
@@ -208,10 +211,9 @@ func _process(delta):
 	if audioopuschunkedeffect != null:
 		processtalkstreamends(get_node("../PTT").button_pressed)
 		while audioopuschunkedeffect.chunk_available():
-			var denoisepressed = get_node("../Denoise").button_pressed
-			var speakingvolume = processvox(get_node("../PTT"), denoisepressed, get_node("../Vox").button_pressed)
+			var speakingvolume = processvox(get_node("../PTT"))
 			processtalkstreamends(get_node("../PTT").button_pressed)
-			processsendopuschunk(denoisepressed)
+			processsendopuschunk()
 			get_parent().PlayerConnections.LocalPlayer.PF_setspeakingvolume(speakingvolume if currentlytalking else 0.0)
 	if microphonefeed == null:
 		get_node("../MicNotPlayingWarning").visible = not $AudioStreamPlayerMicrophone.playing

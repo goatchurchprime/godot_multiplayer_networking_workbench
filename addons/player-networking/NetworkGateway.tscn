@@ -753,5 +753,6 @@ layout_mode = 2
 [connection signal="toggled" from="VBox/PlayerConnections/VBox/HBox/LogAud" to="VBox/PlayerConnections" method="_on_log_aud_toggled"]
 [connection signal="finished" from="VBox/PlayerConnections/VBox/RecordingFeature/TwoVoipMic/AudioStreamPlayerMicrophone" to="VBox/PlayerConnections/VBox/RecordingFeature" method="_on_audio_stream_player_microphone_finished"]
 [connection signal="toggled" from="VBox/PlayerConnections/VBox/RecordingFeature/Vox" to="VBox/PlayerConnections/VBox/RecordingFeature" method="_on_vox_toggled"]
+[connection signal="toggled" from="VBox/PlayerConnections/VBox/RecordingFeature/Denoise" to="VBox/PlayerConnections/VBox/RecordingFeature" method="_on_denoise_toggled"]
 [connection signal="gui_input" from="VBox/PlayerConnections/VBox/RecordingFeature/VoxThreshold" to="VBox/PlayerConnections/VBox/RecordingFeature" method="_on_vox_threshold_gui_input"]
 [connection signal="toggled" from="VBox/DoppelgangerPanel/hbox/VBox_enable/DoppelgangerEnable" to="VBox/PlayerConnections" method="_on_Doppelganger_toggled"]
