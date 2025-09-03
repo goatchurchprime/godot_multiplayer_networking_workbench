@@ -13,6 +13,7 @@ var opusoptimizeforvoice_default = true
 func _ready():
 	$TwoVoipMic.audiosampleframematerial = $VoxThreshold.material
 	$TwoVoipMic.audiosampleframematerial.set_shader_parameter("voxthreshhold", $TwoVoipMic.voxthreshhold)
+	$TwoVoipMic.micaudiowarnings.connect(micaudiowarning)
 
 	if $TwoVoipMic.audioopuschunkedeffect != null:
 		$TwoVoipMic.setopusvalues(opussamplerate_default, opusframedurationms_default, opusbitrate_default, opuscomplexity_default, opusoptimizeforvoice_default)
@@ -24,6 +25,12 @@ func _on_vox_toggled(toggled_on):
 	$PTT.toggle_mode = toggled_on
 	$TwoVoipMic.voxenabled = toggled_on
 	#$TwoVoipMic.pttpressed = false
+
+func _process(delta):
+	if $TwoVoipMic.voxenabled:
+		$PTT.set_pressed_no_signal($TwoVoipMic.pttpressed)
+	else:
+		$TwoVoipMic.pttpressed = $PTT.button_pressed
 
 func _on_denoise_toggled(toggled_on):
 	$TwoVoipMic.denoiseenabled = toggled_on
@@ -42,3 +49,6 @@ func _input(event):
 		$TwoVoipMic.microphonefeed.set_active(false)
 		await get_tree().create_timer(0.5).timeout
 		$TwoVoipMic.microphonefeed.set_active(false)
+
+func micaudiowarning(name, value):
+	get_node(name).visible = value
