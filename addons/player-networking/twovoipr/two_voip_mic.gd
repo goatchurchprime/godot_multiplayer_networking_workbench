@@ -28,6 +28,8 @@ var voxenabled = false
 var denoiseenabled = false
 var pttpressed = false
 
+const rootmeansquaremaxmeasurement = false
+
 var microphoneaudiosamplescountSeconds = 0.0
 var microphoneaudiosamplescount = 0
 var microphoneaudiosamplescountSecondsSampleWindow = 10.0
@@ -150,10 +152,17 @@ func processtalkstreamends():
 		transmitaudiojsonpacket.emit(audiopacketstreamfooter)
 		opusstreamcount += 1
 
+# chunkmax settings (rms???) should be to 0.5???
+# convert the audiostream decoder also to this library
+# also need a gain value to put into the library
+# go again conventional capture, and see quality
+# should be very good quality if we can make it
+
+
 func processvox():
 	if denoiseenabled:
 		audioopuschunkedeffect.denoise_resampled_chunk()
-	var chunkmax = audioopuschunkedeffect.chunk_max(false, denoiseenabled)
+	var chunkmax = audioopuschunkedeffect.chunk_max(rootmeansquaremaxmeasurement, denoiseenabled)
 	audiosampleframematerial.set_shader_parameter("chunkmax", chunkmax)
 	if chunkmax >= voxthreshhold:
 		if voxenabled and not pttpressed:
@@ -161,6 +170,7 @@ func processvox():
 		hangframescountup = 0
 		if chunkmax > chunkmaxpersist:
 			chunkmaxpersist = chunkmax
+			print("chunkmaxpersist ", chunkmaxpersist)
 			audiosampleframematerial.set_shader_parameter("chunkmaxpersist", chunkmaxpersist)
 	else:
 		if hangframescountup == hangframes:

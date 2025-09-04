@@ -630,6 +630,13 @@ theme_override_colors/font_color = Color(0.972549, 0, 0, 1)
 theme_override_styles/normal = SubResource("StyleBoxFlat_4i5jn")
 text = "Warning: addons/twovoip not found"
 
+[node name="MicGainDB" type="SpinBox" parent="VBox/PlayerConnections/VBox/RecordingFeature"]
+layout_mode = 2
+tooltip_text = "Gain"
+min_value = -80.0
+max_value = 24.0
+step = 0.1
+
 [node name="ConnectionLog" type="TextEdit" parent="VBox/PlayerConnections/VBox"]
 custom_minimum_size = Vector2(0, 30)
 layout_mode = 2
@@ -755,4 +762,5 @@ layout_mode = 2
 [connection signal="toggled" from="VBox/PlayerConnections/VBox/RecordingFeature/Vox" to="VBox/PlayerConnections/VBox/RecordingFeature" method="_on_vox_toggled"]
 [connection signal="toggled" from="VBox/PlayerConnections/VBox/RecordingFeature/Denoise" to="VBox/PlayerConnections/VBox/RecordingFeature" method="_on_denoise_toggled"]
 [connection signal="gui_input" from="VBox/PlayerConnections/VBox/RecordingFeature/VoxThreshold" to="VBox/PlayerConnections/VBox/RecordingFeature" method="_on_vox_threshold_gui_input"]
+[connection signal="value_changed" from="VBox/PlayerConnections/VBox/RecordingFeature/MicGainDB" to="VBox/PlayerConnections/VBox/RecordingFeature" method="_on_mic_gain_db_value_changed"]
 [connection signal="toggled" from="VBox/DoppelgangerPanel/hbox/VBox_enable/DoppelgangerEnable" to="VBox/PlayerConnections" method="_on_Doppelganger_toggled"]

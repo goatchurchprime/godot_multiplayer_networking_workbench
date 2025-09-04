@@ -51,3 +51,6 @@ func _on_audio_stream_player_microphone_finished():
 
 func micaudiowarning(name, value):
 	get_node(name).visible = value
+
+func _on_mic_gain_db_value_changed(value):
+	$TwoVoipMic.audioopuschunkedeffect.volume_db = value
