@@ -1,4 +1,4 @@
-[gd_scene load_steps=35 format=3 uid="uid://cfmoahalri06d"]
+[gd_scene load_steps=34 format=3 uid="uid://cfmoahalri06d"]
 
 [ext_resource type="Script" uid="uid://dk1cdf7oaqcxu" path="res://addons/player-networking/NetworkGateway.gd" id="1"]
 [ext_resource type="Script" uid="uid://ddfg67ye8bg6s" path="res://addons/player-networking/Enetmultiplayerserver.gd" id="3"]
@@ -14,7 +14,7 @@
 [ext_resource type="Script" uid="uid://dgclncu5sr6np" path="res://addons/player-networking/ClientmodeWebSocketsignal.gd" id="13"]
 [ext_resource type="Script" uid="uid://ckwh8um88fprv" path="res://addons/player-networking/WebRTCmultiplayerclient.gd" id="14"]
 [ext_resource type="PackedScene" uid="uid://ktm7k0co2o7l" path="res://addons/mqtt/mqtt.tscn" id="14_c5n2c"]
-[ext_resource type="Script" uid="uid://ckct5jm036axl" path="res://addons/player-networking/twovoipr/two_voip_mic.gd" id="16_7s5vv"]
+[ext_resource type="PackedScene" uid="uid://dvpkwo6h7y0sj" path="res://addons/player-networking/twovoipr/two_voip_mic.tscn" id="16_7s5vv"]
 [ext_resource type="Script" uid="uid://b4ywxdff8udo6" path="res://addons/player-networking/RecordingFeature.gd" id="16_hf3ik"]
 [ext_resource type="Script" uid="uid://bc0egyeyk7u4f" path="res://addons/player-networking/DoppelgangerPanel_ui.gd" id="16_i8v6k"]
 
@@ -34,8 +34,6 @@ bg_color = Color(0, 0, 0, 1)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_wj0xm"]
 bg_color = Color(0.12111, 0.1611, 0.691235, 1)
-
-[sub_resource type="AudioStreamMicrophone" id="2"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_3abk2"]
 bg_color = Color(0.724983, 0.581581, 0.136597, 1)
@@ -571,12 +569,7 @@ layout_mode = 2
 layout_mode = 2
 script = ExtResource("16_hf3ik")
 
-[node name="TwoVoipMic" type="Node" parent="VBox/PlayerConnections/VBox/RecordingFeature"]
-script = ExtResource("16_7s5vv")
-
-[node name="AudioStreamPlayerMicrophone" type="AudioStreamPlayer" parent="VBox/PlayerConnections/VBox/RecordingFeature/TwoVoipMic"]
-stream = SubResource("2")
-bus = &"MicrophoneBus"
+[node name="TwoVoipMic" parent="VBox/PlayerConnections/VBox/RecordingFeature" instance=ExtResource("16_7s5vv")]
 
 [node name="MicStreamPlayerNotice" type="ColorRect" parent="VBox/PlayerConnections/VBox/RecordingFeature"]
 visible = false
@@ -758,7 +751,6 @@ layout_mode = 2
 [connection signal="value_changed" from="VBox/PlayerConnections/VBox/HBox/PlayerLagSlider" to="VBox/PlayerConnections" method="_on_PlayerLagSlider_value_changed"]
 [connection signal="toggled" from="VBox/PlayerConnections/VBox/HBox/LogRec" to="VBox/PlayerConnections" method="_on_log_rec_toggled"]
 [connection signal="toggled" from="VBox/PlayerConnections/VBox/HBox/LogAud" to="VBox/PlayerConnections" method="_on_log_aud_toggled"]
-[connection signal="finished" from="VBox/PlayerConnections/VBox/RecordingFeature/TwoVoipMic/AudioStreamPlayerMicrophone" to="VBox/PlayerConnections/VBox/RecordingFeature" method="_on_audio_stream_player_microphone_finished"]
 [connection signal="toggled" from="VBox/PlayerConnections/VBox/RecordingFeature/Vox" to="VBox/PlayerConnections/VBox/RecordingFeature" method="_on_vox_toggled"]
 [connection signal="toggled" from="VBox/PlayerConnections/VBox/RecordingFeature/Denoise" to="VBox/PlayerConnections/VBox/RecordingFeature" method="_on_denoise_toggled"]
 [connection signal="gui_input" from="VBox/PlayerConnections/VBox/RecordingFeature/VoxThreshold" to="VBox/PlayerConnections/VBox/RecordingFeature" method="_on_vox_threshold_gui_input"]
