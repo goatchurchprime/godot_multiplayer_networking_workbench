@@ -2,11 +2,14 @@ extends Node
 
 var audioopuschunkedeffect : AudioEffect = null
 var microphonefeed = null
+var audiostreamplayermicrophone : AudioStreamPlayer = null
+
 var chunkprefix : PackedByteArray = PackedByteArray([0,0]) 
 
 var leadtime : float = 0.15
 var hangtime : float  = 1.2
 var voxthreshhold = 0.2
+var speakingvolume = 0.0
 
 var currentlytalking = false
 var opusframecount = 0
@@ -27,12 +30,15 @@ signal micaudiowarnings(name, value)
 var voxenabled = false
 var denoiseenabled = false
 var pttpressed = false
+var micnotplayingwarning = false
 
 const rootmeansquaremaxmeasurement = false
 
 var microphoneaudiosamplescountSeconds = 0.0
 var microphoneaudiosamplescount = 0
 var microphoneaudiosamplescountSecondsSampleWindow = 10.0
+
+var talkingtimestart = 0
 
 func setopusvalues(opussamplerate, opusframedurationms, opusbitrate, opuscomplexity, opusoptimizeforvoice):
 	assert (not currentlytalking)
@@ -52,66 +58,49 @@ func setopusvalues(opussamplerate, opusframedurationms, opusbitrate, opuscomplex
 	audiosampleframetextureimage = Image.create_from_data(audioopuschunkedeffect.audiosamplesize, 1, false, Image.FORMAT_RGF, audiosampleframedata.to_byte_array())
 	audiosampleframetexture = ImageTexture.create_from_image(audiosampleframetextureimage)
 	audiosampleframematerial.set_shader_parameter("chunktexture", audiosampleframetexture)
-	#$AudioStreamPlayerMicrophone.finished.connect(func a(): $AudioStreamPlayerMicrophone.playing = true)
+	#audiostreamplayermicrophone.finished.connect(func a(): audiostreamplayermicrophone.playing = true)
 
 func _ready():
+	if OS.get_name() == "Android" and not OS.request_permission("android.permission.RECORD_AUDIO"):
+		print("Waiting for user response after requesting audio permissions")
+		# you also need to enabled Record Audio in the android export settings
+		@warning_ignore("untyped_declaration")
+		var x = await get_tree().on_request_permissions_result
+		var permission : String = x[0]
+		var granted : bool = x[1]
+		assert (permission == "android.permission.RECORD_AUDIO")
+		print("Audio permission granted ", granted)
+
+	if not ClassDB.can_instantiate("AudioEffectOpusChunked"):
+		micnotplayingwarning = true
+		micaudiowarnings.emit("MicNotPlayingWarning", micnotplayingwarning)
+		return
+
 	if Engine.has_singleton("MicrophoneServer"):
 		print("Using MicrophoneServer post PR#108773")  # https://github.com/godotengine/godot/pull/108773
 		microphonefeed = Engine.get_singleton("MicrophoneServer").get_feed(0)
-
-		if OS.get_name() == "Android" and not OS.request_permission("android.permission.RECORD_AUDIO"):
-			print("Waiting for user response after requesting audio permissions")
-			# you also need to enabled Record Audio in the android export settings
-			@warning_ignore("untyped_declaration")
-			var x = await get_tree().on_request_permissions_result
-			var permission : String = x[0]
-			var granted : bool = x[1]
-			assert (permission == "android.permission.RECORD_AUDIO")
-			print("Audio permission granted ", granted)
 		microphonefeed.set_active(true)
-
 		micaudiowarnings.emit("MicStreamPlayerNotice", true)
-		if ClassDB.can_instantiate("AudioEffectOpusChunked"):
-			audioopuschunkedeffect = ClassDB.instantiate("AudioEffectOpusChunked")
-		else:
-			micaudiowarnings.emit("MicNotPlayingWarning", true)
-
-		for busidx in range(AudioServer.bus_count):
-			for i in range(AudioServer.get_bus_effect_count(busidx)):
-				if AudioServer.get_bus_effect(busidx, i).is_class("AudioEffectOpusChunked"):
-					if AudioServer.is_bus_effect_enabled(busidx, i):
-						print("Disabling AudioEffectOpusChunked on bus ", AudioServer.get_bus_name(busidx))
-						AudioServer.set_bus_effect_enabled(busidx, i, false)
+		audioopuschunkedeffect = ClassDB.instantiate("AudioEffectOpusChunked")
 	
 	else:
-		if $AudioStreamPlayerMicrophone.bus != "MicrophoneBus":
-			var lmicrophonebusidx = AudioServer.get_bus_index("MicrophoneBus")
-			if lmicrophonebusidx == -1:
-				print("Warning: Adding a MicrophoneBus")
-				lmicrophonebusidx = AudioServer.get_bus_count() - 1
-				AudioServer.set_bus_name(lmicrophonebusidx, "MicrophoneBus")
-				AudioServer.set_bus_mute(lmicrophonebusidx, true)
-			print("Warning: Setting AudioStreamPlayerMicrophone to the MicrophoneBus")
-			$AudioStreamPlayerMicrophone.bus = "MicrophoneBus"
-			#printerr("AudioStreamPlayerMicrophone doesn't use bus called MicrophoneBus, disabling")
-			#$AudioStreamPlayerMicrophone.stop()
-			#return
-		assert ($AudioStreamPlayerMicrophone.stream.is_class("AudioStreamMicrophone"))
-		var microphonebusidx = AudioServer.get_bus_index($AudioStreamPlayerMicrophone.bus)
-		if not AudioServer.is_bus_mute(microphonebusidx):
-			printerr("Warning: MicrophoneBus not mute")
-		for i in range(AudioServer.get_bus_effect_count(microphonebusidx)):
-			if AudioServer.get_bus_effect(microphonebusidx, i).is_class("AudioEffectOpusChunked"):
-				audioopuschunkedeffect = AudioServer.get_bus_effect(microphonebusidx, i)
-		if audioopuschunkedeffect == null and ClassDB.can_instantiate("AudioEffectOpusChunked"):
-			audioopuschunkedeffect = ClassDB.instantiate("AudioEffectOpusChunked")
-			AudioServer.add_bus_effect(microphonebusidx, audioopuschunkedeffect)
+		print("Creating Microphone Stream, Player and Bus")
+		assert (AudioServer.get_bus_index("MicrophoneBus") == -1)
+		AudioServer.add_bus()
+		var microphonebusidx = AudioServer.get_bus_count() - 1
+		AudioServer.set_bus_name(microphonebusidx, "MicrophoneBus")
+		AudioServer.set_bus_mute(microphonebusidx, true)
+		audioopuschunkedeffect = ClassDB.instantiate("AudioEffectOpusChunked")
+		AudioServer.add_bus_effect(microphonebusidx, audioopuschunkedeffect)
 
-		await get_tree().create_timer(2.0).timeout
-		print("Setting AudioStreamPlayerMicrophone to play")
-		$AudioStreamPlayerMicrophone.play()
+		audiostreamplayermicrophone = AudioStreamPlayer.new()
+		audiostreamplayermicrophone.name = "AudioStreamPlayerMicrophone"
+		add_child(audiostreamplayermicrophone)
+		audiostreamplayermicrophone.bus = "MicrophoneBus"
+		audiostreamplayermicrophone.stream = AudioStreamMicrophone.new()
+		#await get_tree().create_timer(2.0).timeout
+		audiostreamplayermicrophone.play()
 
-var talkingtimestart = 0
 func processtalkstreamends():
 	var talking = pttpressed
 	if talking and not currentlytalking:
@@ -134,8 +123,8 @@ func processtalkstreamends():
 		get_parent().PlayerConnections.peerconnections_possiblymissingaudioheaders.clear()
 		opusframecount = 0
 		currentlytalking = true
-		if microphonefeed == null and not $AudioStreamPlayerMicrophone.playing:
-			$AudioStreamPlayerMicrophone.playing = true
+		if microphonefeed == null and not audiostreamplayermicrophone.playing:
+			audiostreamplayermicrophone.playing = true
 			print("Set microphone playing again (switched off by system)")
 
 	elif not talking and currentlytalking:
@@ -151,13 +140,6 @@ func processtalkstreamends():
 		print("My voice chunktime=", talkingtimeduration/opusframecount, " over ", talkingtimeduration, " seconds")
 		transmitaudiojsonpacket.emit(audiopacketstreamfooter)
 		opusstreamcount += 1
-
-# chunkmax settings (rms???) should be to 0.5???
-# convert the audiostream decoder also to this library
-# also need a gain value to put into the library
-# go again conventional capture, and see quality
-# should be very good quality if we can make it
-
 
 func processvox():
 	if denoiseenabled:
@@ -224,11 +206,11 @@ func _process(delta):
 	if audioopuschunkedeffect != null:
 		processtalkstreamends()
 		while audioopuschunkedeffect.chunk_available():
-			var speakingvolume = processvox()
+			speakingvolume = processvox()
 			processtalkstreamends()
 			processsendopuschunk()
-			get_parent().PlayerConnections.LocalPlayer.PF_setspeakingvolume(speakingvolume if currentlytalking else 0.0)
-	if microphonefeed == null:
-		micaudiowarnings.emit("MicNotPlayingWarning", not $AudioStreamPlayerMicrophone.playing)
-	else:
-		micaudiowarnings.emit("MicNotPlayingWarning", not microphonefeed.is_active())
+
+	var lmicnotplayingwarning = (not microphonefeed.is_active() if microphonefeed else not audiostreamplayermicrophone.playing)
+	if micnotplayingwarning != lmicnotplayingwarning:
+		micnotplayingwarning = lmicnotplayingwarning
+		micaudiowarnings.emit("MicNotPlayingWarning", micnotplayingwarning)

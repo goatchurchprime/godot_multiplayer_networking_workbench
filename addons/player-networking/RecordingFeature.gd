@@ -36,6 +36,7 @@ func _process(delta):
 		$PTT.set_pressed_no_signal($TwoVoipMic.pttpressed)
 	else:
 		$TwoVoipMic.pttpressed = $PTT.button_pressed
+	PlayerConnections.LocalPlayer.PF_setspeakingvolume($TwoVoipMic.speakingvolume if $TwoVoipMic.currentlytalking else 0.0)
 
 func _on_denoise_toggled(toggled_on):
 	$TwoVoipMic.denoiseenabled = toggled_on
