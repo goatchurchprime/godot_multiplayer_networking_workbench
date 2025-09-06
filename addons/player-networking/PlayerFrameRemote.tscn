@@ -1,6 +1,9 @@
-[gd_scene load_steps=2 format=3 uid="uid://dk0qrqaedfjm7"]
+[gd_scene load_steps=3 format=3 uid="uid://dk0qrqaedfjm7"]
 
 [ext_resource type="Script" uid="uid://getm81aitdl" path="res://addons/player-networking/PlayerFrameRemote.gd" id="1_d7ino"]
+[ext_resource type="PackedScene" uid="uid://c613yggmsl08x" path="res://addons/player-networking/twovoipr/two_voip_speaker.tscn" id="2_u112y"]
 
 [node name="PlayerFrame" type="Node"]
 script = ExtResource("1_d7ino")
+
+[node name="TwoVoipSpeaker" parent="." instance=ExtResource("2_u112y")]

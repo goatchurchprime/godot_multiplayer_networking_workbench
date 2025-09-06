@@ -1,26 +1,9 @@
-[gd_resource type="AudioBusLayout" load_steps=4 format=3 uid="uid://cooamuiwiiho"]
+[gd_resource type="AudioBusLayout" load_steps=2 format=3 uid="uid://cooamuiwiiho"]
 
 [sub_resource type="AudioEffectReverb" id="AudioEffectReverb_mpj3y"]
 resource_name = "Reverb"
 room_size = 0.34
 
-[sub_resource type="AudioEffectOpusChunked" id="AudioEffectOpusChunked_jccte"]
-resource_name = "OpusChunked"
-
-[sub_resource type="AudioEffectAmplify" id="AudioEffectAmplify_actwb"]
-resource_name = "Amplify"
-volume_db = -30.0
-
 [resource]
 bus/0/effect/0/effect = SubResource("AudioEffectReverb_mpj3y")
 bus/0/effect/0/enabled = false
-bus/1/name = &"MicrophoneBus"
-bus/1/solo = false
-bus/1/mute = true
-bus/1/bypass_fx = false
-bus/1/volume_db = 2.19371
-bus/1/send = &"Master"
-bus/1/effect/0/effect = SubResource("AudioEffectOpusChunked_jccte")
-bus/1/effect/0/enabled = true
-bus/1/effect/1/effect = SubResource("AudioEffectAmplify_actwb")
-bus/1/effect/1/enabled = false

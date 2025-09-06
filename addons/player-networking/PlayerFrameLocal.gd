@@ -198,10 +198,26 @@ func _process(delta):
 	if logrecfile != null:
 		logrecfile.store_var({"t":Time.get_ticks_msec()*0.001, "vd":vd})
 
+var audiopacketstreamjsonheader = null
+func transmitaudiojsonpacket(jsonpacket):
+	if jsonpacket.has("talkingtimestart"):
+		audiopacketstreamjsonheader = jsonpacket
+		PlayerConnections.peerconnections_possiblymissingaudioheaders.clear()
+	if jsonpacket.has("talkingtimeend"):
+		audiopacketstreamjsonheader = null
+	transmitaudiopacket(JSON.stringify(jsonpacket).to_ascii_buffer(), 0)
 
-func transmitaudiopacket(packet):
+func transmitaudiopacket(packet, opusframecount):
+	if audiopacketstreamjsonheader:
+		audiopacketstreamjsonheader["opusframecount"] = opusframecount
 	if networkID >= 1:
+		if PlayerConnections.peerconnections_possiblymissingaudioheaders:
+			for id in PlayerConnections.peerconnections_possiblymissingaudioheaders:
+				print("****** sending missing start to ", id, audiopacketstreamjsonheader)
+				PlayerConnections.rpc_id(id, "RPC_incomingaudiopacket", JSON.stringify(audiopacketstreamjsonheader).to_ascii_buffer())
+			PlayerConnections.peerconnections_possiblymissingaudioheaders.clear()
 		PlayerConnections.rpc("RPC_incomingaudiopacket", packet)
+
 	if doppelgangernode != null and NetworkGatewayForDoppelganger != null:
 		var doppelnetoffset = NetworkGatewayForDoppelganger.DoppelgangerPanel.getnetoffset()
 		var doppelgangerdelay = NetworkGatewayForDoppelganger.getrandomdoppelgangerdelay()
