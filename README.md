@@ -14,9 +14,17 @@ is done using a light-weight MQTT server, of which public versions are available
 
 ![image](https://github.com/user-attachments/assets/ce09a0c1-3b8e-43f7-b58e-cdb54f3733fb)
 
+## Comments
+
+This library is now targeting Godot 4.6 which will hopefully take [PR#108773](https://github.com/godotengine/godot/pull/108773) that 
+gives reliable direct access to the Microphone for use by the TwoVoip library.
+
+Voice audio carried over the network is an essential component of multiplayer, and we have enough open source technology here to 
+to make it such a reliable and seamlessly trivial feature that is always there, but that you can optionally disable 
+if you don't want it.
+
 ## Installation
 
-This is targeting Godot 4.4 (now in beta release) due to a PR for a microphone bug.  
 The reusable component is in `addons/player-networking`  
 The system logic is embedded in a control panel that you can make invisible and operate externally with a 
 restricted set of options tuned to your application, but it is exposed for the purpose of 
