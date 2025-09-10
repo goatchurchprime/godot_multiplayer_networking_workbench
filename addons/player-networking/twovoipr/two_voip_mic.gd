@@ -210,7 +210,7 @@ func _process(delta):
 			processtalkstreamends()
 			processsendopuschunk()
 
-	var lmicnotplayingwarning = (not microphonefeed.is_active() if microphonefeed else not audiostreamplayermicrophone.playing)
+	var lmicnotplayingwarning = (not microphonefeed.is_active() if microphonefeed else (audiostreamplayermicrophone == null or not audiostreamplayermicrophone.playing))
 	if micnotplayingwarning != lmicnotplayingwarning:
 		micnotplayingwarning = lmicnotplayingwarning
 		micaudiowarnings.emit("MicNotPlayingWarning", micnotplayingwarning)
