@@ -1,6 +1,7 @@
-[gd_scene load_steps=4 format=3 uid="uid://bw3irandh5ksv"]
+[gd_scene format=3 uid="uid://bw3irandh5ksv"]
 
 [ext_resource type="Script" uid="uid://dgdmnxdxr3dko" path="res://addons/player-networking/FallbackControlplayer.gd" id="1_yeg3u"]
+[ext_resource type="PackedScene" uid="uid://c613yggmsl08x" path="res://addons/twovoip/voiphelper/two_voip_speaker.tscn" id="2_nnx6h"]
 
 [sub_resource type="Animation" id="Animation_dusod"]
 tracks/0/type = "value"
@@ -58,7 +59,7 @@ _data = {
 &"trackstemplate": SubResource("Animation_dusod")
 }
 
-[node name="FallbackControlplayer" type="Control"]
+[node name="FallbackControlplayer" type="Control" unique_id=719909366]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -67,19 +68,19 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_yeg3u")
 
-[node name="Label" type="Label" parent="."]
+[node name="Label" type="Label" parent="." unique_id=1369637648]
 layout_mode = 0
 offset_right = 40.0
 offset_bottom = 23.0
 
-[node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="."]
+[node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="." unique_id=14410136]
 
-[node name="SpeakingBar" type="Control" parent="."]
+[node name="TwoVoipSpeaker" parent="AudioStreamPlayer" unique_id=1225662619 instance=ExtResource("2_nnx6h")]
+
+[node name="SpeakingBar" type="Control" parent="." unique_id=695705848]
 anchors_preset = 0
 offset_right = 40.0
 offset_bottom = 40.0
 
-[node name="PlayerAnimation" type="AnimationPlayer" parent="."]
-libraries = {
-&"playeral": SubResource("AnimationLibrary_50vjc")
-}
+[node name="PlayerAnimation" type="AnimationPlayer" parent="." unique_id=1523798696]
+libraries/playeral = SubResource("AnimationLibrary_50vjc")

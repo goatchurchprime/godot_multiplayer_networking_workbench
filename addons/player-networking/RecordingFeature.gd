@@ -1,4 +1,4 @@
-extends HBoxContainer
+extends GridContainer
 
 
 @onready var PlayerConnections = find_parent("PlayerConnections")
@@ -13,33 +13,9 @@ var opusoptimizeforvoice_default = true
 func _ready():
 	$TwoVoipMic.audiosampleframematerial = $VoxThreshold.material
 	$TwoVoipMic.audiosampleframematerial.set_shader_parameter("voxthreshhold", $TwoVoipMic.voxthreshhold)
-	$TwoVoipMic.micaudiowarnings.connect(micaudiowarning)
 
-	if $TwoVoipMic.audioopuschunkedeffect != null:
-		$TwoVoipMic.setopusvalues(opussamplerate_default, opusframedurationms_default, opusbitrate_default, opuscomplexity_default, opusoptimizeforvoice_default)
-	else:
-		printerr("Unabled to find or instantiate AudioEffectOpusChunked on MicrophoneBus")
-		$OpusWarningLabel.visible = true
-
-func _on_vox_toggled(toggled_on):
-	if toggled_on:
-		$TwoVoipMic.voxenabled = true
-		$PTT.toggle_mode = true
-		$TwoVoipMic.pttpressed = false
-	else:
-		$TwoVoipMic.voxenabled = false
-		$PTT.toggle_mode = false
-		$TwoVoipMic.pttpressed = $PTT.button_pressed
-
-func _process(delta):
-	if $TwoVoipMic.voxenabled:
-		$PTT.set_pressed_no_signal($TwoVoipMic.pttpressed)
-	else:
-		$TwoVoipMic.pttpressed = $PTT.button_pressed
-	PlayerConnections.LocalPlayer.PF_setspeakingvolume($TwoVoipMic.speakingvolume if $TwoVoipMic.currentlytalking else 0.0)
-
-func _on_denoise_toggled(toggled_on):
-	$TwoVoipMic.denoiseenabled = toggled_on
+	$TwoVoipMic.initvoipmic($MicOn, $OptionInputDevice, $PTT, $Vox, $Denoise, $VoxThreshold.material)
+	$TwoVoipMic.setopusvalues(opussamplerate_default, opusframedurationms_default, 2, opusbitrate_default, opuscomplexity_default, opusoptimizeforvoice_default)
 
 func _on_vox_threshold_gui_input(event):
 	if event is InputEventMouseButton and event.pressed:

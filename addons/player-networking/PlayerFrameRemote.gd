@@ -16,6 +16,7 @@ var PlayerAnimation : AnimationPlayer = null
 var currentplayeranimation : Animation = null
 var currentplayeranimationT0 = 0.0
 const animationtimerunoff = 5.0
+var twovoipspeaker = null
 
 func Dclearcachesig():
 	pass # print("Dclearcachesig ", Time.get_ticks_msec())
@@ -56,6 +57,9 @@ func setupanimationtracks(vd):
 func startupremoteplayer(avatardata):
 	get_parent().visible = false
 	setupanimationtracks(avatardata["snapshottracks"])
+
+func findaudioplayer():
+	return get_parent().get_node("AudioStreamPlayer")
 
 func networkedavatarthinnedframedata(vd):
 		# we could make this tolerate out of order values
@@ -110,12 +114,4 @@ func incomingaudiopacket(packet):
 	$TwoVoipSpeaker.tv_incomingaudiopacket(packet)
 	
 func _ready():
-	var playernode = get_parent()
-	if playernode.has_method("PF_playvoicestream"):
-		playernode.PF_setvoicestream($TwoVoipSpeaker.audiostreamopuschunked)
-		playernode.PF_playvoicestream()
-		$TwoVoipSpeaker.sigplaystream.connect(playernode.PF_playvoicestream)
-		$TwoVoipSpeaker.sigvoicespeedrate.connect(playernode.PF_setvoicespeedup)
-
-	else:
-		print("Need an PF_playvoicestream for an AudioStreamPlayer node in RemotePlayer to do voip")
+	pass

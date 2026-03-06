@@ -62,11 +62,6 @@ static func PF_changethinnedframedatafordoppelganger(fd, doppelnetoffset):
 	if fd.has(NCONSTANTS.CFI_ANIMTRACKS+0):
 		fd[NCONSTANTS.CFI_ANIMTRACKS+0].y = 339 - fd[NCONSTANTS.CFI_ANIMTRACKS+0].y
 
-func PF_getvoicestream():
-	return $AudioStreamPlayer.stream
-
-func PF_setvoicestream(lstream):
-	$AudioStreamPlayer.stream = lstream
 
 func PF_playvoicestream():
 	$AudioStreamPlayer.play()
