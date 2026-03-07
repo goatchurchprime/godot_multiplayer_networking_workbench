@@ -16,7 +16,6 @@ var PlayerAnimation : AnimationPlayer = null
 var currentplayeranimation : Animation = null
 var currentplayeranimationT0 = 0.0
 const animationtimerunoff = 5.0
-var twovoipspeaker = null
 
 func Dclearcachesig():
 	pass # print("Dclearcachesig ", Time.get_ticks_msec())
@@ -113,5 +112,3 @@ func incomingaudiopacket(packet):
 		logrecfile.store_var({"t":Time.get_ticks_msec()*0.001, "au":packet})
 	$TwoVoipSpeaker.tv_incomingaudiopacket(packet)
 	
-func _ready():
-	pass

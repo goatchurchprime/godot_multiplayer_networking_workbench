@@ -47,10 +47,7 @@ func PF_processlocalavatarposition(delta):
 		var quickoptions = get_node("../../../../QuickOptions")
 		if quickoptions.subviewpointcontainerhasmouse and mousedraggingplayer:
 			global_position = get_global_mouse_position().clamp(minmouseposition, maxmouseposition)
-
-	
-func PF_setspeakingvolume(v):
-	$SpeakingBar.scale.x = v
+		$SpeakingBar.scale.x = quickoptions.microphonevolume()
 
 func playername():
 	return $Label.text 
@@ -61,11 +58,3 @@ static func PF_changethinnedframedatafordoppelganger(fd, doppelnetoffset):
 		fd[NCONSTANTS.CFI_TIMESTAMPPREV] += doppelnetoffset
 	if fd.has(NCONSTANTS.CFI_ANIMTRACKS+0):
 		fd[NCONSTANTS.CFI_ANIMTRACKS+0].y = 339 - fd[NCONSTANTS.CFI_ANIMTRACKS+0].y
-
-
-func PF_playvoicestream():
-	$AudioStreamPlayer.play()
-	
-func PF_setvoicespeedup(fac):
-	$AudioStreamPlayer.pitch_scale = fac
-	

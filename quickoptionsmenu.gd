@@ -69,6 +69,9 @@ func _on_sub_viewport_container_mouse_entered():
 func _on_sub_viewport_container_mouse_exited():
 	subviewpointcontainerhasmouse = false
 
+func microphonevolume():
+	return NetworkGateway.PlayerConnections.get_node("VBox/RecordingFeature/TwoVoipMic").last_chunkmax
+
 func _on_physics_toggled(toggled_on):
 	var spawnobjects = get_node("../SubViewportContainer/SubViewport/SyncObjects/SpawnedObjects")
 	for c in spawnobjects.get_children():
