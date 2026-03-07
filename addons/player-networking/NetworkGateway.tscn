@@ -17,6 +17,7 @@
 [ext_resource type="PackedScene" uid="uid://dvpkwo6h7y0sj" path="res://addons/twovoip/voiphelper/two_voip_mic.tscn" id="16_7s5vv"]
 [ext_resource type="Script" uid="uid://b4ywxdff8udo6" path="res://addons/player-networking/RecordingFeature.gd" id="16_hf3ik"]
 [ext_resource type="Script" uid="uid://bc0egyeyk7u4f" path="res://addons/player-networking/DoppelgangerPanel_ui.gd" id="16_i8v6k"]
+[ext_resource type="Shader" uid="uid://bq3uv3u8jhu77" path="res://addons/twovoip/voiphelper/voxshader.gdshader" id="17_70id4"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_5i8wh"]
 bg_color = Color(0.429093, 0.357723, 0.216268, 1)
@@ -44,43 +45,8 @@ bg_color = Color(0.171442, 0.57024, 0.941742, 1)
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_qm0og"]
 bg_color = Color(0.297912, 0.254302, 0.00969122, 1)
 
-[sub_resource type="Shader" id="Shader_fh7cl"]
-code = "shader_type canvas_item;
-
-uniform vec4 backgroundcolor : source_color = vec4(0.1, 0.2, 0.8, 1.0);
-uniform vec4 voxthresholdcolor : source_color = vec4(0.602, 0.43, 0.508, 1.0);
-uniform vec4 voxchunkmaxcolor : source_color = vec4(0.8, 0.8, 0.08, 0.2);
-uniform vec4 voxwavecolor : source_color = vec4(0.8,0.8,0.9,1.0);
-
-uniform float voxthreshhold = 0.2;
-uniform float chunkmax = 0.0;
-uniform float chunkmaxpersist = 0.0;
-uniform bool chunktexenabled = false;
-uniform sampler2D chunktexture : repeat_enable;
-
-void fragment() {
-	if (UV.x > voxthreshhold)
-		COLOR = backgroundcolor;
-	else if ((chunkmax != 0.0) || chunktexenabled)
-		COLOR = voxthresholdcolor;
-
-	if ((UV.x < chunkmaxpersist) && (UV.y > 0.1) && (UV.y < 0.9))
-		COLOR.rgb = mix(COLOR.rgb, voxchunkmaxcolor.rgb, voxchunkmaxcolor.a);
-
-	float d;
-	if (chunktexenabled) {
-		vec4 v = texture(chunktexture, UV);
-		d = UV.y*2.0 - v.r*4.0 - 1.0;
-	} else {
-		d = (UV.x < chunkmax ? UV.y - 0.5 : 1.0);
-	}
-	if (abs(d) < 0.1)
-		COLOR = voxwavecolor;
-}
-"
-
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_c0q00"]
-shader = SubResource("Shader_fh7cl")
+shader = ExtResource("17_70id4")
 shader_parameter/backgroundcolor = Color(0.1, 0.2, 0.8, 1)
 shader_parameter/voxthresholdcolor = Color(0.602, 0.43, 0.508, 1)
 shader_parameter/voxchunkmaxcolor = Color(0.8, 0.8, 0.08, 0.2)
@@ -88,6 +54,7 @@ shader_parameter/voxwavecolor = Color(0.8, 0.8, 0.9, 1)
 shader_parameter/voxthreshhold = 0.2
 shader_parameter/chunkmax = 0.0
 shader_parameter/chunkmaxpersist = 0.0
+shader_parameter/speechnoiseprobability = 0.0
 shader_parameter/chunktexenabled = false
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_uvrja"]
@@ -572,30 +539,12 @@ script = ExtResource("16_hf3ik")
 
 [node name="TwoVoipMic" parent="VBox/PlayerConnections/VBox/RecordingFeature" unique_id=2054874447 instance=ExtResource("16_7s5vv")]
 
-[node name="MicStreamPlayerNotice" type="ColorRect" parent="VBox/PlayerConnections/VBox/RecordingFeature" unique_id=1036523299]
-visible = false
-custom_minimum_size = Vector2(2, 0)
-layout_mode = 2
-color = Color(0.305882, 0.952941, 0.196078, 1)
-
-[node name="MicNotPlayingWarning" type="ColorRect" parent="VBox/PlayerConnections/VBox/RecordingFeature" unique_id=2044885074]
-visible = false
-custom_minimum_size = Vector2(2, 0)
-layout_mode = 2
-color = Color(0.921569, 0, 0.0196078, 1)
-
 [node name="PTT" type="Button" parent="VBox/PlayerConnections/VBox/RecordingFeature" unique_id=2129229624]
 custom_minimum_size = Vector2(40, 0)
 layout_mode = 2
 theme_override_colors/font_pressed_color = Color(0.992157, 0.984314, 0.00392157, 1)
 theme_override_styles/pressed = SubResource("StyleBoxFlat_3abk2")
 text = "PTT"
-
-[node name="MicFinishedWarning" type="ColorRect" parent="VBox/PlayerConnections/VBox/RecordingFeature" unique_id=1318998016]
-visible = false
-custom_minimum_size = Vector2(2, 0)
-layout_mode = 2
-color = Color(0.921569, 0, 0.0196078, 1)
 
 [node name="Vox" type="Button" parent="VBox/PlayerConnections/VBox/RecordingFeature" unique_id=247898774]
 layout_mode = 2

@@ -11,20 +11,18 @@ var opuscomplexity_default = 5 # 0-10
 var opusoptimizeforvoice_default = true
 
 func _ready():
-	#$TwoVoipMic.set_vox_threshold(event.position.x/$VoxThreshold.size.x)
+	#$TwoVoipMic.set_voxthreshhold(event.position.x/$VoxThreshold.size.x)
 	$TwoVoipMic.initvoipmic($MicOn, $OptionInputDevice, $PTT, $Vox, $Denoise, $VoxThreshold.material)
 	$TwoVoipMic.setopusvalues(opussamplerate_default, opusframedurationms_default, 2, opusbitrate_default, opuscomplexity_default, opusoptimizeforvoice_default)
 
 func _on_vox_threshold_gui_input(event):
 	if event is InputEventMouseButton and event.pressed:
-		$TwoVoipMic.set_vox_threshold(event.position.x/$VoxThreshold.size.x)
+		$TwoVoipMic.set_voxthreshhold(event.position.x/$VoxThreshold.size.x)
 
 func _on_audio_stream_player_microphone_finished():
 	print("*** _on_audio_stream_player_microphone_finished")
 	$MicFinishedWarning.visible = true
 
-func micaudiowarning(name, value):
-	get_node(name).visible = value
 
 func _on_mic_gain_db_value_changed(value):
-	$TwoVoipMic.audioopuschunkedeffect.volume_db = value
+	$TwoVoipMic.set_gain(db_to_linear(value))
