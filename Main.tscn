@@ -1,4 +1,4 @@
-[gd_scene load_steps=11 format=3 uid="uid://denbhipr26x6c"]
+[gd_scene format=3 uid="uid://denbhipr26x6c"]
 
 [ext_resource type="Script" uid="uid://djl37ucyvmcxl" path="res://quickoptionsmenu.gd" id="1_8ecn3"]
 [ext_resource type="PackedScene" uid="uid://dhd8tliyhvtiw" path="res://controlplayer.tscn" id="2"]
@@ -25,7 +25,7 @@ height = 120
 fill = 1
 fill_from = Vector2(0.5, 0.5)
 
-[node name="Main" type="Control"]
+[node name="Main" type="Control" unique_id=1926732755]
 layout_mode = 3
 anchor_right = 0.761571
 anchor_bottom = 1.3
@@ -37,7 +37,7 @@ mouse_filter = 2
 mouse_default_cursor_shape = 3
 metadata/_edit_use_anchors_ = true
 
-[node name="QuickOptions" type="HBoxContainer" parent="."]
+[node name="QuickOptions" type="HBoxContainer" parent="." unique_id=1675420523]
 z_index = 1000
 layout_mode = 0
 offset_right = 596.0
@@ -45,67 +45,67 @@ offset_bottom = 40.0
 mouse_filter = 0
 script = ExtResource("1_8ecn3")
 
-[node name="ShowNetworkGateway" type="Button" parent="QuickOptions"]
+[node name="ShowNetworkGateway" type="Button" parent="QuickOptions" unique_id=572083946]
 layout_mode = 2
 toggle_mode = true
 text = "Show Networkgateway"
 
-[node name="VSeparator" type="VSeparator" parent="QuickOptions"]
+[node name="VSeparator" type="VSeparator" parent="QuickOptions" unique_id=784096198]
 layout_mode = 2
 
-[node name="Connect" type="Button" parent="QuickOptions"]
+[node name="Connect" type="Button" parent="QuickOptions" unique_id=1004463764]
 layout_mode = 2
 theme_override_styles/pressed = SubResource("StyleBoxFlat_31q8f")
 toggle_mode = true
 text = "Connect"
 
-[node name="CSButton" type="Button" parent="QuickOptions"]
+[node name="CSButton" type="Button" parent="QuickOptions" unique_id=1439301737]
 layout_mode = 2
 toggle_mode = true
 text = "CS"
 
-[node name="CCButton" type="Button" parent="QuickOptions"]
+[node name="CCButton" type="Button" parent="QuickOptions" unique_id=1995420972]
 layout_mode = 2
 toggle_mode = true
 text = "CC"
 
-[node name="VSeparator2" type="VSeparator" parent="QuickOptions"]
+[node name="VSeparator2" type="VSeparator" parent="QuickOptions" unique_id=943955537]
 layout_mode = 2
 
-[node name="Roomname" type="LineEdit" parent="QuickOptions"]
+[node name="Roomname" type="LineEdit" parent="QuickOptions" unique_id=112904167]
 custom_minimum_size = Vector2(75, 0)
 layout_mode = 2
 text = "cabbage"
 
-[node name="VSeparator3" type="VSeparator" parent="QuickOptions"]
+[node name="VSeparator3" type="VSeparator" parent="QuickOptions" unique_id=420495985]
 layout_mode = 2
 
-[node name="PlayerCount" type="SpinBox" parent="QuickOptions"]
+[node name="PlayerCount" type="SpinBox" parent="QuickOptions" unique_id=311304171]
 layout_mode = 2
 prefix = "playercount"
 
-[node name="NewCard" type="Button" parent="QuickOptions"]
+[node name="NewCard" type="Button" parent="QuickOptions" unique_id=2093328277]
 layout_mode = 2
 text = "New Card"
 
-[node name="Physics" type="Button" parent="QuickOptions"]
+[node name="Physics" type="Button" parent="QuickOptions" unique_id=1299815617]
 visible = false
 layout_mode = 2
 toggle_mode = true
 text = "Physics"
 
-[node name="SubViewportContainer" type="SubViewportContainer" parent="."]
+[node name="SubViewportContainer" type="SubViewportContainer" parent="." unique_id=440478113]
 layout_mode = 0
 offset_right = 512.0
 offset_bottom = 512.0
 mouse_filter = 0
 
-[node name="SubViewport" type="SubViewport" parent="SubViewportContainer"]
+[node name="SubViewport" type="SubViewport" parent="SubViewportContainer" unique_id=100952949]
 handle_input_locally = false
 audio_listener_enable_2d = true
 render_target_update_mode = 4
 
-[node name="Background" type="Sprite2D" parent="SubViewportContainer/SubViewport"]
+[node name="Background" type="Sprite2D" parent="SubViewportContainer/SubViewport" unique_id=815200285]
 modulate = Color(0.592157, 0.592157, 0.592157, 1)
 z_index = -100
 texture_repeat = 2
@@ -114,14 +114,14 @@ texture = SubResource("CanvasTexture_t3x1q")
 region_enabled = true
 region_rect = Rect2(0, 0, 1800, 1500)
 
-[node name="Players" type="Node2D" parent="SubViewportContainer/SubViewport"]
+[node name="Players" type="Node2D" parent="SubViewportContainer/SubViewport" unique_id=21572168]
 z_index = 900
 position = Vector2(-0.000152588, 400)
 
-[node name="LocalPlayer" parent="SubViewportContainer/SubViewport/Players" instance=ExtResource("2")]
+[node name="LocalPlayer" parent="SubViewportContainer/SubViewport/Players" unique_id=1773322500 instance=ExtResource("2")]
 position = Vector2(95, 40)
 
-[node name="Camera2D" type="Camera2D" parent="SubViewportContainer/SubViewport/Players/LocalPlayer"]
+[node name="Camera2D" type="Camera2D" parent="SubViewportContainer/SubViewport/Players/LocalPlayer" unique_id=1173669475]
 enabled = false
 position_smoothing_enabled = true
 drag_horizontal_enabled = true
@@ -131,27 +131,27 @@ drag_top_margin = 0.6
 drag_right_margin = 0.6
 drag_bottom_margin = 0.6
 
-[node name="AudioListener2D" type="AudioListener2D" parent="SubViewportContainer/SubViewport/Players/LocalPlayer"]
+[node name="AudioListener2D" type="AudioListener2D" parent="SubViewportContainer/SubViewport/Players/LocalPlayer" unique_id=589035237]
 
-[node name="SyncObjects" type="Node2D" parent="SubViewportContainer/SubViewport"]
+[node name="SyncObjects" type="Node2D" parent="SubViewportContainer/SubViewport" unique_id=1947488833]
 z_index = 1
 position = Vector2(-0.000152588, 0)
 script = ExtResource("6_jvykx")
 
-[node name="MultiplayerSpawner" type="MultiplayerSpawner" parent="SubViewportContainer/SubViewport/SyncObjects"]
+[node name="MultiplayerSpawner" type="MultiplayerSpawner" parent="SubViewportContainer/SubViewport/SyncObjects" unique_id=1851785682]
 _spawnable_scenes = PackedStringArray("uid://bngiijug5ydb4")
 spawn_path = NodePath("../SpawnedObjects")
 
-[node name="SpawnedObjects" type="Node2D" parent="SubViewportContainer/SubViewport/SyncObjects"]
+[node name="SpawnedObjects" type="Node2D" parent="SubViewportContainer/SubViewport/SyncObjects" unique_id=543456247]
 
-[node name="KNode2D" type="Node2D" parent="SubViewportContainer/SubViewport"]
+[node name="KNode2D" type="Node2D" parent="SubViewportContainer/SubViewport" unique_id=1853587510]
 position = Vector2(-0.000152588, 0)
 
-[node name="Sprite2D" type="Sprite2D" parent="SubViewportContainer/SubViewport/KNode2D"]
+[node name="Sprite2D" type="Sprite2D" parent="SubViewportContainer/SubViewport/KNode2D" unique_id=1323280493]
 position = Vector2(400, 400)
 texture = SubResource("GradientTexture2D_d7327")
 
-[node name="NetworkGateway" parent="." instance=ExtResource("3")]
+[node name="NetworkGateway" parent="." unique_id=1323528393 instance=ExtResource("3")]
 visible = false
 z_index = 1000
 layout_mode = 0

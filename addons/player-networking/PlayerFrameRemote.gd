@@ -57,6 +57,9 @@ func startupremoteplayer(avatardata):
 	get_parent().visible = false
 	setupanimationtracks(avatardata["snapshottracks"])
 
+func findaudioplayer():
+	return get_parent().get_node("AudioStreamPlayer")
+
 func networkedavatarthinnedframedata(vd):
 		# we could make this tolerate out of order values
 	if logrecfile != null:
@@ -109,13 +112,3 @@ func incomingaudiopacket(packet):
 		logrecfile.store_var({"t":Time.get_ticks_msec()*0.001, "au":packet})
 	$TwoVoipSpeaker.tv_incomingaudiopacket(packet)
 	
-func _ready():
-	var playernode = get_parent()
-	if playernode.has_method("PF_playvoicestream"):
-		playernode.PF_setvoicestream($TwoVoipSpeaker.audiostreamopuschunked)
-		playernode.PF_playvoicestream()
-		$TwoVoipSpeaker.sigplaystream.connect(playernode.PF_playvoicestream)
-		$TwoVoipSpeaker.sigvoicespeedrate.connect(playernode.PF_setvoicespeedup)
-
-	else:
-		print("Need an PF_playvoicestream for an AudioStreamPlayer node in RemotePlayer to do voip")

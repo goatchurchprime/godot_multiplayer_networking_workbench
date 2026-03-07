@@ -12,11 +12,12 @@ config_version=5
 
 config/name="MultiplayerWorkbench"
 run/main_scene="res://Main.tscn"
-config/features=PackedStringArray("4.5")
+config/features=PackedStringArray("4.6")
 config/icon="res://icon.png"
 
 [audio]
 
+buses/default_bus_layout="uid://cooamuiwiiho"
 general/2d_panning_strength=1.0
 driver/enable_input=true
 

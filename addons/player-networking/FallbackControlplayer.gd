@@ -15,9 +15,6 @@ func PF_spawninfo_receivedfromserver(sfd, PlayerConnection):
 func PF_processlocalavatarposition(delta):
 	pass
 	
-func PF_setspeakingvolume(v):
-	$SpeakingBar.scale.x = v
-
 func playername():
 	return $Label.text 
 
@@ -27,14 +24,3 @@ static func PF_changethinnedframedatafordoppelganger(fd, doppelnetoffset):
 	if fd.has(NCONSTANTS.CFI_ANIMTRACKS+0):
 		fd[NCONSTANTS.CFI_ANIMTRACKS+0].y = 339 - fd[NCONSTANTS.CFI_ANIMTRACKS+0].y
 	
-func PF_getvoicestream():
-	return $AudioStreamPlayer.stream
-
-func PF_setvoicestream(lstream):
-	$AudioStreamPlayer.stream = lstream
-
-func PF_playvoicestream():
-	$AudioStreamPlayer.play()
-	
-func PF_setvoicespeedup(fac):
-	$AudioStreamPlayer.pitch_scale = fac
