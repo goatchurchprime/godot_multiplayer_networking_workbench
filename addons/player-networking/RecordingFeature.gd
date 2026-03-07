@@ -11,16 +11,13 @@ var opuscomplexity_default = 5 # 0-10
 var opusoptimizeforvoice_default = true
 
 func _ready():
-	$TwoVoipMic.audiosampleframematerial = $VoxThreshold.material
-	$TwoVoipMic.audiosampleframematerial.set_shader_parameter("voxthreshhold", $TwoVoipMic.voxthreshhold)
-
+	#$TwoVoipMic.set_vox_threshold(event.position.x/$VoxThreshold.size.x)
 	$TwoVoipMic.initvoipmic($MicOn, $OptionInputDevice, $PTT, $Vox, $Denoise, $VoxThreshold.material)
 	$TwoVoipMic.setopusvalues(opussamplerate_default, opusframedurationms_default, 2, opusbitrate_default, opuscomplexity_default, opusoptimizeforvoice_default)
 
 func _on_vox_threshold_gui_input(event):
 	if event is InputEventMouseButton and event.pressed:
-		$TwoVoipMic.voxthreshhold = event.position.x/$VoxThreshold.size.x
-		$VoxThreshold.material.set_shader_parameter("voxthreshhold", $TwoVoipMic.voxthreshhold)
+		$TwoVoipMic.set_vox_threshold(event.position.x/$VoxThreshold.size.x)
 
 func _on_audio_stream_player_microphone_finished():
 	print("*** _on_audio_stream_player_microphone_finished")
