@@ -58,7 +58,7 @@ func startupremoteplayer(avatardata):
 	setupanimationtracks(avatardata["snapshottracks"])
 
 func findaudioplayer():
-	return get_parent().get_node("AudioStreamPlayer")
+	return get_parent().find_child("AudioStreamPlayer")
 
 func networkedavatarthinnedframedata(vd):
 		# we could make this tolerate out of order values
