@@ -235,6 +235,7 @@ func _data_channel_received(channel: Object):
 
 func set_vox_on():
 	var RecordingFeature = PlayerConnections.get_node("VBox/RecordingFeature")
+	RecordingFeature.get_node("MicOn").button_pressed = true
 	RecordingFeature.get_node("Vox").button_pressed = true
 	var voxthreshold = 0.06
 	RecordingFeature.get_node("TwoVoipMic").voxthreshhold = voxthreshold
