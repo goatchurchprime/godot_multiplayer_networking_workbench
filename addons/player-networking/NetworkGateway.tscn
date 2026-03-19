@@ -36,6 +36,9 @@ bg_color = Color(0, 0, 0, 1)
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_wj0xm"]
 bg_color = Color(0.12111, 0.1611, 0.691235, 1)
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_70id4"]
+bg_color = Color(0, 0.54509807, 0.2901961, 1)
+
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_3abk2"]
 bg_color = Color(0.724983, 0.581581, 0.136597, 1)
 
@@ -498,7 +501,8 @@ text = "Players:"
 
 [node name="PlayerList" type="OptionButton" parent="VBox/PlayerConnections/VBox/HBox" unique_id=1154281930]
 layout_mode = 2
-size_flags_horizontal = 2
+size_flags_horizontal = 3
+fit_to_longest_item = false
 item_count = 1
 popup/item_0/text = "me"
 popup/item_0/id = 0
@@ -532,12 +536,17 @@ text = "LogAud
 visibility_layer = 0
 layout_mode = 2
 
-[node name="RecordingFeature" type="GridContainer" parent="VBox/PlayerConnections/VBox" unique_id=1163507315]
+[node name="RecordingFeature" type="HBoxContainer" parent="VBox/PlayerConnections/VBox" unique_id=1064492393]
 layout_mode = 2
-columns = 5
 script = ExtResource("16_hf3ik")
 
 [node name="TwoVoipMic" parent="VBox/PlayerConnections/VBox/RecordingFeature" unique_id=2054874447 instance=ExtResource("16_7s5vv")]
+
+[node name="MicOn" type="Button" parent="VBox/PlayerConnections/VBox/RecordingFeature" unique_id=1271496173]
+layout_mode = 2
+theme_override_styles/pressed = SubResource("StyleBoxFlat_70id4")
+toggle_mode = true
+text = "MicOn"
 
 [node name="PTT" type="Button" parent="VBox/PlayerConnections/VBox/RecordingFeature" unique_id=2129229624]
 custom_minimum_size = Vector2(40, 0)
@@ -580,19 +589,28 @@ min_value = -80.0
 max_value = 24.0
 step = 0.1
 
-[node name="MicOn" type="Button" parent="VBox/PlayerConnections/VBox/RecordingFeature" unique_id=1271496173]
-layout_mode = 2
-toggle_mode = true
-text = "MicOn"
-
-[node name="Label" type="Label" parent="VBox/PlayerConnections/VBox/RecordingFeature" unique_id=549416018]
+[node name="HBoxDevices" type="HBoxContainer" parent="VBox/PlayerConnections/VBox" unique_id=46873605]
 layout_mode = 2
 
-[node name="Label2" type="Label" parent="VBox/PlayerConnections/VBox/RecordingFeature" unique_id=1184144536]
+[node name="Label" type="Label" parent="VBox/PlayerConnections/VBox/HBoxDevices" unique_id=1627088299]
 layout_mode = 2
+text = "Audio device In:"
 
-[node name="OptionInputDevice" type="OptionButton" parent="VBox/PlayerConnections/VBox/RecordingFeature" unique_id=45921599]
+[node name="OptionInputDevice" type="OptionButton" parent="VBox/PlayerConnections/VBox/HBoxDevices" unique_id=45921599]
 layout_mode = 2
+size_flags_horizontal = 3
+text_overrun_behavior = 3
+fit_to_longest_item = false
+
+[node name="Label2" type="Label" parent="VBox/PlayerConnections/VBox/HBoxDevices" unique_id=1447229102]
+layout_mode = 2
+text = "Out:"
+
+[node name="OptionOutputDevice" type="OptionButton" parent="VBox/PlayerConnections/VBox/HBoxDevices" unique_id=966939280]
+layout_mode = 2
+size_flags_horizontal = 3
+text_overrun_behavior = 3
+fit_to_longest_item = false
 
 [node name="ConnectionLog" type="TextEdit" parent="VBox/PlayerConnections/VBox" unique_id=1140912632]
 custom_minimum_size = Vector2(0, 30)
