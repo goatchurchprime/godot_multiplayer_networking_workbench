@@ -14,15 +14,6 @@ is done using a light-weight MQTT server, of which public versions are available
 
 ![image](https://github.com/user-attachments/assets/ce09a0c1-3b8e-43f7-b58e-cdb54f3733fb)
 
-## Comments
-
-This library is now targeting Godot 4.6 which will hopefully take [PR#108773](https://github.com/godotengine/godot/pull/108773) that 
-gives reliable direct access to the Microphone for use by the TwoVoip library.
-
-Voice audio carried over the network is an essential component of multiplayer, and we have enough open source technology here to 
-to make it such a reliable and seamlessly trivial feature that is always there, but that you can optionally disable 
-if you don't want it.
-
 ## Installation
 
 The reusable component is in `addons/player-networking`  
@@ -32,14 +23,11 @@ experimentation and debugging.
 
 ### Addons
 
-Addons that are missing can be downloaded from the **AssetLib** tab once you open the project.
+Addons that are missing can be downloaded from the **AssetLib** tab once you open the project, or predownloaded and managed by running `godot4 --headless --xr-mode off -s plug.gd update debug`
 
 * [mqtt-client](https://godotengine.org/asset-library/asset/1993) v1.2 is already included because it is very small and pure GDScript
 
-* [TwoVoip](https://godotengine.org/asset-library/asset/3169) v3.6 is required to compress your audio stream 
-from the microphone using the Opus library.  It can be used on its own for testing from [two-voip-godot-4](https://github.com/goatchurchprime/two-voip-godot-4)
-The asset is 100Mb, so is not included with the project.  **A version of the Godot Engine compiled with
-[Pull Request#100508](https://github.com/godotengine/godot/pull/100508) is recommended for a more reliable implementation of the microphone input.**
+* [TwoVoip](https://godotengine.org/asset-library/asset/3169) recommended to use v5.0 which uses the new [AudioServer.get_input_frames()](https://docs.godotengine.org/en/stable/classes/class_audioserver.html#class-audioserver-method-get-input-frames) added in Godot V4.6.  It can be used on its own for testing from [two-voip-godot-4](https://github.com/goatchurchprime/two-voip-godot-4)
 
 * [WebRTC plugin - Godot 4.1+](https://godotengine.org/asset-library/asset/2103) is required to implement the WebRTC protocol and 
 is also about 100Mb in size (because it has the implementation for all platforms).  
