@@ -11,8 +11,8 @@ var opusoptimizeforvoice_default = true
 
 func _ready():
 	#$TwoVoipMic.set_voxthreshhold(event.position.x/$VoxThreshold.size.x)
-	$TwoVoipMic.initvoipmic($MicOn, get_node("../HBoxDevices/OptionInputDevice"), $PTT, $Vox, $Denoise, $VoxThreshold.material)
-	$TwoVoipMic.setopusvalues(opussamplerate_default, opusframedurationms_default, 2, opusbitrate_default, opuscomplexity_default, opusoptimizeforvoice_default)
+	$TwoVoipMic.init_voip_mic(false, $MicOn, get_node("../HBoxDevices/OptionInputDevice"), $PTT, $Vox, $Denoise, $VoxThreshold.material)
+	$TwoVoipMic.set_opus_values(opussamplerate_default, opusframedurationms_default, 2, opusbitrate_default, opuscomplexity_default, opusoptimizeforvoice_default)
 
 	var OptionOutputDevice = $"../HBoxDevices/OptionOutputDevice"
 	for d in AudioServer.get_output_device_list():

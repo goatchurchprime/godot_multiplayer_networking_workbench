@@ -238,7 +238,7 @@ func set_vox_on():
 	RecordingFeature.get_node("MicOn").button_pressed = true
 	RecordingFeature.get_node("Vox").button_pressed = true
 	var voxthreshold = 0.06
-	RecordingFeature.get_node("TwoVoipMic").voxthreshhold = voxthreshold
+	RecordingFeature.get_node("TwoVoipMic").set_vox_threshhold(voxthreshold)
 	RecordingFeature.get_node("VoxThreshold").material.set_shader_parameter("voxthreshhold", voxthreshold)
 
 func is_disconnected():
