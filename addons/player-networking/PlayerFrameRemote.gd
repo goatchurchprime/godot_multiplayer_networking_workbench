@@ -110,5 +110,5 @@ func _process(delta):
 func incomingaudiopacket(packet):
 	if logrecfile != null:
 		logrecfile.store_var({"t":Time.get_ticks_msec()*0.001, "au":packet})
-	$TwoVoipSpeaker.tv_incomingaudiopacket(packet)
+	$TwoVoipSpeaker.receive_audio_packet(packet)
 	

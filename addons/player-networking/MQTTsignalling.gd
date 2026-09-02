@@ -57,11 +57,12 @@ func _ready():
 	clearallstatuses()
 	StatusMQTT.select(0)
 	$VBox/HBox/Label/WarningLabel.visible = not DirAccess.open("res://").dir_exists("res://addons/webrtc")
-	var content = FileAccess.get_file_as_string("res://iceservers.json")
-	var parsed_json = JSON.parse_string(content)
-	if parsed_json:
-		iceservers = parsed_json["v"]["iceServers"]
-		print("iceservers ", iceservers)
+	if FileAccess.file_exists("res://iceservers.json"):
+		var content = FileAccess.get_file_as_string("res://iceservers.json")
+		var parsed_json = JSON.parse_string(content)
+		if parsed_json:
+			iceservers = parsed_json["v"]["iceServers"]
+			print("iceservers ", iceservers)
 
 @onready var ns_previousitemselected = NetworkGateway.NETWORK_OPTIONS_MQTT_WEBRTC.NETWORK_OFF
 func _on_NetworkOptionsMQTTWebRTC_item_selected(ns):
